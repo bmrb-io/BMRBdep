@@ -28,29 +28,20 @@ export class SaveframeComponent implements OnInit {
     // Listen for the changing of the params string
     const parent = this;
     this.route.params.subscribe(function(params) {
-      console.log(params);
       parent.loadSaveframe(params['entry'], params['saveframe_category']);
-      parent.entry = params['entry'];
-      parent.saveframe_category = params['saveframe_category'];
     });
-
   }
 
-  loadSaveframe(entry: string, saveframe: string) {
+  loadSaveframe(entry: string, saveframe_category: string) {
 
     const parent = this;
-
-    this.api.getSaveframe(entry, saveframe)
-      .subscribe(
-        function(result) {
-          const test: Saveframe = new Saveframe(result[entry][saveframe][0]['name'],
-                                                result[entry][saveframe][0]['category'],
-                                                result[entry][saveframe][0]['tag_prefix']);
-          test.addTags(result[entry][saveframe][0]['tags']);
-          window.h = test;
-          parent.saveframe = test;
-        }
-    );
+    parent.api.getSaveframe(entry, saveframe_category).subscribe(sf => {
+      parent.saveframe = sf;
+      window.h = sf;
+    });
+    parent.entry = entry;
+    parent.saveframe_category = saveframe_category;
   }
+
 
 }

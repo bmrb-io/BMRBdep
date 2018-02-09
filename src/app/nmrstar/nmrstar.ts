@@ -33,11 +33,12 @@ export class Saveframe {
   tags?: SaveframeTag[];
   loops?: Loop[];
 
-  constructor (name: string, category: string, tag_prefix: string, tag_list: SaveframeTag[] = []) {
+  constructor (name: string, category: string, tag_prefix: string, tag_list: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
     this.category = category;
     this.tag_prefix = tag_prefix;
     this.tags = tag_list;
+    this.loops = loops;
   }
 
   addTag(name: string, value: string) {
@@ -66,6 +67,18 @@ export class Entry {
   addSaveframe(saveframe: Saveframe) {
     this.saveframes.push(saveframe);
   }
+}
+
+export function saveframeFromJSON(jdata: Object): Saveframe {
+  const test: Saveframe = new Saveframe(jdata[0]['name'],
+                                        jdata[0]['category'],
+                                        jdata[0]['tag_prefix']);
+  test.addTags(jdata[0]['tags']);
+  for (const l of jdata[0]['loops']) {
+    const new_loop = new Loop(l['category'], l['tags'], l['data']);
+    test.addLoop(new_loop);
+  }
+  return test;
 }
 
 export function fromJSON(jdata: Object): Entry {
