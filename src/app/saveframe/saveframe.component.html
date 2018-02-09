@@ -1,4 +1,4 @@
-<div style="float: left">
+<div style="float: left; width:80%">
 
 	<div>
 	<h3>Saveframe Loader</h3>
@@ -13,13 +13,20 @@
 	<p><a>Display tags with no value: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
    
       <div class="saveframe">
-	      <span class="uneditable">save_</span><input class="editable" [(ngModel)]="saveframe.name" placeholder=".">
+	      <span class="uneditable">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder=".">
 	      <table class="oneindent">
-			  <tr class="highlight" *ngFor='let sftag of saveframe.tags'>
-			  	<app-saveframe-tag [tag]="sftag" [showall]="showall"></app-saveframe-tag>
+	        <tr>
+              <th style="width: 20%"></th>
+              <th></th>                
+            </tr>
+	        <ng-container *ngFor="let sftag of saveframe.tags">
+    		  <tr class="highlight" *ngIf="sftag.value || showall">
+			    <td><span class="uneditable">{{sftag.tag_name}}</span></td>
+			    <td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td>
 			  </tr>
+		    </ng-container>
 		  </table>
 	  </div>
 	  
-	  
+	 
 </div>

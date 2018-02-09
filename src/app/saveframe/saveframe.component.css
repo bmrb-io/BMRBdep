@@ -4,16 +4,30 @@
     max-width: 98%;
 }
 
+.saveframe {
+	max-width: 90%;
+}
+
 .uneditable {
     font-weight: bold;
 }
-.editable {
+.sf_name {
 	border:none;
 	font-weight: normal;
+	width: 90%;
 }
+
+.datum {
+	border:none;
+	font-weight: normal;
+	width: 100%;
+}
+
+
 .oneindent {
     position: relative;
     left: 30px;
+    width: 100%;
 }
 .twoindent {
     position: relative;
@@ -40,18 +54,4 @@
 }
 table.alternatingcolor tr:nth-child(even) {
     background-color: #CBDBFF;
-}
-
-.editable-wrap {
-    display:block;
-    width: 100%;
-    padding-right:10px;
-    .editable-controls {
-        > input,
-        > select,
-        > textarea {
-            display: inline-block;
-            width: 100%;
-        }
-    }
 }
