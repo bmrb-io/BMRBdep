@@ -1,22 +1,22 @@
-<div style="float: left; width:80%">
+<div style="float: left; width:85%">
 
 	<div>
 	<h3>Saveframe Loader</h3>
-      <input [(ngModel)]='entry' type="text">
-      <input [(ngModel)]='saveframe_category' type="text">
-      <button (click)='loadSaveframe(entry, saveframe_category);'>Test</button>
+      <input class="clean_text" [(ngModel)]='entry' type="text">
+      <input class="clean_text" [(ngModel)]='saveframe_category' type="text">
+      <a class="fake_button" [routerLink]="['/saveframe', entry, saveframe_category]">Load</a>
     </div>
 	
 
 	<h1>Saveframe Viewer</h1>
-	<h3>You are on page: {{saveframe_name}}</h3>
+	<h3>You are on page: {{saveframe.name}}</h3>
 	<p><a>Display tags with no value: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
    
       <div class="saveframe">
 	      <span class="uneditable">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder=".">
 	      <table class="oneindent">
 	        <tr>
-              <th style="width: 20%"></th>
+              <th style="width: 30%"></th>
               <th></th>                
             </tr>
 	        <ng-container *ngFor="let sftag of saveframe.tags">

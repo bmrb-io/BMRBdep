@@ -78,10 +78,9 @@ export function fromJSON(jdata: Object): Entry {
         new_frame.category = jdata['saveframes'][i]['category'];
         new_frame.loops = [];
         for (let n = 0; n < jdata['saveframes'][i]['loops'].length; n++) {
-            const new_loop = new Loop();
-            new_loop.columns = jdata['saveframes'][i]['loops'][n]['tags'];
-            new_loop.data = jdata['saveframes'][i]['loops'][n]['data'];
-            new_loop.category = jdata['saveframes'][i]['loops'][n]['category'];
+            const new_loop = new Loop(jdata['saveframes'][i]['loops'][n]['category'],
+                                      jdata['saveframes'][i]['loops'][n]['tags'],
+                                      jdata['saveframes'][i]['loops'][n]['data']);
             new_frame.loops.push(new_loop);
         }
         this.saveframes.push(new_frame);

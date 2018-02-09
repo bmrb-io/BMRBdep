@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Saveframe, DEMO, SaveframeTag } from '../nmrstar/nmrstar';
-import { SaveframeTagComponent } from './saveframe-tag/saveframe-tag.component';
 import { UiSwitchModule } from 'angular2-ui-switch';
 
 @Component({
@@ -12,24 +11,29 @@ import { UiSwitchModule } from 'angular2-ui-switch';
   styleUrls: ['./saveframe.component.css']
 })
 export class SaveframeComponent implements OnInit {
-  saveframe_name: string;
   saveframe: Saveframe;
   showall: false;
-  entry: String;
-  saveframe_category: String;
+  entry: string;
+  saveframe_category: string;
 
   constructor(private route: ActivatedRoute,
-              private api: ApiService) { }
+              private api: ApiService) {
+    this.saveframe = new Saveframe('', '', '');
+  }
 
   ngOnInit() {
     // Refresh the current SF name
-    this.route.params.forEach(params => {
-        this.saveframe_name = params['saveframe_name'];
+
+
+    // Listen for the changing of the params string
+    const parent = this;
+    this.route.params.subscribe(function(params) {
+      console.log(params);
+      parent.loadSaveframe(params['entry'], params['saveframe_category']);
+      parent.entry = params['entry'];
+      parent.saveframe_category = params['saveframe_category'];
     });
 
-    this.saveframe = DEMO;
-    this.entry = '15000';
-    this.saveframe_category = 'entry_information';
   }
 
   loadSaveframe(entry: string, saveframe: string) {
