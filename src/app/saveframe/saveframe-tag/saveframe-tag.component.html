@@ -1,0 +1,6 @@
+<td *ngIf='tag.value || showall'>
+	<span class="uneditable">{{tag.tag_name}}</span>
+</td>
+<td *ngIf='tag.value || showall'>
+	<input class="editable" [(ngModel)]="tag.value" placeholder=".">
+</td>

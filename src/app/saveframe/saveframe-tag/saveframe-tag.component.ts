@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { SaveframeTag } from '../../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-saveframe-tag',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./saveframe-tag.component.css']
 })
 export class SaveframeTagComponent implements OnInit {
+    @Input() tag: SaveframeTag;
+    @Input() showall;
 
   constructor() { }
 

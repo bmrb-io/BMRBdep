@@ -1,3 +1,7 @@
+.editable {
+	border:none;
+	font-weight: normal;
+}
 .star {
     border: solid 2px #33527b;
     margin-top: 0.5em;
@@ -7,10 +11,7 @@
 .uneditable {
     font-weight: bold;
 }
-.editable {
-	border:none;
-	font-weight: normal;
-}
+
 .oneindent {
     position: relative;
     left: 30px;
@@ -40,18 +41,4 @@
 }
 table.alternatingcolor tr:nth-child(even) {
     background-color: #CBDBFF;
-}
-
-.editable-wrap {
-    display:block;
-    width: 100%;
-    padding-right:10px;
-    .editable-controls {
-        > input,
-        > select,
-        > textarea {
-            display: inline-block;
-            width: 100%;
-        }
-    }
 }
