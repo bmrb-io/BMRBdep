@@ -89,25 +89,3 @@ export function fromJSON(jdata: Object): Entry {
   return entry;
 }
 
-const tags: SaveframeTag[] = [new SaveframeTag('Sf_category', 'entry_information'),
-new SaveframeTag('Sf_framecode', 'entry_information'),
-new SaveframeTag('ID', '15000'),
-new SaveframeTag('Title', 'Solution structure of chicken villin headpiece subdomain \
-containing a fluorinated side chain in the core\\n'),
-new SaveframeTag('Type', 'macromolecule'),
-new SaveframeTag('Version_type', 'original'),
-new SaveframeTag('Submission_date', '2006-09-07'),
-new SaveframeTag('Accession_date', '2006-09-07'),
-new SaveframeTag('Last_release_date', null),
-new SaveframeTag('Original_release_date', null),
-new SaveframeTag('Origination', 'author'),
-new SaveframeTag('NMR_STAR_version', '3.1.1.61'),
-new SaveframeTag('Original_NMR_STAR_version', null),
-new SaveframeTag('Experimental_method', 'NMR'),
-new SaveframeTag('Experimental_method_subtype', 'solution'),
-new SaveframeTag('Details', null),
-new SaveframeTag('BMRB_internal_directory_name', null)];
-
-export const DEMO: Saveframe = new Saveframe('entry_information', 'entry_information', '_Entry', tags);
-
-

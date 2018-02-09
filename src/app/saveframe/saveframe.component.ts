@@ -2,7 +2,7 @@ import { ApiService } from '../api.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { Saveframe, DEMO, SaveframeTag } from '../nmrstar/nmrstar';
+import { Saveframe } from '../nmrstar/nmrstar';
 import { UiSwitchModule } from 'angular2-ui-switch';
 
 @Component({
