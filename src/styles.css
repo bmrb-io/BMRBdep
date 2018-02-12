@@ -1,1 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+.oneindent {
+    position: relative;
+    left: 30px;
+    width: 100%;
+}
+.twoindent {
+    position: relative;
+    left: 60px;
+}
+.uneditable {
+    font-weight: bold;
+}
+
+.no_dict {
+    background-color: brown;
+}
+.contains_unicode {
+    background-color: yellow;
+}
+.illegal_null {
+    background-color: orange;
+}
+.warn {
+    background-color:red;
+}

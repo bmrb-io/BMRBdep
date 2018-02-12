@@ -40,6 +40,7 @@
     outline: none;
 }
 
+
 .fake_button, .fake_button:visited {
     color: #333333;
     text-decoration:none;
@@ -58,17 +59,6 @@
     outline: none;
 }
 
-
-
-.oneindent {
-    position: relative;
-    left: 30px;
-    width: 100%;
-}
-.twoindent {
-    position: relative;
-    left: 60px;
-}
 .line {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -87,7 +77,4 @@
 }
 .highlight:hover {
     background-color: #ededed;
-}
-table.alternatingcolor tr:nth-child(even) {
-    background-color: #CBDBFF;
 }

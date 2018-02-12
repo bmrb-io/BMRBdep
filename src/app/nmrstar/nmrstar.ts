@@ -1,13 +1,13 @@
 // import { myJSON } from './demo';
 
 export class Loop {
-  category: string = null;
-  columns: string[];
+  category: string;
+  tags: string[];
   data: string[][];
 
-  constructor (category: string, columns: string[], data: string[][] = []) {
+  constructor (category: string, tags: string[], data: string[][] = []) {
     this.category = category;
-    this.columns = columns;
+    this.tags = tags;
     this.data = data;
   }
 }
@@ -81,7 +81,7 @@ export function saveframeFromJSON(jdata: Object): Saveframe {
   return test;
 }
 
-export function fromJSON(jdata: Object): Entry {
+export function entryFromJSON(jdata: Object): Entry {
 
     const entry = new Entry(jdata['bmrb_id']);
 

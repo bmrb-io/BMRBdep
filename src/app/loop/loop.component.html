@@ -1,0 +1,16 @@
+<div class="line highlight oneindent">
+  <span class="uneditable">loop</span>
+</div>
+<div class="line highlight" *ngFor='let col of loop.tags'>
+  <span class="uneditable twoindent" >{{loop.category + '.' + col}}</span>
+</div>
+<table class="twoindent alternatingcolor" style="max-width: 95%;">
+  <tbody>
+    <tr *ngFor='let row of loop.data'>
+      <td *ngFor='let datum of row'>
+        <span class="editable highlight" contenteditable="true">{{datum}}</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+      

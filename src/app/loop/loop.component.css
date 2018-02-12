@@ -1,0 +1,16 @@
+.datum {
+	border:none;
+	font-weight: normal;
+	width: 100%;
+}
+
+.line {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.highlight:hover {
+    background-color: #ededed;
+}
+table.alternatingcolor tr:nth-child(even) {
+    background-color: #CBDBFF;
+}

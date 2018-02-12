@@ -35,13 +35,13 @@ export class SaveframeComponent implements OnInit {
   loadSaveframe(entry: string, saveframe_category: string) {
 
     const parent = this;
-    parent.api.getSaveframe(entry, saveframe_category).subscribe(sf => {
-      parent.saveframe = sf;
-      window.h = sf;
-    });
+    parent.api.getSaveframe(entry, saveframe_category)
+      .subscribe(
+        sf => parent.saveframe = sf,
+        error => alert('Error :: ' + error)
+      );
     parent.entry = entry;
     parent.saveframe_category = saveframe_category;
   }
-
 
 }
