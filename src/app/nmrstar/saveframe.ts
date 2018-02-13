@@ -44,6 +44,18 @@ export class Saveframe {
     this.loops.push(loop);
   }
 
+  getID(): string {
+    let entry_id_tag = 'Entry_ID';
+    if (this.category === 'entry_information') {
+      entry_id_tag = 'ID';
+    }
+    for (const tag of this.tags) {
+      if (tag['tag_name'] === entry_id_tag) {
+        return tag['value'];
+      }
+    }
+  }
+
   print(): string {
     let width = 0;
 

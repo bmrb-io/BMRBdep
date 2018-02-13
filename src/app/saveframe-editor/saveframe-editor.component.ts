@@ -42,7 +42,6 @@ export class SaveframeEditorComponent implements OnInit {
       );
     parent.entry = entry;
     parent.saveframe_category = saveframe_category;
-
   }
 
   updateLoopData(event) {

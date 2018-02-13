@@ -11,8 +11,9 @@
     <tr *ngFor='let row of loop.data; let n = index'>
       <ng-container *ngFor='let datum of loop.data[n]; let i = index; trackBy: trackByFn'>
 	    <td *ngIf='showall || loop.data_in_column[i]'>
-	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder=".">
+	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder="." [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2'><!-- [style.width.ch]='loop.data[n][i] && loop.data[n][i].length' -->
 	    </td>
+	    
       </ng-container>
     </tr>
   </tbody>
@@ -20,25 +21,3 @@
 <div class="line highlight oneindent">
   <span class="uneditable">stop_</span>
 </div>
-<!-- 
-Less time on reddit! Ugh me too. Its all good, I've been super busy moving anyway.
-
-I think I mentioned I just went through Madison to La Crosse this past weekend. I may be
-trading in my car soon, so I'd have to go through again. Guess I could keep you guys posted if we click!
-
-Metric is one of my absolute favorites, yes. I can't name my favorite Metric album...I
- really adore them all. Eels Souljacker album is super good, along with Wonderful, Glorious.
-  Eels are in quite a few movie soundtracks as well. If you like Broken Social Scene and
-   Metric, you should also check out Stars. More awesome Canadians! The album No One is
-    Lost is my fave there.
-
-I think I've heard of Fruit Bats. Any good songs I should listen to? A show would be fun,
- although I'd be down to meet for coffee or something sooner with you and your wife. I 
- have a few favorite Madison restaurants as well...Swagat and Ha Long Bay come to mind.
-  Any thoughts on good eats?
-
-What do you and Amy do? I teach, as you probably read!
-
-Board games are always a solid choice in my book... I'll play cards and dominoes too. 
-Which games do you guys enjoy? Some favorites for me would be Dominion and Kingdom Builder.
- I also like cute little card games like Sushi Go!-->
