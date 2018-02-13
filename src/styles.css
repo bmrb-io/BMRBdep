@@ -35,7 +35,7 @@
     margin-bottom: 5px;
 }
 .highlight:hover {
-    background-color: #ededed;
+    background-color: #ededed !important;
 }
 
 .no_dict {

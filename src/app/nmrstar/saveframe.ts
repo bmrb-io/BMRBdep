@@ -7,7 +7,7 @@ export class SaveframeTag {
 
   constructor(tag_name: string, value: string) {
     this.tag_name = tag_name;
-    if (value === '.' || value === '?') {
+    if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
     } else {
       this.value = value;

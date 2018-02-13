@@ -15,4 +15,8 @@ export class LoopComponent implements OnInit {
   ngOnInit() {
   }
 
+  trackByFn(index, item) {
+    return index;
+  }
+
 }

@@ -1,6 +1,6 @@
-<div style="margin-top: 20em">
+<div style="margin-top: 3em; float: right; width: 87%">
 	<div class="entry line">
 		<span class="uneditable">entry_{{entry.data_name}}</span>
 	</div>
-	<app-saveframe *ngFor='let sf of entry.saveframes' [saveframe]='sf'></app-saveframe>
+	<app-saveframe *ngFor='let sf of entry.saveframes' [saveframe]='sf' [showall]='true'></app-saveframe>
 </div>

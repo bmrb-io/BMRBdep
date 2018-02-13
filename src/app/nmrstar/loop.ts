@@ -9,9 +9,19 @@ export class Loop {
   constructor (category: string, tags: string[], data: string[][] = []) {
     this.category = category;
     this.tags = tags;
-    this.data = data;
     this.data_in_column = [];
 
+    // Turn text nulls into logical nulls
+    for (let m = 0; m < data.length; m++) {
+      for (let n = 0; n < data[m].length; n++) {
+        if (data[m][n] === '.' || data[m][n] === '?') {
+          data[m][n] = null;
+        }
+      }
+    }
+    this.data = data;
+
+    // Check for rows of null data
     this.checkNull();
   }
 
@@ -22,10 +32,10 @@ export class Loop {
 
       // Check the data for a given column
       for (let n = 0; n < this.data.length; n++) {
-          if (this.data[n][x] !== '.') {
-              this.data_in_column[x] = true;
-              break;
-          }
+        if (!(['.', '?', '', null].indexOf(this.data[n][x]) >= 0)) {
+          this.data_in_column[x] = true;
+          break;
+        }
       }
     }
   }

@@ -8,7 +8,7 @@
     </tr>
     <ng-container *ngFor="let sftag of saveframe.tags">
       <tr class="highlight" *ngIf="sftag.value || showall">
-        <td><span class="uneditable">{{sftag.tag_name}}</span></td>
+        <td><span class="uneditable">{{saveframe.tag_prefix + '.' + sftag.tag_name}}</span></td>
         <td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td>
       </tr>
     </ng-container>

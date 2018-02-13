@@ -1,3 +1,11 @@
 table.alternatingcolor tr:nth-child(even) {
     background-color: #CBDBFF;
 }
+table.alternatingcolor tr:nth-child(even) .datum {
+    background-color: #CBDBFF;
+}
+.datum {
+	border:none;
+	font-weight: normal;
+	width: 100%;
+}

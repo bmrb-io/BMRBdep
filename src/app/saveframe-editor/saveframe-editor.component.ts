@@ -37,10 +37,17 @@ export class SaveframeEditorComponent implements OnInit {
     const parent = this;
     parent.api.getSaveframe(entry, saveframe_category)
       .subscribe(
-        sf => parent.saveframe = sf
+        sf => {parent.saveframe = sf; console.log(sf); }
       );
     parent.entry = entry;
     parent.saveframe_category = saveframe_category;
+
+  }
+
+  updateLoopData(event) {
+    for (const loop of this.saveframe.loops) {
+      loop.checkNull();
+    }
   }
 
 }

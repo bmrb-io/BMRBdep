@@ -33,6 +33,5 @@ export function entryFromJSON(jdata: Object): Entry {
       entry.addSaveframe(new_frame);
     }
 
-  window.h = entry;
   return entry;
 }
