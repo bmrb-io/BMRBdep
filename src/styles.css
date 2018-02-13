@@ -12,6 +12,32 @@
     font-weight: bold;
 }
 
+.fake_button, .fake_button:visited {
+    color: #333333;
+    text-decoration:none;
+    font-weight: bold;
+
+    border-radius: 3px;
+    border: 1px solid #C8C8C8;
+    padding: 5px 10px 5px 10px;
+    display: inline-block;
+    background-color:#ededed;
+}
+
+.fake_button:hover {
+    box-shadow: 0 0 2px #666666 inset;
+    border: 1px solid #666666;
+    outline: none;
+}
+
+.line {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.highlight:hover {
+    background-color: #ededed;
+}
+
 .no_dict {
     background-color: brown;
 }

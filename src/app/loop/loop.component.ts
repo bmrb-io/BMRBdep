@@ -1,4 +1,4 @@
-import { Loop } from '../nmrstar/nmrstar';
+import { Loop } from '../nmrstar/loop';
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({

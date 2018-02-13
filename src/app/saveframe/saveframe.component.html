@@ -1,33 +1,18 @@
-<div style="float: left; width:85%">
 
-	<div>
-	<h3>Saveframe Loader</h3>
-      <input class="clean_text" [(ngModel)]='entry' type="text">
-      <input class="clean_text" [(ngModel)]='saveframe_category' type="text">
-      <a class="fake_button" [routerLink]="['/saveframe', entry, saveframe_category]">Load</a>
-    </div>
-	
-
-	<h1>Saveframe Viewer</h1>
-	<h3>You are on page: {{saveframe.name}}</h3>
-	<p><a>Display tags with no value: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
-   
-      <div class="saveframe">
-	      <span class="uneditable">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder=".">
-	      <table class="oneindent">
-	        <tr>
-              <th style="width: 30%"></th>
-              <th></th>                
-            </tr>
-	        <ng-container *ngFor="let sftag of saveframe.tags">
-    		  <tr class="highlight" *ngIf="sftag.value || showall">
-			    <td><span class="uneditable">{{sftag.tag_name}}</span></td>
-			    <td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td>
-			  </tr>
-		    </ng-container>
-		  </table>
-		  <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop>
-	  </div>
-	  
-	 
+<div class="saveframe">
+  <span class="uneditable line">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder=".">
+  <table class="oneindent">
+    <tr>
+      <th style="width: 30%"></th>
+      <th></th>                
+    </tr>
+    <ng-container *ngFor="let sftag of saveframe.tags">
+      <tr class="highlight" *ngIf="sftag.value || showall">
+        <td><span class="uneditable">{{sftag.tag_name}}</span></td>
+        <td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td>
+      </tr>
+    </ng-container>
+  </table>
+  <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop>
+  <span class="uneditable line">save_</span>
 </div>

@@ -1,0 +1,6 @@
+<div style="margin-top: 20em">
+	<div class="entry line">
+		<span class="uneditable">entry_{{entry.data_name}}</span>
+	</div>
+	<app-saveframe *ngFor='let sf of entry.saveframes' [saveframe]='sf'></app-saveframe>
+</div>

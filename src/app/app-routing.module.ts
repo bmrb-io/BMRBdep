@@ -1,12 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { SaveframeComponent } from './saveframe/saveframe.component';
+import { EntryComponent } from './entry/entry.component';
+import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
 { path: '', redirectTo: '/welcome', pathMatch: 'full'},
-  { path: 'saveframe/:entry/:saveframe_category', component: SaveframeComponent },
+  { path: 'entry/:entry', component: EntryComponent },
+  { path: 'entry/:entry/saveframe/:saveframe_category', component: SaveframeEditorComponent },
   { path: 'welcome', component: WelcomeComponent }
 ];
 

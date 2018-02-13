@@ -1,9 +1,5 @@
-import { ApiService } from '../api.service';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
-import { Saveframe } from '../nmrstar/nmrstar';
-import { UiSwitchModule } from 'angular2-ui-switch';
+import { Component, OnInit, Input } from '@angular/core';
+import { Saveframe } from '../nmrstar/saveframe';
 
 @Component({
   selector: 'app-saveframe',
@@ -11,37 +7,11 @@ import { UiSwitchModule } from 'angular2-ui-switch';
   styleUrls: ['./saveframe.component.css']
 })
 export class SaveframeComponent implements OnInit {
-  saveframe: Saveframe;
-  showall: false;
-  entry: string;
-  saveframe_category: string;
+  @Input() saveframe: Saveframe;
+  @Input() showall: false;
 
-  constructor(private route: ActivatedRoute,
-              private api: ApiService) {
-    this.saveframe = new Saveframe('', '', '');
-  }
+  constructor() {}
 
   ngOnInit() {
-    // Refresh the current SF name
-
-
-    // Listen for the changing of the params string
-    const parent = this;
-    this.route.params.subscribe(function(params) {
-      parent.loadSaveframe(params['entry'], params['saveframe_category']);
-    });
   }
-
-  loadSaveframe(entry: string, saveframe_category: string) {
-
-    const parent = this;
-    parent.api.getSaveframe(entry, saveframe_category)
-      .subscribe(
-        sf => parent.saveframe = sf,
-        error => alert('Error :: ' + error)
-      );
-    parent.entry = entry;
-    parent.saveframe_category = saveframe_category;
-  }
-
 }

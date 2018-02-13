@@ -7,10 +7,12 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { SaveframeComponent } from './saveframe/saveframe.component';
+import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { ApiService } from './api.service';
 import { LoopComponent } from './loop/loop.component';
+import { EntryComponent } from './entry/entry.component';
 
 // https://www.npmjs.com/package/angular2-ui-switch
 
@@ -18,8 +20,10 @@ import { LoopComponent } from './loop/loop.component';
   declarations: [
     AppComponent,
     SaveframeComponent,
+    SaveframeEditorComponent,
     WelcomeComponent,
-    LoopComponent
+    LoopComponent,
+    EntryComponent
   ],
   imports: [
     BrowserModule,

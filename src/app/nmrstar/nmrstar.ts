@@ -1,104 +1,51 @@
-// import { myJSON } from './demo';
+import {sprintf} from 'sprintf-js';
 
-export class Loop {
-  category: string;
-  tags: string[];
-  data: string[][];
 
-  constructor (category: string, tags: string[], data: string[][] = []) {
-    this.category = category;
-    this.tags = tags;
-    this.data = data;
-  }
-}
 
-export class SaveframeTag {
-  tag_name: string;
-  value: string;
+export function cleanValue(value) {
 
-  constructor(tag_name: string, value: string) {
-    this.tag_name = tag_name;
-    if (value === '.' || value === '?') {
-      this.value = null;
-    } else {
-      this.value = value;
-    }
-  }
-}
+    // If the user inserts a newline in the web editor replace it with a newline
+    value = value.replace(/<br>/g, '\n');
+    value = value.replace(/⏎/g, '\n');
 
-export class Saveframe {
-  name: string;
-  category: string;
-  tag_prefix: string;
-  tags?: SaveframeTag[];
-  loops?: Loop[];
-
-  constructor (name: string, category: string, tag_prefix: string, tag_list: SaveframeTag[] = [], loops: Loop[] = []) {
-    this.name = name;
-    this.category = category;
-    this.tag_prefix = tag_prefix;
-    this.tags = tag_list;
-    this.loops = loops;
-  }
-
-  addTag(name: string, value: string) {
-    this.tags.push(new SaveframeTag(name, value));
-  }
-
-  addTags(tag_list: string[][]) {
-    for (const tag_pair of tag_list) {
-      this.addTag(tag_pair[0], tag_pair[1]);
-    }
-  }
-
-  addLoop(loop: Loop) {
-    this.loops.push(loop);
-  }
-}
-
-export class Entry {
-  data_name: string;
-  saveframes: Saveframe[];
-
-  constructor(data_name: string) {
-    this.data_name = data_name;
-  }
-
-  addSaveframe(saveframe: Saveframe) {
-    this.saveframes.push(saveframe);
-  }
-}
-
-export function saveframeFromJSON(jdata: Object): Saveframe {
-  const test: Saveframe = new Saveframe(jdata[0]['name'],
-                                        jdata[0]['category'],
-                                        jdata[0]['tag_prefix']);
-  test.addTags(jdata[0]['tags']);
-  for (const l of jdata[0]['loops']) {
-    const new_loop = new Loop(l['category'], l['tags'], l['data']);
-    test.addLoop(new_loop);
-  }
-  return test;
-}
-
-export function entryFromJSON(jdata: Object): Entry {
-
-    const entry = new Entry(jdata['bmrb_id']);
-
-    for (let i = 0; i < jdata['saveframes'].length; i++) {
-        const new_frame = new Saveframe(jdata['saveframes'][i]['name'],
-                                        jdata['saveframes'][i]['tag_prefix'], jdata['saveframes'][i]['tags']);
-        new_frame.category = jdata['saveframes'][i]['category'];
-        new_frame.loops = [];
-        for (let n = 0; n < jdata['saveframes'][i]['loops'].length; n++) {
-            const new_loop = new Loop(jdata['saveframes'][i]['loops'][n]['category'],
-                                      jdata['saveframes'][i]['loops'][n]['tags'],
-                                      jdata['saveframes'][i]['loops'][n]['data']);
-            new_frame.loops.push(new_loop);
+    // Values that go on their own line don't need to be touched
+    if (value.indexOf('\n') !== -1) {
+        if (value.substring(value.length - 1) !== '\n') {
+            return value + '\n';
+        } else {
+            return value;
         }
-        this.saveframes.push(new_frame);
     }
 
-  return entry;
+    // No empty values
+    if (value === undefined) {
+        throw new Error('Empty strings are not allowed as values. Use a \'.\' or a \'?\' if needed.');
+    }
+
+    // Normally we wouldn't autoconvert null values for them but it may be appropriate here
+    if (value === '') {
+        value = '.';
+    }
+
+    if ((value.indexOf('"') !== -1) && (value.indexOf('\'') !== -1)) {
+        return sprintf('%s\n', value);
+    }
+
+    if ((value.indexOf(' ') !== -1) || (value.indexOf('\t') !== -1) ||
+        (value.indexOf('#') !== -1) || (value.startsWith('_')) ||
+        ((value.length > 4) && (value.startsWith('data_')) ||
+        (value.startsWith('save_')) || (value.startsWith('loop_')) || (value.startsWith('stop_')))) {
+
+        if (value.indexOf('"') !== -1) {
+            return sprintf('\'%s\'', value);
+        } else if (value.indexOf('\'') !== -1) {
+            return sprintf('"%s"', value);
+        } else {
+            return sprintf('\'%s\'', value);
+        }
+    }
+
+    return value;
 }
+
 
