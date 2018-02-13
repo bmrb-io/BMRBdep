@@ -1,8 +1,26 @@
 import {sprintf} from 'sprintf-js';
 
 
+/* Automatically quotes the value in the appropriate way. Don't quote
+   values you send to this method or they will show up in another set
+   of quotes as part of the actual data. E.g.:
 
+cleanValue('"e. coli"') returns '\'"e. coli"\''
+
+while
+
+cleanValue("e. coli") returns "'e. coli'"
+
+This will automatically be called on all values when you use a str()
+method (so don't call it before inserting values into tags or loops).
+
+Be mindful of the value of str_conversion_dict as it will effect the
+way the value is converted to a string.*/
 export function cleanValue(value) {
+
+    if (value == null) {
+      return '.';
+    }
 
     // If the user inserts a newline in the web editor replace it with a newline
     value = value.replace(/<br>/g, '\n');
@@ -48,4 +66,8 @@ export function cleanValue(value) {
     return value;
 }
 
+// Function to check for illegal unicode characters in the file
+export function containsIllegalNonLatinCodepoints(s) {
+  return /[^\u0000-\u00ff]/.test(s.replace(/⏎/g, '\n'));
+}
 

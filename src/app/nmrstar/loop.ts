@@ -4,11 +4,30 @@ export class Loop {
   category: string;
   tags: string[];
   data: string[][];
+  data_in_column: boolean[];
 
   constructor (category: string, tags: string[], data: string[][] = []) {
     this.category = category;
     this.tags = tags;
     this.data = data;
+    this.data_in_column = [];
+
+    this.checkNull();
+  }
+
+  checkNull() {
+    // Go through the columns
+    for (let x = 0; x < this.tags.length; x++) {
+      this.data_in_column[x] = false;
+
+      // Check the data for a given column
+      for (let n = 0; n < this.data.length; n++) {
+          if (this.data[n][x] !== '.') {
+              this.data_in_column[x] = true;
+              break;
+          }
+      }
+    }
   }
 
   print(): string {
@@ -49,51 +68,51 @@ export class Loop {
 
     // Print the categories
     const loop_category = this.category;
-    this.tags.forEach(function(column) {
+    for (const column of this.tags) {
         ret_string += sprintf(pstring, loop_category + '.' + column);
-    });
+    }
 
     ret_string += '\n';
 
     // If there is data to print, print it
     if (this.data.length !== 0) {
 
-        const widths = Array(this.data[0].length).fill(0);
+      const widths = Array(this.data[0].length).fill(0);
 
-        // Figure out the maximum row lengths
-        this.data.forEach(function(row) {
-            for (let n = 0; n < row.length; n++) {
-                // Don't count data that goes on its own line
-                if (row[n].indexOf('\n') !== -1) {
-                    continue;
-                }
-                if (row[n].length + 3 > widths[n]) {
-                    widths[n] = row[n].length + 3;
-                }
-            }
-        });
+      // Figure out the maximum row lengths
+      for (const row of this.data) {
+        for (let n = 0; n < row.length; n++) {
+          // Don't count data that goes on its own line
+          if (row[n].indexOf('\n') !== -1) {
+            continue;
+          }
+          if (row[n].length + 3 > widths[n]) {
+            widths[n] = row[n].length + 3;
+          }
+        }
+      }
 
-        // Go through and print the data
-        this.data.forEach(function(row) {
+      // Go through and print the data
+      for (const row of this.data) {
 
-            // Each row starts with whitespace
-            ret_string += '     ';
+        // Each row starts with whitespace
+        ret_string += '     ';
 
-            // Get the data ready for printing
-            for (let n = 0; n < row.length; n++) {
+        // Get the data ready for printing
+        for (let n = 0; n < row.length; n++) {
 
-                let datum_copy = cleanValue(row[n]);
-                if (datum_copy.indexOf('\n') !== -1) {
-                    datum_copy = sprintf('\n;\n%s;\n', datum_copy);
-                }
-
-                // Add the data to the return string
-                ret_string += sprintf('%-' + widths[n] + 's', datum_copy);
+            let datum_copy = cleanValue(row[n]);
+            if (datum_copy.indexOf('\n') !== -1) {
+                datum_copy = sprintf('\n;\n%s;\n', datum_copy);
             }
 
-            // End the row
-            ret_string += ' \n';
-        });
+            // Add the data to the return string
+            ret_string += sprintf('%-' + widths[n] + 's', datum_copy);
+        }
+
+        // End the row
+        ret_string += ' \n';
+      }
     }
 
     // Close the loop

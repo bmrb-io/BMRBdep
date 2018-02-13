@@ -48,8 +48,8 @@ export class Saveframe {
     let width = 0;
 
     for (const tag of this.tags) {
-      if (tag[0].length > width) {
-          width = tag[0].length;
+      if (tag['tag_name'].length > width) {
+          width = tag['tag_name'].length;
       }
     }
     width += this.tag_prefix.length + 2;
@@ -61,19 +61,19 @@ export class Saveframe {
 
     const tag_prefix = this.tag_prefix;
 
-    this.tags.forEach(function(tag) {
-        const cleaned_tag = cleanValue(tag[1]);
+    for (const tag of this.tags) {
+      const cleaned_tag = cleanValue(tag['value']);
 
-        if (cleaned_tag.indexOf('\n') === -1) {
-            ret_string +=  sprintf(pstring, tag_prefix + '.' + tag[0], cleaned_tag);
-        } else {
-            ret_string +=  sprintf(mstring, tag_prefix + '.' + tag[0], cleaned_tag);
-        }
-    });
+      if (cleaned_tag.indexOf('\n') === -1) {
+          ret_string +=  sprintf(pstring, tag_prefix + '.' + tag['tag_name'], cleaned_tag);
+      } else {
+          ret_string +=  sprintf(mstring, tag_prefix + '.' + tag['tag_name'], cleaned_tag);
+      }
+    }
 
-    this.loops.forEach(function(loop) {
+    for (const loop of this.loops) {
         ret_string += loop.print();
-    });
+    }
 
     return ret_string + 'save_\n';
   }
