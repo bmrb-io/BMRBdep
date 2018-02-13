@@ -87,17 +87,17 @@ export class Loop {
     // If there is data to print, print it
     if (this.data.length !== 0) {
 
-      const widths = Array(this.data[0].length).fill(0);
+      const widths = Array(this.data[0].length).fill(3);
 
       // Figure out the maximum row lengths
       for (const row of this.data) {
         for (let n = 0; n < row.length; n++) {
           // Don't count data that goes on its own line
-          if (row[n].indexOf('\n') !== -1) {
+          if (row[n] && row[n].indexOf('\n') !== -1) {
             continue;
           }
-          if (row[n].length + 3 > widths[n]) {
-            widths[n] = row[n].length + 3;
+          if (row[n] && row[n].length + 3 > widths[n]) {
+              widths[n] = row[n].length + 3;
           }
         }
       }
@@ -126,7 +126,7 @@ export class Loop {
     }
 
     // Close the loop
-    ret_string += '   stop_\n';
+    ret_string += '\n   stop_\n';
     return ret_string;
   }
 }

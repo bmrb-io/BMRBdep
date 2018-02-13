@@ -9,7 +9,10 @@
     <ng-container *ngFor="let sftag of saveframe.tags">
       <tr class="highlight" *ngIf="sftag.value || showall">
         <td><span class="uneditable">{{saveframe.tag_prefix + '.' + sftag.tag_name}}</span></td>
-        <td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td>
+        <ng-container *ngIf='sftag.tag_name != "Sf_framecode" then normal_tag else sf_framecode'></ng-container>
+        <ng-template #normal_tag><td><input class="datum" [(ngModel)]="sftag.value" placeholder="."></td></ng-template>
+        <ng-template #sf_framecode><td><input class="datum" [(ngModel)]="saveframe.name" placeholder="."></td></ng-template>
+        
       </tr>
     </ng-container>
   </table>

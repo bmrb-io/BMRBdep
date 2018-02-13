@@ -5,6 +5,7 @@
       <input class="clean_text" [(ngModel)]='entry' type="text">
       <input class="clean_text" [(ngModel)]='saveframe_category' type="text">
       <a class="fake_button" [routerLink]="['/entry', entry, 'saveframe', saveframe_category]">Load</a>
+      <a class="fake_button" (click)='download(entry + "_" + saveframe.name + ".str", saveframe)'>Download</a>
     </div>
 	
 

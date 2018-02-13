@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Saveframe } from '../nmrstar/saveframe';
+import { download } from '../nmrstar/nmrstar';
 import { UiSwitchModule } from 'ngx-ui-switch';
 
 @Component({
@@ -48,6 +49,10 @@ export class SaveframeEditorComponent implements OnInit {
     for (const loop of this.saveframe.loops) {
       loop.checkNull();
     }
+  }
+
+  download(name: string, printable_object) {
+    download(name, printable_object);
   }
 
 }

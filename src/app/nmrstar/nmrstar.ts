@@ -71,3 +71,12 @@ export function containsIllegalNonLatinCodepoints(s) {
   return /[^\u0000-\u00ff]/.test(s.replace(/⏎/g, '\n'));
 }
 
+export function download(filename, printable_object) {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printable_object.print()));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}

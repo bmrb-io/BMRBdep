@@ -3,6 +3,7 @@ import { Entry } from '../nmrstar/entry';
 import { SaveframeComponent } from '../saveframe/saveframe.component';
 import { Component, OnInit, Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { download } from '../nmrstar/nmrstar';
 
 
 @Component({
@@ -36,6 +37,10 @@ export class EntryComponent implements OnInit {
           console.log(fetched_entry);
         }
       );
+  }
+
+  download(name: string, printable_object) {
+    download(name, printable_object);
   }
 
 }
