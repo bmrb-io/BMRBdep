@@ -4,7 +4,7 @@
 		<span class="uneditable">entry_{{entry.data_name}}</span>
 	</div>
 	<ng-container *ngFor='let sf of entry.saveframes'>
-	  <a class="fake_button line" [routerLink]='["/entry", entry.data_name, "saveframe", sf.category]'>Direct edit {{sf.name}}</a>
+	  <a style="margin-top: 3em" class="fake_button line" [routerLink]='["/entry", entry.data_name, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>
 	  <app-saveframe [saveframe]='sf' [showall]='true'></app-saveframe>
 	</ng-container>
 </div>

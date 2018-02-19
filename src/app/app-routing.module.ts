@@ -8,7 +8,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 const routes: Routes = [
 { path: '', redirectTo: '/welcome', pathMatch: 'full'},
   { path: 'entry/:entry', component: EntryComponent },
-  { path: 'entry/:entry/saveframe/:saveframe_category', component: SaveframeEditorComponent },
+  { path: 'entry/:entry/saveframe/:saveframe_description/:load_type', component: SaveframeEditorComponent },
   { path: 'welcome', component: WelcomeComponent }
 ];
 

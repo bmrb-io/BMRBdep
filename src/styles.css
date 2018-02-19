@@ -12,7 +12,7 @@
     font-weight: bold;
 }
 
-.fake_button, .fake_button:visited {
+.fake_button, .fake_button:visited, select {
     color: #333333;
     text-decoration:none;
     font-weight: bold;

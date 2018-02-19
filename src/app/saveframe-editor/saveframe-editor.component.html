@@ -3,15 +3,18 @@
 	<div>
 	<h3>Saveframe Loader</h3>
       <input class="clean_text" [(ngModel)]='entry' type="text">
-      <input class="clean_text" [(ngModel)]='saveframe_category' type="text">
-      <a class="fake_button" [routerLink]="['/entry', entry, 'saveframe', saveframe_category]">Load</a>
-      <a class="fake_button" (click)='download(entry + "_" + saveframe.name + ".str", saveframe)'>Download Displayed Data</a>
+      <input class="clean_text" [(ngModel)]='saveframe_description' type="text">
+      <select [(ngModel)]="load_type">
+        <option value="category">Category</option>
+        <option value="name">Name</option>
+	  </select>
+      <a class="fake_button" [routerLink]="['/entry', entry, 'saveframe', saveframe_description, load_type]">Load</a>
+      <!-- <a class="fake_button" (click)='download(entry + "_" + saveframe_description + ".str", saveframe)'>Download Displayed Data</a> -->
     </div>
 	
 
 	<h1>Saveframe Viewer</h1>
-	<h3>You are on page: {{saveframe.name}}</h3>
 	<p><a>Display tags with no value: <ui-switch [(ngModel)]="showall" (change)="updateLoopData($event)" size="small" color="#CBDBFF"></ui-switch></a></p>
-   	<app-saveframe [saveframe]='saveframe' [showall]='showall'></app-saveframe>  
+   	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showall]='showall'></app-saveframe>  
 	 
 </div>

@@ -7,5 +7,4 @@ table.alternatingcolor tr:nth-child(even) .datum {
 .datum {
 	border:none;
 	font-weight: normal;
-	width: 100%;
 }

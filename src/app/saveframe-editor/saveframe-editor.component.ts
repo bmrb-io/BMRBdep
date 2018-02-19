@@ -12,14 +12,15 @@ import { UiSwitchModule } from 'ngx-ui-switch';
   styleUrls: ['./saveframe-editor.component.css']
 })
 export class SaveframeEditorComponent implements OnInit {
-  saveframe: Saveframe;
+  saveframes: Saveframe[];
   showall: false;
   entry: string;
-  saveframe_category: string;
+  saveframe_description: string;
+  load_type: string;
 
   constructor(private route: ActivatedRoute,
-              private api: ApiService) {
-    this.saveframe = new Saveframe('', '', '');
+    private api: ApiService) {
+    this.saveframes = [new Saveframe('', '', '')];
   }
 
   ngOnInit() {
@@ -29,24 +30,36 @@ export class SaveframeEditorComponent implements OnInit {
     // Listen for the changing of the params string
     const parent = this;
     this.route.params.subscribe(function(params) {
-      parent.loadSaveframe(params['entry'], params['saveframe_category']);
+      parent.load_type = params['load_type'];
+      parent.saveframe_description = params['saveframe_description'];
+      parent.entry = params['entry'];
+      parent.loadSaveframe(params['entry'], params['saveframe_description']);
     });
   }
 
-  loadSaveframe(entry: string, saveframe_category: string) {
+  loadSaveframe(entry: string, saveframe_description: string) {
 
     const parent = this;
-    parent.api.getSaveframe(entry, saveframe_category)
-      .subscribe(
-        sf => {parent.saveframe = sf; console.log(sf); }
-      );
-    parent.entry = entry;
-    parent.saveframe_category = saveframe_category;
+
+    if (this.load_type === 'name') {
+      parent.api.getSaveframeByName(entry, saveframe_description)
+        .subscribe(
+          sf => {parent.saveframes = [sf]; }
+        );
+    } else if (this.load_type === 'category') {
+      parent.api.getSaveframesByCategory(entry, saveframe_description)
+        .subscribe(
+          sf => {parent.saveframes = sf; }
+        );
+    }
+
   }
 
   updateLoopData(event) {
-    for (const loop of this.saveframe.loops) {
-      loop.checkNull();
+    for (const sf of this.saveframes) {
+      for (const loop of sf.loops) {
+        loop.checkNull();
+      }
     }
   }
 

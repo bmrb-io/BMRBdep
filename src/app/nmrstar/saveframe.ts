@@ -102,3 +102,12 @@ export function saveframeFromJSON(jdata: Object): Saveframe {
   }
   return test;
 }
+
+export function saveframesFromJSON(jdata: Object[]): Saveframe[] {
+  const saveframes = [];
+
+  for (const sf_json of jdata) {
+    saveframes.push(saveframeFromJSON(sf_json));
+  }
+  return saveframes;
+}
