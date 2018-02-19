@@ -1,4 +1,5 @@
 import { ApiService } from '../api.service';
+import { Entry } from '../nmrstar/entry';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -40,19 +41,16 @@ export class SaveframeEditorComponent implements OnInit {
   loadSaveframe(entry: string, saveframe_description: string) {
 
     const parent = this;
-
-    if (this.load_type === 'name') {
-      parent.api.getSaveframeByName(entry, saveframe_description)
-        .subscribe(
-          sf => {parent.saveframes = [sf]; }
-        );
-    } else if (this.load_type === 'category') {
-      parent.api.getSaveframesByCategory(entry, saveframe_description)
-        .subscribe(
-          sf => {parent.saveframes = sf; }
-        );
-    }
-
+    parent.api.getEntry(entry)
+      .subscribe(
+        ret_entry => {
+          if (this.load_type === 'name') {
+            parent.saveframes = [ret_entry.getSaveframeByName(saveframe_description)];
+          } else if (this.load_type === 'category') {
+            parent.saveframes = ret_entry.getSaveframesByCategory(saveframe_description);
+          }
+        }
+      );
   }
 
   updateLoopData(event) {

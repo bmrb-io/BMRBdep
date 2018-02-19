@@ -102,7 +102,7 @@ export function saveframeFromJSON(jdata: Object): Saveframe {
   }
   return test;
 }
-
+/* probably obsolete but kept for now for reference
 export function saveframesFromJSON(jdata: Object[]): Saveframe[] {
   const saveframes = [];
 
@@ -111,3 +111,5 @@ export function saveframesFromJSON(jdata: Object[]): Saveframe[] {
   }
   return saveframes;
 }
+
+*/

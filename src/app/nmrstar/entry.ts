@@ -22,6 +22,25 @@ export class Entry {
 
     return result;
   }
+
+  getSaveframeByName(sf_name: string): Saveframe {
+    for (const sf of this.saveframes) {
+      if (sf.name === sf_name) {
+        return sf;
+      }
+    }
+    return null;
+  }
+
+  getSaveframesByCategory(sf_category: string): Saveframe[] {
+    const return_list: Saveframe[] = [];
+    for (const sf of this.saveframes) {
+      if (sf.category.toLowerCase() === sf_category.toLowerCase()) {
+        return_list.push(sf);
+      }
+    }
+    return return_list;
+  }
 }
 
 export function entryFromJSON(jdata: Object): Entry {
