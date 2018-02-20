@@ -2,11 +2,11 @@ import { Loop } from './loop';
 import { cleanValue } from './nmrstar';
 
 export class SaveframeTag {
-  tag_name: string;
+  name: string;
   value: string;
 
-  constructor(tag_name: string, value: string) {
-    this.tag_name = tag_name;
+  constructor(name: string, value: string) {
+    this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
     } else {
@@ -36,7 +36,11 @@ export class Saveframe {
 
   addTags(tag_list: string[][]) {
     for (const tag_pair of tag_list) {
-      this.addTag(tag_pair[0], tag_pair[1]);
+      if (tag_pair[0]) {
+        this.addTag(tag_pair[0], tag_pair[1]);
+      } else {
+        this.addTag(tag_pair['name'], tag_pair['value']);
+      }
     }
   }
 
@@ -50,7 +54,7 @@ export class Saveframe {
       entry_id_tag = 'ID';
     }
     for (const tag of this.tags) {
-      if (tag['tag_name'] === entry_id_tag) {
+      if (tag['name'] === entry_id_tag) {
         return tag['value'];
       }
     }

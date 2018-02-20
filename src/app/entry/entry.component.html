@@ -1,10 +1,10 @@
 <div style="margin-top: 3em; float: right; width: 87%">
-	<a class="fake_button" (click)='download(entry.data_name + ".str", entry)'>Download</a>
+	<a class="fake_button" (click)='download(entry.entry_id + ".str", entry)'>Download</a>
 	<div class="entry line">
-		<span class="uneditable">entry_{{entry.data_name}}</span>
+		<span class="uneditable">entry_{{entry.entry_id}}</span>
 	</div>
 	<ng-container *ngFor='let sf of entry.saveframes'>
-	  <a style="margin-top: 3em" class="fake_button line" [routerLink]='["/entry", entry.data_name, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>
+	  <a style="margin-top: 3em" class="fake_button line" [routerLink]='["/entry", entry.entry_id, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>
 	  <app-saveframe [saveframe]='sf' [showall]='true'></app-saveframe>
 	</ng-container>
 </div>

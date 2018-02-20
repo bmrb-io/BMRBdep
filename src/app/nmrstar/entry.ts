@@ -1,11 +1,11 @@
 import { Saveframe, saveframeFromJSON } from './saveframe';
 
 export class Entry {
-  data_name: string;
+  entry_id: string;
   saveframes: Saveframe[];
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
-    this.data_name = data_name;
+    this.entry_id = data_name;
     this.saveframes = [];
   }
 
@@ -14,7 +14,7 @@ export class Entry {
   }
 
   print(): string {
-    let result = 'data_' + this.data_name + '\n\n';
+    let result = 'data_' + this.entry_id + '\n\n';
 
     for (const sf of this.saveframes) {
       result += sf.print() + '\n';
@@ -29,7 +29,7 @@ export class Entry {
         return sf;
       }
     }
-    return null;
+    throw new Error('No saveframe with the name ' + sf_name + ' found.');
   }
 
   getSaveframesByCategory(sf_category: string): Saveframe[] {
