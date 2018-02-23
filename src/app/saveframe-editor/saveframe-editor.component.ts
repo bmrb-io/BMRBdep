@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Saveframe } from '../nmrstar/saveframe';
+import { Schema } from '../nmrstar/schema';
 import { download } from '../nmrstar/nmrstar';
 import { UiSwitchModule } from 'ngx-ui-switch';
 
@@ -18,6 +19,7 @@ export class SaveframeEditorComponent implements OnInit {
   entry: string;
   saveframe_description: string;
   load_type: string;
+  schema: Schema;
 
   constructor(private route: ActivatedRoute,
     private api: ApiService) {
@@ -25,9 +27,6 @@ export class SaveframeEditorComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Refresh the current SF name
-
-
     // Listen for the changing of the params string
     const parent = this;
     this.route.params.subscribe(function(params) {
@@ -36,6 +35,7 @@ export class SaveframeEditorComponent implements OnInit {
       parent.entry = params['entry'];
       parent.loadSaveframe(params['entry'], params['saveframe_description']);
     });
+    this.api.getSchema().subscribe(schem => { this.schema = schem; window.t = schem });
   }
 
   loadSaveframe(entry: string, saveframe_description: string) {

@@ -1,7 +1,12 @@
+interface TagDataMap {
+    [tag: string]: {};
+}
+
+
 export class Schema {
   version: string;
   headers: string[];
-  schema: {};
+  schema: TagDataMap;
   tag_order: string[];
   category_order: string[];
 
@@ -27,8 +32,17 @@ export class Schema {
 
       const tt = {};
       for (let i = 0; i <= this.headers.length; i++) {
-        tt[schem_tag[tag_col]][this.headers[i]] = schem_tag[i];
+        tt[this.headers[i]] = schem_tag[i];
       }
+      this.schema[schem_tag[tag_col]] = tt;
     }
+  }
+
+  getTag(tag_name: string) {
+    return this.schema[tag_name];
+  }
+
+  getValue(tag_name: string, tag_property: string) {
+    return this.getTag(tag_name)[tag_property];
   }
 }

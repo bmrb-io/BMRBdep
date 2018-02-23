@@ -1,5 +1,6 @@
 import { Entry, entryFromJSON } from './nmrstar/entry';
 import { Saveframe } from './nmrstar/saveframe';
+import { Schema } from './nmrstar/schema';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
@@ -14,10 +15,23 @@ import 'rxjs/add/observable/throw';
 export class ApiService {
 
   cached_entry: Entry;
+  schema: Schema;
 
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
+    this.schema = null;
+    this.getSchema();
   }
+
+/*
+ import 'rxjs/add/observable/interval';
+
+   Observable.interval(100000)
+    .subscribe(i => {
+      console.log('sss');
+        // This will be called every 10 seconds until `stopCondition` flag is set to true
+    });
+*/
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
 
@@ -35,6 +49,18 @@ export class ApiService {
          console.log('Loaded entry from API.');
          this.saveLocal();
          return this.cached_entry;
+       });
+    }
+  }
+
+  getSchema(): Observable<Schema> {
+    const schema_url = 'http://webapi-master/devel/schema';
+    if (this.schema != null) {
+      return of(this.schema);
+    } else {
+        return this.http.get(schema_url).map(json_data => {
+          this.schema = new Schema(json_data['version'], json_data['headers'], json_data['tags'], json_data['data_types']);
+          return this.schema;
        });
     }
   }
