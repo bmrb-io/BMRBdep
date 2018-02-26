@@ -2,7 +2,6 @@ interface TagDataMap {
     [tag: string]: {};
 }
 
-
 export class Schema {
   version: string;
   headers: string[];
@@ -43,6 +42,18 @@ export class Schema {
   }
 
   getValue(tag_name: string, tag_property: string) {
-    return this.getTag(tag_name)[tag_property];
+    const tag = this.getTag(tag_name);
+    if (tag) {
+      return tag[tag_property];
+    } else {
+      return null;
+    }
+  }
+
+  checkDatatype(tag_name: string, tag_value: string) {
+    const tag_datatype = this.getValue(tag_name, 'BMRB data type');
+    const regexp = new RegExp(this.data_types[tag_datatype]);
+    //console.log(tag_name, tag_datatype, regexp.test(tag_value), this.data_types[tag_datatype]);
+    return !regexp.test(tag_value);
   }
 }

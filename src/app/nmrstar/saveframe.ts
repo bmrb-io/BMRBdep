@@ -4,6 +4,7 @@ import { cleanValue } from './nmrstar';
 export class SaveframeTag {
   name: string;
   value: string;
+  valid: boolean;
 
   constructor(name: string, value: string) {
     this.name = name;
@@ -12,7 +13,13 @@ export class SaveframeTag {
     } else {
       this.value = value;
     }
+    this.valid = true;
   }
+
+  validateTag(tag_prefix, schema) {
+    this.valid = schema.checkDatatype(tag_prefix + '.' + this.name, this.value);
+  }
+
 }
 
 export class Saveframe {
@@ -28,6 +35,10 @@ export class Saveframe {
     this.tag_prefix = tag_prefix;
     this.tags = tag_list;
     this.loops = loops;
+  }
+
+  lt() {
+    return this.tag_prefix + '.' + this.tags[0].name;
   }
 
   addTag(name: string, value: string) {
@@ -93,6 +104,12 @@ export class Saveframe {
 
     return ret_string + 'save_\n';
   }
+
+   validateTags(schema) {
+     for (const tag of this.tags) {
+       tag.validateTag(this.tag_prefix, schema);
+     }
+   }
 }
 
 export function saveframeFromJSON(jdata: Object): Saveframe {

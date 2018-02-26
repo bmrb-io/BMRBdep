@@ -14,7 +14,7 @@
 	
 
 	<h1>Saveframe Viewer</h1>
-	<p><a>Display tags with no value: <ui-switch [(ngModel)]="showall" (change)="updateLoopData($event)" size="small" color="#CBDBFF"></ui-switch></a></p>
+	<p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showall" (change)="updateLoopData($event)" size="small" color="#CBDBFF"></ui-switch></a></p>
    	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showall]='showall'></app-saveframe>  
 	 
 </div>

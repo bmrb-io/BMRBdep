@@ -54,7 +54,7 @@ export class ApiService {
   }
 
   getSchema(): Observable<Schema> {
-    const schema_url = 'http://webapi-master/devel/schema';
+    const schema_url = 'http://localhost:8000/schema';
     if (this.schema != null) {
       return of(this.schema);
     } else {
