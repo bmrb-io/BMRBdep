@@ -15,15 +15,18 @@ import { UiSwitchModule } from 'ngx-ui-switch';
 })
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
-  showall: false;
+  showall: boolean;
   entry: string;
   saveframe_description: string;
   load_type: string;
-  schema: Schema;
 
   constructor(private route: ActivatedRoute,
     private api: ApiService) {
-    this.saveframes = [new Saveframe('', '', '')];
+    const sf = new Saveframe('', '', '', new Entry(''));
+    const schem = new Schema('', [], [], {});
+    sf.parent.schema = schem;
+    this.saveframes = [sf];
+    this.showall = true;
   }
 
   ngOnInit() {
@@ -35,7 +38,6 @@ export class SaveframeEditorComponent implements OnInit {
       parent.entry = params['entry'];
       parent.loadSaveframe(params['entry'], params['saveframe_description']);
     });
-    this.api.getSchema().subscribe(schem => { this.schema = schem; window.t = schem });
   }
 
   loadSaveframe(entry: string, saveframe_description: string) {

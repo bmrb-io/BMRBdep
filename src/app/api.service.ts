@@ -15,12 +15,9 @@ import 'rxjs/add/observable/throw';
 export class ApiService {
 
   cached_entry: Entry;
-  schema: Schema;
 
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
-    this.schema = null;
-    this.getSchema();
   }
 
 /*
@@ -43,36 +40,42 @@ export class ApiService {
       this.loadLocal();
       return of (this.cached_entry);
     } else {
-      const entry_url = `https://webapi.bmrb.wisc.edu/v2/entry/${entry_id}`;
+      const entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
       return this.http.get(entry_url).map(json_data => {
-         this.cached_entry = entryFromJSON(json_data[entry_id]);
+         this.cached_entry = entryFromJSON(json_data);
          console.log('Loaded entry from API.');
          this.saveLocal();
          return this.cached_entry;
        });
     }
   }
-
+/*
   getSchema(): Observable<Schema> {
     const schema_url = 'http://localhost:8000/schema';
-    if (this.schema != null) {
-      return of(this.schema);
-    } else {
-        return this.http.get(schema_url).map(json_data => {
-          this.schema = new Schema(json_data['version'], json_data['headers'], json_data['tags'], json_data['data_types']);
-          return this.schema;
-       });
-    }
-  }
+      return this.http.get(schema_url).map(json_data => {
+        return new Schema(json_data['version'], json_data['headers'], json_data['tags'], json_data['data_types']);
+     });
+
+  }*/
 
   private saveLocal(): void {
-    localStorage.setItem('entry', JSON.stringify(this.cached_entry));
+    // Todo - add toJSON method to the saveframe and entry
+    const keep_keys = ['name', 'value', 'category', 'tag_prefix', 'tags', 'loops',
+                       'data', 'entry_id', 'saveframes', 'schema', 'enumerations',
+                       'version', 'headers', 'data_types', 'category_order', 'tag_order', 'tags',
+                       // ugh, the data types
+                       'any', 'atcode', 'binary', 'code', 'email', 'fax', 'float', 'float-range',
+                       'framecode', 'idname', 'int', 'int-range', 'line', 'name', 'phone', 'symop',
+                       'text', 'uchar1', 'uchar3', 'ucode', 'uline', 'yes_no', 'yyyy-mm-dd', 'yyy-mm-dd:hh:mm'];
+
+    localStorage.setItem('entry', JSON.stringify(this.cached_entry, keep_keys));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');
   }
 
   private loadLocal(): void {
-    this.cached_entry = entryFromJSON(JSON.parse(localStorage.getItem('entry')));
+    const raw_json = JSON.parse(localStorage.getItem('entry'));
+    this.cached_entry = entryFromJSON(raw_json);
     console.log('Loaded entry from local storage.');
   }
 
@@ -80,6 +83,13 @@ export class ApiService {
     return this.cached_entry.entry_id;
   }
 
+  /* If we need to compress in local storage in the future...
+   * https://github.com/carlansley/angular-lz-string
+   * http://pieroxy.net/blog/pages/lz-string/index.html
+   * https://stackoverflow.com/questions/20773945/storing-compressed-json-data-in-local-storage
+   */
+  
+  
   /* obsolete but kept for now for reference
    getSaveframeByName(entry_id: string, saveframe_name: string): Observable<Saveframe> {
      const saveframe_url = `https://webapi.bmrb.wisc.edu/v2/entry/${entry_id}?saveframe_name=${saveframe_name}`;

@@ -8,6 +8,7 @@ export class Schema {
   schema: TagDataMap;
   tag_order: string[];
   category_order: string[];
+  tags: string[][];
 
   data_types = {};
 
@@ -18,6 +19,7 @@ export class Schema {
     this.category_order = [];
     this.tag_order = [];
     this.schema = {};
+    this.tags = tags;
 
     const tag_col = this.headers.indexOf('Tag');
     const cat_col = this.headers.indexOf('SFCategory');
@@ -52,8 +54,8 @@ export class Schema {
 
   checkDatatype(tag_name: string, tag_value: string) {
     const tag_datatype = this.getValue(tag_name, 'BMRB data type');
-    const regexp = new RegExp(this.data_types[tag_datatype]);
-    //console.log(tag_name, tag_datatype, regexp.test(tag_value), this.data_types[tag_datatype]);
+    console.log('Checking schema: ' + tag_name, + ' ' + tag_value + ':' + this.data_types[tag_datatype]);
+    const regexp = new RegExp(this.data_types[tag_datatype].replace('[]', ''));
     return !regexp.test(tag_value);
   }
 }

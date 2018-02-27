@@ -1,7 +1,6 @@
 import { ApiService } from '../api.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { Saveframe, SaveframeTag } from '../nmrstar/saveframe';
-import { Schema } from '../nmrstar/schema';
 
 @Component({
   selector: 'app-saveframe',
@@ -11,31 +10,26 @@ import { Schema } from '../nmrstar/schema';
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @Input() showall: false;
-  schema: Schema;
 
   constructor(public api: ApiService) {
-    this.schema = new Schema('', [], [], {});
   }
 
   ngOnInit() {
-    this.api.getSchema().subscribe(s => {
-      this.schema = s;
-      this.saveframe.validateTags(this.schema);
-      console.log(this.schema);
-    });
-
+    this.saveframe.validateTags(this.saveframe.parent.schema);
   }
 
   tv(tag: SaveframeTag, query: string) {
-    return this.schema.getValue(this.saveframe.tag_prefix + '.' + tag.name, query);
+    if (this.saveframe.parent && this.saveframe.parent.schema && tag) {
+      return this.saveframe.parent.schema.getValue(this.saveframe.tag_prefix + '.' + tag.name, query);
+    }
   }
 
   tag(tag: SaveframeTag) {
-    return this.schema.getTag(this.saveframe.tag_prefix + '.' + tag.name);
+    return this.saveframe.parent.schema.getTag(this.saveframe.tag_prefix + '.' + tag.name);
   }
 
   validateTag(tag: SaveframeTag, tag_value: string) {
-    tag.validateTag(this.saveframe.tag_prefix, this.schema);
+    tag.validateTag(this.saveframe.tag_prefix, this.saveframe.parent.schema);
   }
 
   dothing(ob) {

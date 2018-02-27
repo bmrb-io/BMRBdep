@@ -1,8 +1,11 @@
 import { Saveframe, saveframeFromJSON } from './saveframe';
+import { Schema } from './schema';
 
 export class Entry {
   entry_id: string;
   saveframes: Saveframe[];
+  schema: Schema;
+  enumerations: Object;
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
     this.entry_id = data_name;
@@ -46,9 +49,15 @@ export class Entry {
 export function entryFromJSON(jdata: Object): Entry {
 
     const entry = new Entry(jdata['entry_id']);
+    entry.schema = new Schema(jdata['schema']['version'],
+                              jdata['schema']['headers'],
+                              jdata['schema']['tags'],
+                              jdata['schema']['data_types']);
+    entry.enumerations = jdata['enumerations'];
 
     for (let i = 0; i < jdata['saveframes'].length; i++) {
-      const new_frame = saveframeFromJSON(jdata['saveframes'][i]);
+      const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
+      new_frame.validateTags(entry.schema);
       entry.addSaveframe(new_frame);
     }
 

@@ -1,12 +1,15 @@
+import { Entry } from './entry';
 import { Loop } from './loop';
 import { cleanValue } from './nmrstar';
+import { Schema } from './schema';
 
 export class SaveframeTag {
   name: string;
   value: string;
+  parent: Saveframe;
   valid: boolean;
 
-  constructor(name: string, value: string) {
+  constructor(name: string, value: string, parent: Saveframe) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
@@ -26,15 +29,17 @@ export class Saveframe {
   name: string;
   category: string;
   tag_prefix: string;
-  tags?: SaveframeTag[];
-  loops?: Loop[];
+  tags: SaveframeTag[];
+  loops: Loop[];
+  parent: Entry;
 
-  constructor (name: string, category: string, tag_prefix: string, tag_list: SaveframeTag[] = [], loops: Loop[] = []) {
+  constructor (name: string, category: string, tag_prefix: string, parent: Entry) {
     this.name = name;
     this.category = category;
     this.tag_prefix = tag_prefix;
-    this.tags = tag_list;
-    this.loops = loops;
+    this.tags = [];
+    this.loops = [];
+    this.parent = parent;
   }
 
   lt() {
@@ -42,7 +47,7 @@ export class Saveframe {
   }
 
   addTag(name: string, value: string) {
-    this.tags.push(new SaveframeTag(name, value));
+    this.tags.push(new SaveframeTag(name, value, this));
   }
 
   addTags(tag_list: string[][]) {
@@ -107,15 +112,16 @@ export class Saveframe {
 
    validateTags(schema) {
      for (const tag of this.tags) {
-       tag.validateTag(this.tag_prefix, schema);
+       tag.validateTag(this.tag_prefix, this.parent.schema);
      }
    }
 }
 
-export function saveframeFromJSON(jdata: Object): Saveframe {
+export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
   const test: Saveframe = new Saveframe(jdata['name'],
                                         jdata['category'],
-                                        jdata['tag_prefix']);
+                                        jdata['tag_prefix'],
+                                        parent);
   test.addTags(jdata['tags']);
   for (const l of jdata['loops']) {
     const new_loop = new Loop(l['category'], l['tags'], l['data']);

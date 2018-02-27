@@ -7,6 +7,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { SaveframeComponent } from './saveframe/saveframe.component';
+import { SaveframeViewComponent } from './saveframe_starview/saveframe.component';
 import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WelcomeComponent } from './welcome/welcome.component';
@@ -20,6 +21,7 @@ import { EntryComponent } from './entry/entry.component';
   declarations: [
     AppComponent,
     SaveframeComponent,
+    SaveframeViewComponent,
     SaveframeEditorComponent,
     WelcomeComponent,
     LoopComponent,

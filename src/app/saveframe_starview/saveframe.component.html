@@ -1,38 +1,5 @@
 
-<div>
-	<table>
-		<colgroup>
-	       <col span="1" style="width: 20%;">
-	       <col span="1" style="width: 70%;">
-	    </colgroup>
-    
-		<thead>
-			<tr>
-				<th class="category_cell_toplabel" colspan=2>{{tv(saveframe.tags[0], 'ADIT category view name')}}</th>
-			</tr>
-		</thead>
-		<tbody>
-		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="tv(sftag, 'User full view') == 'Y' || (showall && tv(sftag, 'User full view') == 'N')">
-	      		<td [ngClass]="{'mandatory': tv(sftag, 'User full view') == 'Y', 'tag_description': true}"
-	      		    [innerHTML]="tv(sftag, 'Prompt')"
-	      		    [title]="tv(sftag, 'Interface')"
-	      		    (mouseover)="dothing(sftag);"></td>
-	      		<td><input [(ngModel)]="sftag.value"
-	      		           [ngClass]="{'mandatory': sftag.valid, 'sf_input': true}"
-	      		           [placeholder]="tv(sftag, 'default value')"
-	      		           (change)="validateTag(sftag)"></td>
-			</tr>
-		</ng-container>
-		</tbody>
-	
-	</table>
-</div>
-	
-	
-
-
-<!--  
+<div class="saveframe">
   <span class="uneditable line">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
   <table class="oneindent">
     <tr>
@@ -41,7 +8,7 @@
     </tr>
     <ng-container *ngFor="let sftag of saveframe.tags">
       <tr class="highlight" *ngIf="sftag.value || showall">
-        <td><span class="uneditable">{{schema.getValue(saveframe.tag_prefix + '.' + sftag.name, 'Prompt')}}</span></td>
+        <td><span class="uneditable">{{saveframe.tag_prefix + '.' + sftag.name}}</span></td>
         <ng-container *ngIf='sftag.name != "Sf_framecode" then normal_tag else sf_framecode'></ng-container>
         <ng-template #normal_tag>
           <td>
@@ -59,5 +26,3 @@
   <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop>
   <span class="uneditable line">save_</span>
 </div>
--->
-
