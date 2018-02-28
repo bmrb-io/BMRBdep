@@ -54,7 +54,7 @@ export class Schema {
 
   checkDatatype(tag_name: string, tag_value: string) {
     const tag_datatype = this.getValue(tag_name, 'BMRB data type');
-    console.log('Checking schema: ' + tag_name, + ' ' + tag_value + ':' + this.data_types[tag_datatype]);
+    // console.log('Checking schema: ' + tag_name, + ' ' + tag_value + ':' + this.data_types[tag_datatype]);
     const regexp = new RegExp(this.data_types[tag_datatype].replace('[]', ''));
     return !regexp.test(tag_value);
   }

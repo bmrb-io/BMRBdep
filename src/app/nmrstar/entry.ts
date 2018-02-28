@@ -5,7 +5,7 @@ export class Entry {
   entry_id: string;
   saveframes: Saveframe[];
   schema: Schema;
-  enumerations: Object;
+  enumerations: {};
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
     this.entry_id = data_name;
@@ -53,11 +53,12 @@ export function entryFromJSON(jdata: Object): Entry {
                               jdata['schema']['headers'],
                               jdata['schema']['tags'],
                               jdata['schema']['data_types']);
+    console.log('Using schema: ' + entry.schema.version);
     entry.enumerations = jdata['enumerations'];
 
     for (let i = 0; i < jdata['saveframes'].length; i++) {
       const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
-      new_frame.validateTags(entry.schema);
+      new_frame.updateTags(entry.schema);
       entry.addSaveframe(new_frame);
     }
 

@@ -10,18 +10,14 @@ import { Saveframe, SaveframeTag } from '../nmrstar/saveframe';
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @Input() showall: false;
+  active_tag: SaveframeTag;
 
   constructor(public api: ApiService) {
+    this.active_tag = null;
   }
 
   ngOnInit() {
-    this.saveframe.validateTags(this.saveframe.parent.schema);
-  }
-
-  tv(tag: SaveframeTag, query: string) {
-    if (this.saveframe.parent && this.saveframe.parent.schema && tag) {
-      return this.saveframe.parent.schema.getValue(this.saveframe.tag_prefix + '.' + tag.name, query);
-    }
+    this.saveframe.updateTags(this.saveframe.parent.schema);
   }
 
   tag(tag: SaveframeTag) {
@@ -29,10 +25,7 @@ export class SaveframeComponent implements OnInit {
   }
 
   validateTag(tag: SaveframeTag, tag_value: string) {
-    tag.validateTag(this.saveframe.tag_prefix, this.saveframe.parent.schema);
+    tag.updateTagStatus(this.saveframe.tag_prefix);
   }
 
-  dothing(ob) {
-    // console.log(ob, this.tag(ob));
-  }
 }

@@ -7,26 +7,28 @@
 	    </colgroup>
     
 		<thead>
-			<tr>
-				<th class="category_cell_toplabel" colspan=2>{{tv(saveframe.tags[0], 'ADIT category view name')}}</th>
-			</tr>
+			<tr><th class="category_cell_toplabel" colspan=2 *ngIf="saveframe.tags[0]">{{saveframe.tags[0].schema_values['ADIT category view name']}}</th></tr>
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="tv(sftag, 'User full view') == 'Y' || (showall && tv(sftag, 'User full view') == 'N')">
-	      		<td [ngClass]="{'mandatory': tv(sftag, 'User full view') == 'Y', 'tag_description': true}"
-	      		    [innerHTML]="tv(sftag, 'Prompt')"
-	      		    [title]="tv(sftag, 'Interface')"
-	      		    (mouseover)="dothing(sftag);"></td>
-	      		<td><input [(ngModel)]="sftag.value"
-	      		           [ngClass]="{'mandatory': sftag.valid, 'sf_input': true}"
-	      		           [placeholder]="tv(sftag, 'default value')"
+	      	<tr *ngIf="sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N')"
+	      	    (mouseenter)="active_tag = sftag"
+	      		(mouseleave)="active_tag = null">
+	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
+	      		    [innerHTML]="sftag.schema_values['Prompt']"
+	      		    [title]="sftag.schema_values['Interface']"></td>
+	      		<td class="input_th"><input [(ngModel)]="sftag.value"
+	      		           [ngClass]="{'type_error': sftag.valid, 'sf_input': true}"
+	      		           [placeholder]="sftag.schema_values['default value']"
 	      		           (change)="validateTag(sftag)"></td>
 			</tr>
 		</ng-container>
 		</tbody>
-	
 	</table>
+	<div *ngIf='active_tag'>
+      <p><b>{{active_tag.schema_values['Interface']}}</b></p>
+      <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
+    </div>
 </div>
 	
 	

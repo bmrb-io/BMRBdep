@@ -8,6 +8,9 @@ export class SaveframeTag {
   value: string;
   parent: Saveframe;
   valid: boolean;
+  schema_values: {};
+  fqtn: string;
+  enums: string[];
 
   constructor(name: string, value: string, parent: Saveframe) {
     this.name = name;
@@ -16,11 +19,18 @@ export class SaveframeTag {
     } else {
       this.value = value;
     }
+    this.parent = parent;
     this.valid = true;
+    this.schema_values = {};
+    this.fqtn = parent.tag_prefix + '.' + name;
+    this.enums = [];
   }
 
-  validateTag(tag_prefix, schema) {
-    this.valid = schema.checkDatatype(tag_prefix + '.' + this.name, this.value);
+  updateTagStatus(tag_prefix) {
+    this.fqtn = tag_prefix + '.' + this.name;
+    this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
+    this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
+    this.enums = this.parent.parent.enumerations[this.fqtn];
   }
 
 }
@@ -110,9 +120,9 @@ export class Saveframe {
     return ret_string + 'save_\n';
   }
 
-   validateTags(schema) {
+   updateTags(schema) {
      for (const tag of this.tags) {
-       tag.validateTag(this.tag_prefix, this.parent.schema);
+       tag.updateTagStatus(this.tag_prefix);
      }
    }
 }

@@ -12,6 +12,10 @@
 	color: red;
 }
 
+.type_error {
+	color: red;
+}
+
 .sf_input {
 	width: 100%;
     padding: 10px;
@@ -19,18 +23,28 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+    border-width: 0px;
+    border-radius: 3px;
 }
 
 .tag_description {
 	font-weight: bold;
 }
 
+.input_th {
+	background-color: white;
+}
+
+.input_th>input:hover {
+	border-width: 1px;
+	
+}
+
 /* right from adit */
 .category_cell_toplabel {
-    background-color: black;
+    background-color: #CBDBFF;
     font-size: larger;
     font-weight: bold;
-    color: white;
 }
 
 th {
@@ -50,16 +64,15 @@ th {
 
 table {
     background-color: #E5E6Ef;
-    color: black;
     margin-bottom: 1em;
-    margin-left: 1em;
     margin-right: 1em;
-    border: 0;
     padding-top: 0;
     padding-bottom: 0;
     padding-left: 0.25em;
     padding-right: 0.25em;
     border-collapse: collapse;
+    border-radius: 5px;
+    
 }
 
 td {
