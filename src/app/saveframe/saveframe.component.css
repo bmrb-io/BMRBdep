@@ -63,6 +63,7 @@ th {
 }
 
 table {
+	width: auto;
     background-color: #E5E6Ef;
     margin-bottom: 1em;
     margin-right: 1em;

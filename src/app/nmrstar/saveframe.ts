@@ -30,7 +30,20 @@ export class SaveframeTag {
     this.fqtn = tag_prefix + '.' + this.name;
     this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
     this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
-    this.enums = this.parent.parent.enumerations[this.fqtn];
+    this.enums = this.parent.parent.schema.enumerations[this.fqtn];
+  }
+
+  toJSON(key) {
+    // Clone object to prevent accidentally performing modification on the original object
+    const cloneObj = { ...this as SaveframeTag };
+
+    delete cloneObj.valid;
+    delete cloneObj.parent;
+    delete cloneObj.schema_values;
+    delete cloneObj.fqtn;
+    delete cloneObj.enums;
+
+    return cloneObj;
   }
 
 }
@@ -52,8 +65,12 @@ export class Saveframe {
     this.parent = parent;
   }
 
-  lt() {
-    return this.tag_prefix + '.' + this.tags[0].name;
+  toJSON(key) {
+    // Clone object to prevent accidentally performing modification on the original object
+    const cloneObj = { ...this as Saveframe };
+    delete cloneObj.parent;
+
+    return cloneObj;
   }
 
   addTag(name: string, value: string) {
@@ -90,8 +107,8 @@ export class Saveframe {
     let width = 0;
 
     for (const tag of this.tags) {
-      if (tag['tag_name'].length > width) {
-          width = tag['tag_name'].length;
+      if (tag.name.length > width) {
+          width = tag.name.length;
       }
     }
     width += this.tag_prefix.length + 2;
@@ -107,9 +124,9 @@ export class Saveframe {
       const cleaned_tag = cleanValue(tag['value']);
 
       if (cleaned_tag.indexOf('\n') === -1) {
-          ret_string +=  sprintf(pstring, tag_prefix + '.' + tag['tag_name'], cleaned_tag);
+          ret_string +=  sprintf(pstring, tag_prefix + '.' + tag.name, cleaned_tag);
       } else {
-          ret_string +=  sprintf(mstring, tag_prefix + '.' + tag['tag_name'], cleaned_tag);
+          ret_string +=  sprintf(mstring, tag_prefix + '.' + tag.name, cleaned_tag);
       }
     }
 
@@ -120,7 +137,7 @@ export class Saveframe {
     return ret_string + 'save_\n';
   }
 
-   updateTags(schema) {
+   updateTags() {
      for (const tag of this.tags) {
        tag.updateTagStatus(this.tag_prefix);
      }

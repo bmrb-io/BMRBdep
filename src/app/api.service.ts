@@ -59,16 +59,7 @@ export class ApiService {
   }*/
 
   private saveLocal(): void {
-    // Todo - add toJSON method to the saveframe and entry
-    const keep_keys = ['name', 'value', 'category', 'tag_prefix', 'tags', 'loops',
-                       'data', 'entry_id', 'saveframes', 'schema', 'enumerations',
-                       'version', 'headers', 'data_types', 'category_order', 'tag_order', 'tags',
-                       // ugh, the data types
-                       'any', 'atcode', 'binary', 'code', 'email', 'fax', 'float', 'float-range',
-                       'framecode', 'idname', 'int', 'int-range', 'line', 'name', 'phone', 'symop',
-                       'text', 'uchar1', 'uchar3', 'ucode', 'uline', 'yes_no', 'yyyy-mm-dd', 'yyy-mm-dd:hh:mm'];
-
-    localStorage.setItem('entry', JSON.stringify(this.cached_entry, keep_keys));
+    localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');
   }

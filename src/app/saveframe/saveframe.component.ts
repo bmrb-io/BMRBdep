@@ -17,7 +17,7 @@ export class SaveframeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.saveframe.updateTags(this.saveframe.parent.schema);
+    this.saveframe.updateTags();
   }
 
   tag(tag: SaveframeTag) {

@@ -23,7 +23,7 @@ export class SaveframeEditorComponent implements OnInit {
   constructor(private route: ActivatedRoute,
     private api: ApiService) {
     const sf = new Saveframe('', '', '', new Entry(''));
-    const schem = new Schema('', [], [], {});
+    const schem = new Schema({});
     sf.parent.schema = schem;
     this.saveframes = [sf];
     this.showall = true;
