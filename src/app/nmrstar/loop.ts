@@ -1,15 +1,27 @@
 import { cleanValue } from './nmrstar';
+import { Saveframe } from './saveframe';
 
 export class Loop {
   category: string;
   tags: string[];
   data: string[][];
+  parent: Saveframe;
   data_in_column: boolean[];
 
-  constructor (category: string, tags: string[], data: string[][] = []) {
+  toJSON(key) {
+    // Clone object to prevent accidentally performing modification on the original object
+    const cloneObj = { ...this as Loop };
+    delete cloneObj.parent;
+    delete cloneObj.data_in_column;
+
+    return cloneObj;
+  }
+
+  constructor (category: string, tags: string[], data: string[][], parent: Saveframe) {
     this.category = category;
     this.tags = tags;
     this.data_in_column = [];
+    this.parent = parent;
 
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {

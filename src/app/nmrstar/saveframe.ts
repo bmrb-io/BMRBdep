@@ -2,51 +2,8 @@ import { Entry } from './entry';
 import { Loop } from './loop';
 import { cleanValue } from './nmrstar';
 import { Schema } from './schema';
+import { SaveframeTag } from './tag';
 
-export class SaveframeTag {
-  name: string;
-  value: string;
-  parent: Saveframe;
-  valid: boolean;
-  schema_values: {};
-  fqtn: string;
-  enums: string[];
-
-  constructor(name: string, value: string, parent: Saveframe) {
-    this.name = name;
-    if (['.', '?', '', null].indexOf(value) >= 0) {
-      this.value = null;
-    } else {
-      this.value = value;
-    }
-    this.parent = parent;
-    this.valid = true;
-    this.schema_values = {};
-    this.fqtn = parent.tag_prefix + '.' + name;
-    this.enums = [];
-  }
-
-  updateTagStatus(tag_prefix) {
-    this.fqtn = tag_prefix + '.' + this.name;
-    this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
-    this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
-    this.enums = this.parent.parent.schema.enumerations[this.fqtn];
-  }
-
-  toJSON(key) {
-    // Clone object to prevent accidentally performing modification on the original object
-    const cloneObj = { ...this as SaveframeTag };
-
-    delete cloneObj.valid;
-    delete cloneObj.parent;
-    delete cloneObj.schema_values;
-    delete cloneObj.fqtn;
-    delete cloneObj.enums;
-
-    return cloneObj;
-  }
-
-}
 
 export class Saveframe {
   name: string;
@@ -151,7 +108,7 @@ export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
                                         parent);
   test.addTags(jdata['tags']);
   for (const l of jdata['loops']) {
-    const new_loop = new Loop(l['category'], l['tags'], l['data']);
+    const new_loop = new Loop(l['category'], l['tags'], l['data'], test);
     test.addLoop(new_loop);
   }
   return test;
