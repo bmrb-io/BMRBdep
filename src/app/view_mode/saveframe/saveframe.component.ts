@@ -1,6 +1,6 @@
-import { ApiService } from '../api.service';
+import { ApiService } from '../../api.service';
 import { Component, OnInit, Input } from '@angular/core';
-import { Saveframe } from '../nmrstar/saveframe';
+import { Saveframe } from '../../nmrstar/saveframe';
 
 @Component({
   selector: 'app-saveframe-view',

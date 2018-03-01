@@ -85,6 +85,7 @@ export class Schema {
     // Fail the check if the value is null
     if (!this.getValue(tag_name, 'Nullable')) {
       if (tag_value === null) {
+        console.log(tag_name);
         regex_pass = false;
       }
     }

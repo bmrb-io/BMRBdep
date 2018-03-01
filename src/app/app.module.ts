@@ -6,14 +6,19 @@ import { UiSwitchModule } from 'ngx-ui-switch';
 import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
-import { SaveframeComponent } from './saveframe/saveframe.component';
-import { SaveframeViewComponent } from './saveframe_starview/saveframe.component';
 import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { ApiService } from './api.service';
+
+// For the editor mode
 import { LoopComponent } from './loop/loop.component';
+import { SaveframeComponent } from './saveframe/saveframe.component';
 import { EntryComponent } from './entry/entry.component';
+
+// For the view only mode
+import { LoopViewComponent } from './view_mode/loop/loop.component';
+import { SaveframeViewComponent } from './view_mode/saveframe/saveframe.component';
 
 // https://www.npmjs.com/package/angular2-ui-switch
 
@@ -25,6 +30,7 @@ import { EntryComponent } from './entry/entry.component';
     SaveframeEditorComponent,
     WelcomeComponent,
     LoopComponent,
+    LoopViewComponent,
     EntryComponent
   ],
   imports: [
