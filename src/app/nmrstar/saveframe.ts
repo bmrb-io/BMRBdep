@@ -71,13 +71,18 @@ export class Saveframe {
     this.parent = parent;
   }
 
-  duplicate() {
-    const new_frame = new Saveframe(this.name + '_1', this.category, this.tag_prefix, this.parent);
+  duplicate(clear_values: boolean = false) {
+    const next_this_type = this.parent.getSaveframesByCategory(this.category).length + 1;
+    const new_frame = new Saveframe(this.name + '_' + next_this_type, this.category, this.tag_prefix, this.parent);
 
     // Copy the tags
     const tag_copy: SaveframeTag[] = [];
     for (const tag of this.tags) {
-      tag_copy.push(new SaveframeTag(tag.name, tag.value, new_frame));
+      if (clear_values) {
+        tag_copy.push(new SaveframeTag(tag.name, null, new_frame));
+      } else {
+        tag_copy.push(new SaveframeTag(tag.name, tag.value, new_frame));
+      }
     }
     new_frame.tags = tag_copy;
 

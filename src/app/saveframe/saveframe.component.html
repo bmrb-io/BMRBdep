@@ -1,6 +1,7 @@
 
 <div>
 	<a class="fake_button line" (click)='saveframe.duplicate()'>Duplicate</a>
+	<a class="fake_button line" (click)='saveframe.duplicate(true)'>Create New</a>
 	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe)'>Delete</a>
 	<table>
 		<colgroup>
@@ -27,6 +28,8 @@
 		</ng-container>
 		</tbody>
 	</table>
+	<!-- <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop> -->
+	
 	<div *ngIf='active_tag' class='fixed'>
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
       <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
