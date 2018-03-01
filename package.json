@@ -21,10 +21,11 @@
     "@angular/platform-browser": "^5.2.4",
     "@angular/platform-browser-dynamic": "^5.2.4",
     "@angular/router": "^5.2.4",
-    "angular2-ui-switch": "^1.2.0",
+    "@types/sprintf-js": "^1.1.0",
     "core-js": "^2.4.1",
     "ngx-ui-switch": "^1.4.9",
     "rxjs": "^5.5.6",
+    "sprintf-js": "^1.1.1",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
