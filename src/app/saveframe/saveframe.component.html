@@ -15,7 +15,7 @@
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N')"
+	      	<tr *ngIf="sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N') || true"
 	      	    (mouseenter)="active_tag = sftag"
 	      		(mouseleave)="active_tag = null">
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
@@ -24,7 +24,8 @@
 	      		<td class='input_th'><input [(ngModel)]="sftag.value"
 	      		           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		           [placeholder]="sftag.schema_values['default value']"
-	      		           (change)="validateTag(sftag)"></td>
+	      		           (change)="validateTag(sftag)"
+	      		           [type]="sftag.data_type"></td>
 			</tr>
 		</ng-container>
 		</tbody>
@@ -34,6 +35,7 @@
 	<div *ngIf='active_tag' class='fixed'>
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
       <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
+      <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>
     </div>
 </div>
 	

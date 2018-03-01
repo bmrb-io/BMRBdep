@@ -6,6 +6,7 @@ class Tag {
   value: string;
 
   valid: boolean;
+  data_type: string;
   schema_values: {};
   fqtn: string;
   enums: string[];
@@ -24,6 +25,7 @@ class Tag {
     this.schema_values = {};
     this.fqtn = '';
     this.enums = [];
+    this.data_type = '';
   }
 
   toJSON(key) {
@@ -52,6 +54,21 @@ export class SaveframeTag extends Tag {
     this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
     this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
     this.enums = this.parent.parent.schema.enumerations[this.fqtn];
+    
+    const dt = this.schema_values['BMRB data type'];
+    console.log('Testing type for tag ' + this.fqtn + ' '+ dt);
+    this.data_type = 'string';
+    if (dt === 'int') {
+      this.data_type = 'number';
+    } else if (dt === 'yyyy-mm-dd') {
+      this.data_type = 'date';
+    } else if (dt === 'yyyy-mm-dd:hh:mm') {
+      this.data_type = 'datetime-local';
+    } else if (dt === 'email') {
+      this.data_type = 'email';
+    } else if ((dt === 'fax') || (dt === 'phone')) {
+      this.data_type = 'tel';
+    }
   }
 
 }
