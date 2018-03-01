@@ -1,4 +1,3 @@
-import { ApiService } from '../../api.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { Saveframe } from '../../nmrstar/saveframe';
 
@@ -11,7 +10,7 @@ export class SaveframeViewComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @Input() showall: false;
 
-  constructor(public api: ApiService) {}
+  constructor() {}
 
   ngOnInit() {
   }

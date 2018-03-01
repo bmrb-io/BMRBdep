@@ -17,21 +17,21 @@ import { SaveframeComponent } from './saveframe/saveframe.component';
 import { EntryComponent } from './entry/entry.component';
 
 // For the view only mode
-import { LoopViewComponent } from './view_mode/loop/loop.component';
-import { SaveframeViewComponent } from './view_mode/saveframe/saveframe.component';
+//import { LoopViewComponent } from './view_mode/loop/loop.component';
+//import { SaveframeViewComponent } from './view_mode/saveframe/saveframe.component';
 
 // https://www.npmjs.com/package/angular2-ui-switch
 
 @NgModule({
   declarations: [
     AppComponent,
-    SaveframeComponent,
-    SaveframeViewComponent,
-    SaveframeEditorComponent,
     WelcomeComponent,
     LoopComponent,
-    LoopViewComponent,
-    EntryComponent
+    SaveframeComponent,
+    SaveframeEditorComponent,
+    EntryComponent,
+    //LoopViewComponent,
+    //SaveframeViewComponent,
   ],
   imports: [
     BrowserModule,
