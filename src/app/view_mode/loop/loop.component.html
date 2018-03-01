@@ -1,0 +1,22 @@
+<div class="line highlight oneindent">
+  <span class="uneditable">loop_</span>
+</div>
+<ng-container *ngFor='let col of loop.tags; let i = index'>
+	<div class="line highlight" *ngIf='loop.data_in_column[i] || showall'>
+	  <span class="uneditable twoindent" >{{loop.category + '.' + col}}</span>
+	</div>
+</ng-container>
+<table class="twoindent alternatingcolor" style="max-width: 95%; table-layout: auto">
+  <tbody>
+    <tr *ngFor='let row of loop.data; let n = index; trackBy: trackByFn'>
+      <ng-container *ngFor='let datum of loop.data[n]; let i = index; trackBy: trackByFn'>
+	    <td *ngIf='showall || loop.data_in_column[i]'>
+	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder="." [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2'><!-- [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2' -->
+	    </td>
+      </ng-container>
+    </tr>
+  </tbody>
+</table>
+<div class="line highlight oneindent">
+  <span class="uneditable">stop_</span>
+</div>
