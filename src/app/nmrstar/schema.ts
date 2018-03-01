@@ -23,14 +23,14 @@ export class Schema {
     delete cloneObj.category_order;
     delete cloneObj.tag_order;
 
-    /* If the entry was embedded in something else... 
+    /* If the entry was embedded in something else...
     if (key) {
       cloneObj.code = key;
     } */
 
     return cloneObj;
   }
-  
+
   constructor (json: Object) {
 
     this.tags = json['tags'];
@@ -77,10 +77,17 @@ export class Schema {
     }
   }
 
-  checkDatatype(tag_name: string, tag_value: string) {
+  /* Returns true if data is valid. */
+  checkDatatype(tag_name: string, tag_value: string): boolean {
     const tag_datatype = this.getValue(tag_name, 'BMRB data type');
-    // console.log('Checking schema: ' + tag_name, + ' ' + tag_value + ':' + this.data_types[tag_datatype]);
-    const regexp = new RegExp(this.data_types[tag_datatype].replace('[]', ''));
-    return !regexp.test(tag_value);
+    const regexp = new RegExp(this.data_types[tag_datatype]);
+    let regex_pass = regexp.test(tag_value);
+    // Fail the check if the value is null
+    if (!this.getValue(tag_name, 'Nullable')) {
+      if (tag_value === null) {
+        regex_pass = false;
+      }
+    }
+    return regex_pass;
   }
 }

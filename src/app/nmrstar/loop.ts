@@ -37,6 +37,10 @@ export class Loop {
     this.checkNull();
   }
 
+  duplicate() {
+    return new Loop('', [], [], this.parent);
+  }
+  
   checkNull() {
     // Go through the columns
     for (let x = 0; x < this.tags.length; x++) {

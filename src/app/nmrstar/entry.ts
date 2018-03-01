@@ -11,8 +11,19 @@ export class Entry {
     this.saveframes = [];
   }
 
-  addSaveframe(saveframe: Saveframe) {
-    this.saveframes.push(saveframe);
+  addSaveframe(saveframe: Saveframe, position: number = -1) {
+    if (position < 0) {
+      this.saveframes.push(saveframe);
+    } else {
+      this.saveframes.splice(position, 0, saveframe);
+    }
+  }
+
+  removeSaveframe(saveframe: Saveframe) {
+    const index = this.saveframes.indexOf(saveframe, 0);
+    if (index > -1) {
+       this.saveframes.splice(index, 1);
+    }
   }
 
   print(): string {

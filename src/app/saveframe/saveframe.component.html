@@ -1,5 +1,7 @@
 
 <div>
+	<a class="fake_button line" (click)='saveframe.duplicate()'>Duplicate</a>
+	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe)'>Delete</a>
 	<table>
 		<colgroup>
 	       <col span="1" style="width: 20%;">
@@ -18,14 +20,14 @@
 	      		    [innerHTML]="sftag.schema_values['Prompt']"
 	      		    [title]="sftag.schema_values['Interface']"></td>
 	      		<td class="input_th"><input [(ngModel)]="sftag.value"
-	      		           [ngClass]="{'type_error': sftag.valid, 'sf_input': true}"
+	      		           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		           [placeholder]="sftag.schema_values['default value']"
 	      		           (change)="validateTag(sftag)"></td>
 			</tr>
 		</ng-container>
 		</tbody>
 	</table>
-	<div *ngIf='active_tag'>
+	<div *ngIf='active_tag' class='fixed'>
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
       <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
     </div>

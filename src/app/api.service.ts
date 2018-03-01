@@ -58,7 +58,7 @@ export class ApiService {
 
   }*/
 
-  private saveLocal(): void {
+  saveLocal(): void {
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');

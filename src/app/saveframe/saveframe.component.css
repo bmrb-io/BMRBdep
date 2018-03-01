@@ -39,6 +39,16 @@
 	border-width: 1px;
 	
 }
+.fixed{
+    position:fixed;
+    top:350px;
+    left:15px;
+    width:187px;
+    padding: .5em .5em .5em .5em;
+    border: 2px solid #33527b;
+    border-radius: 5px;
+    word-wrap: break-word;
+}
 
 /* right from adit */
 .category_cell_toplabel {

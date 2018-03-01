@@ -9,6 +9,7 @@ class Tag {
   schema_values: {};
   fqtn: string;
   enums: string[];
+  parent?: Object;
 
   constructor(name: string, value: string) {
     this.name = name;
@@ -33,6 +34,7 @@ class Tag {
     delete cloneObj.schema_values;
     delete cloneObj.fqtn;
     delete cloneObj.enums;
+    delete cloneObj.parent;
 
     return cloneObj;
   }
@@ -52,12 +54,6 @@ export class SaveframeTag extends Tag {
     this.enums = this.parent.parent.schema.enumerations[this.fqtn];
   }
 
-  toJSON(key) {
-    const r = super.toJSON(key);
-    delete r['parent'];
-    return r;
-  }
-
 }
 
 export class LoopTag extends Tag {
@@ -72,12 +68,6 @@ export class LoopTag extends Tag {
     this.valid = this.parent.parent.parent.schema.checkDatatype(this.fqtn, this.value);
     this.schema_values = this.parent.parent.parent.schema.getTag(this.fqtn);
     this.enums = this.parent.parent.parent.schema.enumerations[this.fqtn];
-  }
-
-   toJSON(key) {
-    const r = super.toJSON(key);
-    delete r['parent'];
-    return r;
   }
 
 }

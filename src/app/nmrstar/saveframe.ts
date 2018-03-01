@@ -4,6 +4,50 @@ import { cleanValue } from './nmrstar';
 import { Schema } from './schema';
 import { SaveframeTag } from './tag';
 
+function deepCopy(obj) {
+  let copy;
+
+  // Handle the 3 simple types, and null or undefined
+  if (null === obj || 'object' !== typeof obj) {
+    return obj;
+  }
+
+  // Handle Date
+  if (obj instanceof Date) {
+    copy = new Date();
+    copy.setTime(obj.getTime());
+    return copy;
+  }
+
+  // Handle Array
+  if (obj instanceof Array) {
+    copy = [];
+    for (let i = 0, len = obj.length; i < len; i++) {
+      copy[i] = deepCopy(obj[i]);
+    }
+    return copy;
+  }
+
+  if (typeof(obj) === 'function'){
+    return obj;
+  }
+  
+  // Handle Object
+  if (obj instanceof Object) {
+    copy = {};
+    for (const attr in obj) {
+      if (obj.hasOwnProperty(attr)) {
+        if (attr !== 'parent') {
+          copy[attr] = deepCopy(obj[attr]);
+        }
+      }
+    }
+    return copy;
+  }
+
+  throw new Error('Unable to copy obj! Its type isn\'t supported.');
+}
+
 
 export class Saveframe {
   name: string;
@@ -13,13 +57,38 @@ export class Saveframe {
   loops: Loop[];
   parent: Entry;
 
-  constructor (name: string, category: string, tag_prefix: string, parent: Entry) {
+  constructor (name: string,
+               category: string,
+               tag_prefix: string,
+               parent: Entry,
+               tags: SaveframeTag[] = [],
+               loops: Loop[] = []) {
     this.name = name;
     this.category = category;
     this.tag_prefix = tag_prefix;
-    this.tags = [];
-    this.loops = [];
+    this.tags = tags;
+    this.loops = loops;
     this.parent = parent;
+  }
+
+  duplicate() {
+    const new_frame = new Saveframe(this.name + '_1', this.category, this.tag_prefix, this.parent);
+
+    // Copy the tags
+    const tag_copy: SaveframeTag[] = [];
+    for (const tag of this.tags) {
+      tag_copy.push(new SaveframeTag(tag.name, tag.value, new_frame));
+    }
+    new_frame.tags = tag_copy;
+
+    // Copy the loops
+    const loop_copy: Loop[] = [];
+    for (const loop of this.loops) {
+      loop_copy.push(loop.duplicate());
+    }
+
+    const my_pos = this.parent.saveframes.indexOf(this);
+    this.parent.addSaveframe(new_frame, my_pos + 1);
   }
 
   toJSON(key) {
