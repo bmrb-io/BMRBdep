@@ -16,7 +16,7 @@ import { UiSwitchModule } from 'ngx-ui-switch';
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
   showall: boolean;
-  entry: string;
+  entry: Entry;
   saveframe_description: string;
   load_type: string;
 
@@ -27,6 +27,7 @@ export class SaveframeEditorComponent implements OnInit {
     sf.parent.schema = schem;
     this.saveframes = [sf];
     this.showall = true;
+    this.entry = new Entry('');
   }
 
   ngOnInit() {
@@ -35,24 +36,25 @@ export class SaveframeEditorComponent implements OnInit {
     this.route.params.subscribe(function(params) {
       parent.load_type = params['load_type'];
       parent.saveframe_description = params['saveframe_description'];
-      parent.entry = params['entry'];
-      parent.loadSaveframe(params['entry'], params['saveframe_description']);
+      parent.loadEntry(params['entry']);
     });
   }
 
-  loadSaveframe(entry: string, saveframe_description: string) {
-
+  loadEntry(entry: string) {
     const parent = this;
     parent.api.getEntry(entry)
-      .subscribe(
-        ret_entry => {
-          if (this.load_type === 'name') {
-            parent.saveframes = [ret_entry.getSaveframeByName(saveframe_description)];
-          } else if (this.load_type === 'category') {
-            parent.saveframes = ret_entry.getSaveframesByCategory(saveframe_description);
-          }
-        }
-      );
+      .subscribe(ret_entry => {
+        parent.entry = ret_entry;
+        this.reloadSaveframes();
+      });
+  }
+
+  reloadSaveframes() {
+    if (this.load_type === 'name') {
+      this.saveframes = [this.entry.getSaveframeByName(this.saveframe_description)];
+    } else if (this.load_type === 'category') {
+      this.saveframes = this.entry.getSaveframesByCategory(this.saveframe_description);
+    }
   }
 
   updateLoopData(event) {

@@ -1,7 +1,8 @@
 import { ApiService } from '../api.service';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Saveframe } from '../nmrstar/saveframe';
 import { SaveframeTag } from '../nmrstar/tag';
+import { SaveframeEditorComponent } from '../saveframe-editor/saveframe-editor.component';
 
 @Component({
   selector: 'app-saveframe',
@@ -11,6 +12,7 @@ import { SaveframeTag } from '../nmrstar/tag';
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @Input() showall: false;
+  @Output() myEvent = new EventEmitter<string>();
   active_tag: SaveframeTag;
 
   constructor(public api: ApiService) {
@@ -23,6 +25,13 @@ export class SaveframeComponent implements OnInit {
 
   tag(tag: SaveframeTag) {
     return this.saveframe.parent.schema.getTag(this.saveframe.tag_prefix + '.' + tag.name);
+  }
+
+  /* A saveframe-level change has happened. Save the changes and
+     tell the parent view to refresh */
+  processChange() {
+    this.api.saveLocal();
+    this.myEvent.emit('reload');
   }
 
   validateTag(tag: SaveframeTag, tag_value: string) {

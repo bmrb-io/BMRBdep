@@ -61,7 +61,6 @@ export function entryFromJSON(jdata: Object): Entry {
 
     const entry = new Entry(jdata['entry_id']);
     entry.schema = new Schema(jdata['schema']);
-    console.log(entry.schema);
     console.log('Using schema: ' + entry.schema.version);
 
     for (let i = 0; i < jdata['saveframes'].length; i++) {

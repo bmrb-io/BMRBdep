@@ -1,8 +1,9 @@
 
 <div>
-	<a class="fake_button line" (click)='saveframe.duplicate()'>Duplicate</a>
-	<a class="fake_button line" (click)='saveframe.duplicate(true)'>Create New</a>
-	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe)'>Delete</a>
+	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
+	<a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
+	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
+	<a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View tags of this category</a>
 	<table>
 		<colgroup>
 	       <col span="1" style="width: 20%;">

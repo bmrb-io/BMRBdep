@@ -34,7 +34,6 @@ export class EntryComponent implements OnInit {
       .subscribe(
         fetched_entry => {
           parent.entry = fetched_entry;
-          console.log(fetched_entry);
         }
       );
   }

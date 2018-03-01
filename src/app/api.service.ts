@@ -34,7 +34,6 @@ export class ApiService {
 
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
       console.log('Loaded entry from session memory.');
-      this.saveLocal();
       return of(this.cached_entry);
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
