@@ -3,8 +3,8 @@
 	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
 	<a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
 	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
-	<a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View tags of this category</a>
-	<table>
+	<a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
+	<table style="width: 100%">
 		<colgroup>
 	       <col span="1" style="width: 20%;">
 	       <col span="1" style="width: 70%;">
@@ -21,7 +21,7 @@
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
 	      		    [innerHTML]="sftag.schema_values['Prompt']"
 	      		    [title]="sftag.schema_values['Interface']"></td>
-	      		<td class="input_th"><input [(ngModel)]="sftag.value"
+	      		<td class='input_th'><input [(ngModel)]="sftag.value"
 	      		           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		           [placeholder]="sftag.schema_values['default value']"
 	      		           (change)="validateTag(sftag)"></td>

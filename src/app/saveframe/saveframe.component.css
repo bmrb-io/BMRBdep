@@ -13,18 +13,17 @@
 }
 
 .type_error {
-	color: red;
+	background-color: #ffa4a4;
 }
 
 .sf_input {
 	width: 100%;
-    padding: 10px;
-    margin: 0px;
+	padding: 10px;
+    margin: 0px 0px 0px 0px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     border-width: 0px;
-    border-radius: 3px;
 }
 
 .tag_description {
@@ -33,6 +32,8 @@
 
 .input_th {
 	background-color: white;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
 }
 
 .input_th>input:hover {
