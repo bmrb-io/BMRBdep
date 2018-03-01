@@ -1,9 +1,6 @@
 
 <div>
-	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
-	<a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
-	<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
-	<a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
+	
 	<table style="width: 100%">
 		<colgroup>
 	       <col span="1" style="width: 20%;">
@@ -11,7 +8,16 @@
 	    </colgroup>
     
 		<thead>
-			<tr><th class="category_cell_toplabel" colspan=2 *ngIf="saveframe.tags[0]">{{saveframe.tags[0].schema_values['ADIT category view name']}}</th></tr>
+			<tr>
+			  <th class="category_cell_toplabel" colspan=2 *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.tags[0].schema_values['ADIT category view name']}}</a>
+			  <div style="text-align: right; float: right">
+			  	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
+				<a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
+				<a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
+				<a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
+			  </div>
+			  </th>
+			</tr>
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
@@ -21,11 +27,23 @@
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
 	      		    [innerHTML]="sftag.schema_values['Prompt']"
 	      		    [title]="sftag.schema_values['Interface']"></td>
-	      		<td class='input_th'><input [(ngModel)]="sftag.value"
-	      		           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
-	      		           [placeholder]="sftag.schema_values['default value']"
-	      		           (change)="validateTag(sftag)"
-	      		           [type]="sftag.data_type"></td>
+	      		    
+	      		<td class='input_th'>
+	      		  <input *ngIf="!sftag.enums || sftag.enums[0] == 'N' || sftag.enums[1] == 'N'"
+	      		         [(ngModel)]="sftag.value"
+	      		         [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
+	      		         [placeholder]="sftag.schema_values['default value']"
+	      		         (change)="validateTag(sftag)"
+	      		         [type]="sftag.data_type">
+ 
+	      		  <select *ngIf="sftag.enums && sftag.enums[0] == 'Y' && sftag.enums[1] == 'Y'" 
+	      		          [(ngModel)]="sftag.value"
+	      		          [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
+	      		          (change)="validateTag(sftag)">
+			        <option *ngFor="let val of sftag.enums[2]" [value]="val">{{val}}</option>
+			      </select>
+			      <div *ngIf="sftag.enums && sftag.enums[0] == 'N' && sftag.enums[1] == 'Y'">barf</div>
+		      </td>
 			</tr>
 		</ng-container>
 		</tbody>

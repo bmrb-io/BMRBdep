@@ -30,8 +30,8 @@ export class SaveframeComponent implements OnInit {
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
   processChange() {
-    this.api.saveLocal();
     this.myEvent.emit('reload');
+    this.api.saveLocal();
   }
 
   validateTag(tag: SaveframeTag, tag_value: string) {

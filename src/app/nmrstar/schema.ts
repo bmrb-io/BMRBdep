@@ -9,6 +9,7 @@ export class Schema {
   tags: string[][];
   enumerations: {};
   data_types = {};
+  overrides: string[][];
 
   /* Calculated during construction */
   schema: TagDataMap;
@@ -38,6 +39,7 @@ export class Schema {
     this.headers = json['headers'];
     this.data_types = json['data_types'];
     this.enumerations = json['enumerations'];
+    this.overrides = json['overrides'];
     this.category_order = [];
     this.tag_order = [];
     this.schema = {};

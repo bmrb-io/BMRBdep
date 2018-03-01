@@ -24,6 +24,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     border-width: 0px;
+    background-color: white;
 }
 
 .tag_description {
@@ -35,6 +36,8 @@
 	padding: 0px 0px 0px 0px;
 	margin: 0px 0px 0px 0px;
 }
+
+
 
 .input_th>input:hover {
 	border-width: 1px;
@@ -54,7 +57,11 @@
 /* right from adit */
 .category_cell_toplabel {
     background-color: #CBDBFF;
-    font-size: larger;
+}
+
+.header_text {
+	vertical-align: middle;
+	font-size: larger;
     font-weight: bold;
 }
 

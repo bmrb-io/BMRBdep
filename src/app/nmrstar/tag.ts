@@ -54,9 +54,8 @@ export class SaveframeTag extends Tag {
     this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
     this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
     this.enums = this.parent.parent.schema.enumerations[this.fqtn];
-    
+
     const dt = this.schema_values['BMRB data type'];
-    console.log('Testing type for tag ' + this.fqtn + ' '+ dt);
     this.data_type = 'string';
     if (dt === 'int') {
       this.data_type = 'number';

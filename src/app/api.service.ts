@@ -34,9 +34,11 @@ export class ApiService {
 
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
       console.log('Loaded entry from session memory.');
+      console.log(this.cached_entry);
       return of(this.cached_entry);
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
+      console.log(this.cached_entry);
       return of (this.cached_entry);
     } else {
       const entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
@@ -44,6 +46,7 @@ export class ApiService {
          this.cached_entry = entryFromJSON(json_data);
          console.log('Loaded entry from API.');
          this.saveLocal();
+         console.log(this.cached_entry);
          return this.cached_entry;
        });
     }
