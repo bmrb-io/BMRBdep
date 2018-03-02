@@ -43,14 +43,15 @@
 	margin: 0px 0px 0px 0px;
 }
 
-.input_td>input:hover {
-	border-width: 1px;
-	
+.sf_input:hover {
+	border-width: 1px !important;
+	border-color: #33527b !important;
+	border-style: solid !important;
 }
 
 .fixed{
     position:fixed;
-    top:350px;
+    top:25em;
     left:15px;
     width:187px;
     padding: .5em .5em .5em .5em;
