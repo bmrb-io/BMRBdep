@@ -9,7 +9,7 @@
     
 		<thead>
 			<tr>
-			  <th class="category_cell_toplabel" colspan=2 *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.tags[0].schema_values['ADIT category view name']}}</a>
+			  <th colspan=2 *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.tags[0].schema_values['ADIT category view name']}}</a>
 			  <div style="text-align: right; float: right">
 			  	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
 				<a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
@@ -65,44 +65,12 @@
 	</table>
 	<!-- <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop> -->
 	
-	<div *ngIf='active_tag' class='fixed'>
+	<div *ngIf='active_tag' class='tag_info_box'>
+      <p><i>{{active_tag.fqtn}}</i></p>
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
-      <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
-      <!-- <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>-->
+      <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>
+      <p> Null allowed: {{active_tag.schema_values['Nullable']}}</p>
     </div>
-    
-    
 </div>
 	
-	
-
-
-<!--  
-  <span class="uneditable line">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
-  <table class="oneindent">
-    <tr>
-      <th style="width: 30%"></th>
-      <th></th>                
-    </tr>
-    <ng-container *ngFor="let sftag of saveframe.tags">
-      <tr class="highlight" *ngIf="sftag.value || showall">
-        <td><span class="uneditable">{{schema.getValue(saveframe.tag_prefix + '.' + sftag.name, 'Prompt')}}</span></td>
-        <ng-container *ngIf='sftag.name != "Sf_framecode" then normal_tag else sf_framecode'></ng-container>
-        <ng-template #normal_tag>
-          <td>
-          <div>
-            <a *ngIf='sftag.value && sftag.value.indexOf("$")==0' [routerLink]="['/entry', saveframe.getID(), 'saveframe', sftag.value.substring(1), 'name']">Jump to: </a>
-            <input class="datum" style="width:80%" [(ngModel)]="sftag.value" placeholder=".">
-            </div>
-          </td>
-        </ng-template>
-        <ng-template #sf_framecode><td><input class="datum" [(ngModel)]="saveframe.name" placeholder="."></td></ng-template>
-        
-      </tr>
-    </ng-container>
-  </table>
-  <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop>
-  <span class="uneditable line">save_</span>
-</div>
--->
 
