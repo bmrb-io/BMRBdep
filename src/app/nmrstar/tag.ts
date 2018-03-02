@@ -94,18 +94,20 @@ class Tag {
     this.valid = this.schema.checkDatatype(this.fqtn, this.value);
     if (this.valid) {
       this.validation_message = null;
+
+      // Only continue validating if we haven't yet invalidated
+      if ((!this.schema_values['Nullable']) && (!this.value)) {
+        this.valid = false;
+        this.validation_message = 'Tag must have a value.';
+      }
+      if (this.valid && this.interface_type === 'closed_enum') {
+        if (this.enums[2].indexOf(this.value) < 0) {
+          this.valid = false;
+          this.validation_message = 'Tag does not match one of the allowed options.';
+        }
+      }
     } else {
       this.validation_message = 'Tag does not match specified data type.';
-    }
-    if ((!this.schema_values['Nullable']) && (!this.value)) {
-      this.valid = false;
-      this.validation_message = 'Tag must have a value.';
-    }
-    if (this.interface_type === 'closed_enum') {
-      if (this.enums[2].indexOf(this.value) < 0) {
-        this.valid = false;
-        this.validation_message = 'Tag does not match one of the allowed options.';
-      }
     }
   }
 }
