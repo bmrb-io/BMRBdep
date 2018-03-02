@@ -35,7 +35,6 @@ export class SaveframeComponent implements OnInit {
   }
 
   validateTag(tag: SaveframeTag, tag_value: string) {
-    console.log('Validiting: ', tag);
     tag.updateTagStatus(this.saveframe.tag_prefix);
     this.api.saveLocal();
   }

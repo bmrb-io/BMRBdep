@@ -31,7 +31,6 @@ export class ApiService {
 */
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
-
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
       console.log('Loaded entry from session memory.');
       console.log(this.cached_entry);
@@ -44,8 +43,9 @@ export class ApiService {
       const entry_url = `http://manowar:8000/get_deposition/${entry_id}`;
       return this.http.get(entry_url).map(json_data => {
          this.cached_entry = entryFromJSON(json_data);
+         this.cached_entry.entry_id = entry_id;
          console.log('Loaded entry from API.');
-         this.saveLocal();
+         this.saveLocal(true);
          console.log(this.cached_entry);
          return this.cached_entry;
        });
@@ -60,7 +60,10 @@ export class ApiService {
 
   }*/
 
-  saveLocal(): void {
+  saveLocal(full_save: boolean = false): void {
+    if (full_save) {
+      localStorage.setItem('schema', JSON.stringify(this.cached_entry.schema));
+    }
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');
@@ -68,6 +71,7 @@ export class ApiService {
 
   private loadLocal(): void {
     const raw_json = JSON.parse(localStorage.getItem('entry'));
+    raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
     this.cached_entry = entryFromJSON(raw_json);
     console.log('Loaded entry from local storage.');
   }

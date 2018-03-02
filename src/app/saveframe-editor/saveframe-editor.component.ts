@@ -62,14 +62,6 @@ export class SaveframeEditorComponent implements OnInit {
     this.updateCategoryLinks();
   }
 
-  updateLoopData(event) {
-    for (const sf of this.saveframes) {
-      for (const loop of sf.loops) {
-        loop.checkNull();
-      }
-    }
-  }
-
   download(name: string, printable_object) {
     download(name, printable_object);
   }

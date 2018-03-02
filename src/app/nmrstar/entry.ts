@@ -11,6 +11,20 @@ export class Entry {
     this.saveframes = [];
   }
 
+  toJSON(key) {
+    const cloneObj = { ...this as Entry };
+
+    delete cloneObj.schema;
+    return cloneObj;
+  }
+
+  /* Return the position of a given saveframe in the saveframe list. */
+  sfIndex(saveframe: Saveframe) {
+    return this.saveframes.indexOf(saveframe);
+  }
+
+  /* Add a new saveframe to the saveframe list.
+     Optionally specify position if not at end. */
   addSaveframe(saveframe: Saveframe, position: number = -1) {
     if (position < 0) {
       this.saveframes.push(saveframe);

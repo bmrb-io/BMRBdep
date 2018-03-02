@@ -35,7 +35,7 @@
 
 .tag_info_box{
     position:fixed;
-    top:25em;
+    bottom:0px;
     left:15px;
     width:187px;
     padding: .5em .5em .5em .5em;
