@@ -19,6 +19,8 @@ export class SaveframeEditorComponent implements OnInit {
   entry: Entry;
   saveframe_description: string;
   load_type: string;
+  next_sf: string;
+  prev_sf: string;
 
   constructor(private route: ActivatedRoute,
     private api: ApiService) {
@@ -28,6 +30,8 @@ export class SaveframeEditorComponent implements OnInit {
     this.saveframes = [sf];
     this.showall = true;
     this.entry = new Entry('');
+    this.next_sf = null;
+    this.prev_sf = null;
   }
 
   ngOnInit() {
@@ -55,6 +59,7 @@ export class SaveframeEditorComponent implements OnInit {
     } else if (this.load_type === 'category') {
       this.saveframes = this.entry.getSaveframesByCategory(this.saveframe_description);
     }
+    this.updateCategoryLinks();
   }
 
   updateLoopData(event) {
@@ -67,6 +72,22 @@ export class SaveframeEditorComponent implements OnInit {
 
   download(name: string, printable_object) {
     download(name, printable_object);
+  }
+
+  updateCategoryLinks() {
+    let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
+    if (index < 0 ) {
+      this.prev_sf = null;
+    } else {
+      this.prev_sf =  this.entry.saveframes[index].category;
+    }
+
+    index = this.entry.saveframes.indexOf(this.saveframes[this.saveframes.length - 1]) + 1;
+    if (index > this.entry.saveframes.length - 1 ) {
+      this.next_sf = null;
+    } else {
+      this.next_sf =  this.entry.saveframes[index].category;
+    }
   }
 
 }

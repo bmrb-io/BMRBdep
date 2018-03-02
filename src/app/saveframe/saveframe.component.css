@@ -13,7 +13,7 @@
 }
 
 .type_error {
-	background-color: #ffa4a4;
+	background-color: #ffa4a4 !important;
 }
 
 .sf_input {
@@ -27,22 +27,27 @@
     background-color: white;
 }
 
+.completer-input {
+	border-width: 0px !important;
+	width: 100% !important;
+	padding: 10px !important;
+}
+
 .tag_description {
 	font-weight: bold;
 }
 
-.input_th {
+.input_td {
 	background-color: white;
 	padding: 0px 0px 0px 0px;
 	margin: 0px 0px 0px 0px;
 }
 
-
-
-.input_th>input:hover {
+.input_td>input:hover {
 	border-width: 1px;
 	
 }
+
 .fixed{
     position:fixed;
     top:350px;

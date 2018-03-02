@@ -21,15 +21,15 @@
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N') || true"
+	      	<tr *ngIf="(sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N') || showall) && sftag.schema_values['Prompt'] != 'n/a'"
 	      	    (mouseenter)="active_tag = sftag"
-	      		(mouseleave)="active_tag = null">
+	      		(mouseleave)="active_tag = null" style="height: 2em;">
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
 	      		    [innerHTML]="sftag.schema_values['Prompt']"
 	      		    [title]="sftag.schema_values['Interface']"></td>
 	      		    
-	      		<td class='input_th'>
-	      		  <input *ngIf="!sftag.enums || sftag.enums[0] == 'N' || sftag.enums[1] == 'N'"
+	      		<td class='input_td'>
+	      		  <input *ngIf="!sftag.enums"
 	      		         [(ngModel)]="sftag.value"
 	      		         [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		         [placeholder]="sftag.schema_values['default value']"
@@ -42,7 +42,15 @@
 	      		          (change)="validateTag(sftag)">
 			        <option *ngFor="let val of sftag.enums[2]" [value]="val">{{val}}</option>
 			      </select>
-			      <div *ngIf="sftag.enums && sftag.enums[0] == 'N' && sftag.enums[1] == 'Y'">barf</div>
+			      <ng-container *ngIf="sftag.enums && sftag.enums[0] == 'N' && sftag.enums[1] == 'Y' && sftag.enums[2]">
+				    <input [attr.list]="sftag.fqtn" 
+				           [(ngModel)]="sftag.value"
+				           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
+				           [placeholder]="sftag.schema_values['default value']"
+				           (change)="validateTag(sftag)"
+				           />
+					  <datalist [id]="sftag.fqtn"><option *ngFor="let val of sftag.enums[2]" [value]="val"></datalist>
+				   </ng-container>
 		      </td>
 			</tr>
 		</ng-container>
@@ -53,8 +61,10 @@
 	<div *ngIf='active_tag' class='fixed'>
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
       <p> NMR-STAR Tag: <i>{{active_tag.fqtn}}</i></p>
-      <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>
+      <!-- <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>-->
     </div>
+    
+    
 </div>
 	
 	

@@ -51,9 +51,13 @@ export class SaveframeTag extends Tag {
 
   updateTagStatus(tag_prefix) {
     this.fqtn = tag_prefix + '.' + this.name;
-    this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
     this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
     this.enums = this.parent.parent.schema.enumerations[this.fqtn];
+
+    this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
+    if ((!this.schema_values['Nullable']) && (!this.value)) {
+      this.valid = false;
+    }
 
     const dt = this.schema_values['BMRB data type'];
     this.data_type = 'string';
