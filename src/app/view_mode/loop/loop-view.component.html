@@ -11,7 +11,7 @@
     <tr *ngFor='let row of loop.data; let n = index; trackBy: trackByFn'>
       <ng-container *ngFor='let datum of loop.data[n]; let i = index; trackBy: trackByFn'>
 	    <td *ngIf='showall || loop.data_in_column[i]'>
-	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder="." [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2'><!-- [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2' -->
+	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder="." [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].value.length + 2 : 2'><!-- [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2' -->
 	    </td>
       </ng-container>
     </tr>

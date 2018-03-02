@@ -1,4 +1,5 @@
 import { Loop } from '../nmrstar/loop';
+import { LoopTag } from '../nmrstar/tag';
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
@@ -8,15 +9,13 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class LoopComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() showall: boolean;
+  active_tag: LoopTag;
 
-  constructor() {}
+  constructor() {
+    this.active_tag = null;
+  }
 
   ngOnInit() {
+    console.log();
   }
-
-  trackByFn(index, item) {
-    return index;
-  }
-
 }

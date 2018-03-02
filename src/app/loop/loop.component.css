@@ -1,10 +1,66 @@
-table.alternatingcolor tr:nth-child(even) {
+.tag_info_box{
+    position:fixed;
+    bottom:50px;
+    left:15px;
+    width:187px;
+    padding: .5em .5em .5em .5em;
+    border: 2px solid #33527b;
+    border-radius: 5px;
+    word-wrap: break-word;
+}
+
+.invisible {
+	background-color: white;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+}
+
+/* mostly from adit */
+.header_text {
+	vertical-align: middle;
+	font-size: larger;
+    font-weight: bold;
+}
+
+table {
+	width: auto;
+    background-color: #E5E6Ef;
+    margin-bottom: 1em;
+    margin-right: 1em;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+    border-collapse: collapse;
+    border-radius: 5px;
+}
+
+th {
+    text-align: left;
     background-color: #CBDBFF;
+    font-weight: bold;
+    font-style: normal;
+    color: black;
+    border-color: #666699;
+    border-width: 1px;
+    border-style: solid;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
 }
-table.alternatingcolor tr:nth-child(even) .datum {
-    background-color: #CBDBFF;
-}
-.datum {
-	border:none;
-	font-weight: normal;
-}
+
+td {
+    text-align: left;
+    background-color: #E5E6EF;
+    font-weight: normal;
+    font-style: normal;
+    color: black;
+    border-color: #666699;
+    border-width: 1px;
+    border-style: solid;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+} 

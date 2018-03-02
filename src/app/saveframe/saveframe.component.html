@@ -35,7 +35,7 @@
 		</ng-container>
 		</tbody>
 	</table>
-	<!-- <app-loop *ngFor='let loop of saveframe.loops' [loop]='loop' [showall]='showall'></app-loop> -->
+	<app-loop *ngFor='let loop of saveframe.loops' [loop]='loop'></app-loop>
 	
 	<div *ngIf='active_tag' class='tag_info_box'>
       <p><i>{{active_tag.fqtn}}</i></p>

@@ -16,7 +16,7 @@ export class Tag {
   schema: Schema;
   parent?: Object;
 
-  constructor(name: string, value: string, tag_prefix: string) {
+  constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
@@ -24,13 +24,16 @@ export class Tag {
       this.value = value;
     }
 
+    this.fqtn = tag_prefix + '.' + this.name;
+    this.schema = schema;
+    this.schema_values = this.schema.getTag(this.fqtn);
+    this.enums = this.schema.enumerations[this.fqtn];
+
     /* Will be updated with updateTagStatus */
     this.valid = true;
     this.validation_message = null;
-    this.schema_values = {};
-    this.fqtn = tag_prefix + '.' + this.name;
-    this.enums = [];
     this.data_type = '';
+    this.interface_type = '';
   }
 
   toJSON(key) {
@@ -51,9 +54,6 @@ export class Tag {
   }
 
   updateTagStatus() {
-    this.schema_values = this.schema.getTag(this.fqtn);
-    this.enums = this.schema.enumerations[this.fqtn];
-
     const dt = this.schema_values['BMRB data type'];
 
     if (dt === 'yes_no') {
@@ -115,7 +115,7 @@ export class SaveframeTag extends Tag {
   parent: Saveframe;
 
   constructor(name: string, value: string, parent: Saveframe) {
-     super(name, value, parent.tag_prefix);
+     super(name, value, parent.tag_prefix, parent.parent.schema);
      this.parent = parent;
      this.schema = this.parent.parent.schema;
   }
@@ -124,7 +124,7 @@ export class SaveframeTag extends Tag {
 export class LoopTag extends Tag {
   parent: Loop;
   constructor(name: string, value: string, parent: Loop) {
-     super(name, value, parent.category);
+     super(name, value, parent.category, parent.parent.parent.schema);
      this.parent = parent;
      this.schema = this.parent.parent.parent.schema;
   }
