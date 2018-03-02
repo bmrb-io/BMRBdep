@@ -1,18 +1,4 @@
 <div style="float: right; width:80%">
-
-	<div hidden="hidden">
-	<h3>Saveframe Loader</h3>
-      <input class="clean_text" [(ngModel)]='entry.entry_id' type="text">
-      <input class="clean_text" [(ngModel)]='saveframe_description' type="text">
-      <select [(ngModel)]="load_type">
-        <option value="category">Category</option>
-        <option value="name">Name</option>
-	  </select>
-      <a class="fake_button" [routerLink]="['/entry', entry, 'saveframe', saveframe_description, load_type]">Load</a>
-      <a class="fake_button" (click)='download(entry + "_" + saveframe_description + ".str", saveframes)'>Download Full Entry</a>
-    </div>
-	
-
 	<h1>Saveframe Viewer</h1>
 	<p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
    	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showall]='showall' (myEvent)="reloadSaveframes(entry, saveframe_description)"></app-saveframe>

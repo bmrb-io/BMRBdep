@@ -37,16 +37,3 @@
 .highlight:hover {
     background-color: #ededed !important;
 }
-
-.no_dict {
-    background-color: brown;
-}
-.contains_unicode {
-    background-color: yellow;
-}
-.illegal_null {
-    background-color: orange;
-}
-.warn {
-    background-color:red;
-}
