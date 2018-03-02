@@ -28,10 +28,10 @@ function deepCopy(obj) {
     return copy;
   }
 
-  if (typeof(obj) === 'function'){
+  if (typeof(obj) === 'function') {
     return obj;
   }
-  
+
   // Handle Object
   if (obj instanceof Object) {
     copy = {};
@@ -170,7 +170,7 @@ export class Saveframe {
 
    updateTags() {
      for (const tag of this.tags) {
-       tag.updateTagStatus(this.tag_prefix);
+       tag.updateTagStatus();
      }
    }
 }

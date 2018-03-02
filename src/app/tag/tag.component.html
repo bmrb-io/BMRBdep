@@ -1,0 +1,31 @@
+<input *ngIf="tag.interface_type == 'standard'"
+       [(ngModel)]="tag.value"
+       [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+       [placeholder]="tag.schema_values['default value']"
+       (change)="validateTag(tag)"
+       [type]="tag.data_type">
+
+<select *ngIf="tag.interface_type == 'closed_enum'"
+        [(ngModel)]="tag.value"
+        [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+        (change)="validateTag(tag)">
+ <option *ngFor="let val of tag.enums[2]" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
+</select>
+
+<ng-container *ngIf="tag.interface_type == 'open_enum'" >
+   <input [attr.list]="tag.fqtn" 
+          [(ngModel)]="tag.value"
+          [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+          [placeholder]="tag.schema_values['default value']"
+          (change)="validateTag(tag)"
+          />
+  <datalist [id]="tag.fqtn"><option *ngFor="let val of tag.enums[2]" [value]="val"></datalist>
+</ng-container>
+  
+<ng-container *ngIf="tag.interface_type == 'yes_no'" >
+  <div [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+       (change)="validateTag(tag)">
+  	 Yes<input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'yes'">
+	     No<input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'no'">
+	     </div>
+</ng-container>

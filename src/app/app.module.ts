@@ -21,6 +21,7 @@ import { EntryComponent } from './entry/entry.component';
 // For the view only mode
 import { LoopViewComponent } from './view_mode/loop/loop-view.component';
 import { SaveframeViewComponent } from './view_mode/saveframe/saveframe-view.component';
+import { TagComponent } from './tag/tag.component';
 
 
 
@@ -34,6 +35,7 @@ import { SaveframeViewComponent } from './view_mode/saveframe/saveframe-view.com
     EntryComponent,
     LoopViewComponent,
     SaveframeViewComponent,
+    TagComponent,
   ],
   imports: [
     BrowserModule,

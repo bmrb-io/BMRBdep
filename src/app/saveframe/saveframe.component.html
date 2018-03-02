@@ -25,40 +25,12 @@
 	      	    (mouseenter)="active_tag = sftag"
 	      		(mouseleave)="active_tag = null" style="height: 2em;">
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
-	      		    [innerHTML]="sftag.schema_values['Prompt']"
-	      		    [title]="sftag.schema_values['Interface']"></td>
-	      		    
-	      		<td class='input_td'>
-	      		  <input *ngIf="sftag.interface_type == 'standard'"
-	      		         [(ngModel)]="sftag.value"
-	      		         [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
-	      		         [placeholder]="sftag.schema_values['default value']"
-	      		         (change)="validateTag(sftag)"
-	      		         [type]="sftag.data_type">
- 
-	      		  <select *ngIf="sftag.interface_type == 'closed_enum'"
-	      		          [(ngModel)]="sftag.value"
-	      		          [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
-	      		          (change)="validateTag(sftag)">
-			        <option *ngFor="let val of sftag.enums[2]" [value]="val" [ngClass]="{'type_error': !sftag.valid}">{{val}}</option>
-			      </select>
-			      <ng-container *ngIf="sftag.interface_type == 'open_enum'" >
-				    <input [attr.list]="sftag.fqtn" 
-				           [(ngModel)]="sftag.value"
-				           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
-				           [placeholder]="sftag.schema_values['default value']"
-				           (change)="validateTag(sftag)"
-				           />
-					  <datalist [id]="sftag.fqtn"><option *ngFor="let val of sftag.enums[2]" [value]="val"></datalist>
-				   </ng-container>
-				   <ng-container *ngIf="sftag.interface_type == 'yes_no'" >
-				   <div [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
-				        (change)="validateTag(sftag)">
-				   	 Yes<input type="radio" [name]='sftag.fqtn' [(ngModel)]="sftag.value" [value]="'yes'">
-  				     No<input type="radio" [name]='sftag.fqtn' [(ngModel)]="sftag.value" [value]="'no'">
-  				     </div>
-				   </ng-container>
-		      </td>
+				  	[innerHTML]="sftag.schema_values['Prompt']"
+				  	[title]="sftag.schema_values['Interface']">
+				</td>
+				<td class='invisible'>
+		        	<app-tag [tag]='sftag'></app-tag>
+		        </td>
 			</tr>
 		</ng-container>
 		</tbody>

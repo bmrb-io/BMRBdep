@@ -1,0 +1,26 @@
+.type_error {
+	background-color: #ffa4a4 !important;
+}
+
+.sf_input {
+	width: 100%;
+	padding: 10px;
+    margin: 0px 0px 0px 0px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border-width: 0px;
+    background-color: white;
+}
+
+.sf_input:hover {
+	border-width: 1px !important;
+	border-color: #33527b !important;
+	border-style: solid !important;
+}
+
+.invisible {
+	background-color: white;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+}

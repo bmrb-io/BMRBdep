@@ -2,7 +2,7 @@ import { Saveframe } from './saveframe';
 import { Loop } from './loop';
 import { Schema } from './schema';
 
-class Tag {
+export class Tag {
   name: string;
   value: string;
 
@@ -16,7 +16,7 @@ class Tag {
   schema: Schema;
   parent?: Object;
 
-  constructor(name: string, value: string) {
+  constructor(name: string, value: string, tag_prefix: string) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
@@ -28,7 +28,7 @@ class Tag {
     this.valid = true;
     this.validation_message = null;
     this.schema_values = {};
-    this.fqtn = '';
+    this.fqtn = tag_prefix + '.' + this.name;
     this.enums = [];
     this.data_type = '';
   }
@@ -50,8 +50,7 @@ class Tag {
     return cloneObj;
   }
 
-  updateTagStatus(tag_prefix) {
-    this.fqtn = tag_prefix + '.' + this.name;
+  updateTagStatus() {
     this.schema_values = this.schema.getTag(this.fqtn);
     this.enums = this.schema.enumerations[this.fqtn];
 
@@ -116,7 +115,7 @@ export class SaveframeTag extends Tag {
   parent: Saveframe;
 
   constructor(name: string, value: string, parent: Saveframe) {
-     super(name, value);
+     super(name, value, parent.tag_prefix);
      this.parent = parent;
      this.schema = this.parent.parent.schema;
   }
@@ -125,7 +124,7 @@ export class SaveframeTag extends Tag {
 export class LoopTag extends Tag {
   parent: Loop;
   constructor(name: string, value: string, parent: Loop) {
-     super(name, value);
+     super(name, value, parent.category);
      this.parent = parent;
      this.schema = this.parent.parent.parent.schema;
   }

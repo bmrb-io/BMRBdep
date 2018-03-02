@@ -43,6 +43,7 @@ export class ApiService {
       const entry_url = `http://manowar:8000/get_deposition/${entry_id}`;
       return this.http.get(entry_url).map(json_data => {
          this.cached_entry = entryFromJSON(json_data);
+         // TODO: This probably won't be necessary later
          this.cached_entry.entry_id = entry_id;
          console.log('Loaded entry from API.');
          this.saveLocal(true);
