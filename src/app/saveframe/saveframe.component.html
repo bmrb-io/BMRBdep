@@ -70,6 +70,7 @@
       <p><b>{{active_tag.schema_values['Interface']}}</b></p>
       <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>
       <p> Null allowed: {{active_tag.schema_values['Nullable']}}</p>
+      <p *ngIf='active_tag.validation_message' [class]="'mandatory'">{{active_tag.validation_message}}</p> 
     </div>
 </div>
 	

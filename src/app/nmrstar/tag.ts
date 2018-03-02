@@ -7,6 +7,7 @@ class Tag {
   value: string;
 
   valid: boolean;
+  validation_message: string;
   data_type: string;
   interface_type: string;
   schema_values: {};
@@ -25,6 +26,7 @@ class Tag {
 
     /* Will be updated with updateTagStatus */
     this.valid = true;
+    this.validation_message = null;
     this.schema_values = {};
     this.fqtn = '';
     this.enums = [];
@@ -43,6 +45,7 @@ class Tag {
     delete cloneObj.interface_type;
     delete cloneObj.data_type;
     delete cloneObj.schema;
+    delete cloneObj.validation_message;
 
     return cloneObj;
   }
@@ -82,19 +85,26 @@ class Tag {
     if (this.data_type === undefined) {
       this.data_type = 'string';
     }
-    
+
      /* Check that the tag is valid
      * 1) Matches the data type regex
      * 2) Is not null unless null is allowed
      * 3) Is from the enum list if it a mandatory enum
      */
     this.valid = this.schema.checkDatatype(this.fqtn, this.value);
+    if (this.valid) {
+      this.validation_message = null;
+    } else {
+      this.validation_message = 'Tag does not match specified data type.';
+    }
     if ((!this.schema_values['Nullable']) && (!this.value)) {
       this.valid = false;
+      this.validation_message = 'Tag must have a value.';
     }
     if (this.interface_type === 'closed_enum') {
       if (this.enums[2].indexOf(this.value) < 0) {
         this.valid = false;
+        this.validation_message = 'Tag does not match one of the allowed options.';
       }
     }
   }
