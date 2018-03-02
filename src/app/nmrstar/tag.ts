@@ -1,5 +1,6 @@
 import { Saveframe } from './saveframe';
 import { Loop } from './loop';
+import { Schema } from './schema';
 
 class Tag {
   name: string;
@@ -7,9 +8,11 @@ class Tag {
 
   valid: boolean;
   data_type: string;
+  interface_type: string;
   schema_values: {};
   fqtn: string;
   enums: string[];
+  schema: Schema;
   parent?: Object;
 
   constructor(name: string, value: string) {
@@ -37,43 +40,74 @@ class Tag {
     delete cloneObj.fqtn;
     delete cloneObj.enums;
     delete cloneObj.parent;
+    delete cloneObj.interface_type;
+    delete cloneObj.data_type;
+    delete cloneObj.schema;
 
     return cloneObj;
+  }
+
+  updateTagStatus(tag_prefix) {
+    this.fqtn = tag_prefix + '.' + this.name;
+    this.schema_values = this.schema.getTag(this.fqtn);
+    this.enums = this.schema.enumerations[this.fqtn];
+
+    const dt = this.schema_values['BMRB data type'];
+
+    if (dt === 'yes_no') {
+      this.interface_type = 'yes_no';
+    } else {
+      if (this.enums) {
+        // There are enums, determine which type
+        if (this.enums[1] === 'Y') {
+          if (this.enums[0] === 'Y') {
+            this.interface_type = 'closed_enum';
+          } else if (this.enums[0] === 'N') {
+            this.interface_type = 'open_enum';
+          }
+        // Enum list exists but not open or closed!?
+        } else {
+          console.log('enum list but no ' + this.enums, this);
+        }
+      } else {
+        this.interface_type = 'standard';
+      }
+    }
+
+    // If this is a standard 'input' element, determine the data type
+    const dtmap = {'int': 'number', 'yyyy-mm-dd': 'date',
+                   'yyyy-mm-dd:hh:mm': 'datetime-local',
+                   'email': 'email', 'fax': 'tel', 'phone': 'tel'};
+    this.data_type = dtmap[dt];
+    if (this.data_type === undefined) {
+      this.data_type = 'string';
+    }
+    
+     /* Check that the tag is valid
+     * 1) Matches the data type regex
+     * 2) Is not null unless null is allowed
+     * 3) Is from the enum list if it a mandatory enum
+     */
+    this.valid = this.schema.checkDatatype(this.fqtn, this.value);
+    if ((!this.schema_values['Nullable']) && (!this.value)) {
+      this.valid = false;
+    }
+    if (this.interface_type === 'closed_enum') {
+      if (this.enums[2].indexOf(this.value) < 0) {
+        this.valid = false;
+      }
+    }
   }
 }
 
 export class SaveframeTag extends Tag {
   parent: Saveframe;
+
   constructor(name: string, value: string, parent: Saveframe) {
      super(name, value);
      this.parent = parent;
+     this.schema = this.parent.parent.schema;
   }
-
-  updateTagStatus(tag_prefix) {
-    this.fqtn = tag_prefix + '.' + this.name;
-    this.schema_values = this.parent.parent.schema.getTag(this.fqtn);
-    this.enums = this.parent.parent.schema.enumerations[this.fqtn];
-
-    this.valid = this.parent.parent.schema.checkDatatype(this.fqtn, this.value);
-    if ((!this.schema_values['Nullable']) && (!this.value)) {
-      this.valid = false;
-    }
-
-    const dt = this.schema_values['BMRB data type'];
-    this.data_type = 'string';
-    if (dt === 'int') {
-      this.data_type = 'number';
-    } else if (dt === 'yyyy-mm-dd') {
-      this.data_type = 'date';
-    } else if (dt === 'yyyy-mm-dd:hh:mm') {
-      this.data_type = 'datetime-local';
-    } else if (dt === 'email') {
-      this.data_type = 'email';
-    } else if ((dt === 'fax') || (dt === 'phone')) {
-      this.data_type = 'tel';
-    }
-  }
-
 }
 
 export class LoopTag extends Tag {
@@ -81,14 +115,7 @@ export class LoopTag extends Tag {
   constructor(name: string, value: string, parent: Loop) {
      super(name, value);
      this.parent = parent;
+     this.schema = this.parent.parent.parent.schema;
   }
-
-  updateTagStatus(tag_prefix) {
-    this.fqtn = tag_prefix + '.' + this.name;
-    this.valid = this.parent.parent.parent.schema.checkDatatype(this.fqtn, this.value);
-    this.schema_values = this.parent.parent.parent.schema.getTag(this.fqtn);
-    this.enums = this.parent.parent.parent.schema.enumerations[this.fqtn];
-  }
-
 }
 

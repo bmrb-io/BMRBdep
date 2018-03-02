@@ -29,20 +29,20 @@
 	      		    [title]="sftag.schema_values['Interface']"></td>
 	      		    
 	      		<td class='input_td'>
-	      		  <input *ngIf="!sftag.enums"
+	      		  <input *ngIf="sftag.interface_type == 'standard'"
 	      		         [(ngModel)]="sftag.value"
 	      		         [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		         [placeholder]="sftag.schema_values['default value']"
 	      		         (change)="validateTag(sftag)"
 	      		         [type]="sftag.data_type">
  
-	      		  <select *ngIf="sftag.enums && sftag.enums[0] == 'Y' && sftag.enums[1] == 'Y'" 
+	      		  <select *ngIf="sftag.interface_type == 'closed_enum'"
 	      		          [(ngModel)]="sftag.value"
 	      		          [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
 	      		          (change)="validateTag(sftag)">
-			        <option *ngFor="let val of sftag.enums[2]" [value]="val">{{val}}</option>
+			        <option *ngFor="let val of sftag.enums[2]" [value]="val" [ngClass]="{'type_error': !sftag.valid}">{{val}}</option>
 			      </select>
-			      <ng-container *ngIf="sftag.enums && sftag.enums[0] == 'N' && sftag.enums[1] == 'Y' && sftag.enums[2]">
+			      <ng-container *ngIf="sftag.interface_type == 'open_enum'" >
 				    <input [attr.list]="sftag.fqtn" 
 				           [(ngModel)]="sftag.value"
 				           [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
@@ -50,6 +50,13 @@
 				           (change)="validateTag(sftag)"
 				           />
 					  <datalist [id]="sftag.fqtn"><option *ngFor="let val of sftag.enums[2]" [value]="val"></datalist>
+				   </ng-container>
+				   <ng-container *ngIf="sftag.interface_type == 'yes_no'" >
+				   <div [ngClass]="{'type_error': !sftag.valid, 'sf_input': true}"
+				        (change)="validateTag(sftag)">
+				   	 Yes<input type="radio" [name]='sftag.fqtn' [(ngModel)]="sftag.value" [value]="'yes'">
+  				     No<input type="radio" [name]='sftag.fqtn' [(ngModel)]="sftag.value" [value]="'no'">
+  				     </div>
 				   </ng-container>
 		      </td>
 			</tr>
