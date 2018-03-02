@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LoopComponent } from './loop.component';
+import { LoopViewComponent } from './loop.component';
 
 describe('LoopComponent', () => {
   let component: LoopComponent;

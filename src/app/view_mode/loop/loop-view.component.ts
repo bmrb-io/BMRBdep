@@ -3,12 +3,15 @@ import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loop-view',
-  templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.css']
+  templateUrl: './loop-view.component.html',
+  styleUrls: ['./loop-view.component.css']
 })
+
 export class LoopViewComponent implements OnInit {
   @Input() loop: Loop;
   @Input() showall: boolean;
+
+
 
   constructor() {}
 
