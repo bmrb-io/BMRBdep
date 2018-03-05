@@ -61,11 +61,9 @@ export class Loop {
     for (let r = 0; r < this.tags.length; r++) {
       this.schema_values.push(this.parent.parent.schema.getTag(this.category + '.' + this.tags[r]));
     }
-
-    // Check for rows of null data
-    // this.checkNull();
   }
 
+  // Creates a duplicate of this loop, or an empty loop of the same type
   duplicate(clear_values: boolean = false) {
     const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
@@ -79,7 +77,7 @@ export class Loop {
         }
       }
       new_loop.data.push(new_row);
-      // Just one row for data if cloning
+      // Just one row of null data if cloning
       if (clear_values) {
         return new_loop;
       }

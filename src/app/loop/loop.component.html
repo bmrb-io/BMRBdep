@@ -8,6 +8,11 @@
 	   </colgroup>
 		<thead>
 			<tr>
+			  <th colspan=3>
+				{{loop.data[0][0].schema_values['ADIT category view name']}}
+			  </th>
+			</tr>
+			<tr>
 			 <th style="border-collapse: collapse;"></th>
 			<ng-container *ngFor='let col of loop.tags; let c = index'>
 			  <th *ngIf="loop.schema_values[c]['User full view'] == 'Y'">{{loop.data[0][c].schema_values['Prompt']}}</th>
