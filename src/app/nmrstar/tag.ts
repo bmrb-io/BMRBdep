@@ -60,6 +60,8 @@ export class Tag {
 
     if (dt === 'yes_no') {
       this.interface_type = 'yes_no';
+    } else if (dt === 'text') {
+      this.interface_type = 'text';
     } else {
       if (this.enums) {
         // There are enums, determine which type

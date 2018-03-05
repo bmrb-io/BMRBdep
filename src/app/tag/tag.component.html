@@ -29,3 +29,11 @@
 	     No<input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'no'">
 	     </div>
 </ng-container>
+
+<ng-container *ngIf="tag.interface_type == 'text'" >
+  <textarea [(ngModel)]="tag.value"
+            [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+            [placeholder]="tag.schema_values['default value']"
+            (change)="validateTag(tag)"></textarea>
+
+</ng-container>
