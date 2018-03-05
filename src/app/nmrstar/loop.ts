@@ -53,7 +53,6 @@ export class Loop {
       const row = [];
       for (let c = 0; c < data[r].length; c++) {
         const new_tag = new LoopTag(this.tags[c], data[r][c], this);
-        new_tag.updateTagStatus();
         row.push(new_tag);
       }
       this.data.push(row);
@@ -67,9 +66,28 @@ export class Loop {
     // this.checkNull();
   }
 
-  duplicate() {
-    return new Loop('', [], [], this.parent);
+  duplicate(clear_values: boolean = false) {
+    const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);
+
+    for (let r = 0; r < this.data.length; r++) {
+      const new_row = [];
+      for (let c = 0; c < this.data[r].length; c++) {
+        if (clear_values) {
+          new_row.push(new LoopTag(this.data[r][c].name, null, new_loop));
+        } else {
+          new_row.push(new LoopTag(this.data[r][c].name, this.data[r][c].value, new_loop));
+        }
+      }
+      new_loop.data.push(new_row);
+      // Just one row for data if cloning
+      if (clear_values) {
+        return new_loop;
+      }
+    }
+
+    return new_loop;
   }
+
 
   checkNull() {
     // Go through the columns

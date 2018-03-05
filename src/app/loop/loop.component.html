@@ -1,9 +1,14 @@
 <div>
 
 	<table style="width: 100%">
-   
+   		<colgroup>
+	      <col span="1" style="width: 2.5em;">
+	      <col span="1">
+	      <col span="1">
+	   </colgroup>
 		<thead>
 			<tr>
+			 <th style="border-collapse: collapse;"></th>
 			<ng-container *ngFor='let col of loop.tags; let c = index'>
 			  <th *ngIf="loop.schema_values[c]['User full view'] == 'Y'">{{loop.data[0][c].schema_values['Prompt']}}</th>
 			  </ng-container>
@@ -11,6 +16,7 @@
 		</thead>
 		<tbody>
 			<tr *ngFor="let row of loop.data; let r = index">
+			<td><a *ngIf="r>0" class="fake_button" (click)='deleteRow(r)'>-</a></td>
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.data[r][c].schema_values['User full view'] == 'Y'"
 			      (mouseenter)="active_tag = loop.data[r][c]"
@@ -20,8 +26,15 @@
 			  </td>
 			  </ng-container>
 			</tr>
+			<tr>
+				<td colspan=3>
+				  <a class="fake_button" (click)='addRow()'>+</a>
+				</td>
+			</tr>
+				
 		</tbody>
 	</table>
+	
 	
     <div *ngIf='active_tag' class='tag_info_box'>
       <p><i>{{active_tag.fqtn}}</i></p>

@@ -14,9 +14,9 @@
 }
 
 .sf_input:hover {
-	border-width: 1px !important;
-	border-color: #33527b !important;
-	border-style: solid !important;
+	border-width: 1px;
+	border-color: #33527b;
+	border-style: solid transparent;
 }
 
 .invisible {

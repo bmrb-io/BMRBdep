@@ -79,7 +79,6 @@ export function entryFromJSON(jdata: Object): Entry {
 
     for (let i = 0; i < jdata['saveframes'].length; i++) {
       const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
-      new_frame.updateTags();
       entry.addSaveframe(new_frame);
     }
 

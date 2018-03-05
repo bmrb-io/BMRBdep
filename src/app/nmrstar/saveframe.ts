@@ -89,8 +89,9 @@ export class Saveframe {
     // Copy the loops
     const loop_copy: Loop[] = [];
     for (const loop of this.loops) {
-      loop_copy.push(loop.duplicate());
+      loop_copy.push(loop.duplicate(clear_values));
     }
+    new_frame.loops = loop_copy;
 
     const my_pos = this.parent.saveframes.indexOf(this);
     this.parent.addSaveframe(new_frame, my_pos + 1);
@@ -168,11 +169,6 @@ export class Saveframe {
     return ret_string + 'save_\n';
   }
 
-   updateTags() {
-     for (const tag of this.tags) {
-       tag.updateTagStatus();
-     }
-   }
 }
 
 export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {

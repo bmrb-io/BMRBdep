@@ -19,5 +19,5 @@ export class TagComponent implements OnInit {
     tag.updateTagStatus();
     this.api.saveLocal();
   }
-  
+
 }

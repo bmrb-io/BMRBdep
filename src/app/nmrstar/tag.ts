@@ -34,6 +34,8 @@ export class Tag {
     this.validation_message = null;
     this.data_type = '';
     this.interface_type = '';
+
+    this.updateTagStatus();
   }
 
   toJSON(key) {
@@ -90,23 +92,22 @@ export class Tag {
      * 2) Is not null unless null is allowed
      * 3) Is from the enum list if it a mandatory enum
      */
-    this.valid = this.schema.checkDatatype(this.fqtn, this.value);
-    if (this.valid) {
-      this.validation_message = null;
 
-      // Only continue validating if we haven't yet invalidated
-      if ((!this.schema_values['Nullable']) && (!this.value)) {
-        this.valid = false;
-        this.validation_message = 'Tag must have a value.';
-      }
-      if (this.valid && this.interface_type === 'closed_enum') {
+    this.valid = true;
+    // Check null
+    if ((!this.schema_values['Nullable']) && (!this.value)) {
+      this.valid = false;
+      this.validation_message = 'Tag must have a value.';
+    // Check data type
+    } else if (!this.schema.checkDatatype(this.fqtn, this.value)) {
+      this.valid = false;
+      this.validation_message = 'Tag does not match specified data type.';
+    // Check enums are matched
+    } else if (this.interface_type === 'closed_enum') {
         if (this.enums[2].indexOf(this.value) < 0) {
           this.valid = false;
           this.validation_message = 'Tag does not match one of the allowed options.';
-        }
       }
-    } else {
-      this.validation_message = 'Tag does not match specified data type.';
     }
   }
 }
@@ -117,7 +118,6 @@ export class SaveframeTag extends Tag {
   constructor(name: string, value: string, parent: Saveframe) {
      super(name, value, parent.tag_prefix, parent.parent.schema);
      this.parent = parent;
-     this.schema = this.parent.parent.schema;
   }
 }
 
@@ -126,7 +126,6 @@ export class LoopTag extends Tag {
   constructor(name: string, value: string, parent: Loop) {
      super(name, value, parent.category, parent.parent.parent.schema);
      this.parent = parent;
-     this.schema = this.parent.parent.parent.schema;
   }
 }
 

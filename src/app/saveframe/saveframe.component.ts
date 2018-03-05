@@ -20,7 +20,6 @@ export class SaveframeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.saveframe.updateTags();
   }
 
   tag(tag: SaveframeTag) {
