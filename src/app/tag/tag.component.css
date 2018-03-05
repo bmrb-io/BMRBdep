@@ -5,7 +5,6 @@
 .sf_input {
 	width: 100%;
 	padding: 10px;
-    margin: 0px 0px 0px 0px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -14,13 +13,12 @@
 }
 
 .sf_input:hover {
-	border-width: 1px;
-	border-color: #33527b;
-	border-style: solid transparent;
+	outline: #33527b solid 1px;
 }
 
 .invisible {
 	background-color: white;
 	padding: 0px 0px 0px 0px;
 	margin: 0px 0px 0px 0px;
+	border: 0px;
 }

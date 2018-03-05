@@ -10,6 +10,7 @@ export class Schema {
   enumerations: {};
   data_types = {};
   overrides: string[][];
+  override_dict = {};
 
   /* Calculated during construction */
   schema: TagDataMap;
@@ -23,6 +24,7 @@ export class Schema {
     delete cloneObj.schema;
     delete cloneObj.category_order;
     delete cloneObj.tag_order;
+    delete cloneObj.override_dict;
 
     /* If the entry was embedded in something else...
     if (key) {
@@ -43,6 +45,7 @@ export class Schema {
     this.category_order = [];
     this.tag_order = [];
     this.schema = {};
+    this.override_dict = {};
 
     if (!this.headers) {
       return;
@@ -64,6 +67,13 @@ export class Schema {
       }
       this.schema[schem_tag[tag_col]] = tt;
     }
+
+    for (const or of this.overrides) {
+      if (!this.override_dict[or[0]]) {
+        this.override_dict[or[0]] = [];
+      }
+      this.override_dict[or[0]].push(or.slice(1));
+    }
   }
 
   getTag(tag_name: string) {
@@ -79,17 +89,4 @@ export class Schema {
     }
   }
 
-  /* Returns true if data is valid. */
-  checkDatatype(tag_name: string, tag_value: string): boolean {
-    const tag_datatype = this.getValue(tag_name, 'BMRB data type');
-    const regexp = new RegExp(this.data_types[tag_datatype]);
-    let regex_pass = regexp.test(tag_value);
-    // Fail the check if the value is null
-    if (!this.getValue(tag_name, 'Nullable')) {
-      if (tag_value === null) {
-        regex_pass = false;
-      }
-    }
-    return regex_pass;
-  }
 }

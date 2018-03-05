@@ -3,7 +3,7 @@
 	<p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
 	<a class="fake_button line" *ngIf="prev_sf" [routerLink]="['/entry', entry.entry_id, 'saveframe', prev_sf, 'category']">Previous Category</a>  
 	<a class="fake_button line" *ngIf="next_sf" [routerLink]="['/entry', entry.entry_id, 'saveframe', next_sf, 'category']">Next Category</a>
-   	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showall]='showall' (myEvent)="reloadSaveframes(entry, saveframe_description)"></app-saveframe>
+   	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showall]='showall' (sfReload)="reloadSaveframes(entry, saveframe_description)"></app-saveframe>
    	<a class="fake_button line" *ngIf="prev_sf" [routerLink]="['/entry', entry.entry_id, 'saveframe', prev_sf, 'category']">Previous Category</a>  
 	<a class="fake_button line" *ngIf="next_sf" [routerLink]="['/entry', entry.entry_id, 'saveframe', next_sf, 'category']">Next Category</a>
 </div>

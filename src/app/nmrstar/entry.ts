@@ -50,6 +50,39 @@ export class Entry {
     return result;
   }
 
+  getTagValue(fqtn: string) {
+    const split = fqtn.split('.');
+    const category = split[0];
+    const tag = split[1];
+
+    for (const sf of this.saveframes) {
+      // If the saveframe matches
+      if (sf.tag_prefix === category) {
+        for (const t of sf.tags) {
+          if (t.name === tag) {
+            return t.value;
+          }
+        }
+
+        // Check the loops
+        for (const l of sf.loops) {
+          if (l.category === category) {
+            for (let r = 0; r < l.data.length; r++) {
+              for (let c = 0; c < l.data[r].length; c++) {
+                if (l.data[r][c].name === tag) {
+                  return l.data[r][c].value;
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
+
+    return null;
+  }
+
   getSaveframeByName(sf_name: string): Saveframe {
     for (const sf of this.saveframes) {
       if (sf.name === sf_name) {
@@ -69,6 +102,14 @@ export class Entry {
     return return_list;
   }
 
+  refresh() {
+    for (const sf of this.saveframes) {
+      sf.refresh();
+      for (const l of sf.loops) {
+        l.refresh();
+      }
+    }
+  }
 }
 
 export function entryFromJSON(jdata: Object): Entry {

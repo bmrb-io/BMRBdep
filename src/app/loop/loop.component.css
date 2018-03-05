@@ -1,3 +1,7 @@
+.mandatory {
+	color: red;
+}
+
 .tag_info_box{
     position:fixed;
     bottom:50px;
@@ -11,8 +15,12 @@
 
 .invisible {
 	background-color: white;
-	padding: 0px 0px 0px 0px;
-	margin: 0px 0px 0px 0px;
+	padding: 1px;
+	margin: 0px;
+}
+
+.invalid {
+	background-color: #ffa4a4;
 }
 
 /* mostly from adit */

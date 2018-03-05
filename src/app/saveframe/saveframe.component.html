@@ -21,21 +21,23 @@
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="(sftag.schema_values['User full view'] == 'Y' || (showall && sftag.schema_values['User full view'] == 'N') || showall) && sftag.schema_values['Prompt'] != 'n/a'"
+	      	<tr *ngIf="sftag.display == 'Y' || (showall && sftag.display == 'N')"
 	      	    (mouseenter)="active_tag = sftag"
 	      		(mouseleave)="active_tag = null" style="height: 2em;">
 	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
 				  	[innerHTML]="sftag.schema_values['Prompt']"
 				  	[title]="sftag.schema_values['Interface']">
 				</td>
-				<td class='invisible'>
+				<td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
 		        	<app-tag [tag]='sftag'></app-tag>
 		        </td>
 			</tr>
 		</ng-container>
 		</tbody>
 	</table>
-	<app-loop *ngFor='let loop of saveframe.loops' [loop]='loop'></app-loop>
+	<ng-container *ngFor='let loop of saveframe.loops'>
+      <app-loop *ngIf='loop.display' [loop]='loop'></app-loop>
+	</ng-container>
 	
 	<div *ngIf='active_tag' class='tag_info_box'>
       <p><i>{{active_tag.fqtn}}</i></p>

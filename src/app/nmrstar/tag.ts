@@ -11,9 +11,10 @@ export class Tag {
   data_type: string;
   interface_type: string;
   schema_values: {};
+  overrides: string[][];
+  display: string;
   fqtn: string;
   enums: string[];
-  schema: Schema;
   parent?: Object;
 
   constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
@@ -25,16 +26,17 @@ export class Tag {
     }
 
     this.fqtn = tag_prefix + '.' + this.name;
-    this.schema = schema;
-    this.schema_values = this.schema.getTag(this.fqtn);
-    this.enums = this.schema.enumerations[this.fqtn];
+    this.schema_values = schema.getTag(this.fqtn);
+    this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
+    this.enums = schema.enumerations[this.fqtn];
+    this.overrides = schema.override_dict[this.fqtn];
+    this.display = this.schema_values['User full view'];
 
     /* Will be updated with updateTagStatus */
     this.valid = true;
     this.validation_message = null;
     this.data_type = '';
     this.interface_type = '';
-
     this.updateTagStatus();
   }
 
@@ -44,13 +46,14 @@ export class Tag {
 
     delete cloneObj.valid;
     delete cloneObj.schema_values;
+    delete cloneObj.overrides;
     delete cloneObj.fqtn;
     delete cloneObj.enums;
     delete cloneObj.parent;
     delete cloneObj.interface_type;
     delete cloneObj.data_type;
-    delete cloneObj.schema;
     delete cloneObj.validation_message;
+    delete cloneObj.display;
 
     return cloneObj;
   }
@@ -101,7 +104,7 @@ export class Tag {
       this.valid = false;
       this.validation_message = 'Tag must have a value.';
     // Check data type
-    } else if (!this.schema.checkDatatype(this.fqtn, this.value)) {
+    } else if (!this.schema_values['Regex'].test(this.value)) {
       this.valid = false;
       this.validation_message = 'Tag does not match specified data type.';
     // Check enums are matched
@@ -112,6 +115,10 @@ export class Tag {
       }
     }
   }
+
+  updateCascade() {
+    return null;
+  }
 }
 
 export class SaveframeTag extends Tag {
@@ -121,6 +128,38 @@ export class SaveframeTag extends Tag {
      super(name, value, parent.tag_prefix, parent.parent.schema);
      this.parent = parent;
   }
+
+  updateTagStatus() {
+    super.updateTagStatus();
+
+    if (!this.parent) { return; }
+    // Determine if this tag is being displayed
+    this.display = this.schema_values['User full view'];
+    if (!this.overrides) { return; }
+
+    // Check the overrides
+    for (const or of this.overrides) {
+      const ct_val = this.parent.parent.getTagValue(or[0]);
+      // console.log('Would set tag ' + this.fqtn + ' to ' + or[1] + ' if ' + or[0] + ' has value ' + or[2] + ' it has value ' + ct_val);
+
+      // For * just check if there is *a* value TODO: category based - check if existence of loop/sf
+      if (or[2] === '*') {
+        if (ct_val !== null) {
+          this.display = or[1];
+        }
+      } else {
+        // Check the regex
+        if (new RegExp('^' + or[2] + '$').test(ct_val)) {
+          this.display = or[1];
+// console.log('Set tag ' + this.fqtn + ' to ' + or[1] + ' because ' + or[0] + ' has value ' + or[2] + ' - it has value ' + ct_val);
+        }
+      }
+    }
+  }
+
+  updateCascade() {
+    this.parent.parent.refresh();
+  }
 }
 
 export class LoopTag extends Tag {
@@ -128,6 +167,22 @@ export class LoopTag extends Tag {
   constructor(name: string, value: string, parent: Loop) {
      super(name, value, parent.category, parent.parent.parent.schema);
      this.parent = parent;
+  }
+
+  updateTagStatus() {
+    super.updateTagStatus();
+
+    if (!this.parent) { return; }
+    // Determine if this tag is being displayed
+    this.display = this.schema_values['User full view'];
+    const or = this.overrides;
+    if (or) {
+      
+    }
+  }
+
+  updateCascade() {
+    this.parent.parent.parent.refresh();
   }
 }
 

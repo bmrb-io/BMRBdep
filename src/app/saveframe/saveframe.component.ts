@@ -12,7 +12,7 @@ import { SaveframeEditorComponent } from '../saveframe-editor/saveframe-editor.c
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @Input() showall: false;
-  @Output() myEvent = new EventEmitter<string>();
+  @Output() sfReload = new EventEmitter<string>();
   active_tag: SaveframeTag;
 
   constructor(public api: ApiService) {
@@ -20,6 +20,7 @@ export class SaveframeComponent implements OnInit {
   }
 
   ngOnInit() {
+    // window.e = this.saveframe.parent;
   }
 
   tag(tag: SaveframeTag) {
@@ -29,13 +30,14 @@ export class SaveframeComponent implements OnInit {
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
   processChange() {
-    this.myEvent.emit('reload');
+    this.sfReload.emit('reload');
     this.api.saveLocal();
   }
 
   validateTag(tag: SaveframeTag) {
     tag.updateTagStatus();
     this.api.saveLocal();
+    this.saveframe.refresh();
   }
 
 }

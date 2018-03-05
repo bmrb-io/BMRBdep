@@ -135,6 +135,12 @@ export class Saveframe {
     }
   }
 
+  refresh() {
+    for (const tag of this.tags) {
+      tag.updateTagStatus();
+    }
+  }
+
   print(): string {
     let width = 0;
 
