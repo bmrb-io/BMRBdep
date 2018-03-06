@@ -36,7 +36,7 @@
 		</tbody>
 	</table>
 	<ng-container *ngFor='let loop of saveframe.loops'>
-      <app-loop *ngIf='loop.display' [loop]='loop'></app-loop>
+      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && showall)" [loop]='loop' [showall]='showall'></app-loop>
 	</ng-container>
 	
 	<div *ngIf='active_tag' class='tag_info_box'>

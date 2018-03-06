@@ -10,6 +10,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class LoopComponent implements OnInit {
   @Input() loop: Loop;
+  @Input() showall: boolean;
   active_tag: LoopTag;
 
   constructor(public api: ApiService) {

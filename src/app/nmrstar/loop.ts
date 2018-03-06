@@ -9,7 +9,7 @@ export class Loop {
   parent: Saveframe;
   data_in_column: boolean[];
   schema_values: {}[];
-  display: boolean;
+  display: string;
 
   toJSON(key) {
     // Clone object to prevent accidentally performing modification on the original object
@@ -39,7 +39,7 @@ export class Loop {
     this.data_in_column = [];
     this.parent = parent;
     this.schema_values = [];
-    this.display = false;
+    this.display = 'H';
 
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {
@@ -57,7 +57,14 @@ export class Loop {
       for (let c = 0; c < data[r].length; c++) {
         const new_tag = new LoopTag(this.tags[c], data[r][c], this);
         if (['Y', 'N'].indexOf(new_tag.display) >= 0) {
-          this.display = true;
+          if (this.display === 'N') {
+            if (new_tag.display === 'Y') {
+              this.display = 'Y';
+            }
+          }
+          if (this.display === 'H') {
+            this.display = new_tag.display;
+          }
         }
         row.push(new_tag);
       }
@@ -109,12 +116,16 @@ export class Loop {
   }
 
   refresh() {
-    this.display = false;
+    this.display = 'H';
     for (let r = 0; r < this.data.length; r++) {
       for (let c = 0; c < this.data[r].length; c++) {
         this.data[r][c].updateTagStatus();
         if (this.data[r][c].display === 'Y' || this.data[r][c].display === 'N') {
-          this.display = true;
+          if (this.display === 'H') {
+            this.display = this.data[r][c].display;
+          } else if ((this.display === 'N') && (this.data[r][c].display === 'Y')) {
+            this.display = 'Y';
+          }
         }
       }
     }
