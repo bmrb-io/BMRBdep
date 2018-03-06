@@ -84,7 +84,7 @@ export class Tag {
     }
 
     // If this is a standard 'input' element, determine the data type
-    const dtmap = {'int': 'number', 'yyyy-mm-dd': 'date',
+    const dtmap = {'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
                    'yyyy-mm-dd:hh:mm': 'datetime-local',
                    'email': 'email', 'fax': 'tel', 'phone': 'tel'};
     this.data_type = dtmap[dt];

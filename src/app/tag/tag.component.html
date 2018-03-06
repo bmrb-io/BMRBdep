@@ -3,7 +3,8 @@
        [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
        [placeholder]="tag.schema_values['default value']"
        (change)="validateTag(tag)"
-       [type]="tag.data_type">
+       [type]="tag.data_type"
+       [attr.step]="tag.schema_values['BMRB data type'] == 'float' ? 'any' : null">
 
 <select *ngIf="tag.interface_type == 'closed_enum'"
         [(ngModel)]="tag.value"
