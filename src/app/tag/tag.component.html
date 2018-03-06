@@ -26,8 +26,8 @@
 <ng-container *ngIf="tag.interface_type == 'yes_no'" >
   <div [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
        (change)="validateTag(tag)">
-  	 Yes<input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'yes'">
-	     No<input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'no'">
+  	 <label for="yes">Yes</label><input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'yes'">
+	 <label for="no">No</label><input type="radio" [name]='tag.fqtn' [(ngModel)]="tag.value" [value]="'no'">
 	     </div>
 </ng-container>
 
