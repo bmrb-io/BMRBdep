@@ -114,7 +114,7 @@ export class Saveframe {
     const tag_prefix = this.tag_prefix;
 
     for (const tag of this.tags) {
-      const cleaned_tag = cleanValue(tag['value']);
+      const cleaned_tag = cleanValue(tag.value);
 
       if (cleaned_tag.indexOf('\n') === -1) {
           ret_string +=  sprintf(pstring, tag_prefix + '.' + tag.name, cleaned_tag);

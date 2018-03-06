@@ -183,12 +183,14 @@ export class Loop {
       // Figure out the maximum row lengths
       for (const row of this.data) {
         for (let n = 0; n < row.length; n++) {
-          // Don't count data that goes on its own line
-          if (row[n] && row[n].value.indexOf('\n') !== -1) {
-            continue;
-          }
-          if (row[n] && row[n].value.length + 3 > widths[n]) {
-              widths[n] = row[n].value.length + 3;
+          if (row[n] && row[n].value) {
+            // Don't count data that goes on its own line
+            if (row[n].value.indexOf('\n') !== -1) {
+              continue;
+            }
+            if (row[n].value.length + 3 > widths[n]) {
+                widths[n] = row[n].value.length + 3;
+            }
           }
         }
       }
@@ -202,7 +204,7 @@ export class Loop {
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
-            let datum_copy = cleanValue(row[n]);
+            let datum_copy = cleanValue(row[n].value);
             if (datum_copy.indexOf('\n') !== -1) {
                 datum_copy = sprintf('\n;\n%s;\n', datum_copy);
             }
