@@ -9,6 +9,7 @@ import { Tag } from '../nmrstar/tag';
 })
 export class TagComponent implements OnInit {
   @Input() tag: Tag;
+  @Input() unique_identifier: string;
 
   constructor(public api: ApiService) { }
 

@@ -52,10 +52,7 @@ th {
     border-color: #666699;
     border-width: 1px;
     border-style: solid;
-    padding-top: 0;
-    padding-bottom: 0;
-    padding-left: 0.25em;
-    padding-right: 0.25em;
+    padding: .5em;
 }
 
 td {

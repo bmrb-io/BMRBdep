@@ -26,7 +26,7 @@
 			      (mouseenter)="active_tag = loop.data[r][c]"
 	      		  (mouseleave)="active_tag = null"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
-			    <app-tag [tag]='loop.data[r][c]'></app-tag>
+			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r"></app-tag>
 			  </td>
 			  </ng-container>
 			</tr>

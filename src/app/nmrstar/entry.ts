@@ -123,5 +123,6 @@ export function entryFromJSON(jdata: Object): Entry {
       entry.addSaveframe(new_frame);
     }
 
+  entry.refresh();
   return entry;
 }
