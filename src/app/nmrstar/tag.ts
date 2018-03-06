@@ -73,6 +73,8 @@ export class Tag {
             this.interface_type = 'closed_enum';
           } else if (this.enums[0] === 'N') {
             this.interface_type = 'open_enum';
+          } else {
+            console.log('No enum spec for tag: ' + this.fqtn);
           }
         // Enum list exists but not open or closed!?
         } else {
@@ -99,10 +101,12 @@ export class Tag {
      */
 
     this.valid = true;
-    // Check null
-    if ((!this.schema_values['Nullable']) && (!this.value)) {
-      this.valid = false;
-      this.validation_message = 'Tag must have a value.';
+    // If null, make sure that null is allowed - no need to check regex.
+    if (!this.value) {
+      if (!this.schema_values['Nullable']) {
+        this.valid = false;
+        this.validation_message = 'Tag must have a value.';
+      }
     // Check data type
     } else if (!this.schema_values['Regex'].test(this.value)) {
       this.valid = false;
