@@ -33,11 +33,11 @@ export class Saveframe {
     // Copy the tags
     const tag_copy: SaveframeTag[] = [];
     for (const tag of this.tags) {
-      if (clear_values) {
-        tag_copy.push(new SaveframeTag(tag.name, null, new_frame));
-      } else {
-        tag_copy.push(new SaveframeTag(tag.name, tag.value, new_frame));
+      let val = clear_values ? null : tag.value;
+      if (!clear_values && tag.name === 'Sf_framecode') {
+        val = new_frame.name;
       }
+      tag_copy.push(new SaveframeTag(tag.name, val, new_frame));
     }
     new_frame.tags = tag_copy;
 

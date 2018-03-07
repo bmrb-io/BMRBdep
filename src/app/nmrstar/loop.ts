@@ -83,11 +83,8 @@ export class Loop {
     for (let r = 0; r < this.data.length; r++) {
       const new_row = [];
       for (let c = 0; c < this.data[r].length; c++) {
-        if (clear_values) {
-          new_row.push(new LoopTag(this.data[r][c].name, null, new_loop));
-        } else {
-          new_row.push(new LoopTag(this.data[r][c].name, this.data[r][c].value, new_loop));
-        }
+        const val = clear_values ? null : this.data[r][c].value;
+        new_row.push(new LoopTag(this.data[r][c].name, val, new_loop));
       }
       new_loop.data.push(new_row);
       // Just one row of null data if cloning
