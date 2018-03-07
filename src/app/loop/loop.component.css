@@ -1,12 +1,14 @@
+
+
 .mandatory {
 	color: red;
 }
 
 .tag_info_box{
     position:fixed;
-    bottom:50px;
-    left:15px;
-    width:187px;
+    top:7em;
+    left:1em;
+    max-width:13em;
     padding: .5em .5em .5em .5em;
     border: 2px solid #33527b;
     border-radius: 5px;
@@ -31,14 +33,13 @@
 }
 
 table {
-	width: auto;
+	width: 100%;
     background-color: #E5E6Ef;
     margin-bottom: 1em;
     margin-right: 1em;
-    padding-top: 0;
-    padding-bottom: 0;
-    padding-left: 0.25em;
-    padding-right: 0.25em;
+    margin-left: 1em;
+    
+    padding: 0em .25em 0em .25em;
     border-collapse: collapse;
     border-radius: 5px;
 }
@@ -69,3 +70,8 @@ td {
     padding-left: 0.25em;
     padding-right: 0.25em;
 } 
+
+loop { 
+	padding-left: 1em !important;
+	width: 100% !important;
+}

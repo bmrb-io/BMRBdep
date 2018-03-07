@@ -7,16 +7,15 @@
 
     <body>
         <header>
-            <h1>InstantDep</h1>
+            <h1 class="nopad">InstantDep</h1>
+            <p class="nopad">
+              <a class="fake_button" routerLink="/">Home</a>
+              <a class="fake_button" [routerLink]="['entry', '34ba9bf6ddba38596601aa12d03c62b7']">Full Submission View</a>
+              <a class="fake_button" [routerLink]="['entry', '34ba9bf6ddba38596601aa12d03c62b7', 'saveframe', 'entry_interview', 'category']">Section View</a>
+            </p>
         </header>
 
-        <div class="details_box" style="float: left">
-            <h3>Links</h3>
-            <p><a class="fake_button" routerLink="/">Home</a></p>
-            <p><a class="fake_button" [routerLink]="['entry', '34ba9bf6ddba38596601aa12d03c62b7']">Full Submission View</a></p>
-            <p><a class="fake_button" [routerLink]="['entry', '34ba9bf6ddba38596601aa12d03c62b7', 'saveframe', 'entry_interview', 'category']">Section View</a></p>
-        </div>
-        <div style="width: 100%">
+        <div>
 			<router-outlet></router-outlet>
 		</div>
     </body>

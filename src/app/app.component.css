@@ -103,6 +103,12 @@ header {
      -khtml-border-radius: 5px 5px 5px 5px;
        -moz-border-radius: 5px 5px 5px 5px;
             border-radius: 5px 5px 5px 5px;
+    max-height: 5em;
+}
+
+.nopad {
+	margin: .25em;
+	padding: 0em;
 }
 
 /* Original */
