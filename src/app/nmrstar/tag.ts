@@ -75,6 +75,7 @@ export class Tag {
             this.interface_type = 'open_enum';
           } else {
             console.log('No enum spec for tag: ' + this.fqtn);
+            this.interface_type = 'open_enum';
           }
         // Enum list exists but not open or closed!?
         } else {
