@@ -1,3 +1,4 @@
+<app-treeview [entry]="entry" [active]="'entry'"></app-treeview>
 <div style="margin-top: 3em; float: right; width: 87%">
 	<a class="fake_button line" (click)='download(entry.entry_id + ".str", entry)'>Download Entry {{entry.entry_id}}</a>
 	<ng-container *ngFor='let sf of entry.saveframes'>

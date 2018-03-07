@@ -1,0 +1,38 @@
+.menu_item {
+	padding-left: .5em;
+}
+
+.nav_link {
+	color: #333333;
+    text-decoration:none;
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #C8C8C8;
+    padding: .1em;
+    margin: .1em;
+    background-color:#ededed;
+    max-width: 12em;
+}
+
+.nav_link:hover {
+    box-shadow: 0 0 2px #666666 inset;
+    border: 1px solid #666666;
+    outline: none;
+}
+
+
+.tree_box {
+    position:fixed;
+    top:7em;
+    left:1em;
+    width:13em;
+    height: 30em;
+    padding: .5em;
+    border: 2px solid #33527b;
+    border-radius: 5px;
+    word-wrap: break-word;
+}
+
+.active {
+	font-weight: bold;
+}

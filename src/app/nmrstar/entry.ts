@@ -5,16 +5,20 @@ export class Entry {
   entry_id: string;
   saveframes: Saveframe[];
   schema: Schema;
+  categories: string[];
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
     this.entry_id = data_name;
     this.saveframes = [];
+
+    this.updateCategories();
   }
 
   toJSON(key) {
     const cloneObj = { ...this as Entry };
 
     delete cloneObj.schema;
+    delete cloneObj.categories;
     return cloneObj;
   }
 
@@ -31,12 +35,25 @@ export class Entry {
     } else {
       this.saveframes.splice(position, 0, saveframe);
     }
+
+    this.updateCategories();
   }
 
   removeSaveframe(saveframe: Saveframe) {
     const index = this.saveframes.indexOf(saveframe, 0);
     if (index > -1) {
        this.saveframes.splice(index, 1);
+    }
+
+    this.updateCategories();
+  }
+
+  updateCategories() {
+    this.categories = [];
+    for (const sf of this.saveframes) {
+      if (this.categories.indexOf(sf.category) < 0) {
+        this.categories.push(sf.category);
+      }
     }
   }
 
