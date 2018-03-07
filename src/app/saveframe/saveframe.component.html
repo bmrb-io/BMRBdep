@@ -24,7 +24,7 @@
 	      	<tr *ngIf="sftag.display == 'Y' || (showall && sftag.display == 'N')"
 	      	    (mouseenter)="active_tag = sftag"
 	      		(mouseleave)="active_tag = null" style="height: 2em;">
-	      		<td [ngClass]="{'mandatory': sftag.schema_values['User full view'] == 'Y', 'tag_description': true}"
+	      		<td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
 				  	[innerHTML]="sftag.schema_values['Prompt']"
 				  	[title]="sftag.schema_values['Interface']">
 				</td>
