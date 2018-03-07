@@ -14,7 +14,9 @@
 			 <th style="border-collapse: collapse;"></th>
 			<ng-container *ngFor='let col of loop.tags; let c = index'>
 			  <th *ngIf="loop.schema_values[c]['User full view'] == 'Y' || (loop.schema_values[c]['User full view'] == 'N' && showall)"
-			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y'}">{{loop.data[0][c].schema_values['Prompt']}}</th>
+			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y'}"
+			      (mouseenter)="active_tag = loop.data[0][c]"
+	      		  (mouseleave)="active_tag = null">{{loop.data[0][c].schema_values['Prompt']}}</th>
 			  </ng-container>
 			</tr>
 		</thead>
