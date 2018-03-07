@@ -42,11 +42,11 @@ export class Saveframe {
     new_frame.tags = tag_copy;
 
     // Copy the loops
-    const loop_copy: Loop[] = [];
     for (const loop of this.loops) {
-      loop_copy.push(loop.duplicate(clear_values));
+      const nl = loop.duplicate(clear_values);
+      nl.refresh();
+      new_frame.addLoop(nl);
     }
-    new_frame.loops = loop_copy;
 
     const my_pos = this.parent.saveframes.indexOf(this);
     this.parent.addSaveframe(new_frame, my_pos + 1);
