@@ -11,7 +11,7 @@
 			  <th *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.tags[0].schema_values['ADIT category view name']}}</a></th>
 			  <th>
 			  	<div style="text-align: right; float: right">
-			    	<a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
+			      <a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
 				  <a class="fake_button line" (click)='saveframe.duplicate(true); processChange()'>Create New</a>
 				  <a class="fake_button line" (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
 				  <a class="fake_button line" [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>

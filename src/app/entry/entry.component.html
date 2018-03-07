@@ -1,8 +1,9 @@
 <app-treeview [entry]="entry" [active]="'entry'"></app-treeview>
-<div style="margin-top: 3em; float: right; width: 87%">
+<div style="margin-top: 1em; float: right; width: 87%">
+	<p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showall" size="small" color="#CBDBFF"></ui-switch></a></p>
 	<a class="fake_button line" (click)='download(entry.entry_id + ".str", entry)'>Download Entry {{entry.entry_id}}</a>
 	<ng-container *ngFor='let sf of entry.saveframes'>
 	  <a style="margin-top: 3em; display: none" class="fake_button line" [routerLink]='["/entry", entry.entry_id, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>
-	  <app-saveframe [saveframe]='sf' [showall]='true'></app-saveframe>
+	  <app-saveframe [saveframe]='sf' [showall]='showall'></app-saveframe>
 	</ng-container>
 </div>
