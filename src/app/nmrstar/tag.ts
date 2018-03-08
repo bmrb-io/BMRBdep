@@ -14,7 +14,7 @@ export class Tag {
   overrides: string[][];
   display: string;
   fqtn: string;
-  enums: string[];
+  enums: (string|string[])[];
   parent?: Object;
 
   constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
@@ -37,7 +37,6 @@ export class Tag {
     this.validation_message = null;
     this.data_type = '';
     this.interface_type = '';
-    this.updateTagStatus();
   }
 
   log() {
@@ -123,27 +122,25 @@ export class Tag {
           this.validation_message = 'Tag does not match one of the allowed options.';
       }
     }
-  }
 
-  updateCascade() {
-    return null;
-  }
-}
-
-export class SaveframeTag extends Tag {
-  parent: Saveframe;
-
-  constructor(name: string, value: string, parent: Saveframe) {
-     super(name, value, parent.tag_prefix, parent.parent.schema);
-     this.parent = parent;
-  }
-
-  updateTagStatus() {
-    // First do the standard updates
-    super.updateTagStatus();
-
-    // Just return if we have no parent
+    // Just return if we have no parent - prior to asking the parent for tags
     if (!this.parent) { return; }
+
+    // Check if we are a pointer, if so, enumerate the saveframes to point to
+    if (this.schema_values['Sf pointer'] === 'Y') {
+      // Show this tag as a closed enum
+      this.interface_type = 'closed_enum';
+      const frames_of_category: any[] = (this.parent as any).getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
+      if (frames_of_category.length > 0) {
+        const enum_list: string[] = [];
+        for (const sf of frames_of_category) {
+          enum_list.push('$' + sf.name);
+        }
+        this.enums = ['Y', 'Y', enum_list];
+      } else {
+        this.enums = ['Y', 'Y', ['ERROR NO SAVEFRAMES']];
+      }
+    }
 
     // Determine if this tag is being displayed
     this.display = this.schema_values['User full view'];
@@ -151,7 +148,8 @@ export class SaveframeTag extends Tag {
 
     // Check the overrides
     for (const or of this.overrides) {
-      const ct_val = this.parent.getTagValue(or[0], true);
+      // The (... as any) allows calling a method of a generic object
+      const ct_val = (this.parent as any).getTagValue(or[0]);
 
       // For * just check if there is *a* value TODO: category based - check if existence of loop/sf
       if (or[2] === '*') {
@@ -170,6 +168,19 @@ export class SaveframeTag extends Tag {
   }
 
   updateCascade() {
+    return null;
+  }
+}
+
+export class SaveframeTag extends Tag {
+  parent: Saveframe;
+
+  constructor(name: string, value: string, parent: Saveframe) {
+     super(name, value, parent.tag_prefix, parent.parent.schema);
+     this.parent = parent;
+  }
+
+  updateCascade() {
     this.parent.parent.refresh();
   }
 }
@@ -179,18 +190,6 @@ export class LoopTag extends Tag {
   constructor(name: string, value: string, parent: Loop) {
      super(name, value, parent.category, parent.parent.parent.schema);
      this.parent = parent;
-  }
-
-  updateTagStatus() {
-    super.updateTagStatus();
-
-    if (!this.parent) { return; }
-    // Determine if this tag is being displayed
-    this.display = this.schema_values['User full view'];
-    const or = this.overrides;
-    if (or) {
-      
-    }
   }
 
   updateCascade() {

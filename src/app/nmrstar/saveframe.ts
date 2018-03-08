@@ -82,6 +82,7 @@ export class Saveframe {
    * Attempts to locate the tag within the saveframe. If not found, calls up
    * to the Entry to locate the first instance of it.
    * @param fqtn The fully qualified tag name.
+   * @returns    The value of the queried tag, or null if not found
    */
   getTagValue(fqtn: string, full_entry: boolean = false): string {
     const split = fqtn.split('.');
@@ -106,6 +107,10 @@ export class Saveframe {
     }
   }
 
+  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
+    return this.parent.getSaveframesByPrefix(tag_prefix);
+  }
+
   getID(): string {
     let entry_id_tag = 'Entry_ID';
     if (this.category === 'entry_information') {
@@ -119,8 +124,12 @@ export class Saveframe {
   }
 
   refresh() {
+    this.name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
     for (const tag of this.tags) {
       tag.updateTagStatus();
+    }
+    for (const l of this.loops) {
+      l.refresh();
     }
   }
 

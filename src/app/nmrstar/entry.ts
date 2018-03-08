@@ -103,12 +103,19 @@ export class Entry {
     return return_list;
   }
 
+  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
+    const return_list: Saveframe[] = [];
+    for (const sf of this.saveframes) {
+      if (sf.tag_prefix === tag_prefix) {
+        return_list.push(sf);
+      }
+    }
+    return return_list;
+  }
+
   refresh() {
     for (const sf of this.saveframes) {
       sf.refresh();
-      for (const l of sf.loops) {
-        l.refresh();
-      }
     }
   }
 }

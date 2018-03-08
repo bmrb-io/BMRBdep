@@ -117,15 +117,29 @@ export class Loop {
     for (let r = 0; r < this.data.length; r++) {
       for (let c = 0; c < this.data[r].length; c++) {
         this.data[r][c].updateTagStatus();
-        if (this.data[r][c].display === 'Y' || this.data[r][c].display === 'N') {
-          if (this.display === 'H') {
-            this.display = this.data[r][c].display;
-          } else if ((this.display === 'N') && (this.data[r][c].display === 'Y')) {
+
+        if (this.display === 'N') {
+          if (this.data[r][c].display === 'Y') {
             this.display = 'Y';
           }
         }
+        if (this.display === 'H') {
+          this.display = this.data[r][c].display;
+        }
       }
     }
+  }
+
+  /*
+   * Currently we don't check loop tags, but if we had to
+   * in the future, just have this check those tags preferentially
+   */
+  getTagValue(fqtn: string): string {
+    return this.parent.getTagValue(fqtn, true);
+  }
+
+  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
+    return this.parent.parent.getSaveframesByPrefix(tag_prefix);
   }
 
   print(): string {
