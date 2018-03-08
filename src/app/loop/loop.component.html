@@ -43,11 +43,11 @@
 	</table>
 	
 	
-    <div *ngIf='active_tag' class='tag_info_box'>
+	<div *ngIf='active_tag' class='tag_info_box'>
+      <p><b>{{active_tag.schema_values['Prompt']}}</b></p>
+      <p>{{active_tag.schema_values['Interface']}}</p>
+      <p *ngIf="active_tag.schema_values['Example'] != '?'"><b>Example:</b> {{active_tag.schema_values['Example']}}</p>
       <p><i>{{active_tag.fqtn}}</i></p>
-      <p><b>{{active_tag.schema_values['Interface']}}</b></p>
-      <p> Data type: {{active_tag.schema_values['BMRB data type']}}</p>
-      <p> Null allowed: {{active_tag.schema_values['Nullable']}}</p>
       <p *ngIf='active_tag.validation_message' [class]="'mandatory'">{{active_tag.validation_message}}</p> 
     </div>
 </div>
