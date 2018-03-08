@@ -27,10 +27,22 @@ export class Tag {
 
     this.fqtn = tag_prefix + '.' + this.name;
     this.schema_values = schema.getTag(this.fqtn);
-    this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
-    this.enums = schema.enumerations[this.fqtn];
-    this.overrides = schema.override_dict[this.fqtn];
-    this.display = this.schema_values['User full view'];
+    if (this.schema_values) {
+      this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
+      this.enums = schema.enumerations[this.fqtn];
+      this.overrides = schema.override_dict[this.fqtn];
+      this.display = this.schema_values['User full view'];
+    } else {
+      this.schema_values = {'Regex': new RegExp(schema.data_types['any']),
+                            'Tag': name + '.' + value, 'SFCategory': '?',
+                            'BMRB data type': 'any', 'Nullable': true,
+                            'Prompt': 'Tag not in dictionary', 'Interface': 'Tag not in dictionary',
+                            'default value': '?', 'Example': '?', 'ADIT category view name': 'Missing',
+                            'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': null};
+      this.enums = null;
+      this.overrides = null;
+      this.display = 'ERROR';
+    }
 
     /* Will be updated with updateTagStatus */
     this.valid = true;
@@ -105,6 +117,8 @@ export class Tag {
      */
 
     this.valid = true;
+    this.validation_message = '';
+
     // If null, make sure that null is allowed - no need to check regex.
     if (!this.value) {
       if (!this.schema_values['Nullable']) {
@@ -144,6 +158,7 @@ export class Tag {
       if (this.enums[2].indexOf(this.value) < 0) {
         this.valid = false;
         this.validation_message = 'Tag must have a value.';
+        this.value = null;
       }
     }
 
