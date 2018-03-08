@@ -22,15 +22,15 @@
 
 
 .tree_box {
-    position:fixed;
-    top:7em;
-    left:1em;
-    width:13em;
+	float: left;
+    margin-top: 1em;
+    width: 10%;
     height: 30em;
     padding: .5em;
     border: 2px solid #33527b;
     border-radius: 5px;
     word-wrap: break-word;
+    overflow:hidden;
 }
 
 .active {

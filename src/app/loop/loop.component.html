@@ -44,7 +44,7 @@
 	
 	
 	<div *ngIf='active_tag' class='tag_info_box'>
-      <p><b>{{active_tag.schema_values['Prompt']}}</b></p>
+      <b>{{active_tag.schema_values['Prompt']}}</b>
       <p>{{active_tag.schema_values['Interface']}}</p>
       <p *ngIf="active_tag.schema_values['Example'] != '?'"><b>Example:</b> {{active_tag.schema_values['Example']}}</p>
       <p><i>{{active_tag.fqtn}}</i></p>

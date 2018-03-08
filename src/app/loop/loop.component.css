@@ -5,16 +5,11 @@
 }
 
 .tag_info_box{
-    position:fixed;
-    top:7em;
-    left:1em;
-    min-height: 30em;
-    width:13em;
-    padding: .5em .5em .5em .5em;
+	margin: 1em;
+	padding: 1em;
     border: 2px solid #33527b;
     border-radius: 5px;
     word-wrap: break-word;
-    background-color: white;
 }
 
 .invisible {

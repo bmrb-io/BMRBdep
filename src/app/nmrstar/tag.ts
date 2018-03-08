@@ -41,7 +41,7 @@ export class Tag {
                             'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': null};
       this.enums = null;
       this.overrides = null;
-      this.display = 'ERROR';
+      this.display = 'H';
     }
 
     /* Will be updated with updateTagStatus */
