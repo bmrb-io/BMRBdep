@@ -67,34 +67,18 @@ export class Entry {
     return result;
   }
 
-  getTagValue(fqtn: string) {
+  getTagValue(fqtn: string, skip: Saveframe = null) {
     const split = fqtn.split('.');
     const category = split[0];
     const tag = split[1];
 
     for (const sf of this.saveframes) {
-      // If the saveframe matches
-      if (sf.tag_prefix === category) {
-        for (const t of sf.tags) {
-          if (t.name === tag) {
-            return t.value;
-          }
-        }
+      // Skip checking the saveframe that called us, if one did
+      if (sf === skip) { continue; }
 
-        // Check the loops
-        for (const l of sf.loops) {
-          if (l.category === category) {
-            for (let r = 0; r < l.data.length; r++) {
-              for (let c = 0; c < l.data[r].length; c++) {
-                if (l.data[r][c].name === tag) {
-                  return l.data[r][c].value;
-                }
-              }
-            }
-          }
-        }
-
-      }
+      // Ask the saveframe for the tag, return it if found
+      const sf_res = sf.getTagValue(fqtn);
+      if (sf_res) { return sf_res; }
     }
 
     return null;

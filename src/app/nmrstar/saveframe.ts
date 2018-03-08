@@ -78,6 +78,34 @@ export class Saveframe {
     this.loops.push(loop);
   }
 
+  /*
+   * Attempts to locate the tag within the saveframe. If not found, calls up
+   * to the Entry to locate the first instance of it.
+   * @param fqtn The fully qualified tag name.
+   */
+  getTagValue(fqtn: string, full_entry: boolean = false): string {
+    const split = fqtn.split('.');
+    const category = split[0];
+    const tag = split[1];
+
+    if (this.tag_prefix === category) {
+      for (const t of this.tags) {
+        if (t.name === tag) {
+          return t.value;
+        }
+      }
+    }
+
+    // Ask the parent entry to search the other saveframes if this is a full search
+    // (The parent entry may call this method on us, in which case don't make an
+    // infinite recursion)
+    if (full_entry) {
+      return this.parent.getTagValue(fqtn, this);
+    } else {
+      return null;
+    }
+  }
+
   getID(): string {
     let entry_id_tag = 'Entry_ID';
     if (this.category === 'entry_information') {

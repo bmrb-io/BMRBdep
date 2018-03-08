@@ -139,17 +139,19 @@ export class SaveframeTag extends Tag {
   }
 
   updateTagStatus() {
+    // First do the standard updates
     super.updateTagStatus();
 
+    // Just return if we have no parent
     if (!this.parent) { return; }
+
     // Determine if this tag is being displayed
     this.display = this.schema_values['User full view'];
     if (!this.overrides) { return; }
 
     // Check the overrides
     for (const or of this.overrides) {
-      const ct_val = this.parent.parent.getTagValue(or[0]);
-      // console.log('Would set tag ' + this.fqtn + ' to ' + or[1] + ' if ' + or[0] + ' has value ' + or[2] + ' it has value ' + ct_val);
+      const ct_val = this.parent.getTagValue(or[0], true);
 
       // For * just check if there is *a* value TODO: category based - check if existence of loop/sf
       if (or[2] === '*') {
@@ -160,7 +162,8 @@ export class SaveframeTag extends Tag {
         // Check the regex
         if (new RegExp('^' + or[2] + '$').test(ct_val)) {
           this.display = or[1];
-// console.log('Set tag ' + this.fqtn + ' to ' + or[1] + ' because ' + or[0] + ' has value ' + or[2] + ' - it has value ' + ct_val);
+          // console.log('Set tag ' + this.fqtn + ' to ' + or[1] + ' because ' +
+          //               or[0] + ' has value ' + or[2] + ' - it has value ' + ct_val);
         }
       }
     }
