@@ -14,7 +14,7 @@ export class Tag {
   overrides: string[][];
   display: string;
   fqtn: string;
-  enums: (string|string[])[];
+  enums: [string, string, string[]];
   parent?: Object;
 
   constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
@@ -138,7 +138,12 @@ export class Tag {
         }
         this.enums = ['Y', 'Y', enum_list];
       } else {
-        this.enums = ['Y', 'Y', ['ERROR NO SAVEFRAMES']];
+        this.enums = ['Y', 'Y', ['ERROR']];
+        this.valid = false;
+      }
+      if (this.enums[2].indexOf(this.value) < 0) {
+        this.valid = false;
+        this.validation_message = 'Tag must have a value.';
       }
     }
 
