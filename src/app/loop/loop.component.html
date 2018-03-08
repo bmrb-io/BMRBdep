@@ -16,7 +16,8 @@
 			  <th *ngIf="loop.schema_values[c]['User full view'] == 'Y' || (loop.schema_values[c]['User full view'] == 'N' && showall)"
 			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y'}"
 			      (mouseenter)="active_tag = loop.data[0][c]"
-	      		  (mouseleave)="active_tag = null">{{loop.data[0][c].schema_values['Prompt']}}</th>
+	      		  (mouseleave)="active_tag = null"
+	      		  >{{loop.data[0][c].schema_values['Prompt']}}</th>
 			  </ng-container>
 			</tr>
 		</thead>
@@ -28,7 +29,7 @@
 			      (mouseenter)="active_tag = loop.data[r][c]"
 	      		  (mouseleave)="active_tag = null"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
-			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r"></app-tag>
+			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r" (contextmenu)="loop.data[r][c].log()"></app-tag>
 			  </td>
 			  </ng-container>
 			</tr>

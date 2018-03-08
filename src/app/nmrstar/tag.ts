@@ -40,6 +40,10 @@ export class Tag {
     this.updateTagStatus();
   }
 
+  log() {
+    console.log(this);
+  }
+
   toJSON(key) {
     // Clone object to prevent accidentally performing modification on the original object
     const cloneObj = { ...this as Tag };
