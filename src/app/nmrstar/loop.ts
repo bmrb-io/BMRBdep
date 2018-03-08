@@ -76,6 +76,19 @@ export class Loop {
     }
   }
 
+  addRow() {
+    const new_row = [];
+    for (let i = 0; i < this.tags.length; i++) {
+      new_row.push(new LoopTag(this.tags[i], null, this));
+    }
+    this.data.push(new_row);
+    this.refresh();
+  }
+
+  deleteRow(row_id) {
+    this.data.splice(row_id, 1);
+  }
+
   // Creates a duplicate of this loop, or an empty loop of the same type
   duplicate(clear_values: boolean = false) {
     const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);

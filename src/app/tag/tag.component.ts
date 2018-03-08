@@ -17,9 +17,6 @@ export class TagComponent implements OnInit {
   }
 
   validateTag(tag: Tag) {
-    // tag.updateTagStatus();
-
-
     tag.updateCascade();
     this.api.saveLocal();
   }

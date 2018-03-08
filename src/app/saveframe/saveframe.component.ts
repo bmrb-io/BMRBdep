@@ -19,25 +19,14 @@ export class SaveframeComponent implements OnInit {
     this.active_tag = null;
   }
 
-  ngOnInit() {
-    // window.e = this.saveframe.parent;
-  }
-
-  tag(tag: SaveframeTag) {
-    return this.saveframe.parent.schema.getTag(this.saveframe.tag_prefix + '.' + tag.name);
-  }
+  ngOnInit() { }
 
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
   processChange() {
+    this.saveframe.parent.refresh();
     this.sfReload.emit('reload');
     this.api.saveLocal();
-  }
-
-  validateTag(tag: SaveframeTag) {
-    tag.updateTagStatus();
-    this.api.saveLocal();
-    this.saveframe.refresh();
   }
 
 }

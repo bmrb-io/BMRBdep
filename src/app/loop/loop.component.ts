@@ -22,17 +22,13 @@ export class LoopComponent implements OnInit {
 
   // Add another row of data
   addRow() {
-    const new_row = [];
-    for (let i = 0; i < this.loop.tags.length; i++) {
-      new_row.push(new LoopTag(this.loop.tags[i], null, this.loop));
-    }
-    this.loop.data.push(new_row);
+    this.loop.addRow();
     this.api.saveLocal();
   }
 
   // Delete a row of data
   deleteRow(row_id) {
-    this.loop.data.splice(row_id, 1);
+    this.loop.deleteRow(row_id);
     this.api.saveLocal();
   }
 }

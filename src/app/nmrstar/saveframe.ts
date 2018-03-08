@@ -44,10 +44,10 @@ export class Saveframe {
     // Copy the loops
     for (const loop of this.loops) {
       const nl = loop.duplicate(clear_values);
-      nl.refresh();
       new_frame.addLoop(nl);
     }
 
+    new_frame.refresh();
     const my_pos = this.parent.saveframes.indexOf(this);
     this.parent.addSaveframe(new_frame, my_pos + 1);
   }
@@ -124,7 +124,12 @@ export class Saveframe {
   }
 
   refresh() {
-    this.name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
+    const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
+    if (fc_name) {
+      this.name = fc_name; 
+    } else {
+      console.log('Could not set SF name for ' + this, this);
+    }
     for (const tag of this.tags) {
       tag.updateTagStatus();
     }
