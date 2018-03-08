@@ -1,7 +1,7 @@
 <div class="tree_box">
 	<a [ngClass]="{'active': active=='entry', 'nav_link':true}" [routerLink]="['/entry', entry.entry_id]">Entry</a>
 	<div class="menu_item" *ngFor="let cat of entry.categories">
-		<a [ngClass]="{'active': active==cat, 'nav_link':true}" [routerLink]="['/entry', entry.entry_id, 'saveframe', cat, 'category']">{{cat | titlecase}}</a>
+		<a [ngClass]="{'active': active==cat[1], 'nav_link':true}" [routerLink]="['/entry', entry.entry_id, 'saveframe', cat[1], 'category']">{{cat[0] | titlecase}}</a>
 		<!-- <div class="menu_item" *ngFor="let sf of entry.getSaveframesByCategory(cat)">
 			<a [routerLink]="['/entry', entry.entry_id, 'saveframe', sf.category, 'category']">{{sf.name | titlecase}}</a>
 		</div>-->

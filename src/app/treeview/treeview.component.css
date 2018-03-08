@@ -11,7 +11,6 @@
     padding: .1em;
     margin: .1em;
     background-color:#ededed;
-    max-width: 12em;
 }
 
 .nav_link:hover {
@@ -25,7 +24,6 @@
 	float: left;
     margin-top: 1em;
     width: 10%;
-    height: 30em;
     padding: .5em;
     border: 2px solid #33527b;
     border-radius: 5px;

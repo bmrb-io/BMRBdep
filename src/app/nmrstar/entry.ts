@@ -5,7 +5,7 @@ export class Entry {
   entry_id: string;
   saveframes: Saveframe[];
   schema: Schema;
-  categories: string[];
+  categories: string[][];
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
     this.entry_id = data_name;
@@ -50,9 +50,13 @@ export class Entry {
 
   updateCategories() {
     this.categories = [];
+    const seen = [];
+
     for (const sf of this.saveframes) {
-      if (this.categories.indexOf(sf.category) < 0) {
-        this.categories.push(sf.category);
+      const pretty_name = this.schema.schema[sf.tag_prefix + '.' + 'Sf_ID']['ADIT category view name'];
+      if (seen.indexOf(sf.category) < 0) {
+        this.categories.push([pretty_name, sf.category]);
+        seen.push(sf.category);
       }
     }
   }
@@ -68,9 +72,6 @@ export class Entry {
   }
 
   getTagValue(fqtn: string, skip: Saveframe = null) {
-    const split = fqtn.split('.');
-    const category = split[0];
-    const tag = split[1];
 
     for (const sf of this.saveframes) {
       // Skip checking the saveframe that called us, if one did
