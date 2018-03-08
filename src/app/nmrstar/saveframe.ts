@@ -126,9 +126,7 @@ export class Saveframe {
   refresh() {
     const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
     if (fc_name) {
-      this.name = fc_name; 
-    } else {
-      console.log('Could not set SF name for ' + this, this);
+      this.name = fc_name;
     }
     for (const tag of this.tags) {
       tag.updateTagStatus();
