@@ -4,6 +4,7 @@
 
 .tag_description {
 	font-weight: bold;
+	cursor: help;
 }
 
 .invisible {

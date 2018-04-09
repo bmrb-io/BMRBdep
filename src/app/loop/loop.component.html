@@ -14,9 +14,8 @@
 			 <th style="border-collapse: collapse;"></th>
 			<ng-container *ngFor='let col of loop.tags; let c = index'>
 			  <th *ngIf="loop.schema_values[c]['User full view'] == 'Y' || (loop.schema_values[c]['User full view'] == 'N' && showall)"
-			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y'}"
-			      (mouseenter)="active_tag = loop.data[0][c]"
-	      		  (mouseleave)="active_tag = null"
+			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y', 'tag_header': true}"
+	      		  (click)="active_tag = (active_tag != loop.data[0][c] ? loop.data[0][c] : null)"
 	      		  >{{loop.data[0][c].schema_values['Prompt']}}</th>
 			  </ng-container>
 			</tr>
@@ -26,8 +25,6 @@
 			<td><a *ngIf="r>0" class="fake_button" (click)='deleteRow(r)'>-</a></td>
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.schema_values[c]['User full view'] == 'Y' || (loop.schema_values[c]['User full view'] == 'N' && showall)"
-			      (mouseenter)="active_tag = loop.data[r][c]"
-	      		  (mouseleave)="active_tag = null"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
 			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r" (contextmenu)="loop.data[r][c].log()"></app-tag>
 			  </td>

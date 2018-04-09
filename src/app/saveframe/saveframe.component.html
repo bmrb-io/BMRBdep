@@ -22,8 +22,7 @@
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
 	      	<tr *ngIf="sftag.display == 'Y' || (showall && sftag.display == 'N')"
-	      	    (mouseenter)="active_tag = sftag"
-	      		(mouseleave)="active_tag = null"
+	      		(click)="active_tag = (active_tag != sftag ? sftag : null)"
 	      		(contextmenu)="sftag.log()">
 	      		<td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
 				  	[innerHTML]="sftag.schema_values['Prompt']"

@@ -22,6 +22,10 @@
 	background-color: #ffa4a4;
 }
 
+.tag_header {
+	cursor: help;	
+}
+
 /* mostly from adit */
 .header_text {
 	vertical-align: middle;
