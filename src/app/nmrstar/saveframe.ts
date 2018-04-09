@@ -11,6 +11,7 @@ export class Saveframe {
   tags: SaveframeTag[];
   loops: Loop[];
   parent: Entry;
+  display = 'H';
 
   constructor (name: string,
                category: string,
@@ -56,6 +57,7 @@ export class Saveframe {
     // Clone object to prevent accidentally performing modification on the original object
     const cloneObj = { ...this as Saveframe };
     delete cloneObj.parent;
+    delete cloneObj.display;
 
     return cloneObj;
   }
@@ -123,16 +125,45 @@ export class Saveframe {
     }
   }
 
-  refresh() {
+  refresh(): void {
     const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
     if (fc_name) {
       this.name = fc_name;
     }
+
+    // Update the tags and the loops
     for (const tag of this.tags) {
       tag.updateTagStatus();
     }
     for (const l of this.loops) {
       l.refresh();
+    }
+
+     // Update whether this saveframe has anything to display
+    this.display = 'H';
+    for (const tag of this.tags) {
+      if (['Y', 'N'].indexOf(tag.display) >= 0) {
+        if (this.display === 'N') {
+          if (tag.display === 'Y') {
+            this.display = 'Y';
+          }
+        }
+        if (this.display === 'H') {
+          this.display = tag.display;
+        }
+      }
+    }
+    for (const loop of this.loops) {
+      if (['Y', 'N'].indexOf(loop.display) >= 0) {
+        if (this.display === 'N') {
+          if (loop.display === 'Y') {
+            this.display = 'Y';
+          }
+        }
+        if (this.display === 'H') {
+          this.display = loop.display;
+        }
+      }
     }
   }
 

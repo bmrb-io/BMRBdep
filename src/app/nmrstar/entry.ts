@@ -48,13 +48,14 @@ export class Entry {
     this.updateCategories();
   }
 
-  updateCategories() {
+  updateCategories(): void {
+
     this.categories = [];
     const seen = [];
 
     for (const sf of this.saveframes) {
       const pretty_name = this.schema.schema[sf.tag_prefix + '.' + 'Sf_ID']['ADIT category view name'];
-      if (seen.indexOf(sf.category) < 0) {
+      if (seen.indexOf(sf.category) < 0 && ['Y', 'N'].indexOf(sf.display) >= 0) {
         this.categories.push([pretty_name, sf.category]);
         seen.push(sf.category);
       }
@@ -118,6 +119,7 @@ export class Entry {
     for (const sf of this.saveframes) {
       sf.refresh();
     }
+    this.updateCategories();
   }
 }
 
