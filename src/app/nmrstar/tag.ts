@@ -121,7 +121,7 @@ export class Tag {
 
     // If null, make sure that null is allowed - no need to check regex.
     if (!this.value) {
-      if (!this.schema_values['Nullable']) {
+      if (this.schema_values['User full view'] === 'Y') {
         this.valid = false;
         this.validation_message = 'Tag must have a value.';
       }
