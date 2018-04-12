@@ -19,12 +19,14 @@ export class SaveframeComponent implements OnInit {
 
   constructor(public api: ApiService, private route: ActivatedRoute) {
     this.active_tag = null;
-    this.show_category_link = false;
+    this.show_category_link = true;
   }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
-        this.show_category_link = params['saveframe_description'] !== this.saveframe.category;
+        if (params['load_type'] === 'category') {
+          this.show_category_link = params['saveframe_description'] !== this.saveframe.category;
+        }
       });
   }
 
