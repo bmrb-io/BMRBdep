@@ -40,7 +40,8 @@ export class ApiService {
       console.log(this.cached_entry);
       return of (this.cached_entry);
     } else {
-      const entry_url = `http://manowar:8000/get_deposition/${entry_id}`;
+      // `https://webapi.bmrb.wisc.edu/v2/get_deposition/${entry_id}`
+      const entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
       return this.http.get(entry_url).map(json_data => {
          this.cached_entry = entryFromJSON(json_data);
          // TODO: This probably won't be necessary later

@@ -10,7 +10,7 @@
         [(ngModel)]="tag.value"
         [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
         (change)="validateTag(tag)">
- <option *ngFor="let val of tag.enums[2]" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
+ <option *ngFor="let val of tag.enums" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
 </select>
 
 <ng-container *ngIf="tag.interface_type == 'open_enum'" >
@@ -20,7 +20,7 @@
           [placeholder]="tag.schema_values['default value']"
           (change)="validateTag(tag)"
           />
-  <datalist [id]="tag.fqtn"><option *ngFor="let val of tag.enums[2]" [value]="val"></datalist>
+  <datalist [id]="tag.fqtn"><option *ngFor="let val of tag.enums" [value]="val"></datalist>
 </ng-container>
   
 <ng-container *ngIf="tag.interface_type == 'yes_no'" >

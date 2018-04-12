@@ -8,7 +8,7 @@
     
 		<thead>
 			<tr>
-			  <th *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.tags[0].schema_values['ADIT category view name']}}</a></th>
+			  <th *ngIf="saveframe.tags[0]"><a class="header_text">{{saveframe.parent.schema.saveframe_schema[saveframe.category]['category_group_view_name']}}</a></th>
 			  <th>
 			  	<div style="text-align: right; float: right">
 			      <a class="fake_button line" (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
@@ -22,11 +22,11 @@
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
 	      	<tr *ngIf="sftag.display == 'Y' || (showall && sftag.display == 'N')"
-	      		(click)="active_tag = (active_tag != sftag ? sftag : null)"
 	      		(contextmenu)="sftag.log()">
 	      		<td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
 				  	[innerHTML]="sftag.schema_values['Prompt']"
-				  	[title]="sftag.schema_values['Interface']">
+				  	[title]="sftag.schema_values['Interface']"
+				  	(click)="active_tag = (active_tag != sftag ? sftag : null)">
 				</td>
 				<td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
 		        	<app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name" ></app-tag>

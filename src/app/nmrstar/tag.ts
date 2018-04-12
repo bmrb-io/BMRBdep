@@ -11,10 +11,9 @@ export class Tag {
   data_type: string;
   interface_type: string;
   schema_values: {};
-  overrides: string[][];
   display: string;
   fqtn: string;
-  enums: [string, string, string[]];
+  enums: string[];
   parent?: Object;
 
   constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
@@ -29,8 +28,7 @@ export class Tag {
     this.schema_values = schema.getTag(this.fqtn);
     if (this.schema_values) {
       this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
-      this.enums = schema.enumerations[this.fqtn];
-      this.overrides = schema.override_dict[this.fqtn];
+      this.enums = this.schema_values['enumerations'] ? this.schema_values['enumerations'] : [];
       this.display = this.schema_values['User full view'];
     } else {
       this.schema_values = {'Regex': new RegExp(schema.data_types['any']),
@@ -40,7 +38,6 @@ export class Tag {
                             'default value': '?', 'Example': '?', 'ADIT category view name': 'Missing',
                             'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': null};
       this.enums = null;
-      this.overrides = null;
       this.display = 'H';
     }
 
@@ -61,7 +58,6 @@ export class Tag {
 
     delete cloneObj.valid;
     delete cloneObj.schema_values;
-    delete cloneObj.overrides;
     delete cloneObj.fqtn;
     delete cloneObj.enums;
     delete cloneObj.parent;
@@ -81,12 +77,12 @@ export class Tag {
     } else if (dt === 'text') {
       this.interface_type = 'text';
     } else {
-      if (this.enums) {
+      if (this.schema_values['enumerations']) {
         // There are enums, determine which type
-        if (this.enums[1] === 'Y') {
-          if (this.enums[0] === 'Y') {
+        if (this.schema_values['Item enumerated'] === 'Y') {
+          if (this.schema_values['Item enumeration closed'] === 'Y') {
             this.interface_type = 'closed_enum';
-          } else if (this.enums[0] === 'N') {
+          } else if (this.schema_values['Item enumeration closed'] === 'N') {
             this.interface_type = 'open_enum';
           } else {
             console.log('No enum spec for tag: ' + this.fqtn);
@@ -94,7 +90,7 @@ export class Tag {
           }
         // Enum list exists but not open or closed!?
         } else {
-          console.log('enum list but no ' + this.enums, this);
+          console.log('Enum list but no "Item enumerated" value: ' , this);
         }
       } else {
         this.interface_type = 'standard';
@@ -131,7 +127,7 @@ export class Tag {
       this.validation_message = 'Tag does not match specified data type.';
     // Check enums are matched
     } else if (this.interface_type === 'closed_enum') {
-        if (this.enums[2].indexOf(this.value) < 0) {
+        if (this.enums.indexOf(this.value) < 0) {
           this.valid = false;
           this.validation_message = 'Tag does not match one of the allowed options.';
       }
@@ -146,16 +142,15 @@ export class Tag {
       this.interface_type = 'closed_enum';
       const frames_of_category: any[] = (this.parent as any).getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
       if (frames_of_category.length > 0) {
-        const enum_list: string[] = [];
+        this.enums = [];
         for (const sf of frames_of_category) {
-          enum_list.push('$' + sf.name);
+          this.enums.push('$' + sf.name);
         }
-        this.enums = ['Y', 'Y', enum_list];
       } else {
-        this.enums = ['Y', 'Y', ['ERROR']];
+        this.enums = ['No saveframes of category ' + this.schema_values['Foreign Table'] + ' found in entry. Please create at least one.'];
         this.valid = false;
       }
-      if (this.enums[2].indexOf(this.value) < 0) {
+      if (this.enums.indexOf(this.value) < 0) {
         this.valid = false;
         this.validation_message = 'Tag must have a value.';
         this.value = null;
@@ -164,12 +159,13 @@ export class Tag {
 
     // Determine if this tag is being displayed
     this.display = this.schema_values['User full view'];
-    if (!this.overrides) { return; }
+    if (!this.schema_values['overrides']) { return; }
 
     // Check the overrides
-    for (const or of this.overrides) {
+    for (const or of this.schema_values['overrides']) {
       // The (... as any) allows calling a method of a generic object
       const ct_val = (this.parent as any).getTagValue(or[0]);
+      //console.log(or[0], )
 
       // For * just check if there is *a* value TODO: category based - check if existence of loop/sf
       if (or[2] === '*') {
