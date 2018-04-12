@@ -59,7 +59,7 @@ export class Schema {
       // Turn the overrides into a dictionary
       const tt = {};
       for (let i = 0; i <= this.overrides['headers'].length; i++) {
-        if (or[i]) {
+        if (or[i] != null) {
           tt[this.overrides['headers'][i]] = or[i];
         }
       }
@@ -75,7 +75,7 @@ export class Schema {
     for (const schem_tag of Object.keys(this.tags['values'])) {
       const tt = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
-        if (this.tags['values'][schem_tag][i]) {
+        if (this.tags['values'][schem_tag][i] != null) {
           tt[this.tags['headers'][i]] = this.tags['values'][schem_tag][i];
         }
       }
@@ -88,7 +88,7 @@ export class Schema {
       const saveframe = this.saveframes['values'][saveframe_category];
       const tt = {};
       for (let i = 0; i <= this.saveframes['headers'].length; i++) {
-        if (saveframe[i]) {
+        if (saveframe[i] != null) {
           tt[this.saveframes['headers'][i]] = saveframe[i];
         }
       }

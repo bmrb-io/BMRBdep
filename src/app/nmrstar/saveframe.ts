@@ -14,6 +14,7 @@ export class Saveframe {
   display: string;
   tag_dict: {};
   schema_values: {};
+  index: number;
 
   constructor (name: string,
                category: string,
@@ -29,6 +30,7 @@ export class Saveframe {
     this.parent = parent;
     this.tag_dict = {};
     this.display = 'H';
+    this.index = 0;
     if (this.parent.schema) {
       this.schema_values = this.parent.schema.saveframe_schema[this.category];
     }
@@ -74,6 +76,7 @@ export class Saveframe {
     delete cloneObj.display;
     delete cloneObj.tag_dict;
     delete cloneObj.schema_values;
+    delete cloneObj.index;
 
     return cloneObj;
   }
@@ -136,10 +139,12 @@ export class Saveframe {
   }
 
   refresh(): void {
+    // Get the SF name
     const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
-    if (fc_name) {
-      this.name = fc_name;
-    }
+    if (fc_name) { this.name = fc_name; }
+
+    // Get the category number for this SF
+    this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
     // Update the tags and the loops
     for (const tag of this.tags) {
