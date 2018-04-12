@@ -56,10 +56,16 @@ export class Schema {
         this.override_dict[or[sf_cat_col]][or[tag_cat_col]][or[or_tag_col]] = [];
       }
 
+      // Turn the overrides into a dictionary
+      const tt = {};
+      for (let i = 0; i <= this.overrides['headers'].length; i++) {
+        if (or[i]){
+          tt[this.overrides['headers'][i]] = or[i];
+        }
+      }
 
-      
       // Push the override onto the appropriate tag
-      this.override_dict[or[sf_cat_col]][or[tag_cat_col]][or[or_tag_col]].push(or.slice(1));
+      this.override_dict[or[sf_cat_col]][or[tag_cat_col]][or[or_tag_col]].push(tt);
     }
 
     // Turn the tags into a dictionary of values
@@ -119,8 +125,8 @@ export class Schema {
       }
     }
     function comparator(a, b) {
-      a = parseInt(a[-1], 10);
-      b = parseInt(b[-1], 10);
+      a = parseInt(a['Order of operation'], 10);
+      b = parseInt(b['Order of operation'], 10);
       if (a < b) {
         return -1;
       } else if (a > b) {

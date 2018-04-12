@@ -12,6 +12,7 @@ export class Saveframe {
   loops: Loop[];
   parent: Entry;
   display = 'H';
+  tag_dict = {};
 
   constructor (name: string,
                category: string,
@@ -25,6 +26,11 @@ export class Saveframe {
     this.tags = tags;
     this.loops = loops;
     this.parent = parent;
+    this.tag_dict = {};
+
+    for (const tag of this.tags) {
+      this.tag_dict[tag.fqtn] = tag;
+    }
   }
 
   duplicate(clear_values: boolean = false) {
@@ -58,12 +64,15 @@ export class Saveframe {
     const cloneObj = { ...this as Saveframe };
     delete cloneObj.parent;
     delete cloneObj.display;
+    delete cloneObj.tag_dict;
 
     return cloneObj;
   }
 
   addTag(name: string, value: string) {
-    this.tags.push(new SaveframeTag(name, value, this));
+    const new_tag = new SaveframeTag(name, value, this);
+    this.tags.push(new_tag);
+    this.tag_dict[new_tag.fqtn] = new_tag;
   }
 
   addTags(tag_list: string[][]) {
@@ -87,16 +96,8 @@ export class Saveframe {
    * @returns    The value of the queried tag, or null if not found
    */
   getTagValue(fqtn: string, full_entry: boolean = false): string {
-    const split = fqtn.split('.');
-    const category = split[0];
-    const tag = split[1];
-
-    if (this.tag_prefix === category) {
-      for (const t of this.tags) {
-        if (t.name === tag) {
-          return t.value;
-        }
-      }
+    if (fqtn in this.tag_dict) {
+      return this.tag_dict[fqtn].value;
     }
 
     // Ask the parent entry to search the other saveframes if this is a full search
