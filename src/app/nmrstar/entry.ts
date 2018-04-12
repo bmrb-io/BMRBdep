@@ -54,7 +54,7 @@ export class Entry {
     const seen = [];
 
     for (const sf of this.saveframes) {
-      const pretty_name = this.schema.saveframe_schema[sf.category]['category_group_view_name'];
+      const pretty_name = sf.schema_values['category_group_view_name'];
       if (seen.indexOf(sf.category) < 0 && ['Y', 'N'].indexOf(sf.display) >= 0) {
         this.categories.push([pretty_name, sf.category]);
         seen.push(sf.category);

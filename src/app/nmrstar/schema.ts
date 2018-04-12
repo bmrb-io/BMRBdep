@@ -59,7 +59,7 @@ export class Schema {
       // Turn the overrides into a dictionary
       const tt = {};
       for (let i = 0; i <= this.overrides['headers'].length; i++) {
-        if (or[i]){
+        if (or[i]) {
           tt[this.overrides['headers'][i]] = or[i];
         }
       }

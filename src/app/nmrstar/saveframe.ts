@@ -11,8 +11,9 @@ export class Saveframe {
   tags: SaveframeTag[];
   loops: Loop[];
   parent: Entry;
-  display = 'H';
-  tag_dict = {};
+  display: string;
+  tag_dict: {};
+  schema_values: {};
 
   constructor (name: string,
                category: string,
@@ -27,10 +28,18 @@ export class Saveframe {
     this.loops = loops;
     this.parent = parent;
     this.tag_dict = {};
+    this.display = 'H';
+    if (this.parent.schema) {
+      this.schema_values = this.parent.schema.saveframe_schema[this.category];
+    }
 
     for (const tag of this.tags) {
       this.tag_dict[tag.fqtn] = tag;
     }
+  }
+
+  log() {
+    console.log(this);
   }
 
   duplicate(clear_values: boolean = false) {
@@ -64,6 +73,7 @@ export class Saveframe {
     delete cloneObj.parent;
     delete cloneObj.display;
     delete cloneObj.tag_dict;
+    delete cloneObj.schema_values;
 
     return cloneObj;
   }
