@@ -10,6 +10,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 
+import { environment } from '../environments/environment';
 
 @Injectable()
 export class ApiService {
@@ -40,8 +41,10 @@ export class ApiService {
       console.log(this.cached_entry);
       return of (this.cached_entry);
     } else {
-      // `https://webapi.bmrb.wisc.edu/v2/get_deposition/${entry_id}`
-      const entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
+      let entry_url = `https://webapi.bmrb.wisc.edu/v2/get_deposition/${entry_id}`;
+      if (!environment.production) {
+        entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
+      }
       return this.http.get(entry_url).map(json_data => {
          this.cached_entry = entryFromJSON(json_data);
          // TODO: This probably won't be necessary later

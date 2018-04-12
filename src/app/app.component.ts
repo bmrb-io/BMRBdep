@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
 export class AppComponent {
 
   ngOnInit() {
-    console.log('InstantDep version .1');
+    console.log('InstantDep version .2');
   }
 
 }
