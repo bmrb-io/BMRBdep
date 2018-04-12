@@ -44,9 +44,8 @@ export class Saveframe {
       if (!clear_values && tag.name === 'Sf_framecode') {
         val = new_frame.name;
       }
-      tag_copy.push(new SaveframeTag(tag.name, val, new_frame));
+      new_frame.addTag(tag.name, val);
     }
-    new_frame.tags = tag_copy;
 
     // Copy the loops
     for (const loop of this.loops) {
