@@ -2,7 +2,6 @@ import { ApiService } from '../api.service';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Saveframe } from '../nmrstar/saveframe';
 import { SaveframeTag } from '../nmrstar/tag';
-import { SaveframeEditorComponent } from '../saveframe-editor/saveframe-editor.component';
 import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({

@@ -1,14 +1,12 @@
+
+import {throwError as observableThrowError,  Observable ,  of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Entry, entryFromJSON } from './nmrstar/entry';
-import { Saveframe } from './nmrstar/saveframe';
-import { Schema } from './nmrstar/schema';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/throw';
+
+
 
 import { environment } from '../environments/environment';
 
@@ -45,15 +43,16 @@ export class ApiService {
       if (!environment.production) {
         entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
       }
-      return this.http.get(entry_url).map(json_data => {
-         this.cached_entry = entryFromJSON(json_data);
+      return this.http.get(entry_url).pipe(
+          map(json_data => {
+            this.cached_entry = entryFromJSON(json_data);
          // TODO: This probably won't be necessary later
          this.cached_entry.entry_id = entry_id;
          console.log('Loaded entry from API.');
          this.saveLocal(true);
          console.log(this.cached_entry);
          return this.cached_entry;
-       });
+       }));
     }
   }
 /*
@@ -90,8 +89,8 @@ export class ApiService {
    * http://pieroxy.net/blog/pages/lz-string/index.html
    * https://stackoverflow.com/questions/20773945/storing-compressed-json-data-in-local-storage
    */
-  
-  
+
+
   /* obsolete but kept for now for reference
    getSaveframeByName(entry_id: string, saveframe_name: string): Observable<Saveframe> {
      const saveframe_url = `https://webapi.bmrb.wisc.edu/v2/entry/${entry_id}?saveframe_name=${saveframe_name}`;
@@ -109,7 +108,7 @@ export class ApiService {
 
   // .catch(this.handleError)
   private handleError(error: Response) {
-    return Observable.throw(error.statusText);
+    return observableThrowError(error.statusText);
   }
 
 }

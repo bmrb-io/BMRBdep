@@ -1,7 +1,6 @@
 import { ApiService } from '../api.service';
 import { Entry } from '../nmrstar/entry';
-import { SaveframeComponent } from '../saveframe/saveframe.component';
-import { Component, OnInit, Injectable } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { download } from '../nmrstar/nmrstar';
 
