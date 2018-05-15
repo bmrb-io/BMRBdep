@@ -4,10 +4,10 @@ import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-treeview',
-  templateUrl: './treeview.component.html',
-  styleUrls: ['./treeview.component.css']
+  templateUrl: './tree-view.component.html',
+  styleUrls: ['./tree-view.component.css']
 })
-export class TreeviewComponent implements OnInit {
+export class TreeViewComponent implements OnInit {
   @Input() entry: Entry;
   @Input() active: string;
 
