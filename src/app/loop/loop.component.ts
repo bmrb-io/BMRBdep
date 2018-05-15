@@ -1,7 +1,7 @@
-import { ApiService } from '../api.service';
-import { Loop } from '../nmrstar/loop';
-import { LoopTag } from '../nmrstar/tag';
-import { Component, OnInit, Input } from '@angular/core';
+import {ApiService} from '../api.service';
+import {Loop} from '../nmrstar/loop';
+import {LoopTag} from '../nmrstar/tag';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-loop',
@@ -10,7 +10,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class LoopComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() showall: boolean;
+  @Input() show_all: boolean;
   active_tag: LoopTag;
 
   constructor(public api: ApiService) {

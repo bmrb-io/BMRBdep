@@ -1,8 +1,7 @@
-import { Entry } from './entry';
-import { Loop } from './loop';
-import { cleanValue } from './nmrstar';
-import { Schema } from './schema';
-import { SaveframeTag } from './tag';
+import {Entry} from './entry';
+import {Loop} from './loop';
+import {cleanValue} from './nmrstar';
+import {SaveframeTag} from './tag';
 
 export class Saveframe {
   name: string;
@@ -44,12 +43,11 @@ export class Saveframe {
     console.log(this);
   }
 
-  duplicate(clear_values: boolean = false) {
+  duplicate(clear_values: boolean = false): Saveframe {
     const next_this_type = this.parent.getSaveframesByCategory(this.category).length + 1;
     const new_frame = new Saveframe(this.name + '_' + next_this_type, this.category, this.tag_prefix, this.parent);
 
     // Copy the tags
-    const tag_copy: SaveframeTag[] = [];
     for (const tag of this.tags) {
       let val = clear_values ? null : tag.value;
       if (!clear_values && tag.name === 'Sf_framecode') {
@@ -67,9 +65,12 @@ export class Saveframe {
     new_frame.refresh();
     const my_pos = this.parent.saveframes.indexOf(this);
     this.parent.addSaveframe(new_frame, my_pos + 1);
+
+    // The work is already done, as the new saveframe is inserted, but return it for reference
+    return new_frame;
   }
 
-  toJSON(key) {
+  toJSON(key): {} {
     // Clone object to prevent accidentally performing modification on the original object
     const cloneObj = { ...this as Saveframe };
     delete cloneObj.parent;
@@ -81,13 +82,13 @@ export class Saveframe {
     return cloneObj;
   }
 
-  addTag(name: string, value: string) {
+  addTag(name: string, value: string): void {
     const new_tag = new SaveframeTag(name, value, this);
     this.tags.push(new_tag);
     this.tag_dict[new_tag.fqtn] = new_tag;
   }
 
-  addTags(tag_list: string[][]) {
+  addTags(tag_list: string[][]): void {
     for (const tag_pair of tag_list) {
       if (tag_pair[0]) {
         this.addTag(tag_pair[0], tag_pair[1]);
@@ -97,7 +98,7 @@ export class Saveframe {
     }
   }
 
-  addLoop(loop: Loop) {
+  addLoop(loop: Loop): void {
     this.loops.push(loop);
   }
 
@@ -230,14 +231,3 @@ export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
   }
   return test;
 }
-/* probably obsolete but kept for now for reference
-export function saveframesFromJSON(jdata: Object[]): Saveframe[] {
-  const saveframes = [];
-
-  for (const sf_json of jdata) {
-    saveframes.push(saveframeFromJSON(sf_json));
-  }
-  return saveframes;
-}
-
-*/

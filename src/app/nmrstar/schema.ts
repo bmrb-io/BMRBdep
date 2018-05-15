@@ -7,7 +7,6 @@ export class Schema {
   version: string;
   tags: {};
   saveframes: {};
-  enumerations: {};
   data_types = {};
   overrides: {};
   override_dict = {};
@@ -17,7 +16,7 @@ export class Schema {
   saveframe_schema: TagDataMap;
 
 
-  toJSON(key) {
+  toJSON(key): {} {
     const cloneObj = { ...this as Schema };
 
     delete cloneObj.schema;
@@ -70,17 +69,16 @@ export class Schema {
 
     // Turn the tags into a dictionary of values
     const tag_col = this.tags['headers'].indexOf('Tag');
-    const cat_col = this.tags['headers'].indexOf('SFCategory');
 
-    for (const schem_tag of Object.keys(this.tags['values'])) {
+    for (const schema_tag of Object.keys(this.tags['values'])) {
       const tt = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
-        if (this.tags['values'][schem_tag][i] != null) {
-          tt[this.tags['headers'][i]] = this.tags['values'][schem_tag][i];
+        if (this.tags['values'][schema_tag][i] != null) {
+          tt[this.tags['headers'][i]] = this.tags['values'][schema_tag][i];
         }
       }
       tt['overrides'] = this.getOverrides(tt);
-      this.schema[this.tags['values'][schem_tag][tag_col]] = tt;
+      this.schema[this.tags['values'][schema_tag][tag_col]] = tt;
     }
 
     // Turn the schema values into a dictionary
@@ -96,14 +94,6 @@ export class Schema {
     }
 
     console.log(this);
-  }
-
-  // Returns true if the strings match, or either is a * character
-  private starMatch(string1: string, string2: string) {
-    if (string1 === string2 || string1 === '*' || string2 === '*') {
-      return true;
-    }
-    return false;
   }
 
   private getOverrides(tag: {}): {} {
@@ -139,17 +129,8 @@ export class Schema {
     return overrides;
   }
 
-  getTag(tag_name: string) {
+  getTag(tag_name: string): {} {
     return this.schema[tag_name];
-  }
-
-  getValue(tag_name: string, tag_property: string) {
-    const tag = this.getTag(tag_name);
-    if (tag) {
-      return tag[tag_property];
-    } else {
-      return null;
-    }
   }
 
 }

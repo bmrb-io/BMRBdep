@@ -16,7 +16,7 @@ method (so don't call it before inserting values into tags or loops).
 
 Be mindful of the value of str_conversion_dict as it will effect the
 way the value is converted to a string.*/
-export function cleanValue(value) {
+export function cleanValue(value): string {
 
     if (value == null) {
       return '.';
@@ -67,11 +67,11 @@ export function cleanValue(value) {
 }
 
 // Function to check for illegal unicode characters in the file
-export function containsIllegalNonLatinCodepoints(s) {
+export function containsIllegalNonLatinCodepoints(s): boolean {
   return /[^\u0000-\u00ff]/.test(s.replace(/⏎/g, '\n'));
 }
 
-export function download(filename, printable_object) {
+export function download(filename, printable_object): void {
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printable_object.print()));
     element.setAttribute('download', filename);

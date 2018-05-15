@@ -1,5 +1,5 @@
-import { Loop } from '../../nmrstar/loop';
-import { Component, OnInit, Input } from '@angular/core';
+import {Loop} from '../../nmrstar/loop';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-loop-view',
@@ -9,17 +9,11 @@ import { Component, OnInit, Input } from '@angular/core';
 
 export class LoopViewComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() showall: boolean;
-
-
+  @Input() show_all: boolean;
 
   constructor() {}
 
   ngOnInit() {
-  }
-
-  trackByFn(index, item) {
-    return index;
   }
 
 }

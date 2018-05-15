@@ -1,9 +1,8 @@
-import { Entry } from '../nmrstar/entry';
-import { Component, OnInit, Input } from '@angular/core';
-import { TitleCasePipe } from '@angular/common';
+import {Entry} from '../nmrstar/entry';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
-  selector: 'app-treeview',
+  selector: 'app-tree-view',
   templateUrl: './tree-view.component.html',
   styleUrls: ['./tree-view.component.css']
 })
