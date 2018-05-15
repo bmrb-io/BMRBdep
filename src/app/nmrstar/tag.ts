@@ -44,8 +44,42 @@ export class Tag {
     /* Will be updated with updateTagStatus */
     this.valid = true;
     this.validation_message = null;
-    this.data_type = '';
-    this.interface_type = '';
+
+    // Determine the interface type and data type
+    const dt = this.schema_values['BMRB data type'];
+    if (dt === 'yes_no') {
+      this.interface_type = 'yes_no';
+    } else if (dt === 'text') {
+      this.interface_type = 'text';
+    } else {
+      if (this.schema_values['enumerations']) {
+        // There are enums, determine which type
+        if (this.schema_values['Item enumerated'] === 'Y') {
+          if (this.schema_values['Item enumeration closed'] === 'Y') {
+            this.interface_type = 'closed_enum';
+          } else if (this.schema_values['Item enumeration closed'] === 'N') {
+            this.interface_type = 'open_enum';
+          } else {
+            console.log('No enum spec for tag: ' + this.fqtn);
+            this.interface_type = 'open_enum';
+          }
+          // Enum list exists but not open or closed!?
+        } else {
+          console.log('Enum list but no "Item enumerated" value: ' , this);
+        }
+      } else {
+        this.interface_type = 'standard';
+      }
+    }
+
+    // If this is a standard 'input' element, determine the data type
+    const data_type_map = {'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
+      'yyyy-mm-dd:hh:mm': 'datetime-local',
+      'email': 'email', 'fax': 'tel', 'phone': 'tel'};
+    this.data_type = data_type_map[dt];
+    if (this.data_type === undefined) {
+      this.data_type = 'string';
+    }
   }
 
   log(): void {
@@ -70,41 +104,6 @@ export class Tag {
   }
 
   updateTagStatus() {
-    const dt = this.schema_values['BMRB data type'];
-
-    if (dt === 'yes_no') {
-      this.interface_type = 'yes_no';
-    } else if (dt === 'text') {
-      this.interface_type = 'text';
-    } else {
-      if (this.schema_values['enumerations']) {
-        // There are enums, determine which type
-        if (this.schema_values['Item enumerated'] === 'Y') {
-          if (this.schema_values['Item enumeration closed'] === 'Y') {
-            this.interface_type = 'closed_enum';
-          } else if (this.schema_values['Item enumeration closed'] === 'N') {
-            this.interface_type = 'open_enum';
-          } else {
-            console.log('No enum spec for tag: ' + this.fqtn);
-            this.interface_type = 'open_enum';
-          }
-        // Enum list exists but not open or closed!?
-        } else {
-          console.log('Enum list but no "Item enumerated" value: ' , this);
-        }
-      } else {
-        this.interface_type = 'standard';
-      }
-    }
-
-    // If this is a standard 'input' element, determine the data type
-    const data_type_map = {'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
-                   'yyyy-mm-dd:hh:mm': 'datetime-local',
-                   'email': 'email', 'fax': 'tel', 'phone': 'tel'};
-    this.data_type = data_type_map[dt];
-    if (this.data_type === undefined) {
-      this.data_type = 'string';
-    }
 
      /* Check that the tag is valid
      * 1) Matches the data type regex
