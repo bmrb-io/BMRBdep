@@ -1,8 +1,8 @@
-import { ApiService } from '../api.service';
-import { Entry } from '../nmrstar/entry';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { download } from '../nmrstar/nmrstar';
+import {ApiService} from '../api.service';
+import {Entry} from '../nmrstar/entry';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {download} from '../nmrstar/nmrstar';
 
 
 @Component({
@@ -12,12 +12,12 @@ import { download } from '../nmrstar/nmrstar';
 })
 export class EntryComponent implements OnInit {
   entry: Entry;
-  showall: boolean;
+  show_all: boolean;
 
   constructor(private route: ActivatedRoute,
     private api: ApiService) {
     this.entry = new Entry('');
-    this.showall = true;
+    this.show_all = true;
   }
 
   ngOnInit() {
@@ -28,7 +28,7 @@ export class EntryComponent implements OnInit {
     });
   }
 
-  loadEntry(entry: string) {
+  loadEntry(entry: string): void {
 
     const parent = this;
     parent.api.getEntry(entry)
@@ -39,7 +39,7 @@ export class EntryComponent implements OnInit {
       );
   }
 
-  download(name: string, printable_object) {
+  download(name: string, printable_object): void {
     download(name, printable_object);
   }
 

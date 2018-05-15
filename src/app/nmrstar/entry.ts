@@ -1,5 +1,5 @@
-import { Saveframe, saveframeFromJSON } from './saveframe';
-import { Schema } from './schema';
+import {Saveframe, saveframeFromJSON} from './saveframe';
+import {Schema} from './schema';
 
 export class Entry {
   entry_id: string;
@@ -14,7 +14,7 @@ export class Entry {
     this.updateCategories();
   }
 
-  toJSON(key) {
+  toJSON(key): {} {
     const cloneObj = { ...this as Entry };
 
     delete cloneObj.schema;
@@ -23,13 +23,13 @@ export class Entry {
   }
 
   /* Return the position of a given saveframe in the saveframe list. */
-  sfIndex(saveframe: Saveframe) {
+  sfIndex(saveframe: Saveframe): number {
     return this.saveframes.indexOf(saveframe);
   }
 
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
-  addSaveframe(saveframe: Saveframe, position: number = -1) {
+  addSaveframe(saveframe: Saveframe, position: number = -1): void {
     if (position < 0) {
       this.saveframes.push(saveframe);
     } else {
@@ -39,7 +39,7 @@ export class Entry {
     this.updateCategories();
   }
 
-  removeSaveframe(saveframe: Saveframe) {
+  removeSaveframe(saveframe: Saveframe): void {
     const index = this.saveframes.indexOf(saveframe, 0);
     if (index > -1) {
        this.saveframes.splice(index, 1);
@@ -72,7 +72,7 @@ export class Entry {
     return result;
   }
 
-  getTagValue(fqtn: string, skip: Saveframe = null) {
+  getTagValue(fqtn: string, skip: Saveframe = null): string {
 
     for (const sf of this.saveframes) {
       // Skip checking the saveframe that called us, if one did
@@ -115,7 +115,7 @@ export class Entry {
     return return_list;
   }
 
-  refresh() {
+  refresh(): void {
     for (const sf of this.saveframes) {
       sf.refresh();
     }

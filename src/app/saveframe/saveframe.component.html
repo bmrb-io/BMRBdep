@@ -1,11 +1,11 @@
-<div *ngIf="saveframe.display == 'Y' || (showall && saveframe.display == 'N')">
-	
+<div *ngIf="saveframe.display == 'Y' || (show_all && saveframe.display == 'N')">
+
 	<table style="width: 100%">
 		<colgroup>
 	       <col span="1" style="width: 20%;">
 	       <col span="1" style="width: 70%;">
 	    </colgroup>
-    
+
 		<thead>
 			<tr>
 			  <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
@@ -33,7 +33,7 @@
 		</thead>
 		<tbody>
 		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="sftag.display == 'Y' || (showall && sftag.display == 'N')"
+	      	<tr *ngIf="sftag.display == 'Y' || (show_all && sftag.display == 'N')"
 	      		(contextmenu)="sftag.log()">
 	      		<td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
 				  	[innerHTML]="sftag.schema_values['Prompt']"
@@ -47,18 +47,18 @@
 		</ng-container>
 		</tbody>
 	</table>
-	
+
 	<div *ngIf='active_tag' class='tag_info_box'>
       <b>{{active_tag.schema_values['Prompt']}}</b>
       <p>{{active_tag.schema_values['Interface']}}</p>
       <p *ngIf="active_tag.schema_values['Example'] != '?'"><b>Example:</b> {{active_tag.schema_values['Example']}}</p>
       <p><i>{{active_tag.fqtn}}</i></p>
-      <p *ngIf='active_tag.validation_message' [class]="'mandatory'">{{active_tag.validation_message}}</p> 
+      <p *ngIf='active_tag.validation_message' [class]="'mandatory'">{{active_tag.validation_message}}</p>
     </div>
-    
+
     <ng-container *ngFor='let loop of saveframe.loops'>
-      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && showall)" [loop]='loop' [showall]='showall'></app-loop>
+      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && show_all)" [loop]='loop' [show_all]="show_all"></app-loop>
 	</ng-container>
 </div>
-	
+
 

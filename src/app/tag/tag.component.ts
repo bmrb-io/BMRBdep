@@ -1,6 +1,6 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ApiService } from '../api.service';
-import { Tag } from '../nmrstar/tag';
+import {Component, Input, OnInit} from '@angular/core';
+import {ApiService} from '../api.service';
+import {Tag} from '../nmrstar/tag';
 
 @Component({
   selector: 'app-tag',
@@ -16,7 +16,7 @@ export class TagComponent implements OnInit {
   ngOnInit() {
   }
 
-  validateTag(tag: Tag) {
+  validateTag(tag: Tag): void {
     tag.updateCascade();
     this.api.saveLocal();
   }

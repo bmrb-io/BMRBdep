@@ -1,8 +1,8 @@
-import { ApiService } from '../api.service';
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Saveframe } from '../nmrstar/saveframe';
-import { SaveframeTag } from '../nmrstar/tag';
-import { ActivatedRoute, Params } from '@angular/router';
+import {ApiService} from '../api.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Saveframe} from '../nmrstar/saveframe';
+import {SaveframeTag} from '../nmrstar/tag';
+import {ActivatedRoute, Params} from '@angular/router';
 
 @Component({
   selector: 'app-saveframe',
@@ -11,7 +11,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 })
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
-  @Input() showall: false;
+  @Input() show_all: false;
   @Output() sfReload = new EventEmitter<string>();
   active_tag: SaveframeTag;
   show_category_link: boolean;
@@ -31,7 +31,7 @@ export class SaveframeComponent implements OnInit {
 
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
-  processChange() {
+  processChange(): void {
     this.saveframe.parent.refresh();
     this.sfReload.emit('reload');
     this.api.saveLocal();

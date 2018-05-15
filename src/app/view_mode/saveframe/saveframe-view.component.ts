@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Saveframe } from '../../nmrstar/saveframe';
+import {Component, Input, OnInit} from '@angular/core';
+import {Saveframe} from '../../nmrstar/saveframe';
 
 @Component({
   selector: 'app-saveframe-view',
@@ -8,7 +8,7 @@ import { Saveframe } from '../../nmrstar/saveframe';
 })
 export class SaveframeViewComponent implements OnInit {
   @Input() saveframe: Saveframe;
-  @Input() showall: false;
+  @Input() show_all: false;
 
   constructor() {}
 

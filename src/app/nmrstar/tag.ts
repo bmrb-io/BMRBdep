@@ -1,6 +1,6 @@
-import { Saveframe } from './saveframe';
-import { Loop } from './loop';
-import { Schema } from './schema';
+import {Saveframe} from './saveframe';
+import {Loop} from './loop';
+import {Schema} from './schema';
 
 export class Tag {
   name: string;
@@ -48,11 +48,11 @@ export class Tag {
     this.interface_type = '';
   }
 
-  log() {
+  log(): void {
     console.log(this);
   }
 
-  toJSON(key) {
+  toJSON(key): {} {
     // Clone object to prevent accidentally performing modification on the original object
     const cloneObj = { ...this as Tag };
 
@@ -98,10 +98,10 @@ export class Tag {
     }
 
     // If this is a standard 'input' element, determine the data type
-    const dtmap = {'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
+    const data_type_map = {'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
                    'yyyy-mm-dd:hh:mm': 'datetime-local',
                    'email': 'email', 'fax': 'tel', 'phone': 'tel'};
-    this.data_type = dtmap[dt];
+    this.data_type = data_type_map[dt];
     if (this.data_type === undefined) {
       this.data_type = 'string';
     }
@@ -174,10 +174,11 @@ export class Tag {
         }
       } else {
         // Check the regex
-        if (new RegExp('^' + or['Override value'] + '$').test(ct_val)) {
+        const reg_exp = '^' + or['Override value'] + '$';
+        if (new RegExp(reg_exp).test(ct_val)) {
           /*
            if (this.schema_values['User full view'] !== or['Override view value']) {
-           console.log('Set tag ' + this.fqtn + ' visibilty from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
+           console.log('Set tag ' + this.fqtn + ' visibility from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
                          or['Conditional tag'] + ' has filter ' + or['Override value'] + ' - it has value ' + ct_val);
           } */
           this.display = or['Override view value'];
@@ -186,7 +187,7 @@ export class Tag {
     }
   }
 
-  updateCascade() {
+  updateCascade(): void {
     return null;
   }
 }
@@ -199,7 +200,7 @@ export class SaveframeTag extends Tag {
      this.parent = parent;
   }
 
-  updateCascade() {
+  updateCascade(): void {
     this.parent.parent.refresh();
   }
 }
@@ -211,7 +212,7 @@ export class LoopTag extends Tag {
      this.parent = parent;
   }
 
-  updateCascade() {
+  updateCascade(): void {
     this.parent.parent.parent.refresh();
   }
 }

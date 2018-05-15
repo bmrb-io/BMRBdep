@@ -1,22 +1,20 @@
-import { cleanValue } from './nmrstar';
-import { Saveframe } from './saveframe';
-import { LoopTag } from './tag';
+import {cleanValue} from './nmrstar';
+import {Saveframe} from './saveframe';
+import {LoopTag} from './tag';
 
 export class Loop {
   category: string;
   tags: string[];
   data: LoopTag[][];
   parent: Saveframe;
-  data_in_column: boolean[];
   schema_values: {}[];
   display: string;
 
-  toJSON(key) {
+  toJSON(key): {} {
     // Clone object to prevent accidentally performing modification on the original object
     const cloneObj = { ...this as Loop };
     delete cloneObj.parent;
     delete cloneObj.schema_values;
-    delete cloneObj.data_in_column;
     delete cloneObj.display;
 
     // Turn the loop tags into a simple array of values
@@ -36,7 +34,6 @@ export class Loop {
   constructor (category: string, tags: string[], data: string[][], parent: Saveframe) {
     this.category = category;
     this.tags = tags;
-    this.data_in_column = [];
     this.parent = parent;
     this.schema_values = [];
     this.display = 'H';
@@ -76,7 +73,7 @@ export class Loop {
     }
   }
 
-  addRow() {
+  addRow(): void {
     const new_row = [];
     for (let i = 0; i < this.tags.length; i++) {
       new_row.push(new LoopTag(this.tags[i], null, this));
@@ -85,12 +82,12 @@ export class Loop {
     this.refresh();
   }
 
-  deleteRow(row_id) {
+  deleteRow(row_id): void {
     this.data.splice(row_id, 1);
   }
 
   // Creates a duplicate of this loop, or an empty loop of the same type
-  duplicate(clear_values: boolean = false) {
+  duplicate(clear_values: boolean = false): Loop {
     const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
     for (let r = 0; r < this.data.length; r++) {
@@ -109,23 +106,7 @@ export class Loop {
     return new_loop;
   }
 
-
-  checkNull() {
-    // Go through the columns
-    for (let x = 0; x < this.tags.length; x++) {
-      this.data_in_column[x] = false;
-
-      // Check the data for a given column
-      for (let n = 0; n < this.data.length; n++) {
-        if (this.data[n][x] && (!(['.', '?', '', null].indexOf(this.data[n][x].value) >= 0))) {
-          this.data_in_column[x] = true;
-          break;
-        }
-      }
-    }
-  }
-
-  refresh() {
+  refresh(): void {
     this.display = 'H';
     for (let r = 0; r < this.data.length; r++) {
       for (let c = 0; c < this.data[r].length; c++) {

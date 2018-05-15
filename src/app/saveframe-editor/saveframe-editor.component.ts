@@ -1,10 +1,10 @@
-import { ApiService } from '../api.service';
-import { Entry } from '../nmrstar/entry';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Saveframe } from '../nmrstar/saveframe';
-import { Schema } from '../nmrstar/schema';
-import { download } from '../nmrstar/nmrstar';
+import {ApiService} from '../api.service';
+import {Entry} from '../nmrstar/entry';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Saveframe} from '../nmrstar/saveframe';
+import {Schema} from '../nmrstar/schema';
+import {download} from '../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-saveframe-editor',
@@ -13,7 +13,7 @@ import { download } from '../nmrstar/nmrstar';
 })
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
-  showall: boolean;
+  show_all: boolean;
   entry: Entry;
   saveframe_description: string;
   load_type: string;
@@ -25,7 +25,7 @@ export class SaveframeEditorComponent implements OnInit {
     const sf = new Saveframe('', '', '', new Entry(''));
     sf.parent.schema = new Schema({});
     this.saveframes = [sf];
-    this.showall = true;
+    this.show_all = true;
     this.entry = new Entry('');
     this.next_sf = null;
     this.prev_sf = null;
@@ -41,7 +41,7 @@ export class SaveframeEditorComponent implements OnInit {
     });
   }
 
-  loadEntry(entry: string) {
+  loadEntry(entry: string): void {
     const parent = this;
     parent.api.getEntry(entry)
       .subscribe(ret_entry => {
@@ -50,7 +50,7 @@ export class SaveframeEditorComponent implements OnInit {
       });
   }
 
-  reloadSaveframes() {
+  reloadSaveframes(): void {
     if (this.load_type === 'name') {
       this.saveframes = [this.entry.getSaveframeByName(this.saveframe_description)];
     } else if (this.load_type === 'category') {
@@ -59,11 +59,11 @@ export class SaveframeEditorComponent implements OnInit {
     this.updateCategoryLinks();
   }
 
-  download(name: string, printable_object) {
+  download(name: string, printable_object): void {
     download(name, printable_object);
   }
 
-  updateCategoryLinks() {
+  updateCategoryLinks(): void {
     let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
     while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0) {
       index--;

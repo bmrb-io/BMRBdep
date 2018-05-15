@@ -1,14 +1,8 @@
-
-import {throwError as observableThrowError,  Observable ,  of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Entry, entryFromJSON } from './nmrstar/entry';
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
-
-
-
-import { environment } from '../environments/environment';
+import {Observable, of, throwError as observableThrowError} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {Entry, entryFromJSON} from './nmrstar/entry';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class ApiService {
@@ -18,16 +12,6 @@ export class ApiService {
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
   }
-
-/*
- import 'rxjs/add/observable/interval';
-
-   Observable.interval(100000)
-    .subscribe(i => {
-      console.log('sss');
-        // This will be called every 10 seconds until `stopCondition` flag is set to true
-    });
-*/
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
