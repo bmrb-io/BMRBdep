@@ -155,14 +155,15 @@ export class Tag {
         this.value = null;
       }
     }
+  }
 
+  updateVisibility(overrides): void {
     // Determine if this tag is being displayed
-    //
-    if (!this.schema_values['overrides']) { return; }
+
     this.display = this.schema_values['User full view'];
 
     // Check the overrides
-    for (const or of this.schema_values['overrides']) {
+    for (const or of overrides) {
       // The (... as any) allows calling a method of a generic object
       const ct_val = (this.parent as any).getTagValue(or['Conditional tag']);
 
@@ -175,11 +176,11 @@ export class Tag {
         // Check the regex
         const reg_exp = '^' + or['Override value'] + '$';
         if (new RegExp(reg_exp).test(ct_val)) {
-          /*
-           if (this.schema_values['User full view'] !== or['Override view value']) {
-           console.log('Set tag ' + this.fqtn + ' visibility from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
-                         or['Conditional tag'] + ' has filter ' + or['Override value'] + ' - it has value ' + ct_val);
-          } */
+
+          if (this.schema_values['User full view'] !== or['Override view value']) {
+            console.log('Set tag ' + this.fqtn + ' visibility from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
+              or['Conditional tag'] + ' has filter ' + or['Override value'] + ' - it has value ' + ct_val);
+          }
           this.display = or['Override view value'];
         }
       }
@@ -200,7 +201,7 @@ export class SaveframeTag extends Tag {
   }
 
   updateCascade(): void {
-    this.parent.parent.refresh();
+    this.parent.parent.refresh(this.schema_values['overrides'], this.parent.category);
   }
 }
 
@@ -212,7 +213,7 @@ export class LoopTag extends Tag {
   }
 
   updateCascade(): void {
-    this.parent.parent.parent.refresh();
+    this.parent.parent.parent.refresh(this.schema_values['overrides'], this.parent.category);
   }
 }
 

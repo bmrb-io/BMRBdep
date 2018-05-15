@@ -115,9 +115,9 @@ export class Entry {
     return return_list;
   }
 
-  refresh(): void {
+  refresh(overrides: {}[] = null, category: string = null): void {
     for (const sf of this.saveframes) {
-      sf.refresh();
+      sf.refresh(overrides, category);
     }
     this.updateCategories();
   }
