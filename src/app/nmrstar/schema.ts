@@ -41,18 +41,21 @@ export class Schema {
     }
 
     // Assign the overrides to the appropriate tags
-    const or_tag_col = this.overrides['headers'].indexOf('Tag');
+    const or_tag_col = this.overrides['headers'].indexOf('Conditional tag');
+    const cond_tag_col = this.overrides['headers'].indexOf('Conditional tag');
     const sf_cat_col = this.overrides['headers'].indexOf('Sf category');
     const tag_cat_col = this.overrides['headers'].indexOf('Tag category');
     for (const or of this.overrides['values']) {
       if (!this.override_dict[or[sf_cat_col]]) {
         this.override_dict[or[sf_cat_col]] = {};
       }
-      if (!this.override_dict[or[sf_cat_col]][or[tag_cat_col]]) {
-        this.override_dict[or[sf_cat_col]][or[tag_cat_col]] = {};
+      const current_category = this.override_dict[or[sf_cat_col]];
+      if (!current_category[or[tag_cat_col]]) {
+        current_category[or[tag_cat_col]] = {};
       }
-      if (!this.override_dict[or[sf_cat_col]][or[tag_cat_col]][or[or_tag_col]]) {
-        this.override_dict[or[sf_cat_col]][or[tag_cat_col]][or[or_tag_col]] = [];
+      const current_tag = current_category[or[tag_cat_col]];
+      if (!current_tag[or[or_tag_col]]) {
+        current_tag[or[or_tag_col]] = [];
       }
 
       // Turn the overrides into a dictionary
@@ -77,7 +80,7 @@ export class Schema {
           tt[this.tags['headers'][i]] = this.tags['values'][schema_tag][i];
         }
       }
-      tt['overrides'] = this.getOverrides(tt);
+      tt['overrides'] = this.getOverridePointers(tt);
       this.schema[this.tags['values'][schema_tag][tag_col]] = tt;
     }
 
@@ -96,15 +99,16 @@ export class Schema {
     console.log(this);
   }
 
-  private getOverrides(tag: {}): {} {
-    // sf_or is saveframe category root
-    const sf_or = this.override_dict[tag['SFCategory']];
+
+  private getOverridePointers(tag: {}): {} {
+    // saveframeCategoryRoot is saveframe category root
+    const saveframeCategoryRoot = this.override_dict[tag['SFCategory']];
 
     let overrides = [];
-    if (sf_or) {
+    if (saveframeCategoryRoot) {
       for (const field of [tag['Tag category'], '*']) {
-        if (field in sf_or) {
-          const sf_cat = sf_or[field];
+        if (field in saveframeCategoryRoot) {
+          const sf_cat = saveframeCategoryRoot[field];
           if (tag['Tag'] in sf_cat) {
             overrides = overrides.concat(sf_cat[tag['Tag']]);
           }

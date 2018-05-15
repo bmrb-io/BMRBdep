@@ -74,22 +74,6 @@ export class ApiService {
    * https://stackoverflow.com/questions/20773945/storing-compressed-json-data-in-local-storage
    */
 
-
-  /* obsolete but kept for now for reference
-   getSaveframeByName(entry_id: string, saveframe_name: string): Observable<Saveframe> {
-     const saveframe_url = `https://webapi.bmrb.wisc.edu/v2/entry/${entry_id}?saveframe_name=${saveframe_name}`;
-     return this.http.get(saveframe_url).map(json_data => {
-       return saveframeFromJSON(json_data[entry_id][saveframe_name]);
-     });
-  }
-
-  getSaveframesByCategory(entry_id: string, saveframe_category: string): Observable<Saveframe[]> {
-     const saveframe_url = `https://webapi.bmrb.wisc.edu/v2/entry/${entry_id}?saveframe_category=${saveframe_category}`;
-     return this.http.get(saveframe_url).map(json_data => {
-       return saveframesFromJSON(json_data[entry_id][saveframe_category]);
-     });
-  } */
-
   // .catch(this.handleError)
   private handleError(error: Response) {
     return observableThrowError(error.statusText);

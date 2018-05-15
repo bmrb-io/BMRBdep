@@ -106,7 +106,7 @@ export class Loop {
     return new_loop;
   }
 
-  refresh(): void {
+  refresh(overrides: {}[] = null, category: string = null): void {
     this.display = 'H';
     for (let r = 0; r < this.data.length; r++) {
       for (let c = 0; c < this.data[r].length; c++) {
