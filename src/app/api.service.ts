@@ -2,16 +2,21 @@ import {Observable, of, throwError as observableThrowError} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../environments/environment.prod';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {environment} from '../environments/environment';
 
 @Injectable()
 export class ApiService {
 
   cached_entry: Entry;
+  server_url: string;
 
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
+    this.server_url = 'https://webapi.bmrb.wisc.edu/v2/deposition';
+    if (!environment.production) {
+      this.server_url = 'http://localhost:9000/deposition';
+    }
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
@@ -24,10 +29,8 @@ export class ApiService {
       console.log(this.cached_entry);
       return of (this.cached_entry);
     } else {
-      let entry_url = `https://webapi.bmrb.wisc.edu/v2/get_deposition/${entry_id}`;
-      if (!environment.production) {
-        entry_url = `http://localhost:8000/get_deposition/${entry_id}`;
-      }
+      console.log(environment);
+      const entry_url = `${this.server_url}/${entry_id}`;
       return this.http.get(entry_url).pipe(
           map(json_data => {
             this.cached_entry = entryFromJSON(json_data);
@@ -56,7 +59,22 @@ export class ApiService {
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');
+    this.saveRemote().subscribe();
   }
+
+  saveRemote(): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
+    console.log('Storing entry on remote server...');
+    return this.http.put(entry_url, JSON.stringify(this.cached_entry), httpOptions).pipe(
+      map(json_data => json_data ));
+  }
+
+  // const entry_url = `${this.server_url}/deposition/new`;{'email': 'edu'}
 
   private loadLocal(): void {
     const raw_json = JSON.parse(localStorage.getItem('entry'));

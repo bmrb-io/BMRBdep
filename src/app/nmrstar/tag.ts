@@ -88,19 +88,8 @@ export class Tag {
 
   toJSON(key): {} {
     // Clone object to prevent accidentally performing modification on the original object
-    const cloneObj = { ...this as Tag };
 
-    delete cloneObj.valid;
-    delete cloneObj.schema_values;
-    delete cloneObj.fqtn;
-    delete cloneObj.enums;
-    delete cloneObj.parent;
-    delete cloneObj.interface_type;
-    delete cloneObj.data_type;
-    delete cloneObj.validation_message;
-    delete cloneObj.display;
-
-    return cloneObj;
+    return [this.name, this.value];
   }
 
   updateTagStatus() {
