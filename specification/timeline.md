@@ -14,9 +14,11 @@ Uncompleted tasks:
     * Smaller tasks
         * At least one PI is needed in contact person - 1 day
         * Finish adding support for shared-field value suggestions - 1 day
+        * Implement smarter new saveframe names
     * Data file uploading
         * Add functionality to upload files to GUI - 2 days
         * Trigger display/addition of data-related saveframes upon upload - 2 days
+    * Add more thorough error handling everywhere - 1 week
 
 * Validation Tools
     * Write tool to print dictionary diffs - 4 hours
@@ -26,3 +28,5 @@ Uncompleted tasks:
 * Infrastructure
     * Configure new API server cluster - 1-2 days
     * (Maybe) Update API and BMRBDep servers to run inside of docker - 1-2 weeks 
+
+<b>Targeted first beta completion: September 26th.</b>
