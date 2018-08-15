@@ -42,6 +42,7 @@
 7.  Fields that have fixed enumerations
 8.  Fields with open enumerations
 9.  Mandatory fields that are usually applicable, but in some cases may not have true values (pH in pure organic solvents)
+10. Ability to import data from BMRB database (e.g. chem comp information for a ligand or non-standard residue)
 
 ### Data upload/deletion
 1.  What kinds of data to accept?
@@ -83,4 +84,7 @@
 6.  Test over and over again as the system evolves and is updated
 7.  NMRFAM personnel asked to review and provide feedback on UI
 8.  As system nears completion, ask a few outside users (BMRB curators?) to test system
+
+## Analytics support
+1.  Measure time user takes between starting a deposition and completing the deposition
 
