@@ -9,7 +9,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "release": "ng build --prod --env=prod --output-path=release/"
+    "release": "ng build --prod --configuration --output-path=release/"
   },
   "private": true,
   "dependencies": {
