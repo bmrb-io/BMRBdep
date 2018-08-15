@@ -23,12 +23,12 @@ export class LoopComponent implements OnInit {
   // Add another row of data
   addRow() {
     this.loop.addRow();
-    this.api.saveLocal();
+    this.api.saveEntry();
   }
 
   // Delete a row of data
   deleteRow(row_id) {
     this.loop.deleteRow(row_id);
-    this.api.saveLocal();
+    this.api.saveEntry();
   }
 }

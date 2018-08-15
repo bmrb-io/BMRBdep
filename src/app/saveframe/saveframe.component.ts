@@ -34,7 +34,7 @@ export class SaveframeComponent implements OnInit {
   processChange(): void {
     this.saveframe.parent.refresh();
     this.sfReload.emit('reload');
-    this.api.saveLocal();
+    this.api.saveEntry();
   }
 
 }
