@@ -1,6 +1,7 @@
 import {Saveframe} from './saveframe';
 import {Loop} from './loop';
 import {Schema} from './schema';
+import {Entry} from './entry';
 
 export class Tag {
   name: string;
@@ -47,7 +48,10 @@ export class Tag {
 
     // Determine the interface type and data type
     const dt = this.schema_values['BMRB data type'];
-    if (dt === 'yes_no') {
+
+    if (this.schema_values['Enumeration ties']) {
+      this.interface_type = 'open_enum';
+    } else if (dt === 'yes_no') {
       this.interface_type = 'yes_no';
     } else if (dt === 'text') {
       this.interface_type = 'text';
@@ -100,11 +104,16 @@ export class Tag {
 
   updateTagStatus() {
 
-     /* Check that the tag is valid
-     * 1) Matches the data type regex
-     * 2) Is not null unless null is allowed
-     * 3) Is from the enum list if it a mandatory enum
-     */
+    /* Check that the tag is valid
+    * 1) Matches the data type regex
+    * 2) Is not null unless null is allowed
+    * 3) Is from the enum list if it a mandatory enum
+    */
+
+    if (this.schema_values['Enumeration ties']) {
+      this.updateEnumerationTies();
+      this.enums = this.getEntry().enumeration_ties[this.schema_values['Enumeration ties']];
+    }
 
     this.valid = true;
     this.validation_message = '';
@@ -183,6 +192,16 @@ export class Tag {
   }
 
   updateCascade(): void {
+    this.getEntry().refresh(this.schema_values['overrides'], (this.parent as any).category);
+  }
+
+  updateEnumerationTies(): void {
+    if ((this.schema_values['Enumeration ties']) && (this.value)) {
+      this.getEntry().enumeration_ties[this.schema_values['Enumeration ties']].add(this.value);
+    }
+  }
+
+  getEntry(): Entry {
     return null;
   }
 }
@@ -195,20 +214,23 @@ export class SaveframeTag extends Tag {
      this.parent = parent;
   }
 
-  updateCascade(): void {
-    this.parent.parent.refresh(this.schema_values['overrides'], this.parent.category);
+  getEntry(): Entry {
+    return this.parent.parent;
   }
+
 }
 
 export class LoopTag extends Tag {
   parent: Loop;
+
   constructor(name: string, value: string, parent: Loop) {
      super(name, value, parent.category, parent.parent.parent.schema);
      this.parent = parent;
   }
 
-  updateCascade(): void {
-    this.parent.parent.parent.refresh(this.schema_values['overrides'], this.parent.category);
+  getEntry(): Entry {
+    return this.parent.parent.parent;
   }
+
 }
 
