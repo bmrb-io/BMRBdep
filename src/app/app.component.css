@@ -76,20 +76,6 @@ table.alternating tr:hover {
     outline: none;
 }
 
-
-
-
-.details_box {
-    border: solid 2px #33527b;
-    padding: 1em 1em 1em 1em;
-    margin-top: 1em;
-    margin-right: 1em;
-    background-color: #fdfdfe;
-    border-radius: 5px;
-    overflow: auto;
-}
-
-
 header {
     background-color: #cbdbff;
     border: solid 2px #33527b;

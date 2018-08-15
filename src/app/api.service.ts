@@ -1,8 +1,8 @@
 import {Observable, of, throwError as observableThrowError} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map,catchError} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {environment} from '../environments/environment';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
-    this.server_url = 'https://webapi.bmrb.wisc.edu/v2/deposition';
+    this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
     if (!environment.production) {
       this.server_url = 'http://localhost:9000/deposition';
     }
@@ -59,7 +59,16 @@ export class ApiService {
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
     console.log('Saved entry to local storage.');
-    this.saveRemote().subscribe();
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
+    console.log('Storing entry on remote server...');
+    this.http.put(entry_url, JSON.stringify(this.cached_entry), httpOptions).pipe(
+      map(json_data => json_data )).subscribe();
   }
 
   saveRemote(): Observable<any> {
@@ -74,7 +83,19 @@ export class ApiService {
       map(json_data => json_data ));
   }
 
-  // const entry_url = `${this.server_url}/deposition/new`;{'email': 'edu'}
+  newDeposition(author_email: string, orcid: string): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    const entry_url = `${this.server_url}/new`;
+    const body = {'email': author_email, 'orcid': orcid};
+    console.log('Creating new session...');
+    return this.http.post(entry_url, JSON.stringify(body), httpOptions).pipe(
+      map(json_data => json_data),
+      catchError(val => of('I caught.')));
+  }
 
   private loadLocal(): void {
     const raw_json = JSON.parse(localStorage.getItem('entry'));

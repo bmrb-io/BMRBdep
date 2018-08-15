@@ -1,4 +1,15 @@
-<h1>Welcome to the BMRB InstantDep server!</h1>
-<p>
-  Lorem ipsum...
-</p>
+<div class="details_box">
+  <h1>Welcome to BMRBDep!</h1>
+  <div>
+    <h2>Start new deposition</h2>
+    <p>E-mail*: <input required [(ngModel)]="author_email" placeholder="Please enter your e-mail."><br>
+       ORCID: <input [(ngModel)]="author_orcid" placeholder="Please enter your ORCID if you have one." ><br>
+      Click <button (click)="new()"> here</button> to start a new deposition.</p>
+  </div>
+  <div>
+    <h2>Resume deposition</h2>
+    <input type="text" [(ngModel)]="session_id" #name="ngModel" placeholder="Please enter your session ID.">
+    <p *ngIf="validate(); else invalid">Click <button [routerLink]="['/entry', session_id]">here</button> to resume deposition {{session_id}}.</p>
+    <ng-template #invalid><p>Invalid or missing session ID.</ng-template>
+  </div>
+</div>
