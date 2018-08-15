@@ -60,12 +60,13 @@ export class Tag {
           } else if (this.schema_values['Item enumeration closed'] === 'N') {
             this.interface_type = 'open_enum';
           } else {
-            console.log('No enum spec for tag: ' + this.fqtn);
+            console.log('Enum list and "Item enumerated"="Y" but no "Item enumeration closed" value: ' + this.fqtn);
             this.interface_type = 'open_enum';
           }
           // Enum list exists but not open or closed!?
         } else {
-          console.log('Enum list but no "Item enumerated" value: ' , this);
+          console.log('Enum list but no "Item enumerated" value: ' + this.fqtn);
+          this.interface_type = 'open_enum';
         }
       } else {
         this.interface_type = 'standard';
