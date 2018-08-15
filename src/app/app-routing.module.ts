@@ -6,10 +6,9 @@ import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.co
 import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
-{ path: '', redirectTo: 'welcome', pathMatch: 'full'},
+  { path: '', component: WelcomeComponent },
   { path: 'entry/:entry', component: EntryComponent },
-  { path: 'entry/:entry/saveframe/:saveframe_description/:load_type', component: SaveframeEditorComponent },
-  { path: 'welcome', component: WelcomeComponent }
+  { path: 'entry/:entry/saveframe/:saveframe_description/:load_type', component: SaveframeEditorComponent }
 ];
 
 @NgModule({
