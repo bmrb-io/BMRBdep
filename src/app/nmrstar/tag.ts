@@ -89,7 +89,12 @@ export class Tag {
   toJSON(key): {} {
     // Clone object to prevent accidentally performing modification on the original object
 
-    return [this.name, this.value];
+    if (this.value !== null && this.value !== '') {
+      return [this.name, this.value];
+    } else {
+      return [this.name, '.'];
+    }
+
   }
 
   updateTagStatus() {
