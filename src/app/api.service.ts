@@ -37,7 +37,7 @@ export class ApiService {
          // TODO: This probably won't be necessary later
          this.cached_entry.entry_id = entry_id;
          console.log('Loaded entry from API.');
-         this.saveLocal(true);
+         this.saveEntry(true);
          console.log(this.cached_entry);
          return this.cached_entry;
        }));
@@ -52,7 +52,7 @@ export class ApiService {
 
   }*/
 
-  saveLocal(full_save: boolean = false): void {
+  saveEntry(full_save: boolean = false): void {
     if (full_save) {
       localStorage.setItem('schema', JSON.stringify(this.cached_entry.schema));
     }
@@ -69,18 +69,6 @@ export class ApiService {
     console.log('Storing entry on remote server...');
     this.http.put(entry_url, JSON.stringify(this.cached_entry), httpOptions).pipe(
       map(json_data => json_data )).subscribe();
-  }
-
-  saveRemote(): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-    const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
-    console.log('Storing entry on remote server...');
-    return this.http.put(entry_url, JSON.stringify(this.cached_entry), httpOptions).pipe(
-      map(json_data => json_data ));
   }
 
   newDeposition(author_email: string, orcid: string): Observable<any> {
