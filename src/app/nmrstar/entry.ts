@@ -6,10 +6,12 @@ export class Entry {
   saveframes: Saveframe[];
   schema: Schema;
   categories: string[][];
+  enumeration_ties: {};
 
   constructor(data_name: string, saveframes: Saveframe[] = []) {
     this.entry_id = data_name;
     this.saveframes = [];
+    this.enumeration_ties = {};
 
     this.updateCategories();
   }
@@ -116,6 +118,12 @@ export class Entry {
   }
 
   refresh(overrides: {}[] = null, category: string = null): void {
+
+    this.enumeration_ties = {};
+    for (let i = 0; i < 30; i++) {
+      this.enumeration_ties[i] = new Set();
+    }
+
     for (const sf of this.saveframes) {
       sf.refresh(overrides, category);
     }
