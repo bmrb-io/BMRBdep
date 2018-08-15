@@ -11,6 +11,12 @@ export class ApiService {
   cached_entry: Entry;
   server_url: string;
 
+  JSONOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
+
   constructor(private http: HttpClient) {
     this.cached_entry = new Entry('');
     this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
@@ -58,29 +64,20 @@ export class ApiService {
     }
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
-    console.log('Saved entry to local storage.');
 
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
+    // Save to remote server
     const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
-    console.log('Storing entry on remote server...');
-    this.http.put(entry_url, JSON.stringify(this.cached_entry), httpOptions).pipe(
+    this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).pipe(
       map(json_data => json_data )).subscribe();
+
+    console.log('Saved entry.');
   }
 
   newDeposition(author_email: string, orcid: string): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
     const entry_url = `${this.server_url}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     console.log('Creating new session...');
-    return this.http.post(entry_url, JSON.stringify(body), httpOptions).pipe(
+    return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions).pipe(
       map(json_data => json_data),
       catchError(val => of('I caught.')));
   }
