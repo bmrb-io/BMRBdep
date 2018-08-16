@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
       if (!(evt instanceof NavigationEnd)) {
         return;
       }
+      // TODO: This breaks scrolling when pressing the back button...
       window.scrollTo(0, 0);
     });
   }
