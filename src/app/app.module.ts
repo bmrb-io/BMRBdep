@@ -11,7 +11,6 @@ import { AppComponent } from './app.component';
 import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WelcomeComponent } from './welcome/welcome.component';
-import { ApiService } from './api.service';
 
 // For the editor mode
 import { LoopComponent } from './loop/loop.component';
@@ -46,7 +45,6 @@ import { TreeViewComponent } from './treeview/tree-view.component';
     AppRoutingModule,
     UiSwitchModule,
   ],
-  providers: [ApiService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
