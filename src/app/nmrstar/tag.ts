@@ -49,7 +49,7 @@ export class Tag {
     // Determine the interface type and data type
     const dt = this.schema_values['BMRB data type'];
 
-    if (this.schema_values['Enumeration ties']) {
+    if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y')) {
       this.interface_type = 'open_enum';
     } else if (dt === 'yes_no') {
       this.interface_type = 'yes_no';
@@ -110,9 +110,12 @@ export class Tag {
     * 3) Is from the enum list if it a mandatory enum
     */
 
-    if (this.schema_values['Enumeration ties']) {
-      this.updateEnumerationTies();
-      this.enums = this.getEntry().enumeration_ties[this.schema_values['Enumeration ties']];
+    if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y') && (this.value)) {
+      const parentEntry: Entry = this.getEntry();
+      if (parentEntry.enumeration_ties[this.schema_values['Enumeration ties']]) {
+        parentEntry.enumeration_ties[this.schema_values['Enumeration ties']].add(this.value);
+        this.enums = parentEntry.enumeration_ties[this.schema_values['Enumeration ties']];
+      }
     }
 
     this.valid = true;
@@ -133,7 +136,7 @@ export class Tag {
         if (this.enums.indexOf(this.value) < 0) {
           this.valid = false;
           this.validation_message = 'Tag does not match one of the allowed options.';
-      }
+        }
     }
 
     // Just return if we have no parent - prior to asking the parent for tags
@@ -193,12 +196,6 @@ export class Tag {
 
   updateCascade(): void {
     this.getEntry().refresh(this.schema_values['overrides'], (this.parent as any).category);
-  }
-
-  updateEnumerationTies(): void {
-    if ((this.schema_values['Enumeration ties']) && (this.value)) {
-      this.getEntry().enumeration_ties[this.schema_values['Enumeration ties']].add(this.value);
-    }
   }
 
   getEntry(): Entry {

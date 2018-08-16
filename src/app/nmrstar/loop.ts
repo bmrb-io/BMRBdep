@@ -26,6 +26,8 @@ export class Loop {
       }
       reduced_data.push(row);
     }
+
+    // Set the loop data to return
     cloneObj.data = reduced_data;
 
     return cloneObj;
@@ -53,16 +55,6 @@ export class Loop {
       const row = [];
       for (let c = 0; c < data[r].length; c++) {
         const new_tag = new LoopTag(this.tags[c], data[r][c], this);
-        if (['Y', 'N'].indexOf(new_tag.display) >= 0) {
-          if (this.display === 'N') {
-            if (new_tag.display === 'Y') {
-              this.display = 'Y';
-            }
-          }
-          if (this.display === 'H') {
-            this.display = new_tag.display;
-          }
-        }
         row.push(new_tag);
       }
       this.data.push(row);

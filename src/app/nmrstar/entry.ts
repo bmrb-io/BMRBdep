@@ -21,6 +21,7 @@ export class Entry {
 
     delete cloneObj.schema;
     delete cloneObj.categories;
+    delete cloneObj.enumeration_ties;
     return cloneObj;
   }
 
