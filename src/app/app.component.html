@@ -13,6 +13,7 @@
         <div>
 			    <router-outlet></router-outlet>
 		    </div>
+        <div *ngIf="message" class="messages">{{message}}</div>
     </body>
 </html>
 

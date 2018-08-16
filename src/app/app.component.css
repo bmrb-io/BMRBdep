@@ -126,3 +126,12 @@ li a:hover {
 .left_align {
     text-align: left;
 }
+
+.messages {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+
+  left: 50%;
+  transform: translate(0, -50%);
+}

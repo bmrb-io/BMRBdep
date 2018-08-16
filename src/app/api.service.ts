@@ -4,8 +4,11 @@ import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {environment} from '../environments/environment';
+import {MessagesService} from './messages.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiService {
 
   cached_entry: Entry;
@@ -17,7 +20,8 @@ export class ApiService {
     })
   };
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+              private messagesService: MessagesService) {
     this.cached_entry = new Entry('');
     this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
     if (!environment.production) {
@@ -61,7 +65,7 @@ export class ApiService {
     if (!initial_save) {
       const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
-        x => x,
+        () => this.messagesService.sendMessage('Entry saved.'),
         () => console.log('Error saving!')
       );
     }

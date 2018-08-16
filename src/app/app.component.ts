@@ -1,14 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
+import { MessagesService } from './messages.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
 
-  constructor(private router: Router) { }
+  subscription: Subscription;
+  message: string;
+
+  constructor(private router: Router,
+              private messagesService: MessagesService) {
+    this.subscription = this.messagesService.getMessage().subscribe(message => { this.message = message['text']; });
+  }
+
+  ngOnDestroy() {
+    // unsubscribe to ensure no memory leaks
+    this.subscription.unsubscribe();
+  }
 
   ngOnInit() {
     console.log('InstantDep version .2');
