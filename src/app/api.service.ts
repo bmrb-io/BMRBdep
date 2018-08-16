@@ -1,8 +1,8 @@
-import {Observable, of, throwError as observableThrowError} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, of, throwError} from 'rxjs';
+import {map, catchError} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {environment} from '../environments/environment';
 
 @Injectable()
@@ -71,8 +71,16 @@ export class ApiService {
     const entry_url = `${this.server_url}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     console.log('Creating new session...');
-    return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions).pipe(
-      map(json_data => json_data));
+    return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions)
+      .pipe(
+        map(json_data => json_data),
+        // Convert the error into something we can handle
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 400) {
+            return of(error.error);
+          }
+        })
+      );
   }
 
   private loadLocal(): void {
@@ -92,9 +100,20 @@ export class ApiService {
    * https://stackoverflow.com/questions/20773945/storing-compressed-json-data-in-local-storage
    */
 
-  // .catch(this.handleError)
-  private handleError(error: Response) {
-    return observableThrowError(error.statusText);
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred. Handle it accordingly.
+      console.error('An error occurred:', error.error.message);
+    } else {
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong,
+      console.error(
+        `Backend returned code ${error.status}, ` +
+        'body was:', error.error);
+    }
+    // return an observable with a user-facing error message
+    return throwError(
+      'Something bad happened; please try again later.');
   }
 
 }
