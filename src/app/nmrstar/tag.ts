@@ -91,7 +91,7 @@ export class Tag {
     console.log(this);
   }
 
-  toJSON(key): {} {
+  toJSON(): {} {
     // Clone object to prevent accidentally performing modification on the original object
 
     if (this.value !== null && this.value !== '') {
@@ -146,13 +146,14 @@ export class Tag {
     if (this.schema_values['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       this.interface_type = 'closed_enum';
-      const frames_of_category: any[] = (this.parent as any).getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
+      const frames_of_category: any[] = this.getEntry().getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
       if (frames_of_category.length > 0) {
         this.enums = [];
         for (const sf of frames_of_category) {
           this.enums.push('$' + sf.name);
         }
       } else {
+        console.log('Sf pointer set to \'Y\' but no tags!', this);
         this.enums = ['No saveframes of category ' + this.schema_values['Foreign Table'] + ' found in entry. Please create at least one.'];
         this.valid = false;
       }
