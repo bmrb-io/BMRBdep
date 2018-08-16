@@ -11,11 +11,13 @@ export class WelcomeComponent implements OnInit {
   session_id: string;
   author_email: string;
   author_orcid: string;
+  error: string;
 
   constructor(private router: Router, private api: ApiService) {
     this.session_id = '';
     this.author_email = '';
     this.author_orcid = '';
+    this.error = '';
   }
 
   ngOnInit() {
@@ -29,8 +31,7 @@ export class WelcomeComponent implements OnInit {
   new() {
     this.api.newDeposition(this.author_email, this.author_orcid).subscribe(response => {
       if (response['error']) {
-        alert(response['error']);
-        console.log(response['error']);
+        this.error = response['error'];
       } else {
         this.router.navigate(['/entry/', response['deposition_id']]);
       }
