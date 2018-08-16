@@ -1,8 +1,8 @@
 import {Observable, of, throwError as observableThrowError} from 'rxjs';
-import {map,catchError} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from '../environments/environment';
 
 @Injectable()
@@ -49,14 +49,6 @@ export class ApiService {
        }));
     }
   }
-/*
-  getSchema(): Observable<Schema> {
-    const schema_url = 'http://localhost:8000/schema';
-      return this.http.get(schema_url).map(json_data => {
-        return new Schema(json_data['version'], json_data['headers'], json_data['tags'], json_data['data_types']);
-     });
-
-  }*/
 
   saveEntry(initial_save: boolean = false): void {
     if (initial_save) {
@@ -80,8 +72,7 @@ export class ApiService {
     const body = {'email': author_email, 'orcid': orcid};
     console.log('Creating new session...');
     return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions).pipe(
-      map(json_data => json_data),
-      catchError(val => of('I caught.')));
+      map(json_data => json_data));
   }
 
   private loadLocal(): void {
