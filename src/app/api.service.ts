@@ -58,19 +58,21 @@ export class ApiService {
 
   }*/
 
-  saveEntry(full_save: boolean = false): void {
-    if (full_save) {
+  saveEntry(initial_save: boolean = false): void {
+    if (initial_save) {
       localStorage.setItem('schema', JSON.stringify(this.cached_entry.schema));
     }
     localStorage.setItem('entry', JSON.stringify(this.cached_entry));
     localStorage.setItem('entry_key', this.cached_entry.entry_id);
 
-    // Save to remote server
-    const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
-    this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).pipe(
-      map(json_data => json_data )).subscribe();
-
-    console.log('Saved entry.');
+    // Save to remote server if we haven't just loaded the entry
+    if (!initial_save) {
+      const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
+      this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
+        x => x,
+        () => console.log('Error saving!')
+      );
+    }
   }
 
   newDeposition(author_email: string, orcid: string): Observable<any> {
