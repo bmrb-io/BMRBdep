@@ -2,9 +2,10 @@
   <h1>Welcome to BMRBDep!</h1>
   <div>
     <h2>Start new deposition</h2>
-    <p>E-mail*: <input required [(ngModel)]="author_email" placeholder="Please enter your e-mail."><br>
+    <p>E-mail: <input [(ngModel)]="author_email" placeholder="Please enter your e-mail." [class.red-background]="!author_email"><br>
        ORCID: <input [(ngModel)]="author_orcid" placeholder="Please enter your ORCID if you have one." ><br>
-      Click <button (click)="new()"> here</button> to start a new deposition.</p>
+      <span *ngIf="error" class="red">{{error}}</span><br>
+       Click <button (click)="new()"> here</button> to start a new deposition.</p>
   </div>
   <div>
     <h2>Resume deposition</h2>

@@ -25,3 +25,11 @@ input[type="submit"], input[type="reset"], input[type="button"], input[type="fil
   display: inline-block;
   background: #EDEDED;
 }
+
+.red {
+  color: red;
+}
+
+.red-background {
+  background-color: #FF91A4 !important;
+}
