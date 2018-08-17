@@ -48,6 +48,9 @@ export class MessagesService {
 
   sendMessage(message: Message) {
     this.subject.next(message);
+    setTimeout(() => {
+      this.clearMessage();
+    }, message.messageTimeout);
   }
 
   clearMessage() {
