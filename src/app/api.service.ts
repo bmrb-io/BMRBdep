@@ -1,5 +1,5 @@
 import {Observable, of, throwError} from 'rxjs';
-import {map, catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
@@ -30,27 +30,31 @@ export class ApiService {
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
+    // If all we did was reroute, we still have the entry
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
       console.log('Loaded entry from session memory.');
       console.log(this.cached_entry);
       return of(this.cached_entry);
+    // The page is being reloaded, but we can get the entry from the browser cache
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
       console.log(this.cached_entry);
       return of (this.cached_entry);
+    // We either don't have the entry or have a different one, so fetch from the API
     } else {
-      console.log(environment);
       const entry_url = `${this.server_url}/${entry_id}`;
       return this.http.get(entry_url).pipe(
           map(json_data => {
-            this.cached_entry = entryFromJSON(json_data);
-         // TODO: This probably won't be necessary later
-         this.cached_entry.entry_id = entry_id;
-         console.log('Loaded entry from API.');
-         this.saveEntry(true);
-         console.log(this.cached_entry);
-         return this.cached_entry;
-       }));
+              this.cached_entry = entryFromJSON(json_data);
+              // TODO: This probably won't be necessary later
+              this.cached_entry.entry_id = entry_id;
+              console.log('Loaded entry from API.');
+              this.saveEntry(true);
+              console.log(this.cached_entry);
+              return this.cached_entry;
+           }),
+        catchError((error: HttpErrorResponse) => this.handleError(error))
+      );
     }
   }
 
@@ -67,7 +71,7 @@ export class ApiService {
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
         () => this.messagesService.sendMessage(new Message('Changes saved.') ),
         () => this.messagesService.sendMessage(new Message('Failed to save changes on the server. Changes are saved ' +
-          'locally in your browser. If this message persists, <a href="mailto:bmrbhelp@bmrb.wisc.edu">please contact us</a>.',
+          'locally in your browser. If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.',
                                                                  MessageType.WarningMessage, 10000 ))
       );
     }
@@ -113,19 +117,11 @@ export class ApiService {
    */
 
   private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      console.error('An error occurred:', error.error.message);
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        'body was:', error.error);
-    }
-    // return an observable with a user-facing error message
-    return throwError(
-      'Something bad happened; please try again later.');
+    this.messagesService.sendMessage(new Message('A network or server exception occurred. If this message persists, please ' +
+        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000 ))
+    console.error('An unhandled server error code occurred:', error);
+    return throwError('Some sort of exception happened, and was presented to the user.');
   }
+
 
 }
