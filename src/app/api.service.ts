@@ -77,7 +77,7 @@ export class ApiService {
     const entry_url = `${this.server_url}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
-      MessageType.NotificationMessage, 3000 ));
+      MessageType.NotificationMessage, 0 ));
     return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions)
       .pipe(
         map(json_data => {
