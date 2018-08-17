@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable, Subject} from 'rxjs';
 
 export enum MessageType {
   SuccessMessage,
@@ -22,16 +22,16 @@ export class Message {
   }
 
   getClass() {
-    if (this.messageType === MessageType.SuccessMessage){
+    if (this.messageType === MessageType.SuccessMessage) {
       return 'SuccessMessage';
     }
-    if (this.messageType === MessageType.WarningMessage){
+    if (this.messageType === MessageType.WarningMessage) {
       return 'WarningMessage';
     }
-    if (this.messageType === MessageType.ErrorMessage){
+    if (this.messageType === MessageType.ErrorMessage) {
       return 'ErrorMessage';
     }
-    if (this.messageType === MessageType.NotificationMessage){
+    if (this.messageType === MessageType.NotificationMessage) {
       return 'NotificationMessage';
     }
   }
@@ -43,17 +43,31 @@ export class Message {
 export class MessagesService {
 
   private subject = new Subject<any>();
+  private lastTimeout;
 
-  constructor() { }
+  constructor() {
+    this.lastTimeout = null;
+  }
+
+  private cancelTimeout(): void {
+    if (this.lastTimeout){
+      clearTimeout(this.lastTimeout);
+    }
+    this.lastTimeout = null;
+  }
 
   sendMessage(message: Message) {
+    this.cancelTimeout();
+    // Send the message
     this.subject.next(message);
-    setTimeout(() => {
+    // Store the timeout in case we need to cancel it
+    this.lastTimeout = setTimeout(() => {
       this.clearMessage();
     }, message.messageTimeout);
   }
 
   clearMessage() {
+    this.cancelTimeout();
     this.subject.next();
   }
 
