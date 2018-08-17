@@ -22,7 +22,11 @@ export class Loop {
     for (let r = 0; r < this.data.length; r++) {
       const row = [];
       for (let c = 0; c < this.data[r].length; c++) {
-        row.push(this.data[r][c].value);
+        if ((!this.data[r][c].value) || (this.data[r][c].value === '')){
+          row.push('.');
+        } else {
+          row.push(this.data[r][c].value);
+        }
       }
       reduced_data.push(row);
     }
