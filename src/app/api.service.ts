@@ -4,7 +4,7 @@ import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {environment} from '../environments/environment';
-import {MessagesService} from './messages.service';
+import {Message, MessagesService, MessageType} from './messages.service';
 
 @Injectable({
   providedIn: 'root'
@@ -65,8 +65,10 @@ export class ApiService {
     if (!initial_save) {
       const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
-        () => this.messagesService.sendMessage('Entry saved.'),
-        () => console.log('Error saving!')
+        () => this.messagesService.sendMessage(new Message('Changes saved.') ),
+        () => this.messagesService.sendMessage(new Message('Failed to save changes on the server. Changes are saved ' +
+          'locally in your browser. If this message persists, <a href="mailto:bmrbhelp@bmrb.wisc.edu">please contact us</a>.',
+                                                                 MessageType.WarningMessage, 10000 ))
       );
     }
   }
@@ -81,7 +83,10 @@ export class ApiService {
         // Convert the error into something we can handle
         catchError((error: HttpErrorResponse) => {
           if (error.status === 400) {
-            return of(error.error);
+            console.log(error.error);
+            this.messagesService.sendMessage(new Message(error.error.error,
+              MessageType.WarningMessage, 10000 ))
+            return of(null);
           }
         })
       );

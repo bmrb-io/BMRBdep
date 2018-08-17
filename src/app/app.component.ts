@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { MessagesService } from './messages.service';
+import { Message, MessagesService } from './messages.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -11,15 +11,18 @@ import { Subscription } from 'rxjs';
 export class AppComponent implements OnInit, OnDestroy {
 
   subscription: Subscription;
-  message: string;
+  message: Message;
 
   constructor(private router: Router,
               private messagesService: MessagesService) {
-    this.subscription = this.messagesService.getMessage().subscribe(message => { this.message = message['text']; });
+
+    this.subscription = this.messagesService.getMessage().subscribe(message => {
+      this.message = message;
+      setTimeout(() => {this.message = null; }, message.messageTimeout);
+    });
   }
 
   ngOnDestroy() {
-    // unsubscribe to ensure no memory leaks
     this.subscription.unsubscribe();
   }
 
@@ -31,7 +34,6 @@ export class AppComponent implements OnInit, OnDestroy {
       if (!(evt instanceof NavigationEnd)) {
         return;
       }
-      // TODO: This breaks scrolling when pressing the back button...
       window.scrollTo(0, 0);
     });
   }
