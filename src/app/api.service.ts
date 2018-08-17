@@ -76,14 +76,17 @@ export class ApiService {
   newDeposition(author_email: string, orcid: string): Observable<any> {
     const entry_url = `${this.server_url}/new`;
     const body = {'email': author_email, 'orcid': orcid};
-    console.log('Creating new session...');
+    this.messagesService.sendMessage(new Message('Creating deposition...',
+      MessageType.NotificationMessage, 3000 ));
     return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions)
       .pipe(
-        map(json_data => json_data),
+        map(json_data => {
+          this.messagesService.clearMessage();
+          return json_data;
+        }),
         // Convert the error into something we can handle
         catchError((error: HttpErrorResponse) => {
           if (error.status === 400) {
-            console.log(error.error);
             this.messagesService.sendMessage(new Message(error.error.error,
               MessageType.WarningMessage, 10000 ))
             return of(null);

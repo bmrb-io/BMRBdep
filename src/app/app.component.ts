@@ -18,7 +18,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.subscription = this.messagesService.getMessage().subscribe(message => {
       this.message = message;
-      setTimeout(() => {this.message = null; }, message.messageTimeout);
     });
   }
 
