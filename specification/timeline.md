@@ -9,7 +9,6 @@ Uncompleted tasks:
         * Update GUI - 1 day
     * Write code to "submit" deposition into existing pipeline 2-3 days
     * ORCID
-        * Implement autofilling of user-values based on ORCID - 1 day
         * Implement ORCID validation using OpenAuth flow - ~1 week
     * Smaller tasks
         * At least one PI is needed in contact person - 1 day
