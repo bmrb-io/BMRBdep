@@ -61,9 +61,11 @@ export class MessagesService {
     // Send the message
     this.subject.next(message);
     // Store the timeout in case we need to cancel it
-    this.lastTimeout = setTimeout(() => {
-      this.clearMessage();
-    }, message.messageTimeout);
+    if (message.messageTimeout){
+      this.lastTimeout = setTimeout(() => {
+        this.clearMessage();
+      }, message.messageTimeout);
+    }
   }
 
   clearMessage() {
