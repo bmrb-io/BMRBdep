@@ -10,12 +10,7 @@ export class Loop {
   schema_values: {}[];
   display: string;
 
-  toJSON(key): {} {
-    // Clone object to prevent accidentally performing modification on the original object
-    const cloneObj = { ...this as Loop };
-    delete cloneObj.parent;
-    delete cloneObj.schema_values;
-    delete cloneObj.display;
+  toJSON(): {} {
 
     // Turn the loop tags into a simple array of values
     const reduced_data = [];
@@ -31,10 +26,7 @@ export class Loop {
       reduced_data.push(row);
     }
 
-    // Set the loop data to return
-    cloneObj.data = reduced_data;
-
-    return cloneObj;
+    return {category: this.category, tags: this.tags, data: reduced_data};
   }
 
   constructor (category: string, tags: string[], data: string[][], parent: Saveframe) {
