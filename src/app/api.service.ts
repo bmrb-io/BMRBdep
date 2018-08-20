@@ -70,8 +70,9 @@ export class ApiService {
       const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
         () => this.messagesService.sendMessage(new Message('Changes saved.') ),
-        () => this.messagesService.sendMessage(new Message('Failed to save changes on the server. Changes are saved ' +
-          'locally in your browser. If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.',
+        () => this.messagesService.sendMessage(new Message('Failed to save changes on the BMRB server. Changes are saved ' +
+          'locally in your browser, and no data has been lost. If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu">' +
+          ' contact us</a>.',
                                                                  MessageType.WarningMessage, 10000 ))
       );
     }
@@ -92,7 +93,7 @@ export class ApiService {
         catchError((error: HttpErrorResponse) => {
           if (error.status === 400) {
             this.messagesService.sendMessage(new Message(error.error.error,
-              MessageType.WarningMessage, 10000 ))
+              MessageType.WarningMessage, 10000 ));
             return of(null);
           }
         })
@@ -100,6 +101,7 @@ export class ApiService {
   }
 
   private loadLocal(): void {
+    // TODO: This will throw an uncaught exception if entry_key in local storage but the entry itself isn't
     const raw_json = JSON.parse(localStorage.getItem('entry'));
     raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
     this.cached_entry = entryFromJSON(raw_json);
@@ -118,7 +120,7 @@ export class ApiService {
 
   private handleError(error: HttpErrorResponse) {
     this.messagesService.sendMessage(new Message('A network or server exception occurred. If this message persists, please ' +
-        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000 ))
+        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000 ));
     console.error('An unhandled server error code occurred:', error);
     return throwError('Some sort of exception happened, and was presented to the user.');
   }
