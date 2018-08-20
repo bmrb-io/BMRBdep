@@ -16,13 +16,9 @@ export class Schema {
   saveframe_schema: TagDataMap;
 
 
-  toJSON(key): {} {
-    const cloneObj = { ...this as Schema };
-
-    delete cloneObj.schema;
-    delete cloneObj.override_dict;
-    delete cloneObj.saveframe_schema;
-    return cloneObj;
+  toJSON(): {} {
+    return {version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.data_types,
+            overrides: this.overrides};
   }
 
   constructor (json: Object) {
@@ -96,7 +92,6 @@ export class Schema {
       this.saveframe_schema[saveframe_category] = tt;
     }
 
-    console.log(this);
   }
 
 

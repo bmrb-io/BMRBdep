@@ -16,13 +16,8 @@ export class Entry {
     this.updateCategories();
   }
 
-  toJSON(key): {} {
-    const cloneObj = { ...this as Entry };
-
-    delete cloneObj.schema;
-    delete cloneObj.categories;
-    delete cloneObj.enumeration_ties;
-    return cloneObj;
+  toJSON(): {} {
+    return {entry_id: this.entry_id, saveframes: this.saveframes};
   }
 
   /* Return the position of a given saveframe in the saveframe list. */
