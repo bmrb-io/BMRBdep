@@ -22,10 +22,17 @@
   <tbody>
     <tr>
       <td>
-        <input type="file" (change)="selectFile($event)" placeholder="Upload file" accept=".pdf,.doc,.txt,.csv">
+        <input type="file" (change)="selectFile($event)" placeholder="Upload file">
       </td>
-      <td>
-        <span>Select type or whatever</span>
+      <td class="invisible">
+          <ng-multiselect-dropdown
+            placeholder="Please select the data type(s) for this file."
+            [data]="dropdownList"
+            [(ngModel)]="selectedItems"
+            [settings]="dropdownSettings"
+            (onSelect)="onItemSelect($event)"
+            (onSelectAll)="onSelectAll($event)">
+          </ng-multiselect-dropdown><button>Upload</button>
       </td>
     </tr>
   </tbody>

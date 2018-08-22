@@ -33,3 +33,9 @@ td {
   border: 1px solid #666699;
   padding: 0 0.25em;
 }
+
+.invisible {
+  background-color: white;
+  padding: 6px;
+  margin: 0;
+}
