@@ -1,1 +1,25 @@
-<input type="file" (change)="selectFile($event)" placeholder="Upload file" multiple> <!-- accept=".pdf,.doc,.txt,.csv"-->
+<table style="width: 100%">
+  <colgroup>
+    <col span="1" style="width: 20%;">
+    <col span="1" style="width: 70%;">
+  </colgroup>
+
+  <thead>
+  <tr>
+    <th>
+      <a class="header_text">Deposit data files</a>
+    </th>
+    <th>
+      <div style="text-align: right; float: right">
+        <a class="fake_button line"
+           [routerLink]="['/entry', api.getEntryID(), 'saveframe', 'deposited_data_files', 'category']">
+          View sections of this category
+        </a>
+      </div>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+
+  </tbody>
+</table>
