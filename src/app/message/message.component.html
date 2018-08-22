@@ -1,9 +1,9 @@
 <div *ngIf="message"
-     [ngClass]="{'message.messageType == messageType.ErrorMessage': 'ErrorMessage',
-                'message.messageType == messageType.WarningMessage': 'WarningMessage',
-                'message.messageType == messageType.SuccessMessage': 'SuccessMessage',
-                'message.messageType == messageType.NotificationMessage': 'NotificationMessage',
-                'true': 'messages'}">
+     [ngClass]="{ErrorMessage: message.messageType == messageType.ErrorMessage,
+                 WarningMessage: message.messageType == messageType.WarningMessage,
+                 SuccessMessage: message.messageType == messageType.SuccessMessage,
+                 NotificationMessage: message.messageType == messageType.NotificationMessage,
+                 messages: 'true'}">
   {{message.messageBody}}
   <span *ngIf="message.messageType == messageType.ErrorMessage || message.messageType == messageType.WarningMessage">
     If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Reporting issue with deposition server">contact us</a>.
