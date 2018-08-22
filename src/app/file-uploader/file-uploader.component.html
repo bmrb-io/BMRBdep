@@ -6,7 +6,7 @@
 
   <thead>
   <tr>
-    <th>
+    <th (contextmenu)="saveframe.log()">
       <a class="header_text">Deposit data files</a>
     </th>
     <th>
@@ -20,6 +20,13 @@
   </tr>
   </thead>
   <tbody>
-
+    <tr>
+      <td>
+        <input type="file" (change)="selectFile($event)" placeholder="Upload file" accept=".pdf,.doc,.txt,.csv">
+      </td>
+      <td>
+        <span>Select type or whatever</span>
+      </td>
+    </tr>
   </tbody>
 </table>
