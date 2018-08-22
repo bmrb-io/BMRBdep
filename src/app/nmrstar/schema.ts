@@ -8,6 +8,7 @@ export class Schema {
   tags: {};
   saveframes: {};
   data_types = {};
+  file_upload_types;
   overrides: {};
   override_dict = {};
 
@@ -18,7 +19,7 @@ export class Schema {
 
   toJSON(): {} {
     return {version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.data_types,
-            overrides: this.overrides};
+            overrides: this.overrides, file_upload_types: this.file_upload_types};
   }
 
   constructor (json: Object) {
@@ -28,6 +29,7 @@ export class Schema {
     this.data_types = json['data_types'];
     this.overrides = json['overrides'];
     this.saveframes = json['saveframes'];
+    this.file_upload_types = json['file_upload_types'];
     this.schema = {};
     this.saveframe_schema = {};
     this.override_dict = {};

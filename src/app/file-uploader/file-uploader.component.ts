@@ -10,10 +10,30 @@ import {Saveframe} from '../nmrstar/saveframe';
 export class FileUploaderComponent implements OnInit {
 
   @Input() saveframe: Saveframe;
+  public dropdownList;
+  public selectedItems;
+  public dropdownSettings = {
+    singleSelection: false,
+    idField: 1,
+    textField: 0,
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    allowSearchFilter: true,
+    enableCheckAll: false,
+  };
 
   constructor(public api: ApiService) { }
 
   ngOnInit() {
+    this.dropdownList = this.saveframe.parent.schema.file_upload_types;
+    this.selectedItems = [];
+  }
+
+  onItemSelect (item: any) {
+    console.log(item);
+  }
+  onSelectAll (items: any) {
+    console.log(items);
   }
 
   // At the drag drop area
