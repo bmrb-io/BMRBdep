@@ -1,54 +1,56 @@
-<div *ngIf="saveframe.display == 'Y' || (show_all && saveframe.display == 'N')">
+<app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal"></app-file-uploader>
+<ng-template #normal>
+  <div *ngIf="saveframe.display == 'Y' || (show_all && saveframe.display == 'N')">
 
-	<table style="width: 100%">
-		<colgroup>
-	       <col span="1" style="width: 20%;">
-	       <col span="1" style="width: 70%;">
-	    </colgroup>
+    <table style="width: 100%">
+      <colgroup>
+           <col span="1" style="width: 20%;">
+           <col span="1" style="width: 70%;">
+        </colgroup>
 
-		<thead>
-			<tr>
-			  <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
-				<a class="header_text" [title]="saveframe.schema_values['group_view_help']">
-				   {{saveframe.schema_values['category_group_view_name']}}
-				</a>
-			  </th>
-			  <th>
-			  	<div style="text-align: right; float: right">
-			      <a class="fake_button line"
-			        *ngIf="saveframe.schema_values['ADIT replicable'] === 'Y'"
-			        (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
-				  <a class="fake_button line"
-				    *ngIf="saveframe.schema_values['ADIT replicable'] === 'Y'"
-				    (click)='saveframe.duplicate(true); processChange()'>Create New</a>
-				  <a class="fake_button line"
-				    *ngIf="saveframe.index >= saveframe.schema_values['mandatory_number']"
-				    (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
-				  <a class="fake_button line"
-				    *ngIf="show_category_link"
-				    [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
-			    </div>
-			  </th>
-			</tr>
-		</thead>
-		<tbody>
-		<ng-container *ngFor="let sftag of saveframe.tags">
-	      	<tr *ngIf="sftag.display == 'Y' || (show_all && sftag.display == 'N')"
-	      		(contextmenu)="sftag.log()">
-	      		<td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
-				  	[innerHTML]="sftag.schema_values['Prompt']"
-				  	[title]="sftag.schema_values['Interface']"
-				  	(click)="active_tag = (active_tag != sftag ? sftag : null)">
-				</td>
-				<td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
-		        	<app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name" ></app-tag>
-		        </td>
-			</tr>
-		</ng-container>
-		</tbody>
-	</table>
+      <thead>
+        <tr>
+          <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
+          <a class="header_text" [title]="saveframe.schema_values['group_view_help']">
+             {{saveframe.schema_values['category_group_view_name']}}
+          </a>
+          </th>
+          <th>
+            <div style="text-align: right; float: right">
+              <a class="fake_button line"
+                *ngIf="saveframe.schema_values['ADIT replicable'] === 'Y'"
+                (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
+            <a class="fake_button line"
+              *ngIf="saveframe.schema_values['ADIT replicable'] === 'Y'"
+              (click)='saveframe.duplicate(true); processChange()'>Create New</a>
+            <a class="fake_button line"
+              *ngIf="saveframe.index >= saveframe.schema_values['mandatory_number']"
+              (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
+            <a class="fake_button line"
+              *ngIf="show_category_link"
+              [routerLink]="['/entry', saveframe.parent.entry_id, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let sftag of saveframe.tags">
+            <tr *ngIf="sftag.display == 'Y' || (show_all && sftag.display == 'N')"
+              (contextmenu)="sftag.log()">
+              <td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
+              [innerHTML]="sftag.schema_values['Prompt']"
+              [title]="sftag.schema_values['Interface']"
+              (click)="active_tag = (active_tag != sftag ? sftag : null)">
+          </td>
+          <td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
+                <app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name" ></app-tag>
+              </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
 
-	<div *ngIf='active_tag' class='tag_info_box'>
+    <div *ngIf='active_tag' class='tag_info_box'>
       <b>{{active_tag.schema_values['Prompt']}}</b>
       <p>{{active_tag.schema_values['Interface']}}</p>
       <p *ngIf="active_tag.schema_values['Example'] != '?'"><b>Example:</b> {{active_tag.schema_values['Example']}}</p>
@@ -58,7 +60,6 @@
 
     <ng-container *ngFor='let loop of saveframe.loops'>
       <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && show_all)" [loop]='loop' [show_all]="show_all"></app-loop>
-	</ng-container>
-</div>
-
-
+    </ng-container>
+  </div>
+</ng-template>
