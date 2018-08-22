@@ -2,10 +2,9 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest, HttpEventType, HttpResponse} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
-import {HttpEventType, HttpResponse} from '../../node_modules/@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
