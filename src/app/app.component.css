@@ -126,32 +126,3 @@ li a:hover {
 .left_align {
     text-align: left;
 }
-
-.messages {
-  /* Center the display on the bottom. */
-  position: fixed;
-  bottom: 1em;
-  left: 50%;
-  transform: translate(-50%, 0);
-
-  padding: 1em;
-  border-radius: 3px;
-  border: 2px solid;
-}
-
-.SuccessMessage {
-  background-color: #a4f29e;
-}
-
-.WarningMessage {
-  background-color: #f2807a;
-}
-
-.ErrorMessage {
-  background-color: #f24b3d;
-  font-weight: bold;
-}
-
-.NotificationMessage {
-  background-color: #cbdbff;
-}

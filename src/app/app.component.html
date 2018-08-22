@@ -13,9 +13,7 @@
         <div>
 			    <router-outlet></router-outlet>
 		    </div>
-        <div *ngIf="message"
-             [innerHTML]="message.messageBody | keepHtml"
-             [ngClass]="[message.getClass(), 'messages']"></div>
+        <app-message [message]="message"></app-message>
     </body>
 </html>
 
