@@ -1,4 +1,4 @@
-<app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal"></app-file-uploader>
+<app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal" [saveframe]="saveframe"></app-file-uploader>
 <ng-template #normal>
   <div *ngIf="saveframe.display == 'Y' || (show_all && saveframe.display == 'N')">
 
