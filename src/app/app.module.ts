@@ -6,6 +6,8 @@ import { HttpClientModule } from '@angular/common/http';
 // https://github.com/webcat12345/ngx-ui-switch
 // https://www.npmjs.com/package/angular2-ui-switch
 import { UiSwitchModule } from 'ngx-ui-switch';
+// https://www.npmjs.com/package/ng-multiselect-dropdown
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 
 import { AppComponent } from './app.component';
 import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
@@ -22,7 +24,6 @@ import { LoopViewComponent } from './view_mode/loop/loop-view.component';
 import { SaveframeViewComponent } from './view_mode/saveframe/saveframe-view.component';
 import { TagComponent } from './tag/tag.component';
 import { TreeViewComponent } from './treeview/tree-view.component';
-import { KeepHtmlPipe } from './pipes/keep-html.pipe';
 import { FileUploaderComponent } from './file-uploader/file-uploader.component';
 import { MessageComponent } from './message/message.component';
 
@@ -40,7 +41,6 @@ import { MessageComponent } from './message/message.component';
     SaveframeViewComponent,
     TagComponent,
     TreeViewComponent,
-    KeepHtmlPipe,
     FileUploaderComponent,
     MessageComponent,
   ],
@@ -50,6 +50,7 @@ import { MessageComponent } from './message/message.component';
     HttpClientModule,
     AppRoutingModule,
     UiSwitchModule,
+    NgMultiSelectDropDownModule.forRoot()
   ],
   bootstrap: [AppComponent]
 })
