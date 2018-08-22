@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
+import {Saveframe} from '../nmrstar/saveframe';
 
 @Component({
   selector: 'app-file-uploader',
@@ -7,6 +8,8 @@ import {ApiService} from '../api.service';
   styleUrls: ['./file-uploader.component.css']
 })
 export class FileUploaderComponent implements OnInit {
+
+  @Input() saveframe: Saveframe;
 
   constructor(public api: ApiService) { }
 
