@@ -18,9 +18,11 @@ Uncompleted tasks:
         * Add functionality to upload files to GUI - 2 days
         * Trigger display/addition of data-related saveframes upon upload - 2 days
     * Add more thorough error handling everywhere - 1 week
+    * Add some sort of session support to prevent simultaneous 
+    browser changes and potential data loss - 2 days
 
 * Validation Tools
-    * Write tool to print dictionary diffs - 4 hours
+    * Write tool to print dictionary diffs - 1 day
     * Write protractor tests for GUI - 2 days
     * Write more dictionary sanity-checks - 1 day
      
