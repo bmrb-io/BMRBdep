@@ -24,6 +24,7 @@ import { TagComponent } from './tag/tag.component';
 import { TreeViewComponent } from './treeview/tree-view.component';
 import { KeepHtmlPipe } from './pipes/keep-html.pipe';
 import { FileUploaderComponent } from './file-uploader/file-uploader.component';
+import { MessageComponent } from './message/message.component';
 
 
 
@@ -41,6 +42,7 @@ import { FileUploaderComponent } from './file-uploader/file-uploader.component';
     TreeViewComponent,
     KeepHtmlPipe,
     FileUploaderComponent,
+    MessageComponent,
   ],
   imports: [
     BrowserModule,

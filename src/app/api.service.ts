@@ -2,9 +2,10 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
+import {HttpEventType, HttpResponse} from '../../node_modules/@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,7 @@ export class ApiService {
   }
 
   // file from event.target.files[0]
-  uploadFile(file: File): Observable<HttpEvent<any>> {
+  uploadFile(file: File): boolean {
 
     const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file`;
 
@@ -43,9 +44,20 @@ export class ApiService {
     };
 
     const req = new HttpRequest('POST', apiEndPoint, formData, options);
-    return this.http.request(req);
+    this.http.request(req).pipe(
+      map(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const percentDone = Math.round(100 * event.loaded / event.total);
+          this.messagesService.sendMessage(new Message(`File is ${percentDone}% uploaded.`, MessageType.NotificationMessage));
+        } else if (event instanceof HttpResponse) {
+          this.messagesService.sendMessage(new Message('File upload complete.', MessageType.SuccessMessage));
+          return true;
+        }
+      }),
+      catchError((error: HttpErrorResponse) => this.handleError(error))
+    ).subscribe();
 
-    // return this.http.post(apiEndPoint, formData, options)
+    return false;
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
@@ -90,9 +102,7 @@ export class ApiService {
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
         () => this.messagesService.sendMessage(new Message('Changes saved.') ),
         () => this.messagesService.sendMessage(new Message('Failed to save changes on the BMRB server. Changes are saved ' +
-          'locally in your browser, and no data has been lost. If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu">' +
-          ' contact us</a>.',
-                                                                 MessageType.WarningMessage, 10000 ))
+          'locally in your browser, and no data has been lost.', MessageType.WarningMessage, 10000 ))
       );
     }
   }
