@@ -10,7 +10,7 @@
 .invisible {
 	background-color: white;
 	padding: 1px;
-	margin: 0px;
+	margin: 0;
 }
 
 .invalid {
@@ -25,7 +25,6 @@
     word-wrap: break-word;
 }
 
-/* mostly from adit */
 .header_text {
 	vertical-align: middle;
 	font-size: larger;

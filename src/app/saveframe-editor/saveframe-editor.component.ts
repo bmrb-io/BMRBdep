@@ -4,7 +4,6 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Schema} from '../nmrstar/schema';
-import {download} from '../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-saveframe-editor',
@@ -59,17 +58,13 @@ export class SaveframeEditorComponent implements OnInit {
     this.updateCategoryLinks();
   }
 
-  download(name: string, printable_object): void {
-    download(name, printable_object);
-  }
-
   updateCategoryLinks(): void {
     let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
     while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0) {
       index--;
     }
 
-    if (index < 0 ) {
+    if (index <= 0 ) {
       this.prev_sf = null;
     } else {
       this.prev_sf =  this.entry.saveframes[index].category;
