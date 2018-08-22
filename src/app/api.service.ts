@@ -144,13 +144,12 @@ export class ApiService {
     if (error.status === 400) {
       this.messagesService.sendMessage(new Message(error.error.error,
         MessageType.WarningMessage, 15000 ));
-      return of(null);
     } else {
-      this.messagesService.sendMessage(new Message('A network or server exception occurred. If this message persists, please ' +
-        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000));
+      this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
       console.error('An unhandled server error code occurred:', error);
-      return of(null);
     }
+
+    return of(null);
   }
 
 
