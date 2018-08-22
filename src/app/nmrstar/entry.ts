@@ -7,8 +7,9 @@ export class Entry {
   schema: Schema;
   categories: string[][];
   enumeration_ties: {};
+  source: string;
 
-  constructor(data_name: string, saveframes: Saveframe[] = []) {
+  constructor(data_name: string) {
     this.entry_id = data_name;
     this.saveframes = [];
     this.enumeration_ties = {};

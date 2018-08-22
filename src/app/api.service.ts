@@ -1,8 +1,8 @@
-import {Observable, of, throwError} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 
@@ -29,17 +29,33 @@ export class ApiService {
     }
   }
 
+  // file from event.target.files[0]
+  uploadFile(file: File): Observable<HttpEvent<any>> {
+
+    const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file`;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const options = {
+      params: new HttpParams(),
+      reportProgress: true,
+    };
+
+    const req = new HttpRequest('POST', apiEndPoint, formData, options);
+    return this.http.request(req);
+
+    // return this.http.post(apiEndPoint, formData, options)
+  }
+
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
     // If all we did was reroute, we still have the entry
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
-      console.log('Loaded entry from session memory.');
-      console.log(this.cached_entry);
-      return of(this.cached_entry);
+      this.cached_entry['source'] = 'session memory';
     // The page is being reloaded, but we can get the entry from the browser cache
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
-      console.log(this.cached_entry);
-      return of (this.cached_entry);
+      this.cached_entry['source'] = 'browser cache';
     // We either don't have the entry or have a different one, so fetch from the API
     } else {
       const entry_url = `${this.server_url}/${entry_id}`;
@@ -48,7 +64,7 @@ export class ApiService {
               this.cached_entry = entryFromJSON(json_data);
               // TODO: This probably won't be necessary later
               this.cached_entry.entry_id = entry_id;
-              console.log('Loaded entry from API.');
+              this.cached_entry['source'] = 'API server';
               this.saveEntry(true);
               console.log(this.cached_entry);
               return this.cached_entry;
@@ -56,6 +72,9 @@ export class ApiService {
         catchError((error: HttpErrorResponse) => this.handleError(error))
       );
     }
+
+    console.log(this.cached_entry);
+    return of(this.cached_entry);
   }
 
   saveEntry(initial_save: boolean = false): void {
@@ -90,13 +109,7 @@ export class ApiService {
           return json_data;
         }),
         // Convert the error into something we can handle
-        catchError((error: HttpErrorResponse) => {
-          if (error.status === 400) {
-            this.messagesService.sendMessage(new Message(error.error.error,
-              MessageType.WarningMessage, 10000 ));
-            return of(null);
-          }
-        })
+        catchError((error: HttpErrorResponse) => this.handleError(error))
       );
   }
 
@@ -119,10 +132,16 @@ export class ApiService {
    */
 
   private handleError(error: HttpErrorResponse) {
-    this.messagesService.sendMessage(new Message('A network or server exception occurred. If this message persists, please ' +
-        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000 ));
-    console.error('An unhandled server error code occurred:', error);
-    return throwError('Some sort of exception happened, and was presented to the user.');
+    if (error.status === 400) {
+      this.messagesService.sendMessage(new Message(error.error.error,
+        MessageType.WarningMessage, 15000 ));
+      return of(null);
+    } else {
+      this.messagesService.sendMessage(new Message('A network or server exception occurred. If this message persists, please ' +
+        '<a href="mailto:bmrbhelp@bmrb.wisc.edu"> contact us</a>.', MessageType.ErrorMessage, 15000));
+      console.error('An unhandled server error code occurred:', error);
+      return of(null);
+    }
   }
 
 

@@ -23,6 +23,7 @@ import { SaveframeViewComponent } from './view_mode/saveframe/saveframe-view.com
 import { TagComponent } from './tag/tag.component';
 import { TreeViewComponent } from './treeview/tree-view.component';
 import { KeepHtmlPipe } from './pipes/keep-html.pipe';
+import { FileUploaderComponent } from './file-uploader/file-uploader.component';
 
 
 
@@ -39,6 +40,7 @@ import { KeepHtmlPipe } from './pipes/keep-html.pipe';
     TagComponent,
     TreeViewComponent,
     KeepHtmlPipe,
+    FileUploaderComponent,
   ],
   imports: [
     BrowserModule,
