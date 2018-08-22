@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject} from 'rxjs';
+import {environment} from '../environments/environment';
 
 export enum MessageType {
   SuccessMessage,
@@ -19,21 +20,6 @@ export class Message {
     this.messageBody = messageBody;
     this.messageType = messageType;
     this.messageTimeout = messageTimeout;
-  }
-
-  getClass() {
-    if (this.messageType === MessageType.SuccessMessage) {
-      return 'SuccessMessage';
-    }
-    if (this.messageType === MessageType.WarningMessage) {
-      return 'WarningMessage';
-    }
-    if (this.messageType === MessageType.ErrorMessage) {
-      return 'ErrorMessage';
-    }
-    if (this.messageType === MessageType.NotificationMessage) {
-      return 'NotificationMessage';
-    }
   }
 }
 
@@ -65,6 +51,11 @@ export class MessagesService {
       this.lastTimeout = setTimeout(() => {
         this.clearMessage();
       }, message.messageTimeout);
+    }
+
+    // Log messages to the console if in development mode
+    if (!environment.production) {
+      console.log('Sent message: ', message);
     }
   }
 
