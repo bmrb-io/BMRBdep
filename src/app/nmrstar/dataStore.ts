@@ -37,13 +37,20 @@ export class DataFileStore {
   }
 
   addFile(filename: string = null, selected: {} = []): DataFile {
+    // File already exists
     if (this.dataFileMap[filename]) {
-      return this.dataFileMap[filename];
+      // Move it to the end of the file list
+      const dataFile = this.dataFileMap[filename];
+      this.dataFiles.splice(this.dataFiles.indexOf(dataFile), 1);
+      this.dataFiles.push(dataFile);
+
+      return dataFile;
+    } else {
+      const dataFile = new DataFile(filename, this.dropdownList, selected);
+      this.dataFiles.push(dataFile);
+      this.dataFileMap[filename] = dataFile;
+      return dataFile;
     }
-    const dataFile = new DataFile(filename, this.dropdownList, selected);
-    this.dataFiles.push(dataFile);
-    this.dataFileMap[filename] = dataFile;
-    return dataFile;
   }
 
   updateName(dataFile: DataFile, fileName: string) {
