@@ -27,6 +27,9 @@ import { TreeViewComponent } from './treeview/tree-view.component';
 import { FileUploaderComponent } from './file-uploader/file-uploader.component';
 import { MessageComponent } from './message/message.component';
 
+// Angular Material
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatProgressBarModule} from '@angular/material';
 
 
 @NgModule({
@@ -50,7 +53,9 @@ import { MessageComponent } from './message/message.component';
     HttpClientModule,
     AppRoutingModule,
     UiSwitchModule,
-    NgMultiSelectDropDownModule.forRoot()
+    NgMultiSelectDropDownModule.forRoot(),
+    BrowserAnimationsModule,
+    MatProgressBarModule
   ],
   bootstrap: [AppComponent]
 })
