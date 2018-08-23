@@ -3,6 +3,7 @@ import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {DataFile} from '../nmrstar/dataStore';
 import {Saveframe} from '../nmrstar/saveframe';
+import {Message, MessageType} from '../messages.service';
 
 @Component({
   selector: 'app-file-uploader',
@@ -59,6 +60,10 @@ export class FileUploaderComponent implements OnInit {
             } else if (event instanceof HttpResponse) {
               dataFile.percent = 100;
               this.saveframe.parent.dataStore.updateName(dataFile, event.body['filename']);
+              if (!event.body['changed']){
+                this.api.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+                the server with the same contents.`, MessageType.NotificationMessage));
+              }
             }
           },
           error => {

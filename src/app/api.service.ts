@@ -8,8 +8,6 @@ import {
   HttpHeaders,
   HttpParams,
   HttpRequest,
-  HttpEventType,
-  HttpResponse,
   HttpEvent
 } from '@angular/common/http';
 import {environment} from '../environments/environment';
@@ -30,7 +28,7 @@ export class ApiService {
   };
 
   constructor(private http: HttpClient,
-              private messagesService: MessagesService) {
+              public messagesService: MessagesService) {
     this.cached_entry = new Entry('');
     this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
     if (!environment.production) {
@@ -53,20 +51,6 @@ export class ApiService {
 
     const req = new HttpRequest('POST', apiEndPoint, formData, options);
     return this.http.request(req);
-
-    /*
-    this.http.request(req).pipe(
-      map(event => {
-        if (event.type === HttpEventType.UploadProgress) {
-          const percentDone = Math.round(100 * event.loaded / event.total);
-          this.messagesService.sendMessage(new Message(`File is ${percentDone}% uploaded.`, MessageType.NotificationMessage));
-        } else if (event instanceof HttpResponse) {
-          this.messagesService.sendMessage(new Message('File upload complete.', MessageType.SuccessMessage));
-          return true;
-        }
-      }),
-      catchError((error: HttpErrorResponse) => this.handleError(error))
-    ).subscribe();*/
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
