@@ -39,3 +39,27 @@ td {
   padding: 6px;
   margin: 0;
 }
+
+.dragTD {
+  background-color: white;
+}
+
+.dragBox {
+  height: 4em;
+  margin: .5em;
+  border: 2px solid #33527b;
+  border-radius: 5px;
+  text-align: center;
+  position: relative;
+}
+
+.dragText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.file-upload {
+  margin: .5em;
+}

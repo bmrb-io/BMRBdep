@@ -2,7 +2,16 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpRequest, HttpEventType, HttpResponse} from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+  HttpEventType,
+  HttpResponse,
+  HttpEvent
+} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 
@@ -30,7 +39,7 @@ export class ApiService {
   }
 
   // file from event.target.files[0]
-  uploadFile(file: File): boolean {
+  uploadFile(file: File): Observable<HttpEvent<any>> {
 
     const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file`;
 
@@ -43,6 +52,9 @@ export class ApiService {
     };
 
     const req = new HttpRequest('POST', apiEndPoint, formData, options);
+    return this.http.request(req);
+
+    /*
     this.http.request(req).pipe(
       map(event => {
         if (event.type === HttpEventType.UploadProgress) {
@@ -54,9 +66,7 @@ export class ApiService {
         }
       }),
       catchError((error: HttpErrorResponse) => this.handleError(error))
-    ).subscribe();
-
-    return false;
+    ).subscribe();*/
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
@@ -140,7 +150,7 @@ export class ApiService {
    * https://stackoverflow.com/questions/20773945/storing-compressed-json-data-in-local-storage
    */
 
-  private handleError(error: HttpErrorResponse) {
+  handleError(error: HttpErrorResponse) {
     if (error.status === 400) {
       this.messagesService.sendMessage(new Message(error.error.error,
         MessageType.WarningMessage, 15000 ));
