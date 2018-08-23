@@ -5,7 +5,10 @@
                  NotificationMessage: message.messageType == messageType.NotificationMessage,
                  messages: 'true'}">
   {{message.messageBody}}
-  <span *ngIf="message.messageType == messageType.ErrorMessage || message.messageType == messageType.WarningMessage">
+  <span *ngIf="message.messageType == messageType.ErrorMessage">
     If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Reporting issue with deposition server">contact us</a>.
+  </span>
+  <span *ngIf="message.messageType == messageType.WarningMessage">
+    If this message seems in error, please <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Reporting issue with deposition server">contact us</a>.
   </span>
 </div>
