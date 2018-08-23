@@ -1,5 +1,7 @@
 import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
+import {DataFileStore} from './dataStore';
+
 
 export class Entry {
   entry_id: string;
@@ -8,6 +10,7 @@ export class Entry {
   categories: string[][];
   enumeration_ties: {};
   source: string;
+  dataStore: DataFileStore;
 
   constructor(data_name: string) {
     this.entry_id = data_name;
@@ -18,7 +21,7 @@ export class Entry {
   }
 
   toJSON(): {} {
-    return {entry_id: this.entry_id, saveframes: this.saveframes};
+    return {entry_id: this.entry_id, saveframes: this.saveframes, data_files: this.dataStore};
   }
 
   /* Return the position of a given saveframe in the saveframe list. */
@@ -132,6 +135,8 @@ export function entryFromJSON(jdata: Object): Entry {
 
     const entry = new Entry(jdata['entry_id']);
     entry.schema = new Schema(jdata['schema']);
+    entry.dataStore = new DataFileStore(jdata['data_files'], entry.schema.file_upload_types);
+
     console.log('Using schema: ' + entry.schema.version);
 
     for (let i = 0; i < jdata['saveframes'].length; i++) {
