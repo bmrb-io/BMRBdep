@@ -1,13 +1,12 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 // https://github.com/webcat12345/ngx-ui-switch
 // https://www.npmjs.com/package/angular2-ui-switch
 import { UiSwitchModule } from 'ngx-ui-switch';
 // https://www.npmjs.com/package/ng-multiselect-dropdown
-import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 
 import { AppComponent } from './app.component';
 import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
@@ -53,10 +52,10 @@ import {MatProgressBarModule, MatSelectModule} from '@angular/material';
     HttpClientModule,
     AppRoutingModule,
     UiSwitchModule,
-    NgMultiSelectDropDownModule.forRoot(),
     BrowserAnimationsModule,
     MatProgressBarModule,
-    MatSelectModule
+    MatSelectModule,
+    ReactiveFormsModule
   ],
   bootstrap: [AppComponent]
 })

@@ -1,6 +1,7 @@
 import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
+import {LoopTag} from './tag';
 
 
 export class Entry {
@@ -129,6 +130,32 @@ export class Entry {
     }
     this.updateCategories();
   }
+
+
+  /* Update the data files loop */
+  updateUploadedData() {
+    const dfLoop = this.getSaveframesByCategory('deposited_data_files')[0].loops[0];
+    const newData = [];
+    for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
+      for (let n = 0; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+        newData.push([
+          new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop),
+          new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop),
+          new LoopTag('Data_file_content_type', this.dataStore.dataFiles[i].control.value[n][0], dfLoop),
+          new LoopTag('Data_file_Sf_category', this.dataStore.dataFiles[i].control.value[n][1], dfLoop),
+          new LoopTag('Data_file_syntax', null, dfLoop),
+          new LoopTag('Data_file_immutable_flag', null, dfLoop),
+          new LoopTag('Sf_ID', null, dfLoop),
+          new LoopTag('Entry_ID', this.entry_id, dfLoop),
+          new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop)
+        ]);
+      }
+    }
+    if (newData.length) {
+      dfLoop.data = newData;
+    }
+  }
+
 }
 
 export function entryFromJSON(jdata: Object): Entry {

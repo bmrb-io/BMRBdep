@@ -26,7 +26,6 @@
     "@angular/router": "6.0.0",
     "@types/sprintf-js": "^1.1.0",
     "core-js": "^2.5.6",
-    "ng-multiselect-dropdown": "^0.2.1",
     "ngx-ui-switch": "^2.1.0",
     "rxjs": "^6.1.0",
     "sprintf-js": "^1.1.1",

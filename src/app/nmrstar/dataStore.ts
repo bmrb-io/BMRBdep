@@ -1,23 +1,23 @@
+import {FormControl} from '@angular/forms';
+import {Loop} from './loop';
+
 export class DataFile {
   dropdownList;
   selectedItems;
   fileName;
   percent;
-  dropdownSettings = {
-    singleSelection: false,
-    idField: 1,
-    textField: 0,
-    selectAllText: 'Select All',
-    unSelectAllText: 'UnSelect All',
-    allowSearchFilter: true,
-    enableCheckAll: false,
-  };
+  control: FormControl;
 
   constructor(fileName: string, dropdownList: {}, selectedItems: {} = []) {
     this.fileName = fileName;
     this.dropdownList = dropdownList;
     this.selectedItems = selectedItems;
     this.percent = 0;
+    this.control = new FormControl(selectedItems);
+  }
+
+  getCategories(): Array<string> {
+    return this.control.value;
   }
 }
 
