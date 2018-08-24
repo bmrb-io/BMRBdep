@@ -1,8 +1,8 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
-import {Saveframe} from '../nmrstar/saveframe';
 import {Message, MessageType} from '../messages.service';
+import {Entry} from '../nmrstar/entry';
 
 @Component({
   selector: 'app-file-uploader',
@@ -11,12 +11,17 @@ import {Message, MessageType} from '../messages.service';
 })
 export class FileUploaderComponent implements OnInit {
 
-  @Input() saveframe: Saveframe;
+  @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
   constructor(public api: ApiService) { }
 
   ngOnInit() { }
+
+  updateAndSaveDataFiles() {
+    this.entry.updateUploadedData();
+    this.api.saveEntry();
+  }
 
   // At the drag drop area
   // (drop)="onDropFile($event)"
@@ -43,7 +48,7 @@ export class FileUploaderComponent implements OnInit {
   uploadFile(files: FileList) {
 
     for (let i = 0; i < files.length; i++) {
-      const dataFile = this.saveframe.parent.dataStore.addFile(files[i].name);
+      const dataFile = this.entry.dataStore.addFile(files[i].name);
 
       this.api.uploadFile(files[i])
         .subscribe(
@@ -52,11 +57,12 @@ export class FileUploaderComponent implements OnInit {
               dataFile.percent = Math.round(100 * event.loaded / event.total);
             } else if (event instanceof HttpResponse) {
               dataFile.percent = 100;
-              this.saveframe.parent.dataStore.updateName(dataFile, event.body['filename']);
+              this.entry.dataStore.updateName(dataFile, event.body['filename']);
               if (!event.body['changed']) {
                 this.api.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
               }
+              this.updateAndSaveDataFiles();
             }
           },
           error => {

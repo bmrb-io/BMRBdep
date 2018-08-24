@@ -68,3 +68,7 @@ td {
 .mat-form-field {
   width:100% !important;
 }
+
+.invalid {
+  background-color: #ffa4a4;
+}
