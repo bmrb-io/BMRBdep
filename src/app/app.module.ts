@@ -29,7 +29,7 @@ import { MessageComponent } from './message/message.component';
 
 // Angular Material
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {MatProgressBarModule} from '@angular/material';
+import {MatProgressBarModule, MatSelectModule} from '@angular/material';
 
 
 @NgModule({
@@ -55,7 +55,8 @@ import {MatProgressBarModule} from '@angular/material';
     UiSwitchModule,
     NgMultiSelectDropDownModule.forRoot(),
     BrowserAnimationsModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatSelectModule
   ],
   bootstrap: [AppComponent]
 })

@@ -37,6 +37,11 @@
             (onSelect)="onItemSelect($event, file)"
             (onSelectAll)="onSelectAll($event, file)">
           </ng-multiselect-dropdown>
+          <mat-form-field>
+            <mat-select placeholder="Data Types" multiple>
+              <mat-option *ngFor="let dataType of dataTypes" [value]="dataType">{{dataType}}</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
       </td>
     </tr>
