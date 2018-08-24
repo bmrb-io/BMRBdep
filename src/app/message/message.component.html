@@ -3,7 +3,7 @@
                  WarningMessage: message.messageType == messageType.WarningMessage,
                  SuccessMessage: message.messageType == messageType.SuccessMessage,
                  NotificationMessage: message.messageType == messageType.NotificationMessage,
-                 messages: 'true'}">
+                 messages: true}">
   {{message.messageBody}}
   <span *ngIf="message.messageType == messageType.ErrorMessage">
     If this message persists, please <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Reporting issue with deposition server">contact us</a>.
