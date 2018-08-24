@@ -20,6 +20,7 @@
   </tr>
   </thead>
   <tbody>
+    <ng-container *ngIf="saveframe">
     <tr *ngFor="let file of saveframe.parent.dataStore.dataFiles">
       <td>
         <div class="file-upload">
@@ -29,22 +30,18 @@
       </td>
       <td class="invisible">
         <div class="file-upload">
-          <ng-multiselect-dropdown *ngIf="file.fileName && file.percent == 100"
-            placeholder="Please select the data type(s) for this file."
-            [data]="file.dropdownList"
-            [(ngModel)]="file.selectedItems"
-            [settings]="file.dropdownSettings"
-            (onSelect)="onItemSelect($event, file)"
-            (onSelectAll)="onSelectAll($event, file)">
-          </ng-multiselect-dropdown>
           <mat-form-field>
-            <mat-select placeholder="Data Types" multiple>
-              <mat-option *ngFor="let dataType of dataTypes" [value]="dataType">{{dataType}}</mat-option>
+            <mat-select (selectionChange)="saveframe.parent.updateUploadedData(); this.api.saveEntry()"
+                        [formControl]="file.control"
+                        placeholder="Please select the data type(s) for this file."
+                        multiple required>
+              <mat-option *ngFor="let dataType of file.dropdownList" [value]="dataType">{{dataType[0]}}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
       </td>
     </tr>
+    </ng-container>
     <tr>
       <td>
         <div class="file-upload">
@@ -56,5 +53,4 @@
       </td>
     </tr>
   </tbody>
-
 </table>
