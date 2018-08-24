@@ -31,7 +31,7 @@
           <mat-progress-bar *ngIf="file.fileName && file.percent != 100" mode="determinate" [value]="file.percent" color="#33527b">Uploading file: </mat-progress-bar>
         </div>
       </td>
-      <td [ngClass]="{invisible: file.control.valid, invalid: !file.control.valid}">
+      <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
         <div class="file-upload">
           <mat-form-field>
             <mat-select (selectionChange)="updateAndSaveDataFiles()"
