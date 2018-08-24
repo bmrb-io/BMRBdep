@@ -24,7 +24,10 @@
     <tr *ngFor="let file of entry.dataStore.dataFiles">
       <td>
         <div class="file-upload">
-          <div *ngIf="file.fileName">{{file.fileName}}</div>
+          <div *ngIf="file.fileName">
+            <a download *ngIf="file.percent == 100; else uploading" [href]="this.api.server_url + '/' + entry.entry_id + '/file/' + file.fileName">{{file.fileName}}</a>
+            <ng-template #uploading>{{file.fileName}}</ng-template>
+          </div>
           <mat-progress-bar *ngIf="file.fileName && file.percent != 100" mode="determinate" [value]="file.percent" color="#33527b">Uploading file: </mat-progress-bar>
         </div>
       </td>
