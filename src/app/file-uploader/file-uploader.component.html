@@ -6,7 +6,7 @@
 
   <thead>
   <tr>
-    <th (contextmenu)="saveframe.log()">
+    <th>
       <a class="header_text">Deposit data files</a>
     </th>
     <th>
@@ -20,18 +20,18 @@
   </tr>
   </thead>
   <tbody>
-    <ng-container *ngIf="saveframe">
-    <tr *ngFor="let file of saveframe.parent.dataStore.dataFiles">
+    <ng-container *ngIf="entry">
+    <tr *ngFor="let file of entry.dataStore.dataFiles">
       <td>
         <div class="file-upload">
           <div *ngIf="file.fileName">{{file.fileName}}</div>
           <mat-progress-bar *ngIf="file.fileName && file.percent != 100" mode="determinate" [value]="file.percent" color="#33527b">Uploading file: </mat-progress-bar>
         </div>
       </td>
-      <td class="invisible">
+      <td [ngClass]="{invisible: file.control.valid, invalid: !file.control.valid}">
         <div class="file-upload">
           <mat-form-field>
-            <mat-select (selectionChange)="saveframe.parent.updateUploadedData(); this.api.saveEntry()"
+            <mat-select (selectionChange)="updateAndSaveDataFiles()"
                         [formControl]="file.control"
                         placeholder="Please select the data type(s) for this file."
                         multiple required>
