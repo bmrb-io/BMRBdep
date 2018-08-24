@@ -4,6 +4,7 @@ import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {DataFile} from '../nmrstar/dataStore';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Message, MessageType} from '../messages.service';
+import {FormControl} from '@angular/forms';
 
 @Component({
   selector: 'app-file-uploader',
@@ -15,9 +16,14 @@ export class FileUploaderComponent implements OnInit {
   @Input() saveframe: Saveframe;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
+  dataTypes: string[];
+  control = new FormControl();
+
   constructor(public api: ApiService) { }
 
-  ngOnInit() {  }
+  ngOnInit() {
+    this.dataTypes = this.saveframe.parent.dataStore.dataFiles[0].dropdownList;
+  }
 
   onItemSelect (item: any, dataFile: DataFile) {
     console.log(item);
