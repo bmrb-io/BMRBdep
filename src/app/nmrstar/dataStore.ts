@@ -1,5 +1,4 @@
 import {FormControl} from '@angular/forms';
-import {Loop} from './loop';
 
 export class DataFile {
   dropdownList;
@@ -14,10 +13,6 @@ export class DataFile {
     this.selectedItems = selectedItems;
     this.percent = 0;
     this.control = new FormControl(selectedItems);
-  }
-
-  getCategories(): Array<string> {
-    return this.control.value;
   }
 }
 

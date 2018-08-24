@@ -134,15 +134,27 @@ export class Entry {
 
   /* Update the data files loop */
   updateUploadedData() {
+    // TODO: 1) Get the loop by the category
+    //       2) Add the tags in a tag-order agnostic way
     const dfLoop = this.getSaveframesByCategory('deposited_data_files')[0].loops[0];
     const newData = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
-      for (let n = 0; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+      for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+        let sfCat = null;
+        let sfDescription = null;
+
+        // Make sure there is at least an empty record for each file
+        if (n === -1) {
+          if (this.dataStore.dataFiles[i].control.value.length !== 0) {continue; }
+        } else {
+          sfCat = this.dataStore.dataFiles[i].control.value[n][1];
+          sfDescription = this.dataStore.dataFiles[i].control.value[n][0];
+        }
         newData.push([
           new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop),
           new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop),
-          new LoopTag('Data_file_content_type', this.dataStore.dataFiles[i].control.value[n][0], dfLoop),
-          new LoopTag('Data_file_Sf_category', this.dataStore.dataFiles[i].control.value[n][1], dfLoop),
+          new LoopTag('Data_file_content_type', sfCat, dfLoop),
+          new LoopTag('Data_file_Sf_category', sfDescription, dfLoop),
           new LoopTag('Data_file_syntax', null, dfLoop),
           new LoopTag('Data_file_immutable_flag', null, dfLoop),
           new LoopTag('Sf_ID', null, dfLoop),
