@@ -174,7 +174,6 @@ export function entryFromJSON(jdata: Object): Entry {
 
     const entry = new Entry(jdata['entry_id']);
     entry.schema = new Schema(jdata['schema']);
-    entry.dataStore = new DataFileStore(jdata['data_files'], entry.schema.file_upload_types);
 
     console.log('Using schema: ' + entry.schema.version);
 
@@ -184,5 +183,6 @@ export function entryFromJSON(jdata: Object): Entry {
     }
 
   entry.refresh();
+  entry.dataStore = new DataFileStore(jdata['data_files'], entry.schema.file_upload_types);
   return entry;
 }

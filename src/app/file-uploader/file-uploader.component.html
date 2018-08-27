@@ -25,6 +25,7 @@
       <td>
         <div class="file-upload">
           <div *ngIf="file.fileName">
+            <button (click)="deleteFile(file.fileName)">-</button>&nbsp;
             <a download *ngIf="file.percent == 100; else uploading" [href]="this.api.server_url + '/' + entry.entry_id + '/file/' + file.fileName">{{file.fileName}}</a>
             <ng-template #uploading>{{file.fileName}}</ng-template>
           </div>
@@ -38,7 +39,7 @@
                         [formControl]="file.control"
                         placeholder="Please select the data type(s) for this file."
                         multiple required>
-              <mat-option *ngFor="let dataType of file.dropdownList" [value]="dataType">{{dataType[0]}}</mat-option>
+              <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType">{{dataType[0]}}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>

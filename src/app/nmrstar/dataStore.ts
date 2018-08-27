@@ -1,15 +1,16 @@
 import {FormControl} from '@angular/forms';
+import {Entry} from './entry';
 
 export class DataFile {
-  dropdownList;
+  dropDownList;
   selectedItems;
   fileName;
   percent;
   control: FormControl;
 
-  constructor(fileName: string, dropdownList: {}, selectedItems: {} = []) {
+  constructor(fileName: string, dropDownList: {}, selectedItems: {} = []) {
     this.fileName = fileName;
-    this.dropdownList = dropdownList;
+    this.dropDownList = dropDownList;
     this.selectedItems = selectedItems;
     this.percent = 0;
     this.control = new FormControl(selectedItems);
@@ -19,36 +20,49 @@ export class DataFile {
 export class DataFileStore {
   dataFiles: DataFile[];
   dataFileMap: {};
-  dropdownList;
+  dropDownList;
 
-  constructor(fileNames: string[], dropdownList) {
+  constructor(fileNames: string[], dropDownList) {
     // Create the dataFiles objects
     this.dataFiles = [];
     this.dataFileMap = {};
-    this.dropdownList = dropdownList;
+    this.dropDownList = dropDownList;
     for (let i = 0; i < fileNames.length; i++) {
       this.addFile(fileNames[i]).percent = 100;
     }
   }
 
   addFile(filename: string = null, selected: {} = []): DataFile {
+
+    let dataFile = null;
+
     // File already exists
     if (this.dataFileMap[filename]) {
       // Move it to the end of the file list
-      const dataFile = this.dataFileMap[filename];
+      dataFile = this.dataFileMap[filename];
       this.dataFiles.splice(this.dataFiles.indexOf(dataFile), 1);
       this.dataFiles.push(dataFile);
 
-      return dataFile;
     } else {
-      const dataFile = new DataFile(filename, this.dropdownList, selected);
+      dataFile = new DataFile(filename, this.dropDownList, selected);
       this.dataFiles.push(dataFile);
       this.dataFileMap[filename] = dataFile;
-      return dataFile;
+    }
+    return dataFile;
+  }
+
+  deleteFile(filename: string): boolean {
+    if (this.dataFileMap[filename]) {
+      const deleteFile = this.dataFileMap[filename];
+      delete this.dataFileMap[filename];
+      this.dataFiles.splice(this.dataFiles.indexOf(deleteFile), 1);
+      return true;
+    } else {
+      return false;
     }
   }
 
-  updateName(dataFile: DataFile, fileName: string) {
+  updateName(dataFile: DataFile, fileName: string): void {
 
     // No change, do nothing
     if (dataFile.fileName === fileName) {
