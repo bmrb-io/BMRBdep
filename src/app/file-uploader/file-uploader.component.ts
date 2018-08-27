@@ -20,7 +20,7 @@ export class FileUploaderComponent implements OnInit {
 
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
-    this.api.saveEntry();
+    this.api.saveEntry(false, true);
   }
 
   // At the drag drop area
@@ -40,12 +40,13 @@ export class FileUploaderComponent implements OnInit {
   // At the file input element
   // (change)="selectFile($event)"
   selectFile(event) {
-    console.log(event);
     this.uploadFile(event.target.files);
     this.fileUploadElement.nativeElement.value = '';
   }
 
   uploadFile(files: FileList) {
+
+    let closure = files.length;
 
     for (let i = 0; i < files.length; i++) {
       const dataFile = this.entry.dataStore.addFile(files[i].name);
@@ -62,11 +63,16 @@ export class FileUploaderComponent implements OnInit {
                 this.api.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
               }
-              this.updateAndSaveDataFiles();
             }
           },
           error => {
             this.api.handleError(error);
+          },
+          () => {
+            closure -= 1;
+            if (closure === 0) {
+              this.updateAndSaveDataFiles();
+            }
           }
         );
     }
