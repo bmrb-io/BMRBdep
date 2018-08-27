@@ -15,7 +15,6 @@ Uncompleted tasks:
         * Implement smarter new saveframe names - 4 hours
         * Only allow one outstanding save request at a time - 4 hours
     * Data file uploading
-        * Add functionality to upload files to GUI - 2 days
         * Trigger display/addition of data-related saveframes upon upload - 2 days
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
