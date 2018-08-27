@@ -2,6 +2,7 @@ import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
+import {Loop} from './loop';
 
 
 export class Entry {
@@ -131,12 +132,22 @@ export class Entry {
     this.updateCategories();
   }
 
+  getLoopsByCategory(category): Loop[] {
+    const results: Loop[] = [];
+    for (let s = 0; s < this.saveframes.length; s++) {
+      for (let l = 0; l < this.saveframes.length; l++) {
+        if (this.saveframes[s].loops[l].category === category) {
+          results.push(this.saveframes[s].loops[l]);
+        }
+      }
+    }
+    return results;
+  }
 
   /* Update the data files loop */
   updateUploadedData() {
-    // TODO: 1) Get the loop by the category
-    //       2) Add the tags in a tag-order agnostic way
-    const dfLoop = this.getSaveframesByCategory('deposited_data_files')[0].loops[0];
+    // TODO: 1) Add the tags in a tag-order agnostic way
+    const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
     const newData = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
       for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
