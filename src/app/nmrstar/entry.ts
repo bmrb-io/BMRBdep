@@ -197,7 +197,7 @@ export class Entry {
     const dataBuilder = {};
     const nameList = [];
     for (let i = 0; i < dataLoop.data.length; i++) {
-      if (!nameList[i]) {
+      if (!dataLoop.data[i][1].value) {
         continue;
       }
       const sel = getSelectionByDescription(dataLoop.data[i][3].value);
