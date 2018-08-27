@@ -18,6 +18,10 @@ export class FileUploaderComponent implements OnInit {
 
   ngOnInit() { }
 
+  logit(item) {
+    console.log(item);
+  }
+
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.api.saveEntry(false, true);
@@ -67,6 +71,7 @@ export class FileUploaderComponent implements OnInit {
           },
           error => {
             this.api.handleError(error);
+            this.entry.dataStore.deleteFile(dataFile.fileName);
           },
           () => {
             closure -= 1;
