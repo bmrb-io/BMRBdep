@@ -23,7 +23,7 @@ export class Entry {
   }
 
   toJSON(): {} {
-    return {entry_id: this.entry_id, saveframes: this.saveframes, data_files: this.dataStore};
+    return {entry_id: this.entry_id, saveframes: this.saveframes};
   }
 
   /* Return the position of a given saveframe in the saveframe list. */
@@ -197,6 +197,9 @@ export class Entry {
     const dataBuilder = {};
     const nameList = [];
     for (let i = 0; i < dataLoop.data.length; i++) {
+      if (!nameList[i]) {
+        continue;
+      }
       const sel = getSelectionByDescription(dataLoop.data[i][3].value);
       if (!dataBuilder[dataLoop.data[i][1].value]) {
         dataBuilder[dataLoop.data[i][1].value] = [];
