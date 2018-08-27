@@ -44,8 +44,16 @@ export class Saveframe {
   }
 
   duplicate(clear_values: boolean = false): Saveframe {
-    const next_this_type = this.parent.getSaveframesByCategory(this.category).length + 1;
-    const new_frame = new Saveframe(this.name + '_' + next_this_type, this.category, this.tag_prefix, this.parent);
+    let frameIndex = this.parent.getSaveframesByCategory(this.category).length + 1;
+    let frameName = this.category + '_' + frameIndex;
+    while (this.parent.getSaveframeByName(frameName)) {
+      frameIndex += 1;
+      frameName = this.category + '_' + frameIndex;
+    }
+    console.log('settled on ', frameName);
+
+
+    const new_frame = new Saveframe(frameName, this.category, this.tag_prefix, this.parent);
 
     // Copy the tags
     for (const tag of this.tags) {
