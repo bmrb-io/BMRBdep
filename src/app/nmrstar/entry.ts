@@ -96,7 +96,7 @@ export class Entry {
         return sf;
       }
     }
-    throw new Error('No saveframe with the name ' + sf_name + ' found.');
+    return null;
   }
 
   getSaveframesByCategory(sf_category: string): Saveframe[] {

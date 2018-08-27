@@ -12,7 +12,6 @@ Uncompleted tasks:
         * Implement ORCID validation using OpenAuth flow - ~1 week
     * Smaller tasks
         * At least one PI is needed in contact person - 1 day
-        * Implement smarter new saveframe names - 4 hours
         * Only allow one outstanding save request at a time - 4 hours
     * Data file uploading
         * Trigger display/addition of data-related saveframes upon upload - 2 days
