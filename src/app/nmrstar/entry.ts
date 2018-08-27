@@ -135,7 +135,7 @@ export class Entry {
   getLoopsByCategory(category): Loop[] {
     const results: Loop[] = [];
     for (let s = 0; s < this.saveframes.length; s++) {
-      for (let l = 0; l < this.saveframes.length; l++) {
+      for (let l = 0; l < this.saveframes[s].loops.length; l++) {
         if (this.saveframes[s].loops[l].category === category) {
           results.push(this.saveframes[s].loops[l]);
         }
@@ -158,8 +158,8 @@ export class Entry {
         if (n === -1) {
           if (this.dataStore.dataFiles[i].control.value.length !== 0) {continue; }
         } else {
-          sfCat = this.dataStore.dataFiles[i].control.value[n][1];
-          sfDescription = this.dataStore.dataFiles[i].control.value[n][0];
+          sfCat = this.dataStore.dataFiles[i].control.value[n][0];
+          sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
         }
         newData.push([
           new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop),
@@ -179,21 +179,53 @@ export class Entry {
     }
   }
 
+  regenerateDataStore(): void {
+    const dataStore = new DataFileStore([], this.schema.file_upload_types);
+    const dataLoop = this.getLoopsByCategory('_Upload_data')[0];
+
+    function getSelectionByDescription(category: string) {
+      if (category === null) {
+        return null;
+      }
+      for (let i = 0; i < dataStore.dropDownList.length; i++) {
+        if (dataStore.dropDownList[i][1] === category) {
+          return dataStore.dropDownList[i];
+        }
+      }
+    }
+
+    const dataBuilder = {};
+    const nameList = [];
+    for (let i = 0; i < dataLoop.data.length; i++) {
+      const sel = getSelectionByDescription(dataLoop.data[i][3].value);
+      if (!dataBuilder[dataLoop.data[i][1].value]) {
+        dataBuilder[dataLoop.data[i][1].value] = [];
+        nameList.push(dataLoop.data[i][1].value);
+      }
+      if (sel) {
+        dataBuilder[dataLoop.data[i][1].value].push(sel);
+      }
+    }
+
+    for (let i = 0; i < nameList.length; i++) {
+      dataStore.addFile(nameList[i], dataBuilder[nameList[i]]).percent = 100;
+    }
+
+    this.dataStore = dataStore;
+  }
+
 }
 
 export function entryFromJSON(jdata: Object): Entry {
+  const entry = new Entry(jdata['entry_id']);
+  entry.schema = new Schema(jdata['schema']);
 
-    const entry = new Entry(jdata['entry_id']);
-    entry.schema = new Schema(jdata['schema']);
-
-    console.log('Using schema: ' + entry.schema.version);
-
-    for (let i = 0; i < jdata['saveframes'].length; i++) {
-      const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
-      entry.addSaveframe(new_frame);
-    }
+  for (let i = 0; i < jdata['saveframes'].length; i++) {
+    const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
+    entry.addSaveframe(new_frame);
+  }
 
   entry.refresh();
-  entry.dataStore = new DataFileStore(jdata['data_files'], entry.schema.file_upload_types);
+  entry.regenerateDataStore();
   return entry;
 }
