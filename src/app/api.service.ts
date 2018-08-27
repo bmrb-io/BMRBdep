@@ -53,6 +53,16 @@ export class ApiService {
     return this.http.request(req);
   }
 
+  deleteFile(fileName: string): Observable<boolean> {
+    const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file/${fileName}`;
+    this.http.delete(apiEndPoint).subscribe(
+      () => {this.messagesService.sendMessage(new Message('File deleted.') ); return of(true); },
+      () => {this.messagesService.sendMessage(new Message('Failed to delete file.',
+                                                               MessageType.ErrorMessage, 15000 )); return of(false); }
+    );
+    return of(false);
+  }
+
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
     // If all we did was reroute, we still have the entry
     if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
