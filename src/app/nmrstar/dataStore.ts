@@ -1,5 +1,4 @@
 import {FormControl} from '@angular/forms';
-import {Entry} from './entry';
 
 export class DataFile {
   dropDownList;
