@@ -104,8 +104,7 @@ export class ApiService {
       const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
         () => {if (!skipMessage) {this.messagesService.sendMessage(new Message('Changes saved.')); }},
-        () => this.messagesService.sendMessage(new Message('Failed to save changes on the BMRB server. Changes are saved ' +
-          'locally in your browser, and no data has been lost.', MessageType.WarningMessage, 10000 ))
+        err => this.handleError(err)
       );
     }
   }
