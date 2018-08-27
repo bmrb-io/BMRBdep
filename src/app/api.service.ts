@@ -92,7 +92,7 @@ export class ApiService {
     return of(this.cached_entry);
   }
 
-  saveEntry(initial_save: boolean = false): void {
+  saveEntry(initial_save: boolean = false, skipMessage: boolean = false): void {
     if (initial_save) {
       localStorage.setItem('schema', JSON.stringify(this.cached_entry.schema));
     }
@@ -103,7 +103,7 @@ export class ApiService {
     if (!initial_save) {
       const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
-        () => this.messagesService.sendMessage(new Message('Changes saved.') ),
+        () => {if (!skipMessage) {this.messagesService.sendMessage(new Message('Changes saved.')); }},
         () => this.messagesService.sendMessage(new Message('Failed to save changes on the BMRB server. Changes are saved ' +
           'locally in your browser, and no data has been lost.', MessageType.WarningMessage, 10000 ))
       );
