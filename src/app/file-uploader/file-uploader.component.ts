@@ -24,6 +24,7 @@ export class FileUploaderComponent implements OnInit {
 
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
+    this.entry.refresh();
     this.api.saveEntry(false, true);
   }
 

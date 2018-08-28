@@ -14,7 +14,7 @@ export class Tag {
   schema_values: {};
   display: string;
   fqtn: string;
-  enums: string[];
+  enums: Set<string>;
   parent?: Object;
 
   constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
@@ -29,7 +29,7 @@ export class Tag {
     this.schema_values = schema.getTag(this.fqtn);
     if (this.schema_values) {
       this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
-      this.enums = this.schema_values['enumerations'] ? this.schema_values['enumerations'] : [];
+      this.enums = this.schema_values['enumerations'] ? new Set(this.schema_values['enumerations']) : new Set();
       this.display = this.schema_values['User full view'];
     } else {
       this.schema_values = {'Regex': new RegExp(schema.data_types['any']),
@@ -50,7 +50,12 @@ export class Tag {
     const dt = this.schema_values['BMRB data type'];
 
     if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y')) {
-      this.interface_type = 'open_enum';
+      // 19 is the enumeration tie value of the files
+      if (this.schema_values['Enumeration ties'] === '19') {
+        this.interface_type = 'closed_enum';
+      } else {
+        this.interface_type = 'open_enum';
+      }
     } else if (dt === 'yes_no') {
       this.interface_type = 'yes_no';
     } else if (dt === 'text') {
@@ -110,11 +115,15 @@ export class Tag {
     * 3) Is from the enum list if it a mandatory enum
     */
 
-    if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y') && (this.value)) {
+    if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y')) {
       const parentEntry: Entry = this.getEntry();
-      if (parentEntry.enumeration_ties[this.schema_values['Enumeration ties']]) {
-        parentEntry.enumeration_ties[this.schema_values['Enumeration ties']].add(this.value);
-        this.enums = parentEntry.enumeration_ties[this.schema_values['Enumeration ties']];
+      const enumerationSet = parentEntry.enumeration_ties[this.schema_values['Enumeration ties']];
+      if (enumerationSet) {
+        // Only add our value to the enumeration set if we have a value
+        if (this.value) {
+          enumerationSet.add(this.value);
+        }
+        this.enums = enumerationSet;
       }
     }
 
@@ -133,7 +142,7 @@ export class Tag {
       this.validation_message = 'Tag does not match specified data type.';
     // Check enums are matched
     } else if (this.interface_type === 'closed_enum') {
-        if (this.enums.indexOf(this.value) < 0) {
+        if (!this.enums.has(this.value)) {
           this.valid = false;
           this.validation_message = 'Tag does not match one of the allowed options.';
         }
@@ -148,16 +157,16 @@ export class Tag {
       this.interface_type = 'closed_enum';
       const frames_of_category: any[] = this.getEntry().getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
       if (frames_of_category.length > 0) {
-        this.enums = [];
+        this.enums = new Set();
         for (const sf of frames_of_category) {
-          this.enums.push('$' + sf.name);
+          this.enums.add('$' + sf.name);
         }
       } else {
         console.log('Sf pointer set to \'Y\' but no tags!', this);
-        this.enums = ['No saveframes of category ' + this.schema_values['Foreign Table'] + ' found in entry. Please create at least one.'];
+        this.enums = new Set(['No saveframes of category ' + this.schema_values['Foreign Table'] + ' found in entry. Please create at least one.']);
         this.valid = false;
       }
-      if (this.enums.indexOf(this.value) < 0) {
+      if (!this.enums.has(this.value)) {
         this.valid = false;
         this.validation_message = 'Tag must have a value.';
         this.value = null;

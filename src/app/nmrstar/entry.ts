@@ -121,9 +121,17 @@ export class Entry {
 
   refresh(overrides: {}[] = null, category: string = null): void {
 
+    // Reset the enumeration ties
     this.enumeration_ties = {};
     for (let i = 0; i < 30; i++) {
       this.enumeration_ties[i] = new Set();
+    }
+
+    // Enumeration ties 19 is the file list
+    if (this.dataStore) {
+      for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
+        this.enumeration_ties[19].add(this.dataStore.dataFiles[i].fileName);
+      }
     }
 
     for (const sf of this.saveframes) {
