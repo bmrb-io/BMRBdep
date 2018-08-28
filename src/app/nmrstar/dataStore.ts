@@ -1,4 +1,5 @@
 import {FormControl} from '@angular/forms';
+import {Data} from '@angular/router';
 
 export class DataFile {
   dropDownList;
@@ -91,9 +92,21 @@ export class DataFileStore {
     }
   }
 
+  getDataFileNamesByCategory(category: string): Set<string> {
+    const results: Set<string> = new Set();
+    for (let i = 0; i < this.dataFiles.length; i++) {
+      for (let n = 0; n < this.dataFiles[i].control.value.length; n++) {
+        if (this.dataFiles[i].control.value[n][1] === category) {
+          results.add(this.dataFiles[i].fileName);
+        }
+      }
+    }
+    return results;
+  }
+
   toJSON(): {} {
     const filenames: string[] = [];
-    for (let i = 0; i < this.dataFiles.length; i++){
+    for (let i = 0; i < this.dataFiles.length; i++) {
       filenames.push(this.dataFiles[i].fileName);
     }
     return filenames;
