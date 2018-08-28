@@ -123,9 +123,6 @@ export class Entry {
 
     // Reset the enumeration ties
     this.enumeration_ties = {};
-    for (let i = 0; i < 30; i++) {
-      this.enumeration_ties[i] = new Set();
-    }
 
     for (const sf of this.saveframes) {
       sf.refresh(overrides, category);
