@@ -78,16 +78,8 @@ export class Saveframe {
     return new_frame;
   }
 
-  toJSON(key): {} {
-    // Clone object to prevent accidentally performing modification on the original object
-    const cloneObj = { ...this as Saveframe };
-    delete cloneObj.parent;
-    delete cloneObj.display;
-    delete cloneObj.tag_dict;
-    delete cloneObj.schema_values;
-    delete cloneObj.index;
-
-    return cloneObj;
+  toJSON(): {} {
+    return {category: this.category, name: this.name, tag_prefix: this.tag_prefix, tags: this.tags, loops: this.loops};
   }
 
   addTag(name: string, value: string): void {
