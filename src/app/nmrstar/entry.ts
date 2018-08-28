@@ -127,13 +127,6 @@ export class Entry {
       this.enumeration_ties[i] = new Set();
     }
 
-    // Enumeration ties 19 is the file list
-    if (this.dataStore) {
-      for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
-        this.enumeration_ties[19].add(this.dataStore.dataFiles[i].fileName);
-      }
-    }
-
     for (const sf of this.saveframes) {
       sf.refresh(overrides, category);
     }
@@ -263,7 +256,7 @@ export function entryFromJSON(jdata: Object): Entry {
     entry.addSaveframe(new_frame);
   }
 
+  entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
   entry.refresh();
-  entry.regenerateDataStore();
   return entry;
 }
