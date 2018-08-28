@@ -55,13 +55,13 @@ export class Entry {
   updateCategories(): void {
 
     this.categories = [];
-    const seen = [];
+    const seen = new Set();
 
     for (const sf of this.saveframes) {
       const pretty_name = sf.schema_values['category_group_view_name'];
-      if (seen.indexOf(sf.category) < 0 && ['Y', 'N'].indexOf(sf.display) >= 0) {
+      if (!seen.has(sf.category) && ['Y', 'N'].indexOf(sf.display) >= 0) {
         this.categories.push([pretty_name, sf.category]);
-        seen.push(sf.category);
+        seen.add(sf.category);
       }
     }
   }
