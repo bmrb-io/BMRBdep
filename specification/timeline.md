@@ -18,6 +18,13 @@ Uncompleted tasks:
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
     browser changes and potential data loss - 2 days
+    * Navigation bar updates
+      * Redo bar to use Angular Material navigation elements - 2 days
+      * Add supercategory-level navigation (also requires API update)- 3 days
+      * Add color-coding based on entry completion - 4 hours
+    
+Optimization tasks:
+* Implement saving on a saveframe-level basis to speed up saving smaller changes - 3 days
 
 * Validation Tools
     * Write tool to print dictionary diffs - 1 day
