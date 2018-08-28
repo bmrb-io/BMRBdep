@@ -50,8 +50,6 @@ export class Saveframe {
       frameIndex += 1;
       frameName = this.category + '_' + frameIndex;
     }
-    console.log('settled on ', frameName);
-
 
     const new_frame = new Saveframe(frameName, this.category, this.tag_prefix, this.parent);
 
