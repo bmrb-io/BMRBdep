@@ -116,18 +116,21 @@ export class Tag {
     */
 
     if ((this.schema_values['Enumeration ties']) && (this.schema_values['Sf pointer'] !== 'Y')) {
+      // 19 is the special case that means the enumeration tie is for a file
       if (this.schema_values['Enumeration ties'] === '19') {
         this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
       } else {
         const parentEntry: Entry = this.getEntry();
-        const enumerationSet = parentEntry.enumeration_ties[this.schema_values['Enumeration ties']];
-        if (enumerationSet) {
-          // Only add our value to the enumeration set if we have a value
-          if (this.value) {
-            enumerationSet.add(this.value);
-          }
-          this.enums = enumerationSet;
+        let enumerationSet = parentEntry.enumeration_ties[this.schema_values['Enumeration ties']];
+        if (!enumerationSet) {
+          enumerationSet = new Set();
+          parentEntry.enumeration_ties[this.schema_values['Enumeration ties']] = enumerationSet;
         }
+        // Only add our value to the enumeration set if we have a value
+        if (this.value) {
+          enumerationSet.add(this.value);
+        }
+        this.enums = enumerationSet;
       }
     }
 
