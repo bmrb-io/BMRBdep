@@ -182,9 +182,7 @@ export class Tag {
         }
       } else {
         // Check the regex
-        const reg_exp = '^' + or['Override value'] + '$';
-        if (new RegExp(reg_exp).test(ct_val)) {
-
+        if (or['Override value'].test(ct_val)) {
           if (this.schema_values['User full view'] !== or['Override view value']) {
             console.log('Set tag ' + this.fqtn + ' visibility from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
               or['Conditional tag'] + ' has filter ' + or['Override value'] + ' - it has value ' + ct_val);

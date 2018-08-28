@@ -38,6 +38,7 @@ export class Schema {
     const sfCategoryCol = this.overrides['headers'].indexOf('Sf category');
     const tagCategoryCol = this.overrides['headers'].indexOf('Tag category');
     const tagCol = this.tags['headers'].indexOf('Tag');
+    const conditionalValueCol = this.overrides['headers'].indexOf('Override value');
 
     // Assign the overrides to the appropriate tags
     for (const overrideRecord of this.overrides['values']) {
@@ -64,7 +65,11 @@ export class Schema {
       const overrideDictionary = {};
       for (let i = 0; i <= this.overrides['headers'].length; i++) {
         if (overrideRecord[i] != null) {
-          overrideDictionary[this.overrides['headers'][i]] = overrideRecord[i];
+          if ((i === conditionalValueCol) && (overrideRecord[i] !== '*')) {
+            overrideDictionary[this.overrides['headers'][i]] = new RegExp('^' + overrideRecord[i] + '$');
+          } else {
+            overrideDictionary[this.overrides['headers'][i]] = overrideRecord[i];
+          }
         }
       }
 
