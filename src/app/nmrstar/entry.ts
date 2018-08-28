@@ -146,6 +146,10 @@ export class Entry {
 
   /* Update the data files loop */
   updateUploadedData() {
+
+    /*
+    First, update the uploaded_data loop
+     */
     // TODO: 1) Add the tags in a tag-order agnostic way
     const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
     const newData = [];
@@ -176,6 +180,29 @@ export class Entry {
     }
     if (newData.length) {
       dfLoop.data = newData;
+    }
+
+    /*
+    Now, update the data types present in the entry_information saveframe
+     */
+    const infoSaveframe = this.getSaveframesByCategory('entry_interview')[0];
+
+    // Set them all to 'no'
+    for (let i = 0; i < this.dataStore.dropDownList.length; i++) {
+      const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + this.dataStore.dropDownList[i][2]];
+      if (categoryTag) {
+        categoryTag.value = 'no';
+      }
+    }
+
+    // Set the appropriate ones to 'yes'
+    for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
+      for (let n = 0; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+        const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + this.dataStore.dataFiles[i].control.value[n][2]];
+        if (categoryTag) {
+          categoryTag.value = 'yes';
+        }
+      }
     }
   }
 
