@@ -13,11 +13,13 @@ export class Entry {
   enumeration_ties: {};
   source: string;
   dataStore: DataFileStore;
+  valid: boolean;
 
   constructor(data_name: string) {
     this.entry_id = data_name;
     this.saveframes = [];
     this.enumeration_ties = {};
+    this.valid = true;
 
     this.updateCategories();
   }
@@ -60,7 +62,7 @@ export class Entry {
     for (const sf of this.saveframes) {
       const pretty_name = sf.schema_values['category_group_view_name'];
       if (!seen.has(sf.category) && ['Y', 'N'].indexOf(sf.display) >= 0) {
-        this.categories.push([pretty_name, sf.category]);
+        this.categories.push([pretty_name, sf.category, sf.valid]);
         seen.add(sf.category);
       }
     }
@@ -123,11 +125,20 @@ export class Entry {
 
     // Reset the enumeration ties
     this.enumeration_ties = {};
-
+    // Refresh each saveframe
     for (const sf of this.saveframes) {
       sf.refresh(overrides, category);
     }
     this.updateCategories();
+    // Check entry validity
+    this.valid = true;
+    for (const sf of this.saveframes) {
+      if (sf.display === 'Y' && !sf.valid) {
+        this.valid = false;
+        break;
+      }
+    }
+
   }
 
   getLoopsByCategory(category): Loop[] {

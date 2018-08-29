@@ -11,6 +11,7 @@ export class Saveframe {
   loops: Loop[];
   parent: Entry;
   display: string;
+  valid: boolean;
   tag_dict: {};
   schema_values: {};
   index: number;
@@ -29,6 +30,7 @@ export class Saveframe {
     this.parent = parent;
     this.tag_dict = {};
     this.display = 'H';
+    this.valid = true;
     this.index = 0;
     if (this.parent.schema) {
       this.schema_values = this.parent.schema.saveframe_schema[this.category];
@@ -173,8 +175,9 @@ export class Saveframe {
       l.refresh(overrides, category);
     }
 
-     // Update whether this saveframe has anything to display
+     // Update whether this saveframe has anything to display and is complete
     this.display = 'H';
+    this.valid = true;
     for (const tag of this.tags) {
       if (['Y', 'N'].indexOf(tag.display) >= 0) {
         if (this.display === 'N') {
@@ -196,6 +199,22 @@ export class Saveframe {
         }
         if (this.display === 'H') {
           this.display = loop.display;
+        }
+      }
+    }
+
+    // Update the validity value
+    for (const tag of this.tags) {
+      if (tag.display === 'Y' && !tag.valid){
+        this.valid = false;
+        break;
+      }
+    }
+    if (this.valid) {
+      for (const loop of this.loops) {
+        if (loop.display === 'Y' && !loop.valid) {
+          this.valid = false;
+          break;
         }
       }
     }
