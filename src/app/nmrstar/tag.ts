@@ -169,7 +169,8 @@ export class Tag {
         }
       } else {
         console.log('Sf pointer set to \'Y\' but no tags!', this);
-        this.enums = new Set(['No saveframes of category ' + this.schema_values['Foreign Table'] + ' found in entry. Please create at least one.']);
+        this.enums = new Set(['No saveframes of category ' + this.schema_values['Foreign Table'] +
+                                     ' found in entry. Please create at least one.']);
         this.valid = false;
       }
       if (!this.enums.has(this.value)) {
