@@ -123,6 +123,8 @@ export class Entry {
 
   refresh(overrides: {}[] = null, category: string = null): void {
 
+    console.time('entry.refresh()');
+
     // Reset the enumeration ties
     this.enumeration_ties = {};
     // Refresh each saveframe
@@ -139,14 +141,15 @@ export class Entry {
       }
     }
 
+    console.timeEnd('entry.refresh()');
   }
 
   getLoopsByCategory(category): Loop[] {
     const results: Loop[] = [];
-    for (let s = 0; s < this.saveframes.length; s++) {
-      for (let l = 0; l < this.saveframes[s].loops.length; l++) {
-        if (this.saveframes[s].loops[l].category === category) {
-          results.push(this.saveframes[s].loops[l]);
+    for (const saveframe of this.saveframes) {
+      for (const loop of saveframe.loops) {
+        if (loop.category === category) {
+          results.push(loop);
         }
       }
     }
@@ -197,17 +200,17 @@ export class Entry {
     const infoSaveframe = this.getSaveframesByCategory('entry_interview')[0];
 
     // Set them all to 'no'
-    for (let i = 0; i < this.dataStore.dropDownList.length; i++) {
-      const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + this.dataStore.dropDownList[i][2]];
+    for (const dropDownItem of this.dataStore.dropDownList) {
+      const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + dropDownItem[2]];
       if (categoryTag) {
         categoryTag.value = 'no';
       }
     }
 
     // Set the appropriate ones to 'yes'
-    for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
-      for (let n = 0; n < this.dataStore.dataFiles[i].control.value.length; n++) {
-        const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + this.dataStore.dataFiles[i].control.value[n][2]];
+    for (const dataFile of this.dataStore.dataFiles) {
+      for (const dataType of dataFile.control.value) {
+        const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + dataType[2]];
         if (categoryTag) {
           categoryTag.value = 'yes';
         }
@@ -223,31 +226,31 @@ export class Entry {
       if (category === null) {
         return null;
       }
-      for (let i = 0; i < dataStore.dropDownList.length; i++) {
-        if (dataStore.dropDownList[i][1] === category) {
-          return dataStore.dropDownList[i];
+      for (const dropDownItem of dataStore.dropDownList) {
+        if (dropDownItem[1] === category) {
+          return dropDownItem;
         }
       }
     }
 
     const dataBuilder = {};
     const nameList = [];
-    for (let i = 0; i < dataLoop.data.length; i++) {
-      if (!dataLoop.data[i][1].value) {
+    for (const dataRow of dataLoop.data) {
+      if (!dataRow[1].value) {
         continue;
       }
-      const sel = getSelectionByDescription(dataLoop.data[i][3].value);
-      if (!dataBuilder[dataLoop.data[i][1].value]) {
-        dataBuilder[dataLoop.data[i][1].value] = [];
-        nameList.push(dataLoop.data[i][1].value);
+      const sel = getSelectionByDescription(dataRow[3].value);
+      if (!dataBuilder[dataRow[1].value]) {
+        dataBuilder[dataRow[1].value] = [];
+        nameList.push(dataRow[1].value);
       }
       if (sel) {
-        dataBuilder[dataLoop.data[i][1].value].push(sel);
+        dataBuilder[dataRow[1].value].push(sel);
       }
     }
 
-    for (let i = 0; i < nameList.length; i++) {
-      dataStore.addFile(nameList[i], dataBuilder[nameList[i]]).percent = 100;
+    for (const name of nameList) {
+      dataStore.addFile(name, dataBuilder[name]).percent = 100;
     }
 
     this.dataStore = dataStore;
@@ -259,8 +262,8 @@ export function entryFromJSON(jdata: Object): Entry {
   const entry = new Entry(jdata['entry_id']);
   entry.schema = new Schema(jdata['schema']);
 
-  for (let i = 0; i < jdata['saveframes'].length; i++) {
-    const new_frame = saveframeFromJSON(jdata['saveframes'][i], entry);
+  for (const saveframeJSON of jdata['saveframes']) {
+    const new_frame = saveframeFromJSON(saveframeJSON, entry);
     entry.addSaveframe(new_frame);
   }
 
