@@ -62,7 +62,7 @@ export class Entry {
     for (const sf of this.saveframes) {
       const pretty_name = sf.schema_values['category_group_view_name'];
       if (!seen.has(sf.category) && ['Y', 'N'].indexOf(sf.display) >= 0) {
-        this.categories.push([pretty_name, sf.category, sf.valid]);
+        this.categories.push([pretty_name, sf.category, sf.valid, sf.display]);
         seen.add(sf.category);
       }
     }
