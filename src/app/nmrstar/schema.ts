@@ -37,7 +37,6 @@ export class Schema {
     const conditionalTagCol = this.overrides['headers'].indexOf('Conditional tag');
     const sfCategoryCol = this.overrides['headers'].indexOf('Sf category');
     const tagCategoryCol = this.overrides['headers'].indexOf('Tag category');
-    const tagCol = this.tags['headers'].indexOf('Tag');
     const conditionalValueCol = this.overrides['headers'].indexOf('Override value');
 
     // Assign the overrides to the appropriate tags
@@ -78,11 +77,18 @@ export class Schema {
     }
 
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas
+    const tagCol = this.tags['headers'].indexOf('Tag');
+    const dataTypeCol = this.tags['headers'].indexOf('BMRB data type');
     for (const schemaTag of Object.keys(this.tags['values'])) {
       const tagSchemaDictionary = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
         if (this.tags['values'][schemaTag][i] != null) {
-          tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
+          if (i === dataTypeCol) {
+            tagSchemaDictionary['Regex'] = new RegExp('^' + this.data_types[this.tags['values'][schemaTag][i]] + '$');
+            tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];
+          } else {
+            tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
+          }
         }
       }
       tagSchemaDictionary['overrides'] = this.getOverridePointers(tagSchemaDictionary);

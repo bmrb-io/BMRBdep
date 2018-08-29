@@ -28,11 +28,10 @@ export class Tag {
     this.fqtn = tag_prefix + '.' + this.name;
     this.schema_values = schema.getTag(this.fqtn);
     if (this.schema_values) {
-      this.schema_values['Regex'] = new RegExp(schema.data_types[this.schema_values['BMRB data type']]);
       this.enums = this.schema_values['enumerations'] ? new Set(this.schema_values['enumerations']) : new Set();
       this.display = this.schema_values['User full view'];
     } else {
-      this.schema_values = {'Regex': new RegExp(schema.data_types['any']),
+      this.schema_values = {'Regex': new RegExp('^' + schema.data_types['any'] + '$'),
                             'Tag': name + '.' + value, 'SFCategory': '?',
                             'BMRB data type': 'any', 'Nullable': true,
                             'Prompt': 'Tag not in dictionary', 'Interface': 'Tag not in dictionary',
