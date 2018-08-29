@@ -177,35 +177,29 @@ export class Saveframe {
 
      // Update whether this saveframe has anything to display and is complete
     this.display = 'H';
-    this.valid = true;
     for (const tag of this.tags) {
-      if (['Y', 'N'].indexOf(tag.display) >= 0) {
-        if (this.display === 'N') {
-          if (tag.display === 'Y') {
-            this.display = 'Y';
-          }
-        }
-        if (this.display === 'H') {
-          this.display = tag.display;
-        }
+      if (tag.display === 'Y') {
+        this.display = 'Y';
+        break;
+      }
+      if (this.display === 'H') {
+        this.display = tag.display;
       }
     }
     for (const loop of this.loops) {
-      if (['Y', 'N'].indexOf(loop.display) >= 0) {
-        if (this.display === 'N') {
-          if (loop.display === 'Y') {
-            this.display = 'Y';
-          }
-        }
-        if (this.display === 'H') {
-          this.display = loop.display;
-        }
+      if (loop.display === 'Y') {
+        this.display = 'Y';
+        break;
+      }
+      if (this.display === 'H') {
+        this.display = loop.display;
       }
     }
 
     // Update the validity value
+    this.valid = true;
     for (const tag of this.tags) {
-      if (tag.display === 'Y' && !tag.valid){
+      if (tag.display === 'Y' && !tag.valid) {
         this.valid = false;
         break;
       }
