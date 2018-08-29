@@ -34,3 +34,11 @@
 .active {
 	font-weight: bold;
 }
+
+.complete {
+  background-color: #87f287;
+}
+
+.incomplete {
+  background-color: red;
+}

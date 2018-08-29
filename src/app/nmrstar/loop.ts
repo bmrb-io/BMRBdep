@@ -9,6 +9,7 @@ export class Loop {
   parent: Saveframe;
   schema_values: {}[];
   display: string;
+  valid: boolean;
 
   toJSON(): {} {
 
@@ -35,6 +36,7 @@ export class Loop {
     this.parent = parent;
     this.schema_values = [];
     this.display = 'H';
+    this.valid = true;
 
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {
@@ -107,6 +109,18 @@ export class Loop {
         }
         if (this.display === 'H') {
           this.display = this.data[r][c].display;
+        }
+      }
+    }
+
+    // Check if the loop is valid
+    this.valid = true;
+    validityCheck:
+    for (const row of this.data) {
+      for (const item of row) {
+        if (item.display === 'Y' && !item.valid) {
+          this.valid = false;
+          break validityCheck;
         }
       }
     }
