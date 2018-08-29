@@ -26,7 +26,7 @@
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.schema_values[c]['User full view'] == 'Y' || (loop.schema_values[c]['User full view'] == 'N' && show_all)"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
-			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r" (contextmenu)="loop.data[r][c].log()"></app-tag>
+			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c" (contextmenu)="loop.data[r][c].log()"></app-tag>
 			  </td>
 			  </ng-container>
 			</tr>
