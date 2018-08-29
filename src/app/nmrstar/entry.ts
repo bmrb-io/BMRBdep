@@ -57,14 +57,40 @@ export class Entry {
   updateCategories(): void {
 
     this.categories = [];
-    const seen = new Set();
 
+    // First get the categories, and their order
+    const categories = new Set();
     for (const sf of this.saveframes) {
-      const pretty_name = sf.schema_values['category_group_view_name'];
-      if (!seen.has(sf.category) && ['Y', 'N'].indexOf(sf.display) >= 0) {
-        this.categories.push([pretty_name, sf.category, sf.valid, sf.display]);
-        seen.add(sf.category);
+      categories.add(sf.category);
+    }
+
+    // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
+    for (const category of Array.from(categories)) {
+      const pretty_name = this.schema.saveframe_schema[category]['category_group_view_name'];
+
+      const matchingSaveframes = this.getSaveframesByCategory(category);
+
+      // Determine category validity
+      let valid = true;
+      for (const saveframe of matchingSaveframes) {
+        if (!saveframe.valid) {
+          valid = false;
+        }
       }
+      // Determine category display rules
+      let display = 'H';
+      for (const saveframe of matchingSaveframes) {
+        if (saveframe.display === 'Y') {
+          display = 'Y';
+          break;
+        }
+        if (display === 'H') {
+          display = saveframe.display;
+        }
+      }
+
+      // Add the record
+      this.categories.push([pretty_name, category, valid, display]);
     }
   }
 
