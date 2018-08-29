@@ -31,7 +31,7 @@ export class WelcomeComponent implements OnInit {
   new() {
     this.api.newDeposition(this.author_email, this.author_orcid).subscribe(response => {
       if (response) {
-        this.router.navigate(['/entry/', response['deposition_id']]);
+        this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
       }
     });
   }
