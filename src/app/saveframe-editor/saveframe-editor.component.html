@@ -1,5 +1,5 @@
 <div>
-  <app-tree-view [entry]="entry" [active]="saveframe_description"></app-tree-view>
+  <app-tree-view [entry]="entry" [active]="saveframe_description" [show_all]="show_all"></app-tree-view>
   <div class="saveframe_editor">
     <p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="show_all" size="small" color="#CBDBFF"></ui-switch></a></p>
 	<a class="fake_button line" *ngIf="prev_sf" [routerLink]="['/entry', entry.entry_id, 'saveframe', prev_sf, 'category']">Previous Category</a>

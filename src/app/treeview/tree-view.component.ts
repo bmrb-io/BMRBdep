@@ -9,6 +9,7 @@ import {Component, Input, OnInit} from '@angular/core';
 export class TreeViewComponent implements OnInit {
   @Input() entry: Entry;
   @Input() active: string;
+  @Input() show_all: boolean;
 
   constructor() { }
 
