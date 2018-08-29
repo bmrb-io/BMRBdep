@@ -15,16 +15,16 @@ export class Loop {
 
     // Turn the loop tags into a simple array of values
     const reduced_data = [];
-    for (let r = 0; r < this.data.length; r++) {
-      const row = [];
-      for (let c = 0; c < this.data[r].length; c++) {
-        if ((!this.data[r][c].value) || (this.data[r][c].value === '')){
-          row.push('.');
+    for (const row of this.data) {
+      const outputRow = [];
+      for (const item of row) {
+        if ((!item.value) || (item.value === '')) {
+          outputRow.push('.');
         } else {
-          row.push(this.data[r][c].value);
+          outputRow.push(item.value);
         }
       }
-      reduced_data.push(row);
+      reduced_data.push(outputRow);
     }
 
     return {category: this.category, tags: this.tags, data: reduced_data};
@@ -49,24 +49,24 @@ export class Loop {
 
     // Turn the data into loop tags...
     this.data = [];
-    for (let r = 0; r < data.length; r++) {
+    for (const rawRow of data) {
       const row = [];
-      for (let c = 0; c < data[r].length; c++) {
-        const new_tag = new LoopTag(this.tags[c], data[r][c], this);
+      for (let c = 0; c < rawRow.length; c++) {
+        const new_tag = new LoopTag(this.tags[c], rawRow[c], this);
         row.push(new_tag);
       }
       this.data.push(row);
     }
 
-    for (let r = 0; r < this.tags.length; r++) {
-      this.schema_values.push(this.parent.parent.schema.getTag(this.category + '.' + this.tags[r]));
+    for (const tag of this.tags) {
+      this.schema_values.push(this.parent.parent.schema.getTag(this.category + '.' + tag));
     }
   }
 
   addRow(): void {
     const new_row = [];
-    for (let i = 0; i < this.tags.length; i++) {
-      new_row.push(new LoopTag(this.tags[i], null, this));
+    for (const tag of this.tags) {
+      new_row.push(new LoopTag(tag, null, this));
     }
     this.data.push(new_row);
     this.refresh();
@@ -80,11 +80,11 @@ export class Loop {
   duplicate(clear_values: boolean = false): Loop {
     const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
-    for (let r = 0; r < this.data.length; r++) {
+    for (const row of this.data) {
       const new_row = [];
-      for (let c = 0; c < this.data[r].length; c++) {
-        const val = clear_values ? null : this.data[r][c].value;
-        new_row.push(new LoopTag(this.data[r][c].name, val, new_loop));
+      for (const item of row) {
+        const val = clear_values ? null : item.value;
+        new_row.push(new LoopTag(item.name, val, new_loop));
       }
       new_loop.data.push(new_row);
       // Just one row of null data if cloning

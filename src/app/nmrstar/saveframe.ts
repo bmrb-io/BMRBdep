@@ -16,12 +16,7 @@ export class Saveframe {
   schema_values: {};
   index: number;
 
-  constructor (name: string,
-               category: string,
-               tag_prefix: string,
-               parent: Entry,
-               tags: SaveframeTag[] = [],
-               loops: Loop[] = []) {
+  constructor (name: string, category: string, tag_prefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
     this.category = category;
     this.tag_prefix = tag_prefix;
@@ -256,9 +251,9 @@ export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
                                         jdata['tag_prefix'],
                                         parent);
   test.addTags(jdata['tags']);
-  for (const l of jdata['loops']) {
-    const new_loop = new Loop(l['category'], l['tags'], l['data'], test);
-    test.addLoop(new_loop);
+  for (const loopJSON of jdata['loops']) {
+    const newLoop = new Loop(loopJSON['category'], loopJSON['tags'], loopJSON['data'], test);
+    test.addLoop(newLoop);
   }
   return test;
 }
