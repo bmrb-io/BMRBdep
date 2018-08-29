@@ -2,16 +2,10 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-  HttpEvent
-} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +22,8 @@ export class ApiService {
   };
 
   constructor(private http: HttpClient,
-              public messagesService: MessagesService) {
+              public messagesService: MessagesService,
+              private router: Router) {
     this.cached_entry = new Entry('');
     this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
     if (!environment.production) {
@@ -84,7 +79,12 @@ export class ApiService {
               console.log(this.cached_entry);
               return this.cached_entry;
            }),
-        catchError((error: HttpErrorResponse) => this.handleError(error))
+        catchError(() => {
+          this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
+                                                       MessageType.ErrorMessage, 10000));
+          setTimeout(() => {this.router.navigate(['/']); }, 10000);
+          return of(new Entry(entry_id));
+        })
       );
     }
 
