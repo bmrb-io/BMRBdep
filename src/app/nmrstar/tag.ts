@@ -138,7 +138,9 @@ export class Tag {
 
     // If null, make sure that null is allowed - no need to check regex.
     if (!this.value) {
-      if (this.schema_values['User full view'] === 'Y') {
+      // TODO: This only works after updateVisibity() is called on this tag. Should be fixed after rewrite of conditional visiblity code
+      // but may require some addition refactoring
+      if (this.display === 'Y') {
         this.valid = false;
         this.validation_message = 'Tag must have a value.';
       }
