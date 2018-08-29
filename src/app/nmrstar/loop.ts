@@ -97,18 +97,25 @@ export class Loop {
   }
 
   refresh(overrides: {}[] = null, category: string = null): void {
-    this.display = 'H';
-    for (let r = 0; r < this.data.length; r++) {
-      for (let c = 0; c < this.data[r].length; c++) {
-        this.data[r][c].updateTagStatus();
 
-        if (this.display === 'N') {
-          if (this.data[r][c].display === 'Y') {
-            this.display = 'Y';
-          }
+    // Update the child data tags
+    for (const row of this.data) {
+      for (const item of row) {
+        item.updateTagStatus();
+      }
+    }
+
+    // Check the loop visibility
+    this.display = 'H';
+    visibilityCheck:
+    for (const row of this.data) {
+      for (const item of row) {
+        if (item.display === 'Y') {
+          this.display = 'Y';
+          break visibilityCheck;
         }
         if (this.display === 'H') {
-          this.display = this.data[r][c].display;
+          this.display = item.display;
         }
       }
     }
