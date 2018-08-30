@@ -1,6 +1,6 @@
 import {cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
-import {LoopTag} from './tag';
+import {LoopTag, Tag} from './tag';
 
 export class Loop {
   category: string;
@@ -96,7 +96,38 @@ export class Loop {
     return new_loop;
   }
 
-  refresh(overrides: {}[] = null, category: string = null): void {
+  // Sets the visibility of all tags in the loop
+  setVisibility(visibility: 'H' | 'N' | 'Y', FQTN: string = '*'): void {
+
+    // Only certain tags
+    if (FQTN !== '*') {
+      let tagCol = -1;
+      for (const row of this.data) {
+        for (const col in row) {
+          if (row[col].fqtn === FQTN) {
+            tagCol = parseInt(col, 10);
+          }
+        }
+      }
+      if (tagCol < 0 ) {
+        console.error('Loop ', this, ' asked to hide tag of FQTN of ', FQTN, ' which isn\'t present in this loop.');
+        return;
+      }
+
+      for (const row of this.data) {
+        row[tagCol].display = visibility;
+      }
+    } else {
+      // Indiscriminately apply to all tags
+      for (const row of this.data) {
+        for (const tag of row) {
+          tag.display = visibility;
+        }
+      }
+    }
+  }
+
+  refresh(): void {
 
     // Update the child data tags
     for (const row of this.data) {
