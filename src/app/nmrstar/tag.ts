@@ -163,7 +163,7 @@ export class Tag {
     if (this.schema_values['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       this.interface_type = 'closed_enum';
-      const frames_of_category: any[] = this.getEntry().getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
+      const frames_of_category: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schema_values['Foreign Table']);
       if (frames_of_category.length > 0) {
         this.enums = new Set();
         for (const sf of frames_of_category) {
@@ -183,36 +183,8 @@ export class Tag {
     }
   }
 
-  updateVisibility(overrides): void {
-    // Determine if this tag is being displayed
-
-    this.display = this.schema_values['User full view'];
-
-    // Check the overrides
-    for (const or of overrides) {
-      // The (... as any) allows calling a method of a generic object
-      const ct_val = (this.parent as any).getTagValue(or['Conditional tag']);
-
-      // For * just check if there is *a* value
-      if (or['Override value'] === '*') {
-        if (ct_val !== null) {
-          this.display = or['Override view value'];
-        }
-      } else {
-        // Check the regex
-        if (or['Override value'].test(ct_val)) {
-          if (this.schema_values['User full view'] !== or['Override view value']) {
-            console.log('Set tag ' + this.fqtn + ' visibility from ' + this.display + ' to ' + or['Override view value'] + ' because ' +
-              or['Conditional tag'] + ' has filter ' + or['Override value'] + ' - it has value ' + ct_val);
-          }
-          this.display = or['Override view value'];
-        }
-      }
-    }
-  }
-
   updateCascade(): void {
-    this.getEntry().refresh(this.schema_values['overrides'], (this.parent as any).category);
+    this.getEntry().refresh();
   }
 
   getEntry(): Entry {
