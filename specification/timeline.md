@@ -13,6 +13,7 @@ Uncompleted tasks:
     * Smaller tasks
         * At least one PI is needed in contact person - 1 day
         * Only allow one outstanding save request at a time - 4 hours
+        * Require at least one loop row if one loop tag has ADIT mandatory='y'
     * Data file uploading
         * Trigger display/addition of data-related saveframes upon upload - 2 days
     * Add more thorough error handling everywhere - 1 week
