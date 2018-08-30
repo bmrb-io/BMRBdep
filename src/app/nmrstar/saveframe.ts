@@ -1,7 +1,7 @@
 import {Entry} from './entry';
 import {Loop} from './loop';
 import {cleanValue} from './nmrstar';
-import {SaveframeTag} from './tag';
+import {SaveframeTag, Tag} from './tag';
 
 export class Saveframe {
   name: string;
@@ -134,7 +134,14 @@ export class Saveframe {
     }
   }
 
-  refresh(overrides: {}[] = null, category: string = null): void {
+  // Sets the visibility of all tags in the saveframe
+  setVisibility(visibility: 'H' | 'N' | 'Y'): void {
+    for (const tag of this.tags) {
+      tag.display = visibility;
+    }
+  }
+
+  refresh(): void {
     // Get the SF name
     const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
     if (fc_name) { this.name = fc_name; }
@@ -142,33 +149,16 @@ export class Saveframe {
     // Get the category number for this SF
     this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
-    // Determine which tags need extra updates
-    const conditionalUpdateTags = {};
-    if (overrides && category === this.category) {
-      // console.log(this.category, this.index, overrides);
-      for (const o of overrides) {
-        if (conditionalUpdateTags[o['Tag']]) {
-          conditionalUpdateTags[o['Tag']].push(o);
-        } else {
-          conditionalUpdateTags[o['Tag']] = [o];
-        }
-      }
-      // console.log(conditionalUpdateTags);
-    }
 
     // Update the tags
     for (const tag of this.tags) {
       tag.updateTagStatus();
-      if (tag.fqtn in conditionalUpdateTags) {
-        tag.updateVisibility(conditionalUpdateTags[tag.fqtn]);
-        // console.log('Updating tag ', tag, ' with conditionals ', conditionalUpdateTags[tag.fqtn]);
-      }
+    }
+    for (const loop of this.loops) {
+      loop.refresh();
     }
 
-    // Update the loops
-    for (const l of this.loops) {
-      l.refresh(overrides, category);
-    }
+    // TODO: update display for loops
 
      // Update whether this saveframe has anything to display and is complete
     this.display = 'H';

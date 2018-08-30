@@ -1,3 +1,10 @@
+class NotNullChecker {
+  constructor () {}
+  static test(value: string) {
+    return value !== null;
+  }
+}
+
 export class Schema {
   /* Populated from parameters */
   version: string;
@@ -7,6 +14,7 @@ export class Schema {
   file_upload_types;
   overrides: {};
   override_dict = {};
+  overridesDictList: Array<{}>;
 
   /* Calculated during construction */
   schema: {};
@@ -29,6 +37,7 @@ export class Schema {
     this.schema = {};
     this.saveframe_schema = {};
     this.override_dict = {};
+    this.overridesDictList = [];
 
     if (!this.tags) {
       return;
@@ -37,7 +46,6 @@ export class Schema {
     const conditionalTagCol = this.overrides['headers'].indexOf('Conditional tag');
     const sfCategoryCol = this.overrides['headers'].indexOf('Sf category');
     const tagCategoryCol = this.overrides['headers'].indexOf('Tag category');
-    const conditionalValueCol = this.overrides['headers'].indexOf('Override value');
 
     // Assign the overrides to the appropriate tags
     for (const overrideRecord of this.overrides['values']) {
@@ -64,16 +72,24 @@ export class Schema {
       const overrideDictionary = {};
       for (let i = 0; i <= this.overrides['headers'].length; i++) {
         if (overrideRecord[i] != null) {
-          if ((i === conditionalValueCol) && (overrideRecord[i] !== '*')) {
-            overrideDictionary[this.overrides['headers'][i]] = new RegExp('^' + overrideRecord[i] + '$');
-          } else {
-            overrideDictionary[this.overrides['headers'][i]] = overrideRecord[i];
-          }
+          overrideDictionary[this.overrides['headers'][i]] = overrideRecord[i];
         }
+      }
+
+      if (overrideDictionary['Override value'] === '*') {
+        overrideDictionary['Regex'] = NotNullChecker;
+      } else {
+        overrideDictionary['Regex'] = new RegExp('^' + overrideDictionary['Override value'] + '$');
+      }
+
+      overrideDictionary['Conditional tag prefix'] = overrideDictionary['Conditional tag'].split('.')[0];
+      if (overrideDictionary['Tag category'] !== '*') {
+        overrideDictionary['Tag category'] = '_' + overrideDictionary['Tag category'];
       }
 
       // Push the override onto the appropriate tag
       fullyResolvedTagList[conditionalTag].push(overrideDictionary);
+      this.overridesDictList.push(overrideDictionary);
     }
 
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas

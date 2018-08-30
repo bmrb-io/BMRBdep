@@ -1,7 +1,7 @@
 import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
-import {LoopTag} from './tag';
+import {LoopTag, Tag} from './tag';
 import {Loop} from './loop';
 
 
@@ -147,15 +147,67 @@ export class Entry {
     return return_list;
   }
 
-  refresh(overrides: {}[] = null, category: string = null): void {
-
-    console.time('entry.refresh()');
+  refresh(): void {
 
     // Reset the enumeration ties
     this.enumeration_ties = {};
+
+    // TODO: Refresh all the tag visibilities based on the override rules
+
+    // First reset all the tag display values to the default
+    for (const saveframe of this.saveframes) {
+      for (const tag of saveframe.tags) {
+        tag.display = tag.schema_values['User full view'];
+      }
+      for (const loop of saveframe.loops) {
+        for (const row of loop.data) {
+          for (const tag of row) {
+            tag.display = tag.schema_values['User full view'];
+          }
+        }
+      }
+    }
+
+    for (const saveframe of this.saveframes) {
+      for (const rule of this.schema.overridesDictList) {
+
+        // Check if this is a saveframe we need to test
+        if (rule['Conditional tag prefix'] === saveframe.tag_prefix) {
+          // See if the rule fires
+          if (rule['Regex'].test(saveframe.tag_dict[rule['Conditional tag']].value)) {
+
+            // First see if the rule applies to saveframe-level tag
+            if (rule['Tag category'] === saveframe.tag_prefix) {
+              saveframe.tag_dict[rule['Tag']].display = rule['Override view value'];
+            // See if the rule applies to a child loop
+            } else {
+              const loopsByPrefix = {};
+              for (const loop of saveframe.loops) {
+                loopsByPrefix[loop.category] = loop;
+              }
+              // The rule applies to a loop in this saveframe
+              if (loopsByPrefix[rule['Tag category']]) {
+                loopsByPrefix[rule['Tag category']].setVisibility(rule['Override view value'], rule['Tag']);
+              // The rule applies to a saveframe elsewhere
+              } else {
+                const frames = this.getSaveframesByCategory(rule['Sf category']);
+                for (const frame of frames) {
+                  frame.setVisibility(rule['Override view value']);
+                  for (const loop of frame.loops) {
+                    loop.setVisibility(rule['Override view value']);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
+
     // Refresh each saveframe
     for (const sf of this.saveframes) {
-      sf.refresh(overrides, category);
+      sf.refresh();
     }
     this.updateCategories();
     // Check entry validity
@@ -166,8 +218,6 @@ export class Entry {
         break;
       }
     }
-
-    console.timeEnd('entry.refresh()');
   }
 
   getLoopsByCategory(category): Loop[] {
