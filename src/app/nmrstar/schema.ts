@@ -13,7 +13,6 @@ export class Schema {
   data_types = {};
   file_upload_types;
   overrides: {};
-  override_dict = {};
   overridesDictList: Array<{}>;
 
   /* Calculated during construction */
@@ -36,37 +35,14 @@ export class Schema {
     this.file_upload_types = json['file_upload_types'];
     this.schema = {};
     this.saveframe_schema = {};
-    this.override_dict = {};
     this.overridesDictList = [];
 
     if (!this.tags) {
       return;
     }
 
-    const conditionalTagCol = this.overrides['headers'].indexOf('Conditional tag');
-    const sfCategoryCol = this.overrides['headers'].indexOf('Sf category');
-    const tagCategoryCol = this.overrides['headers'].indexOf('Tag category');
-
     // Assign the overrides to the appropriate tags
     for (const overrideRecord of this.overrides['values']) {
-      const conditionalTag =  overrideRecord[conditionalTagCol];
-      const sfCategory = overrideRecord[sfCategoryCol];
-      const tagCategory = overrideRecord[tagCategoryCol];
-
-      // Create a dictionary for this saveframe category if none exists
-      if (!this.override_dict[sfCategory]) {
-        this.override_dict[sfCategory] = {};
-      }
-      // Create a dictionary for the tag category if none exists
-      const categoryDictionary = this.override_dict[sfCategory];
-      if (!categoryDictionary[tagCategory]) {
-        categoryDictionary[tagCategory] = {};
-      }
-      // Create a list of the tag rules if none exists
-      const fullyResolvedTagList = categoryDictionary[tagCategory];
-      if (!fullyResolvedTagList[conditionalTag]) {
-        fullyResolvedTagList[conditionalTag] = [];
-      }
 
       // Generate an override dictionary for a single override
       const overrideDictionary = {};
@@ -87,8 +63,7 @@ export class Schema {
         overrideDictionary['Tag category'] = '_' + overrideDictionary['Tag category'];
       }
 
-      // Push the override onto the appropriate tag
-      fullyResolvedTagList[conditionalTag].push(overrideDictionary);
+
       this.overridesDictList.push(overrideDictionary);
     }
 
@@ -107,7 +82,6 @@ export class Schema {
           }
         }
       }
-      tagSchemaDictionary['overrides'] = this.getOverridePointers(tagSchemaDictionary);
       this.schema[this.tags['values'][schemaTag][tagCol]] = tagSchemaDictionary;
     }
 
@@ -122,40 +96,6 @@ export class Schema {
       }
       this.saveframe_schema[saveframeCategory] = saveframeSchemaDictionary;
     }
-  }
-
-
-  private getOverridePointers(tag: {}): {} {
-    // saveframeCategoryRoot is saveframe category root
-    const saveframeCategoryRoot = this.override_dict[tag['SFCategory']];
-
-    let overrides = [];
-    if (saveframeCategoryRoot) {
-      for (const field of [tag['Tag category'], '*']) {
-        if (field in saveframeCategoryRoot) {
-          const categoryDictionary = saveframeCategoryRoot[field];
-          if (tag['Tag'] in categoryDictionary) {
-            overrides = overrides.concat(categoryDictionary[tag['Tag']]);
-          }
-          if ('*' in categoryDictionary) {
-            overrides = overrides.concat(categoryDictionary['*']);
-          }
-        }
-      }
-    }
-    function comparator(a, b) {
-      a = parseInt(a['Order of operation'], 10);
-      b = parseInt(b['Order of operation'], 10);
-      if (a < b) {
-        return -1;
-      } else if (a > b) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-    overrides = overrides.sort(comparator);
-    return overrides;
   }
 
   getTag(tag_name: string): {} {
