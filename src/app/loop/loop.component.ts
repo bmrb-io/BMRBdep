@@ -31,4 +31,8 @@ export class LoopComponent implements OnInit {
     this.loop.deleteRow(row_id);
     this.api.saveEntry();
   }
+
+  log(){
+    console.log(this.loop);
+  }
 }
