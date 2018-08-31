@@ -33,3 +33,7 @@ input[type="submit"], input[type="reset"], input[type="button"], input[type="fil
 .red-background {
   background-color: #FF91A4 !important;
 }
+
+.full_margin {
+  margin: 1em;
+}
