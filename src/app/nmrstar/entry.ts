@@ -1,7 +1,7 @@
 import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
-import {LoopTag, Tag} from './tag';
+import {LoopTag, SaveframeTag, Tag} from './tag';
 import {Loop} from './loop';
 
 
@@ -178,7 +178,13 @@ export class Entry {
 
             // First see if the rule applies to saveframe-level tag
             if (rule['Tag category'] === saveframe.tag_prefix) {
-              saveframe.tag_dict[rule['Tag']].display = rule['Override view value'];
+              if (rule['Override view value'] === 'O') {
+                // Set the tag to whatever its dictionary value was
+                saveframe.tag_dict[rule['Tag']].display = saveframe.tag_dict[rule['Tag']].schema_values['User full view'];
+              } else {
+                // Set the tag to the override rule
+                saveframe.tag_dict[rule['Tag']].display = rule['Override view value'];
+              }
             // See if the rule applies to a child loop
             } else {
               const loopsByPrefix = {};

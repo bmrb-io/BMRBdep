@@ -97,7 +97,7 @@ export class Loop {
   }
 
   // Sets the visibility of all tags in the loop
-  setVisibility(visibility: 'H' | 'N' | 'Y', FQTN: string = '*'): void {
+  setVisibility(visibility: 'H' | 'N' | 'Y' | 'O', FQTN: string = '*'): void {
 
     // Only certain tags
     if (FQTN !== '*') {
@@ -115,13 +115,21 @@ export class Loop {
       }
 
       for (const row of this.data) {
-        row[tagCol].display = visibility;
+        if (visibility === 'O') {
+          row[tagCol].display = row[tagCol].schema_values['User full view'];
+        } else {
+          row[tagCol].display = visibility;
+        }
       }
     } else {
       // Indiscriminately apply to all tags
       for (const row of this.data) {
         for (const tag of row) {
-          tag.display = visibility;
+          if (visibility === 'O') {
+            tag.display = tag.schema_values['User full view'];
+          } else {
+            tag.display = visibility;
+          }
         }
       }
     }
