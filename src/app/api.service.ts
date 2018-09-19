@@ -13,7 +13,6 @@ import {Router} from '@angular/router';
 export class ApiService {
 
   cached_entry: Entry;
-  server_url: string;
 
   JSONOptions = {
     headers: new HttpHeaders({
@@ -25,16 +24,12 @@ export class ApiService {
               public messagesService: MessagesService,
               private router: Router) {
     this.cached_entry = new Entry('');
-    this.server_url = 'https://webapi.bmrb.wisc.edu/devel/deposition';
-    if (!environment.production) {
-      this.server_url = 'http://localhost:9000/deposition';
-    }
   }
 
   // file from event.target.files[0]
   uploadFile(file: File): Observable<HttpEvent<any>> {
 
-    const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file`;
+    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
     const formData = new FormData();
     formData.append('file', file);
@@ -49,7 +44,7 @@ export class ApiService {
   }
 
   deleteFile(fileName: string): Observable<boolean> {
-    const apiEndPoint = `${this.server_url}/${this.getEntryID()}/file/${fileName}`;
+    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
     this.http.delete(apiEndPoint).subscribe(
       () => {this.messagesService.sendMessage(new Message('File deleted.') ); return of(true); },
       () => {this.messagesService.sendMessage(new Message('Failed to delete file.',
@@ -68,7 +63,7 @@ export class ApiService {
       this.cached_entry['source'] = 'browser cache';
     // We either don't have the entry or have a different one, so fetch from the API
     } else {
-      const entry_url = `${this.server_url}/${entry_id}`;
+      const entry_url = `${environment.serverURL}/${entry_id}`;
       return this.http.get(entry_url).pipe(
           map(json_data => {
               this.cached_entry = entryFromJSON(json_data);
@@ -101,7 +96,7 @@ export class ApiService {
 
     // Save to remote server if we haven't just loaded the entry
     if (!initial_save) {
-      const entry_url = `${this.server_url}/${this.cached_entry.entry_id}`;
+      const entry_url = `${environment.serverURL}/${this.cached_entry.entry_id}`;
       this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
         () => {if (!skipMessage) {this.messagesService.sendMessage(new Message('Changes saved.')); }},
         err => this.handleError(err)
@@ -110,7 +105,7 @@ export class ApiService {
   }
 
   newDeposition(author_email: string, orcid: string): Observable<any> {
-    const entry_url = `${this.server_url}/new`;
+    const entry_url = `${environment.serverURL}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0 ));
