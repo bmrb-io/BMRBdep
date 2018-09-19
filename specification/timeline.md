@@ -12,7 +12,6 @@ Uncompleted tasks:
     * ORCID
         * Implement ORCID validation using OpenAuth flow - ~1 week
     * Smaller tasks
-        * At least one PI is needed in contact person - 1 day
         * Only allow one outstanding save request at a time - 4 hours
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
