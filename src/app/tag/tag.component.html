@@ -4,12 +4,14 @@
        [placeholder]="tag.schema_values['default value']"
        (change)="validateTag(tag)"
        [type]="tag.data_type"
-       [attr.step]="tag.schema_values['BMRB data type'] == 'float' ? 'any' : null">
+       [attr.step]="tag.schema_values['BMRB data type'] == 'float' ? 'any' : null"
+       [title]="tag.validation_message">
 
 <select *ngIf="tag.interface_type == 'closed_enum'"
         [(ngModel)]="tag.value"
         [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-        (change)="validateTag(tag)">
+        (change)="validateTag(tag)"
+        [title]="tag.validation_message">
  <option *ngFor="let val of tag.enums" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
 </select>
 
@@ -19,13 +21,15 @@
           [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
           [placeholder]="tag.schema_values['default value']"
           (change)="validateTag(tag)"
+          [title]="tag.validation_message"
           />
   <datalist [id]="tag.fqtn"><option *ngFor="let val of tag.enums" [value]="val"></datalist>
 </ng-container>
   
 <ng-container *ngIf="tag.interface_type == 'yes_no'" >
   <div [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-       (change)="validateTag(tag)">
+       (change)="validateTag(tag)"
+       [title]="tag.validation_message">
   	 <label [for]="tag.fqtn + unique_identifier">Yes</label>
     <input type="radio"
            [name]="tag.fqtn + unique_identifier"
@@ -45,6 +49,7 @@
   <textarea [(ngModel)]="tag.value"
             [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
             [placeholder]="tag.schema_values['default value']"
-            (change)="validateTag(tag)"></textarea>
+            (change)="validateTag(tag)"
+            [title]="tag.validation_message"></textarea>
 
 </ng-container>

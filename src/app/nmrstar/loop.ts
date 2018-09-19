@@ -99,10 +99,6 @@ export class Loop {
   // Sets the visibility of all tags in the loop
   setVisibility(rule): void {
 
-    if (this.category === '_Bond') {
-      console.error('its happening', rule);
-    }
-
     if (rule['Tag category'] !== '*' && rule['Tag category'] !== this.category ) {
       console.error('Invalid rule applied to loop:', rule, this);
       return;
@@ -181,6 +177,33 @@ export class Loop {
         }
       }
     }
+
+    // If this is the contact person loop, an extra check is needed
+    if (this.category === '_Contact_person') {
+      console.log('Checking', this);
+      let valid = false;
+      const roleTags: LoopTag[] = [];
+
+      for (const row of this.data) {
+        for (const item of row) {
+          if (item.name === 'Role') {
+            if (item.value === 'principal investigator') {
+              valid = true;
+            }
+            roleTags.push(item);
+          }
+        }
+      }
+
+      if (!valid) {
+        this.valid = false;
+        for (const tag of roleTags) {
+          tag.valid = false;
+          tag.validation_message = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
+        }
+      }
+    }
+
   }
 
   /*
