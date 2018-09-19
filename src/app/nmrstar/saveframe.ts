@@ -135,9 +135,34 @@ export class Saveframe {
   }
 
   // Sets the visibility of all tags in the saveframe
-  setVisibility(visibility: 'H' | 'N' | 'Y'): void {
-    for (const tag of this.tags) {
-      tag.display = visibility;
+  setVisibility(rule): void {
+
+    // Make sure this is a rule for the saveframe and not a rule for a child loop
+    if (rule['Tag category'] === '*'  || rule['Tag category'] === this.tag_prefix) {
+
+      // If the rule applies to all tags in this saveframe
+      if (rule['Tag'] === '*') {
+        for (const tag of this.tags) {
+          if (rule['Override view value'] === 'O') {
+            tag.display = tag.schema_values['User full view'];
+          } else {
+            tag.display = rule['Override view value'];
+          }
+        }
+      } else {
+        if (rule['Override view value'] === 'O') {
+          this.tag_dict[rule['Tag']].display = this.tag_dict[rule['Tag']].schema_values['User full view'];
+        } else {
+          this.tag_dict[rule['Tag']].display = rule['Override view value'];
+        }
+      }
+    }
+
+    // Now set the visibility for the child loops
+    for (const loop of this.loops) {
+      if (rule['Tag category'] === '*' || rule['Tag category'] === loop.category) {
+        loop.setVisibility(rule);
+      }
     }
   }
 

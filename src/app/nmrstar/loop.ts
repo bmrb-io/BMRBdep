@@ -97,38 +97,49 @@ export class Loop {
   }
 
   // Sets the visibility of all tags in the loop
-  setVisibility(visibility: 'H' | 'N' | 'Y' | 'O', FQTN: string = '*'): void {
+  setVisibility(rule): void {
+
+    if (this.category === '_Bond') {
+      console.error('its happening', rule);
+    }
+
+    if (rule['Tag category'] !== '*' && rule['Tag category'] !== this.category ) {
+      console.error('Invalid rule applied to loop:', rule, this);
+      return;
+    }
 
     // Only certain tags
-    if (FQTN !== '*') {
+    if (rule['Tag'] !== '*') {
       let tagCol = -1;
       for (const row of this.data) {
         for (const col in row) {
-          if (row[col].fqtn === FQTN) {
+          if (row[col].fqtn === rule['Tag']) {
             tagCol = parseInt(col, 10);
           }
         }
       }
+
       if (tagCol < 0 ) {
-        console.error('Loop ', this, ' asked to hide tag of FQTN of ', FQTN, ' which isn\'t present in this loop.');
+        console.error('Invalid rule applied to loop missing specified tag:', rule, this);
         return;
       }
 
+      // Apply the rule
       for (const row of this.data) {
-        if (visibility === 'O') {
+        if (rule['Override view value'] === 'O') {
           row[tagCol].display = row[tagCol].schema_values['User full view'];
         } else {
-          row[tagCol].display = visibility;
+          row[tagCol].display = rule['Override view value'];
         }
       }
     } else {
       // Indiscriminately apply to all tags
       for (const row of this.data) {
         for (const tag of row) {
-          if (visibility === 'O') {
+          if (rule['Override view value'] === 'O') {
             tag.display = tag.schema_values['User full view'];
           } else {
-            tag.display = visibility;
+            tag.display = rule['Override view value'];
           }
         }
       }
