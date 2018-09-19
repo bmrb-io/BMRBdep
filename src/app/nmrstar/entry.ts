@@ -193,15 +193,11 @@ export class Entry {
               }
               // The rule applies to a loop in this saveframe
               if (loopsByPrefix[rule['Tag category']]) {
-                loopsByPrefix[rule['Tag category']].setVisibility(rule['Override view value'], rule['Tag']);
+                loopsByPrefix[rule['Tag category']].setVisibility(rule);
               // The rule applies to a saveframe elsewhere
               } else {
-                const frames = this.getSaveframesByCategory(rule['Sf category']);
-                for (const frame of frames) {
-                  frame.setVisibility(rule['Override view value']);
-                  for (const loop of frame.loops) {
-                    loop.setVisibility(rule['Override view value']);
-                  }
+                for (const frame of this.getSaveframesByCategory(rule['Sf category'])) {
+                  frame.setVisibility(rule);
                 }
               }
             }
