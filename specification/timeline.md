@@ -7,15 +7,13 @@ Uncompleted tasks:
         * Update PyNMRSTAR to allow "merging" entries - 2 days
         * Add new methods to API - 1 day
         * Update GUI - 1 day
+        * Handle incompatible dictionary changes in uploaded files - ??? days
     * Write code to "submit" deposition into existing pipeline 2-3 days
     * ORCID
         * Implement ORCID validation using OpenAuth flow - ~1 week
     * Smaller tasks
         * At least one PI is needed in contact person - 1 day
         * Only allow one outstanding save request at a time - 4 hours
-        * Require at least one loop row if one loop tag has ADIT mandatory='y'
-    * Data file uploading
-        * Trigger display/addition of data-related saveframes upon upload - 2 days
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
     browser changes and potential data loss - 2 days
@@ -23,7 +21,6 @@ Uncompleted tasks:
       * Redo bar to use Angular Material navigation elements - 2 days
       * Add supercategory-level navigation (also requires API update)- 3 days
       * Add color-coding based on entry completion - 4 hours
-    
 Optimization tasks:
 * Implement saving on a saveframe-level basis to speed up saving smaller changes - 3 days
 
