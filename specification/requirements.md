@@ -12,8 +12,8 @@
 3. Allow decoupling web server from API development
 4. Instant data validation
 5. Data consistency checking 
-6. Orchid ID validation
-7. Email id validation
+6. ORCID ID validation
+7. Email validation
 8. Depositor will be able to modify previously entered data in later stage 
 
 ## General Issues
