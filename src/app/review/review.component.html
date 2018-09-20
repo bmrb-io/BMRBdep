@@ -1,5 +1,6 @@
 <div>
   <h3 class="center" *ngIf="!entry.valid">You are viewing portions of your deposition that still need to be completed.</h3>
+  <h3 class="center" *ngIf="entry.valid">Your deposition is ready to submit.</h3>
   <app-tree-view [entry]="entry" [active]="'entry'" [showInvalidOnly]="'true'"></app-tree-view>
   <div class="eighty_five" *ngIf="!entry.valid">
     <app-saveframe *ngFor='let saveframe of entry.saveframes' [saveframe]='saveframe' [showAll]="'false'" [showInvalidOnly]="'true'"></app-saveframe>
@@ -9,6 +10,13 @@
     <input type="button"
            [disabled]="!entry.valid"
            (click)="entry.valid && submitEntry()"
-           value="Submit Entry to BMRB">
+           value="Submit deposition to BMRB">
   </div>
+
+  <div class="wrapper">
+    <input type="button"
+           [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']"
+           value="Return to full overview">
+  </div>
+
 </div>
