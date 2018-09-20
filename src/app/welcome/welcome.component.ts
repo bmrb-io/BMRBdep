@@ -8,15 +8,17 @@ import {ApiService} from '../api.service';
   styleUrls: ['./welcome.component.css']
 })
 export class WelcomeComponent implements OnInit {
-  session_id: string;
-  author_email: string;
-  author_orcid: string;
+  sessionID: string;
+  authorEmail: string;
+  authorORCID: string;
+  bootstrapID: string;
   error: string;
 
   constructor(private router: Router, private api: ApiService) {
-    this.session_id = '';
-    this.author_email = '';
-    this.author_orcid = '';
+    this.sessionID = '';
+    this.authorEmail = '';
+    this.authorORCID = '';
+    this.bootstrapID = '';
     this.error = '';
   }
 
@@ -25,11 +27,11 @@ export class WelcomeComponent implements OnInit {
 
   validate() {
       const regexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      return regexp.test(this.session_id);
+      return regexp.test(this.sessionID);
   }
 
   new() {
-    this.api.newDeposition(this.author_email, this.author_orcid).subscribe(response => {
+    this.api.newDeposition(this.authorEmail, this.authorORCID).subscribe(response => {
       if (response) {
         this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
       }
