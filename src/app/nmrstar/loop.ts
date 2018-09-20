@@ -7,7 +7,7 @@ export class Loop {
   tags: string[];
   data: LoopTag[][];
   parent: Saveframe;
-  schema_values: {}[];
+  schemaValues: {}[];
   display: string;
   valid: boolean;
 
@@ -30,11 +30,11 @@ export class Loop {
     return {category: this.category, tags: this.tags, data: reduced_data};
   }
 
-  constructor (category: string, tags: string[], data: string[][], parent: Saveframe) {
+  constructor(category: string, tags: string[], data: string[][], parent: Saveframe) {
     this.category = category;
     this.tags = tags;
     this.parent = parent;
-    this.schema_values = [];
+    this.schemaValues = [];
     this.display = 'H';
     this.valid = true;
 
@@ -59,7 +59,7 @@ export class Loop {
     }
 
     for (const tag of this.tags) {
-      this.schema_values.push(this.parent.parent.schema.getTag(this.category + '.' + tag));
+      this.schemaValues.push(this.parent.parent.schema.getTag(this.category + '.' + tag));
     }
   }
 
@@ -99,7 +99,7 @@ export class Loop {
   // Sets the visibility of all tags in the loop
   setVisibility(rule): void {
 
-    if (rule['Tag category'] !== '*' && rule['Tag category'] !== this.category ) {
+    if (rule['Tag category'] !== '*' && rule['Tag category'] !== this.category) {
       console.error('Invalid rule applied to loop:', rule, this);
       return;
     }
@@ -109,13 +109,13 @@ export class Loop {
       let tagCol = -1;
       for (const row of this.data) {
         for (const col in row) {
-          if (row[col].fqtn === rule['Tag']) {
+          if (row[col].fullyQualifiedTagName === rule['Tag']) {
             tagCol = parseInt(col, 10);
           }
         }
       }
 
-      if (tagCol < 0 ) {
+      if (tagCol < 0) {
         console.error('Invalid rule applied to loop missing specified tag:', rule, this);
         return;
       }
@@ -123,7 +123,7 @@ export class Loop {
       // Apply the rule
       for (const row of this.data) {
         if (rule['Override view value'] === 'O') {
-          row[tagCol].display = row[tagCol].schema_values['User full view'];
+          row[tagCol].display = row[tagCol].schemaValues['User full view'];
         } else {
           row[tagCol].display = rule['Override view value'];
         }
@@ -133,7 +133,7 @@ export class Loop {
       for (const row of this.data) {
         for (const tag of row) {
           if (rule['Override view value'] === 'O') {
-            tag.display = tag.schema_values['User full view'];
+            tag.display = tag.schemaValues['User full view'];
           } else {
             tag.display = rule['Override view value'];
           }
@@ -154,29 +154,29 @@ export class Loop {
     // Check the loop visibility
     this.display = 'H';
     visibilityCheck:
-    for (const row of this.data) {
-      for (const item of row) {
-        if (item.display === 'Y') {
-          this.display = 'Y';
-          break visibilityCheck;
-        }
-        if (this.display === 'H') {
-          this.display = item.display;
+      for (const row of this.data) {
+        for (const item of row) {
+          if (item.display === 'Y') {
+            this.display = 'Y';
+            break visibilityCheck;
+          }
+          if (this.display === 'H') {
+            this.display = item.display;
+          }
         }
       }
-    }
 
     // Check if the loop is valid
     this.valid = true;
     validityCheck:
-    for (const row of this.data) {
-      for (const item of row) {
-        if (item.display === 'Y' && !item.valid) {
-          this.valid = false;
-          break validityCheck;
+      for (const row of this.data) {
+        for (const item of row) {
+          if (item.display === 'Y' && !item.valid) {
+            this.valid = false;
+            break validityCheck;
+          }
         }
       }
-    }
 
     // If this is the contact person loop, an extra check is needed
     if (this.category === '_Contact_person') {
@@ -199,7 +199,7 @@ export class Loop {
         this.valid = false;
         for (const tag of roleTags) {
           tag.valid = false;
-          tag.validation_message = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
+          tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
         }
       }
     }
@@ -223,24 +223,24 @@ export class Loop {
     const parent = this;
     // Check for empty loops
     if (this.data.length === 0) {
-        if (this.tags.length === 0) {
-            return '\n   loop_\n\n   stop_\n';
-        }
+      if (this.tags.length === 0) {
+        return '\n   loop_\n\n   stop_\n';
+      }
     }
 
     // Can't print data without columns
     if (this.tags.length === 0) {
-        throw new Error(sprintf('Impossible to print data if there are no associated tags. Loop: \'%s\'.', parent.category));
+      throw new Error(sprintf('Impossible to print data if there are no associated tags. Loop: \'%s\'.', parent.category));
     }
 
     // Make sure that if there is data, it is the same width as the column tags
     if (this.data.length > 0) {
-        for (let n = 0; n < this.data.length; n++) {
-            if (this.tags.length !== this.data[n].length) {
-                throw new Error(sprintf('The number of column tags must match width of the data.\
+      for (let n = 0; n < this.data.length; n++) {
+        if (this.tags.length !== this.data[n].length) {
+          throw new Error(sprintf('The number of column tags must match width of the data.\
  Row: %d Loop: \'%s\'.', n, parent.category));
-            }
         }
+      }
     }
 
     // Start the loop
@@ -250,14 +250,14 @@ export class Loop {
 
     // Check to make sure our category is set
     if (this.category === undefined) {
-        throw new Error('The category was never set for this loop. Either add a column \
+      throw new Error('The category was never set for this loop. Either add a column \
         with the category intact, specify it when generating the loop, or set it using setCategory.');
     }
 
     // Print the categories
     const loop_category = this.category;
     for (const column of this.tags) {
-        ret_string += sprintf(pstring, loop_category + '.' + column);
+      ret_string += sprintf(pstring, loop_category + '.' + column);
     }
 
     ret_string += '\n';
@@ -276,7 +276,7 @@ export class Loop {
               continue;
             }
             if (row[n].value.length + 3 > widths[n]) {
-                widths[n] = row[n].value.length + 3;
+              widths[n] = row[n].value.length + 3;
             }
           }
         }
@@ -291,13 +291,13 @@ export class Loop {
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
-            let datum_copy = cleanValue(row[n].value);
-            if (datum_copy.indexOf('\n') !== -1) {
-                datum_copy = sprintf('\n;\n%s;\n', datum_copy);
-            }
+          let datum_copy = cleanValue(row[n].value);
+          if (datum_copy.indexOf('\n') !== -1) {
+            datum_copy = sprintf('\n;\n%s;\n', datum_copy);
+          }
 
-            // Add the data to the return string
-            ret_string += sprintf('%-' + widths[n] + 's', datum_copy);
+          // Add the data to the return string
+          ret_string += sprintf('%-' + widths[n] + 's', datum_copy);
         }
 
         // End the row

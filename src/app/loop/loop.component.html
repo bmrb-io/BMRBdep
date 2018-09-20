@@ -7,16 +7,16 @@
 		<thead>
 			<tr (contextmenu)="log()">
 			  <th colspan=999>
-				{{loop.data[0][0].schema_values['ADIT category view name']}}
-			  </th>
+          {{loop.data[0][0].schemaValues['ADIT category view name']}}
+        </th>
 			</tr>
 			<tr>
 			 <th style="border-collapse: collapse;"></th>
 			<ng-container *ngFor='let col of loop.tags; let c = index'>
-			  <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && show_all)"
-			      [ngClass]="{'mandatory': loop.schema_values[c]['User full view'] == 'Y', 'tag_header': true}"
-	      		  (click)="active_tag = (active_tag != loop.data[0][c] ? loop.data[0][c] : null)"
-	      		  >{{loop.data[0][c].schema_values['Prompt']}}</th>
+			  <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && showAll)"
+			      [ngClass]="{'mandatory': loop.schemaValues[c]['User full view'] == 'Y', 'tag_header': true}"
+	      		  (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
+	      		  >{{loop.data[0][c].schemaValues['Prompt']}}</th>
 			  </ng-container>
 			</tr>
 		</thead>
@@ -24,7 +24,7 @@
 			<tr *ngFor="let row of loop.data; let r = index">
 			<td><a *ngIf="r>0" class="fake_button" (click)='deleteRow(r)'>-</a></td>
 			<ng-container *ngFor="let col of row; let c = index">
-			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && show_all)"
+			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && showAll)"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
 			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c" (contextmenu)="loop.data[r][c].log()"></app-tag>
 			  </td>
@@ -40,11 +40,11 @@
 	</table>
 
 
-	<div *ngIf='active_tag' class='tag_info_box'>
-      <b>{{active_tag.schema_values['Prompt']}}</b>
-      <p>{{active_tag.schema_values['Interface']}}</p>
-      <p *ngIf="active_tag.schema_values['Example'] != '?'"><b>Example:</b> {{active_tag.schema_values['Example']}}</p>
-      <p><i>{{active_tag.fqtn}}</i></p>
-      <p *ngIf='active_tag.validation_message' [class]="'mandatory'">{{active_tag.validation_message}}</p>
+	<div *ngIf='activeTag' class='tag_info_box'>
+      <b>{{activeTag.schemaValues['Prompt']}}</b>
+      <p>{{activeTag.schemaValues['Interface']}}</p>
+      <p *ngIf="activeTag.schemaValues['Example'] != '?'"><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>
+      <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
+      <p *ngIf="activeTag.validationMessage" [class]="'mandatory'">{{activeTag.validationMessage}}</p>
     </div>
 </div>

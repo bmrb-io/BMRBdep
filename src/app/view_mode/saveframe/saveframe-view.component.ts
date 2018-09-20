@@ -8,9 +8,10 @@ import {Saveframe} from '../../nmrstar/saveframe';
 })
 export class SaveframeViewComponent implements OnInit {
   @Input() saveframe: Saveframe;
-  @Input() show_all: false;
+  @Input() showAll: false;
 
-  constructor() {}
+  constructor() {
+  }
 
   ngOnInit() {
   }

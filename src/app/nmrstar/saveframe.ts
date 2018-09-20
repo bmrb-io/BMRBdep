@@ -6,33 +6,33 @@ import {SaveframeTag, Tag} from './tag';
 export class Saveframe {
   name: string;
   category: string;
-  tag_prefix: string;
+  tagPrefix: string;
   tags: SaveframeTag[];
   loops: Loop[];
   parent: Entry;
   display: string;
   valid: boolean;
-  tag_dict: {};
-  schema_values: {};
+  tagDict: {};
+  schemaValues: {};
   index: number;
 
-  constructor (name: string, category: string, tag_prefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
+  constructor(name: string, category: string, tag_prefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
     this.category = category;
-    this.tag_prefix = tag_prefix;
+    this.tagPrefix = tag_prefix;
     this.tags = tags;
     this.loops = loops;
     this.parent = parent;
-    this.tag_dict = {};
+    this.tagDict = {};
     this.display = 'H';
     this.valid = true;
     this.index = 0;
     if (this.parent.schema) {
-      this.schema_values = this.parent.schema.saveframe_schema[this.category];
+      this.schemaValues = this.parent.schema.saveframeSchema[this.category];
     }
 
     for (const tag of this.tags) {
-      this.tag_dict[tag.fqtn] = tag;
+      this.tagDict[tag.fullyQualifiedTagName] = tag;
     }
   }
 
@@ -48,7 +48,7 @@ export class Saveframe {
       frameName = this.category + '_' + frameIndex;
     }
 
-    const new_frame = new Saveframe(frameName, this.category, this.tag_prefix, this.parent);
+    const new_frame = new Saveframe(frameName, this.category, this.tagPrefix, this.parent);
 
     // Copy the tags
     for (const tag of this.tags) {
@@ -74,13 +74,13 @@ export class Saveframe {
   }
 
   toJSON(): {} {
-    return {category: this.category, name: this.name, tag_prefix: this.tag_prefix, tags: this.tags, loops: this.loops};
+    return {category: this.category, name: this.name, tag_prefix: this.tagPrefix, tags: this.tags, loops: this.loops};
   }
 
   addTag(name: string, value: string): void {
     const new_tag = new SaveframeTag(name, value, this);
     this.tags.push(new_tag);
-    this.tag_dict[new_tag.fqtn] = new_tag;
+    this.tagDict[new_tag.fullyQualifiedTagName] = new_tag;
   }
 
   addTags(tag_list: string[][]): void {
@@ -104,8 +104,8 @@ export class Saveframe {
    * @returns    The value of the queried tag, or null if not found
    */
   getTagValue(fqtn: string, full_entry: boolean = false): string {
-    if (fqtn in this.tag_dict) {
-      return this.tag_dict[fqtn].value;
+    if (fqtn in this.tagDict) {
+      return this.tagDict[fqtn].value;
     }
 
     // Ask the parent entry to search the other saveframes if this is a full search
@@ -138,22 +138,22 @@ export class Saveframe {
   setVisibility(rule): void {
 
     // Make sure this is a rule for the saveframe and not a rule for a child loop
-    if (rule['Tag category'] === '*'  || rule['Tag category'] === this.tag_prefix) {
+    if (rule['Tag category'] === '*' || rule['Tag category'] === this.tagPrefix) {
 
       // If the rule applies to all tags in this saveframe
       if (rule['Tag'] === '*') {
         for (const tag of this.tags) {
           if (rule['Override view value'] === 'O') {
-            tag.display = tag.schema_values['User full view'];
+            tag.display = tag.schemaValues['User full view'];
           } else {
             tag.display = rule['Override view value'];
           }
         }
       } else {
         if (rule['Override view value'] === 'O') {
-          this.tag_dict[rule['Tag']].display = this.tag_dict[rule['Tag']].schema_values['User full view'];
+          this.tagDict[rule['Tag']].display = this.tagDict[rule['Tag']].schemaValues['User full view'];
         } else {
-          this.tag_dict[rule['Tag']].display = rule['Override view value'];
+          this.tagDict[rule['Tag']].display = rule['Override view value'];
         }
       }
     }
@@ -168,8 +168,10 @@ export class Saveframe {
 
   refresh(): void {
     // Get the SF name
-    const fc_name = this.getTagValue(this.tag_prefix + '.Sf_framecode');
-    if (fc_name) { this.name = fc_name; }
+    const fc_name = this.getTagValue(this.tagPrefix + '.Sf_framecode');
+    if (fc_name) {
+      this.name = fc_name;
+    }
 
     // Get the category number for this SF
     this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
@@ -185,7 +187,7 @@ export class Saveframe {
 
     // TODO: update display for loops
 
-     // Update whether this saveframe has anything to display and is complete
+    // Update whether this saveframe has anything to display and is complete
     this.display = 'H';
     for (const tag of this.tags) {
       if (tag.display === 'Y') {
@@ -229,30 +231,30 @@ export class Saveframe {
 
     for (const tag of this.tags) {
       if (tag.name.length > width) {
-          width = tag.name.length;
+        width = tag.name.length;
       }
     }
-    width += this.tag_prefix.length + 2;
+    width += this.tagPrefix.length + 2;
 
     // Print the saveframe
     let ret_string = sprintf('save_%s\n', this.name);
     const pstring = sprintf('   %%-%ds  %%s\n', width);
     const mstring = sprintf('   %%-%ds\n;\n%%s;\n', width);
 
-    const tag_prefix = this.tag_prefix;
+    const tag_prefix = this.tagPrefix;
 
     for (const tag of this.tags) {
       const cleaned_tag = cleanValue(tag.value);
 
       if (cleaned_tag.indexOf('\n') === -1) {
-          ret_string +=  sprintf(pstring, tag_prefix + '.' + tag.name, cleaned_tag);
+        ret_string += sprintf(pstring, tag_prefix + '.' + tag.name, cleaned_tag);
       } else {
-          ret_string +=  sprintf(mstring, tag_prefix + '.' + tag.name, cleaned_tag);
+        ret_string += sprintf(mstring, tag_prefix + '.' + tag.name, cleaned_tag);
       }
     }
 
     for (const loop of this.loops) {
-        ret_string += loop.print();
+      ret_string += loop.print();
     }
 
     return ret_string + 'save_\n';
@@ -262,9 +264,9 @@ export class Saveframe {
 
 export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
   const test: Saveframe = new Saveframe(jdata['name'],
-                                        jdata['category'],
-                                        jdata['tag_prefix'],
-                                        parent);
+    jdata['category'],
+    jdata['tag_prefix'],
+    parent);
   test.addTags(jdata['tags']);
   for (const loopJSON of jdata['loops']) {
     const newLoop = new Loop(loopJSON['category'], loopJSON['tags'], loopJSON['data'], test);
