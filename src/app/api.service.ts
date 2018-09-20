@@ -12,7 +12,7 @@ import {Router} from '@angular/router';
 })
 export class ApiService {
 
-  cached_entry: Entry;
+  cachedEntry: Entry;
 
   JSONOptions = {
     headers: new HttpHeaders({
@@ -23,7 +23,7 @@ export class ApiService {
   constructor(private http: HttpClient,
               public messagesService: MessagesService,
               private router: Router) {
-    this.cached_entry = new Entry('');
+    this.cachedEntry = new Entry('');
   }
 
   // file from event.target.files[0]
@@ -46,59 +46,71 @@ export class ApiService {
   deleteFile(fileName: string): Observable<boolean> {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
     this.http.delete(apiEndPoint).subscribe(
-      () => {this.messagesService.sendMessage(new Message('File deleted.') ); return of(true); },
-      () => {this.messagesService.sendMessage(new Message('Failed to delete file.',
-                                                               MessageType.ErrorMessage, 15000 )); return of(false); }
+      () => {
+        this.messagesService.sendMessage(new Message('File deleted.'));
+        return of(true);
+      },
+      () => {
+        this.messagesService.sendMessage(new Message('Failed to delete file.',
+          MessageType.ErrorMessage, 15000));
+        return of(false);
+      }
     );
     return of(false);
   }
 
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
     // If all we did was reroute, we still have the entry
-    if ((entry_id === this.cached_entry.entry_id) && (!skip_cache)) {
-      this.cached_entry['source'] = 'session memory';
+    if ((entry_id === this.cachedEntry.entryID) && (!skip_cache)) {
+      this.cachedEntry['source'] = 'session memory'
     // The page is being reloaded, but we can get the entry from the browser cache
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
-      this.cached_entry['source'] = 'browser cache';
+      this.cachedEntry['source'] = 'browser cache';
     // We either don't have the entry or have a different one, so fetch from the API
     } else {
       const entry_url = `${environment.serverURL}/${entry_id}`;
       return this.http.get(entry_url).pipe(
-          map(json_data => {
-              this.cached_entry = entryFromJSON(json_data);
-              // TODO: This probably won't be necessary later
-              this.cached_entry.entry_id = entry_id;
-              this.cached_entry['source'] = 'API server';
-              this.saveEntry(true);
-              console.log(this.cached_entry);
-              return this.cached_entry;
-           }),
+        map(json_data => {
+          this.cachedEntry = entryFromJSON(json_data);
+          // TODO: This probably won't be necessary later
+          this.cachedEntry.entryID = entry_id;
+          this.cachedEntry['source'] = 'API server';
+          this.saveEntry(true);
+          console.log(this.cachedEntry);
+          return this.cachedEntry;
+        }),
         catchError(() => {
           this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
-                                                       MessageType.ErrorMessage, 10000));
-          setTimeout(() => {this.router.navigate(['/']); }, 10000);
+            MessageType.ErrorMessage, 10000));
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 10000);
           return of(new Entry(entry_id));
         })
       );
     }
 
-    console.log(this.cached_entry);
-    return of(this.cached_entry);
+    console.log(this.cachedEntry);
+    return of(this.cachedEntry);
   }
 
   saveEntry(initial_save: boolean = false, skipMessage: boolean = false): void {
     if (initial_save) {
-      localStorage.setItem('schema', JSON.stringify(this.cached_entry.schema));
+      localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
     }
-    localStorage.setItem('entry', JSON.stringify(this.cached_entry));
-    localStorage.setItem('entry_key', this.cached_entry.entry_id);
+    localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
+    localStorage.setItem('entry_key', this.cachedEntry.entryID);
 
     // Save to remote server if we haven't just loaded the entry
     if (!initial_save) {
-      const entry_url = `${environment.serverURL}/${this.cached_entry.entry_id}`;
-      this.http.put(entry_url, JSON.stringify(this.cached_entry), this.JSONOptions).subscribe(
-        () => {if (!skipMessage) {this.messagesService.sendMessage(new Message('Changes saved.')); }},
+      const entry_url = `${environment.serverURL}/${this.cachedEntry.entryID}`;
+      this.http.put(entry_url, JSON.stringify(this.cachedEntry), this.JSONOptions).subscribe(
+        () => {
+          if (!skipMessage) {
+            this.messagesService.sendMessage(new Message('Changes saved.'));
+          }
+        },
         err => this.handleError(err)
       );
     }
@@ -108,7 +120,7 @@ export class ApiService {
     const entry_url = `${environment.serverURL}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
-      MessageType.NotificationMessage, 0 ));
+      MessageType.NotificationMessage, 0));
     return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions)
       .pipe(
         map(json_data => {
@@ -124,12 +136,12 @@ export class ApiService {
     // TODO: This will throw an uncaught exception if entry_key in local storage but the entry itself isn't
     const raw_json = JSON.parse(localStorage.getItem('entry'));
     raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
-    this.cached_entry = entryFromJSON(raw_json);
+    this.cachedEntry = entryFromJSON(raw_json);
     console.log('Loaded entry from local storage.');
   }
 
   getEntryID(): string {
-    return this.cached_entry.entry_id;
+    return this.cachedEntry.entryID;
   }
 
   /* If we need to compress in local storage in the future...
@@ -141,7 +153,7 @@ export class ApiService {
   handleError(error: HttpErrorResponse) {
     if (error.status === 400) {
       this.messagesService.sendMessage(new Message(error.error.error,
-        MessageType.WarningMessage, 15000 ));
+        MessageType.WarningMessage, 15000));
     } else {
       this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
       console.error('An unhandled server error code occurred:', error);

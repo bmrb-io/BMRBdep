@@ -1,5 +1,7 @@
 class NotNullChecker {
-  constructor () {}
+  constructor() {
+  }
+
   static test(value: string) {
     return value !== null;
   }
@@ -10,31 +12,33 @@ export class Schema {
   version: string;
   tags: {};
   saveframes: {};
-  data_types = {};
-  file_upload_types;
+  dataTypes = {};
+  fileUploadTypes;
   overrides: {};
   overridesDictList: Array<{}>;
 
   /* Calculated during construction */
   schema: {};
-  saveframe_schema: {};
+  saveframeSchema: {};
 
 
   toJSON(): {} {
-    return {version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.data_types,
-            overrides: this.overrides, file_upload_types: this.file_upload_types};
+    return {
+      version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.dataTypes,
+      overrides: this.overrides, file_upload_types: this.fileUploadTypes
+    };
   }
 
-  constructor (json: Object) {
+  constructor(json: Object) {
 
     this.version = json['version'];
     this.tags = json['tags'];
-    this.data_types = json['data_types'];
+    this.dataTypes = json['data_types'];
     this.overrides = json['overrides'];
     this.saveframes = json['saveframes'];
-    this.file_upload_types = json['file_upload_types'];
+    this.fileUploadTypes = json['file_upload_types'];
     this.schema = {};
-    this.saveframe_schema = {};
+    this.saveframeSchema = {};
     this.overridesDictList = [];
 
     if (!this.tags) {
@@ -75,7 +79,7 @@ export class Schema {
       for (let i = 0; i <= this.tags['headers'].length; i++) {
         if (this.tags['values'][schemaTag][i] != null) {
           if (i === dataTypeCol) {
-            tagSchemaDictionary['Regex'] = new RegExp('^' + this.data_types[this.tags['values'][schemaTag][i]] + '$');
+            tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
             tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];
           } else {
             tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
@@ -94,7 +98,7 @@ export class Schema {
           saveframeSchemaDictionary[this.saveframes['headers'][i]] = saveframeSchemaList[i];
         }
       }
-      this.saveframe_schema[saveframeCategory] = saveframeSchemaDictionary;
+      this.saveframeSchema[saveframeCategory] = saveframeSchemaDictionary;
     }
   }
 

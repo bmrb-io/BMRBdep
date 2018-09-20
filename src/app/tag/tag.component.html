@@ -1,55 +1,55 @@
-<input *ngIf="tag.interface_type == 'standard'"
+<input *ngIf="tag.interfaceType == 'standard'"
        [(ngModel)]="tag.value"
        [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-       [placeholder]="tag.schema_values['default value']"
+       [placeholder]="tag.schemaValues['default value']"
        (change)="validateTag(tag)"
        [type]="tag.data_type"
-       [attr.step]="tag.schema_values['BMRB data type'] == 'float' ? 'any' : null"
-       [title]="tag.validation_message">
+       [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
+       [title]="tag.validationMessage">
 
-<select *ngIf="tag.interface_type == 'closed_enum'"
+<select *ngIf="tag.interfaceType == 'closed_enum'"
         [(ngModel)]="tag.value"
         [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
         (change)="validateTag(tag)"
-        [title]="tag.validation_message">
+        [title]="tag.validationMessage">
  <option *ngFor="let val of tag.enums" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
 </select>
 
-<ng-container *ngIf="tag.interface_type == 'open_enum'" >
-   <input [attr.list]="tag.fqtn" 
+<ng-container *ngIf="tag.interfaceType == 'open_enum'" >
+   <input [attr.list]="tag.fullyQualifiedTagName"
           [(ngModel)]="tag.value"
           [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-          [placeholder]="tag.schema_values['default value']"
+          [placeholder]="tag.schemaValues['default value']"
           (change)="validateTag(tag)"
-          [title]="tag.validation_message"
+          [title]="tag.validationMessage"
           />
-  <datalist [id]="tag.fqtn"><option *ngFor="let val of tag.enums" [value]="val"></datalist>
+  <datalist [id]="tag.fullyQualifiedTagName"><option *ngFor="let val of tag.enums" [value]="val"></datalist>
 </ng-container>
   
-<ng-container *ngIf="tag.interface_type == 'yes_no'" >
+<ng-container *ngIf="tag.interfaceType == 'yes_no'" >
   <div [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
        (change)="validateTag(tag)"
-       [title]="tag.validation_message">
-  	 <label [for]="tag.fqtn + unique_identifier">Yes</label>
+       [title]="tag.validationMessage">
+  	 <label [for]="tag.fullyQualifiedTagName + unique_identifier">Yes</label>
     <input type="radio"
-           [name]="tag.fqtn + unique_identifier"
+           [name]="tag.fullyQualifiedTagName + unique_identifier"
            [(ngModel)]="tag.value"
-           [id]="tag.fqtn + unique_identifier"
+           [id]="tag.fullyQualifiedTagName + unique_identifier"
            [value]="'yes'">
-	 <label [for]="tag.fqtn + unique_identifier">No</label>
+	 <label [for]="tag.fullyQualifiedTagName + unique_identifier">No</label>
     <input type="radio"
-           [name]="tag.fqtn + unique_identifier"
+           [name]="tag.fullyQualifiedTagName + unique_identifier"
            [(ngModel)]="tag.value"
-           [id]="tag.fqtn + unique_identifier"
+           [id]="tag.fullyQualifiedTagName + unique_identifier"
            [value]="'no'">
 	     </div>
 </ng-container>
 
-<ng-container *ngIf="tag.interface_type == 'text'" >
+<ng-container *ngIf="tag.interfaceType == 'text'" >
   <textarea [(ngModel)]="tag.value"
             [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-            [placeholder]="tag.schema_values['default value']"
+            [placeholder]="tag.schemaValues['default value']"
             (change)="validateTag(tag)"
-            [title]="tag.validation_message"></textarea>
+            [title]="tag.validationMessage"></textarea>
 
 </ng-container>

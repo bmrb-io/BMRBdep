@@ -2,7 +2,7 @@
   <span class="uneditable">loop_</span>
 </div>
 <ng-container *ngFor='let col of loop.tags; let i = index'>
-	<div class="line highlight" *ngIf="loop.data_in_column[i] || show_all">
+	<div class="line highlight" *ngIf="loop.data_in_column[i] || showAll">
 	  <span class="uneditable twoindent" >{{loop.category + '.' + col}}</span>
 	</div>
 </ng-container>
@@ -10,7 +10,7 @@
   <tbody>
     <tr *ngFor='let row of loop.data; let n = index;'>
       <ng-container *ngFor='let datum of loop.data[n]; let i = index;'>
-	    <td *ngIf="show_all || loop.data_in_column[i]">
+	    <td *ngIf="showAll || loop.data_in_column[i]">
 	      <input class="datum highlight" [(ngModel)]="loop.data[n][i]" placeholder="." [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].value.length + 2 : 2'><!-- [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2' -->
 	    </td>
       </ng-container>

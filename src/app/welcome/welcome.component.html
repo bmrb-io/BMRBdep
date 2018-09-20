@@ -2,15 +2,12 @@
   <h1>Welcome to BMRBDep!</h1>
   <div>
     <h2>Start new deposition</h2>
-    <div>
       <h3>From scratch:</h3>
       <p><input [(ngModel)]="authorEmail" placeholder="Please enter your e-mail." [class.red-background]="!authorEmail"><br>
         <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
         <label for="bootstrap">To pre-fill your deposition from an existing deposition or released BMRB entry:</label><br>
         <input type="text" id="bootstrap" disabled [(ngModel)]="bootstrapID" placeholder="Disabled - implementation pending"><!--Please enter the deposition ID or BMRB ID.--><br>
         Click <button (click)="new()"> here</button> to start a new deposition.</p>
-    </div>
-
   </div>
   <div>
     <h2>Resume deposition</h2>

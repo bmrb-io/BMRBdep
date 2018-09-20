@@ -11,20 +11,20 @@ import {ActivatedRoute, Params} from '@angular/router';
 })
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
-  @Input() show_all: false;
+  @Input() showAll: false;
   @Output() sfReload = new EventEmitter<string>();
-  active_tag: SaveframeTag;
-  show_category_link: boolean;
+  activeTag: SaveframeTag;
+  showCategoryLink: boolean;
 
   constructor(public api: ApiService, private route: ActivatedRoute) {
-    this.active_tag = null;
-    this.show_category_link = true;
+    this.activeTag = null;
+    this.showCategoryLink = true;
   }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
         if (params['load_type'] === 'category') {
-          this.show_category_link = params['saveframe_description'] !== this.saveframe.category;
+          this.showCategoryLink = params['saveframe_description'] !== this.saveframe.category;
         }
       });
   }

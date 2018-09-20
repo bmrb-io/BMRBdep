@@ -12,30 +12,30 @@ import {Schema} from '../nmrstar/schema';
 })
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
-  show_all: boolean;
+  showAll: boolean;
   entry: Entry;
-  saveframe_description: string;
-  load_type: string;
-  next_sf: string;
-  prev_sf: string;
+  saveframeDescription: string;
+  loadType: string;
+  nextSaveframe: string;
+  previousSaveframe: string;
 
   constructor(private route: ActivatedRoute,
-    private api: ApiService) {
+              private api: ApiService) {
     const sf = new Saveframe('', '', '', new Entry(''));
     sf.parent.schema = new Schema({});
     this.saveframes = [sf];
-    this.show_all = true;
+    this.showAll = true;
     this.entry = new Entry('');
-    this.next_sf = null;
-    this.prev_sf = null;
+    this.nextSaveframe = null;
+    this.previousSaveframe = null;
   }
 
   ngOnInit() {
     // Listen for the changing of the params string
     const parent = this;
-    this.route.params.subscribe(function(params) {
-      parent.load_type = params['load_type'];
-      parent.saveframe_description = params['saveframe_description'];
+    this.route.params.subscribe(function (params) {
+      parent.loadType = params['load_type'];
+      parent.saveframeDescription = params['saveframe_description'];
       parent.loadEntry(params['entry']);
     });
   }
@@ -50,10 +50,10 @@ export class SaveframeEditorComponent implements OnInit {
   }
 
   reloadSaveframes(): void {
-    if (this.load_type === 'name') {
-      this.saveframes = [this.entry.getSaveframeByName(this.saveframe_description)];
-    } else if (this.load_type === 'category') {
-      this.saveframes = this.entry.getSaveframesByCategory(this.saveframe_description);
+    if (this.loadType === 'name') {
+      this.saveframes = [this.entry.getSaveframeByName(this.saveframeDescription)];
+    } else if (this.loadType === 'category') {
+      this.saveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
     }
     this.updateCategoryLinks();
   }
@@ -64,21 +64,21 @@ export class SaveframeEditorComponent implements OnInit {
       index--;
     }
 
-    if (index <= 0 ) {
-      this.prev_sf = null;
+    if (index <= 0) {
+      this.previousSaveframe = null;
     } else {
-      this.prev_sf =  this.entry.saveframes[index].category;
+      this.previousSaveframe = this.entry.saveframes[index].category;
     }
 
 
     index = this.entry.saveframes.indexOf(this.saveframes[this.saveframes.length - 1]) + 1;
-    while (index <= this.entry.saveframes.length - 1 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ) {
+    while (index <= this.entry.saveframes.length - 1 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0) {
       index++;
     }
-    if (index > this.entry.saveframes.length - 1 ) {
-      this.next_sf = null;
+    if (index > this.entry.saveframes.length - 1) {
+      this.nextSaveframe = null;
     } else {
-      this.next_sf =  this.entry.saveframes[index].category;
+      this.nextSaveframe = this.entry.saveframes[index].category;
     }
   }
 }
