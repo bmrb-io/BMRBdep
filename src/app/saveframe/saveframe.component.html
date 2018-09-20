@@ -1,3 +1,4 @@
+<ng-container *ngIf="(showInvalidOnly && !saveframe.valid) || !showInvalidOnly">
 <app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal" [entry]="saveframe.parent"></app-file-uploader>
 <ng-template #normal>
   <div *ngIf="saveframe.display == 'Y' || (showAll && saveframe.display == 'N')">
@@ -40,7 +41,7 @@
               <td [ngClass]="{'mandatory': sftag.display == 'Y', 'tag_description': true}"
               [innerHTML]="sftag.schemaValues['Prompt']"
               [title]="sftag.schemaValues['Interface']"
-              (click)="activeTag = (active_tag != sftag ? sftag : null)">
+              (click)="activeTag = (activeTag != sftag ? sftag : null)">
           </td>
           <td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
                 <app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name" ></app-tag>
@@ -50,16 +51,20 @@
       </tbody>
     </table>
 
-    <div *ngIf='active_tag' class='tag_info_box'>
-      <b>{{active_tag.schemaValues['Prompt']}}</b>
-      <p>{{active_tag.schemaValues['Interface']}}</p>
-      <p *ngIf="active_tag.schemaValues['Example'] != '?'"><b>Example:</b> {{active_tag.schemaValues['Example']}}</p>
-      <p><i>{{active_tag.fullyQualifiedTagName}}</i></p>
-      <p *ngIf='active_tag.validationMessage' [class]="'mandatory'">{{active_tag.validationMessage}}</p>
+    <div *ngIf='activeTag' class='tag_info_box'>
+      <b>{{activeTag.schemaValues['Prompt']}}</b>
+      <p>{{activeTag.schemaValues['Interface']}}</p>
+      <p *ngIf="activeTag.schemaValues['Example'] != '?'"><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>
+      <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
+      <p *ngIf='activeTag.validationMessage' [class]="'mandatory'">{{activeTag.validationMessage}}</p>
     </div>
 
     <ng-container *ngFor='let loop of saveframe.loops'>
-      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && showAll)" [loop]='loop' [showAll]="showAll"></app-loop>
+      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && showAll)"
+                [loop]='loop'
+                [showAll]="showAll"
+                [showInvalidOnly]="showInvalidOnly"></app-loop>
     </ng-container>
   </div>
 </ng-template>
+</ng-container>

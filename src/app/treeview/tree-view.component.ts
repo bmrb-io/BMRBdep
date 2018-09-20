@@ -10,6 +10,7 @@ export class TreeViewComponent implements OnInit {
   @Input() entry: Entry;
   @Input() active: string;
   @Input() showAll: boolean;
+  @Input() showInvalidOnly: boolean;
 
   constructor() {
   }

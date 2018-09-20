@@ -29,6 +29,7 @@ import {MessageComponent} from './message/message.component';
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatProgressBarModule, MatSelectModule} from '@angular/material';
+import { ReviewComponent } from './review/review.component';
 
 
 @NgModule({
@@ -45,6 +46,7 @@ import {MatProgressBarModule, MatSelectModule} from '@angular/material';
     TreeViewComponent,
     FileUploaderComponent,
     MessageComponent,
+    ReviewComponent,
   ],
   imports: [
     BrowserModule,
