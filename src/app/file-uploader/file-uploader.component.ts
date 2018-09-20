@@ -1,7 +1,7 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
-import {Message, MessageType} from '../messages.service';
+import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 
 @Component({
@@ -14,7 +14,8 @@ export class FileUploaderComponent implements OnInit {
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
-  constructor(public api: ApiService) {
+  constructor(public api: ApiService,
+              private messagesService: MessagesService) {
   }
 
   ngOnInit() {
@@ -63,7 +64,7 @@ export class FileUploaderComponent implements OnInit {
               dataFile.percent = 100;
               this.entry.dataStore.updateName(dataFile, event.body['filename']);
               if (!event.body['changed']) {
-                this.api.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+                this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
               }
             }

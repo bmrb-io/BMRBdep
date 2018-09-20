@@ -21,7 +21,7 @@ export class ApiService {
   };
 
   constructor(private http: HttpClient,
-              public messagesService: MessagesService,
+              private messagesService: MessagesService,
               private router: Router) {
     this.cachedEntry = new Entry('');
   }
@@ -62,7 +62,7 @@ export class ApiService {
   getEntry(entry_id: string, skip_cache: boolean = false): Observable<Entry> {
     // If all we did was reroute, we still have the entry
     if ((entry_id === this.cachedEntry.entryID) && (!skip_cache)) {
-      this.cachedEntry['source'] = 'session memory'
+      this.cachedEntry['source'] = 'session memory';
     // The page is being reloaded, but we can get the entry from the browser cache
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
       this.loadLocal();
@@ -117,11 +117,27 @@ export class ApiService {
   }
 
   newDeposition(author_email: string, orcid: string): Observable<any> {
-    const entry_url = `${environment.serverURL}/new`;
+    const apiEndPoint = `${environment.serverURL}/new`;
     const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
-    return this.http.post(entry_url, JSON.stringify(body), this.JSONOptions)
+    return this.http.post(apiEndPoint, JSON.stringify(body), this.JSONOptions)
+      .pipe(
+        map(json_data => {
+          this.messagesService.clearMessage();
+          return json_data;
+        }),
+        // Convert the error into something we can handle
+        catchError((error: HttpErrorResponse) => this.handleError(error))
+      );
+  }
+
+  submitEntry(): Observable<any> {
+    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
+
+    this.messagesService.sendMessage(new Message('Submitting deposition...',
+      MessageType.NotificationMessage, 0));
+    return this.http.post(apiEndPoint, null)
       .pipe(
         map(json_data => {
           this.messagesService.clearMessage();
