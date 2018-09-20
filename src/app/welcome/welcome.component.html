@@ -2,14 +2,21 @@
   <h1>Welcome to BMRBDep!</h1>
   <div>
     <h2>Start new deposition</h2>
-    <p>E-mail: <input [(ngModel)]="author_email" placeholder="Please enter your e-mail." [class.red-background]="!author_email"><br>
-       ORCID: <input [(ngModel)]="author_orcid" placeholder="Please enter your ORCID if you have one." ><br>
-       Click <button (click)="new()"> here</button> to start a new deposition.</p>
+    <div>
+      <h3>From scratch:</h3>
+      <p><input [(ngModel)]="authorEmail" placeholder="Please enter your e-mail." [class.red-background]="!authorEmail"><br>
+        <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
+        <label for="bootstrap">To pre-fill your deposition from an existing deposition or released BMRB entry:</label><br>
+        <input type="text" id="bootstrap" disabled [(ngModel)]="bootstrapID" placeholder="Disabled - implementation pending"><!--Please enter the deposition ID or BMRB ID.--><br>
+        Click <button (click)="new()"> here</button> to start a new deposition.</p>
+    </div>
+
   </div>
   <div>
     <h2>Resume deposition</h2>
-    <input type="text" [(ngModel)]="session_id" #name="ngModel" placeholder="Please enter your session ID.">
-    <p *ngIf="validate(); else invalid">Click <button [routerLink]="['/entry', session_id]">here</button> to resume deposition {{session_id}}.</p>
+    <input type="text" [(ngModel)]="sessionID" #name="ngModel" placeholder="Please enter your session ID.">
+    <p *ngIf="validate(); else invalid">Click <button [routerLink]="['/entry', sessionID]">here</button>
+      to resume deposition {{sessionID}}.</p>
     <ng-template #invalid><p>Invalid or missing session ID.</ng-template>
   </div>
 </div>
