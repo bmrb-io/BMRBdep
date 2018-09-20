@@ -1,5 +1,4 @@
 import {FormControl} from '@angular/forms';
-import {Data} from '@angular/router';
 
 export class DataFile {
   dropDownList;
@@ -78,7 +77,9 @@ export class DataFileStore {
     if (this.dataFileMap[fileName]) {
       // Remove the old file element from the array
       const index = this.dataFiles.indexOf(this.dataFileMap[fileName]);
-      if (index > -1) { this.dataFiles.splice(index, 1); }
+      if (index > -1) {
+        this.dataFiles.splice(index, 1);
+      }
       // Update the reference to point to the new file upload
       this.dataFileMap[dataFile.fileName] = dataFile;
 

@@ -1,31 +1,31 @@
 import {Saveframe, saveframeFromJSON} from './saveframe';
 import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
-import {LoopTag, SaveframeTag, Tag} from './tag';
+import {LoopTag} from './tag';
 import {Loop} from './loop';
 
 
 export class Entry {
-  entry_id: string;
+  entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
   categories: string[][];
-  enumeration_ties: {};
+  enumerationTies: {};
   source: string;
   dataStore: DataFileStore;
   valid: boolean;
 
   constructor(data_name: string) {
-    this.entry_id = data_name;
+    this.entryID = data_name;
     this.saveframes = [];
-    this.enumeration_ties = {};
+    this.enumerationTies = {};
     this.valid = true;
 
     this.updateCategories();
   }
 
   toJSON(): {} {
-    return {entry_id: this.entry_id, saveframes: this.saveframes};
+    return {entry_id: this.entryID, saveframes: this.saveframes};
   }
 
   /* Return the position of a given saveframe in the saveframe list. */
@@ -48,7 +48,7 @@ export class Entry {
   removeSaveframe(saveframe: Saveframe): void {
     const index = this.saveframes.indexOf(saveframe, 0);
     if (index > -1) {
-       this.saveframes.splice(index, 1);
+      this.saveframes.splice(index, 1);
     }
 
     this.updateCategories();
@@ -66,7 +66,7 @@ export class Entry {
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     for (const category of Array.from(categories)) {
-      const pretty_name = this.schema.saveframe_schema[category]['category_group_view_name'];
+      const pretty_name = this.schema.saveframeSchema[category]['category_group_view_name'];
 
       const matchingSaveframes = this.getSaveframesByCategory(category);
 
@@ -95,7 +95,7 @@ export class Entry {
   }
 
   print(): string {
-    let result = 'data_' + this.entry_id + '\n\n';
+    let result = 'data_' + this.entryID + '\n\n';
 
     for (const sf of this.saveframes) {
       result += sf.print() + '\n';
@@ -108,11 +108,15 @@ export class Entry {
 
     for (const sf of this.saveframes) {
       // Skip checking the saveframe that called us, if one did
-      if (sf === skip) { continue; }
+      if (sf === skip) {
+        continue;
+      }
 
       // Ask the saveframe for the tag, return it if found
       const sf_res = sf.getTagValue(fqtn);
-      if (sf_res) { return sf_res; }
+      if (sf_res) {
+        return sf_res;
+      }
     }
 
     return null;
@@ -140,7 +144,7 @@ export class Entry {
   getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
     const return_list: Saveframe[] = [];
     for (const sf of this.saveframes) {
-      if (sf.tag_prefix === tag_prefix) {
+      if (sf.tagPrefix === tag_prefix) {
         return_list.push(sf);
       }
     }
@@ -150,19 +154,19 @@ export class Entry {
   refresh(): void {
 
     // Reset the enumeration ties
-    this.enumeration_ties = {};
+    this.enumerationTies = {};
 
     // TODO: Refresh all the tag visibilities based on the override rules
 
     // First reset all the tag display values to the default
     for (const saveframe of this.saveframes) {
       for (const tag of saveframe.tags) {
-        tag.display = tag.schema_values['User full view'];
+        tag.display = tag.schemaValues['User full view'];
       }
       for (const loop of saveframe.loops) {
         for (const row of loop.data) {
           for (const tag of row) {
-            tag.display = tag.schema_values['User full view'];
+            tag.display = tag.schemaValues['User full view'];
           }
         }
       }
@@ -172,18 +176,18 @@ export class Entry {
       for (const rule of this.schema.overridesDictList) {
 
         // Check if this is a saveframe we need to test
-        if (rule['Conditional tag prefix'] === saveframe.tag_prefix) {
+        if (rule['Conditional tag prefix'] === saveframe.tagPrefix) {
           // See if the rule fires
-          if (rule['Regex'].test(saveframe.tag_dict[rule['Conditional tag']].value)) {
+          if (rule['Regex'].test(saveframe.tagDict[rule['Conditional tag']].value)) {
 
             // First see if the rule applies to saveframe-level tag
-            if (rule['Tag category'] === saveframe.tag_prefix) {
+            if (rule['Tag category'] === saveframe.tagPrefix) {
               if (rule['Override view value'] === 'O') {
                 // Set the tag to whatever its dictionary value was
-                saveframe.tag_dict[rule['Tag']].display = saveframe.tag_dict[rule['Tag']].schema_values['User full view'];
+                saveframe.tagDict[rule['Tag']].display = saveframe.tagDict[rule['Tag']].schemaValues['User full view'];
               } else {
                 // Set the tag to the override rule
-                saveframe.tag_dict[rule['Tag']].display = rule['Override view value'];
+                saveframe.tagDict[rule['Tag']].display = rule['Override view value'];
               }
             // See if the rule applies to a child loop
             } else {
@@ -250,7 +254,9 @@ export class Entry {
 
         // Make sure there is at least an empty record for each file
         if (n === -1) {
-          if (this.dataStore.dataFiles[i].control.value.length !== 0) {continue; }
+          if (this.dataStore.dataFiles[i].control.value.length !== 0) {
+            continue;
+          }
         } else {
           sfCat = this.dataStore.dataFiles[i].control.value[n][0];
           sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
@@ -263,7 +269,7 @@ export class Entry {
           new LoopTag('Data_file_syntax', null, dfLoop),
           new LoopTag('Data_file_immutable_flag', null, dfLoop),
           new LoopTag('Sf_ID', null, dfLoop),
-          new LoopTag('Entry_ID', this.entry_id, dfLoop),
+          new LoopTag('Entry_ID', this.entryID, dfLoop),
           new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop)
         ]);
       }
@@ -279,7 +285,7 @@ export class Entry {
 
     // Set them all to 'no'
     for (const dropDownItem of this.dataStore.dropDownList) {
-      const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + dropDownItem[2]];
+      const categoryTag = infoSaveframe.tagDict['_Entry_interview.' + dropDownItem[2]];
       if (categoryTag) {
         categoryTag.value = 'no';
       }
@@ -288,7 +294,7 @@ export class Entry {
     // Set the appropriate ones to 'yes'
     for (const dataFile of this.dataStore.dataFiles) {
       for (const dataType of dataFile.control.value) {
-        const categoryTag = infoSaveframe.tag_dict['_Entry_interview.' + dataType[2]];
+        const categoryTag = infoSaveframe.tagDict['_Entry_interview.' + dataType[2]];
         if (categoryTag) {
           categoryTag.value = 'yes';
         }
@@ -297,7 +303,7 @@ export class Entry {
   }
 
   regenerateDataStore(): void {
-    const dataStore = new DataFileStore([], this.schema.file_upload_types);
+    const dataStore = new DataFileStore([], this.schema.fileUploadTypes);
     const dataLoop = this.getLoopsByCategory('_Upload_data')[0];
 
     function getSelectionByDescription(category: string) {

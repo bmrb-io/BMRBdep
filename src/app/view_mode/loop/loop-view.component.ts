@@ -9,9 +9,10 @@ import {Component, Input, OnInit} from '@angular/core';
 
 export class LoopViewComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() show_all: boolean;
+  @Input() showAll: boolean;
 
-  constructor() {}
+  constructor() {
+  }
 
   ngOnInit() {
   }

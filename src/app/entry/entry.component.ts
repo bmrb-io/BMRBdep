@@ -12,18 +12,18 @@ import {download} from '../nmrstar/nmrstar';
 })
 export class EntryComponent implements OnInit {
   entry: Entry;
-  show_all: boolean;
+  showAll: boolean;
 
   constructor(private route: ActivatedRoute,
-    private api: ApiService) {
+              private api: ApiService) {
     this.entry = new Entry('');
-    this.show_all = true;
+    this.showAll = true;
   }
 
   ngOnInit() {
     // Listen for the changing of the params string
     const parent = this;
-    this.route.params.subscribe(function(params) {
+    this.route.params.subscribe(function (params) {
       parent.loadEntry(params['entry']);
     });
   }

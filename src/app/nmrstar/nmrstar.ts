@@ -18,52 +18,52 @@ Be mindful of the value of str_conversion_dict as it will effect the
 way the value is converted to a string.*/
 export function cleanValue(value): string {
 
-    if (value == null) {
-      return '.';
+  if (value == null) {
+    return '.';
+  }
+
+  // If the user inserts a newline in the web editor replace it with a newline
+  value = value.replace(/<br>/g, '\n');
+  value = value.replace(/⏎/g, '\n');
+
+  // Values that go on their own line don't need to be touched
+  if (value.indexOf('\n') !== -1) {
+    if (value.substring(value.length - 1) !== '\n') {
+      return value + '\n';
+    } else {
+      return value;
     }
+  }
 
-    // If the user inserts a newline in the web editor replace it with a newline
-    value = value.replace(/<br>/g, '\n');
-    value = value.replace(/⏎/g, '\n');
+  // No empty values
+  if (value === undefined) {
+    throw new Error('Empty strings are not allowed as values. Use a \'.\' or a \'?\' if needed.');
+  }
 
-    // Values that go on their own line don't need to be touched
-    if (value.indexOf('\n') !== -1) {
-        if (value.substring(value.length - 1) !== '\n') {
-            return value + '\n';
-        } else {
-            return value;
-        }
+  // Normally we wouldn't autoconvert null values for them but it may be appropriate here
+  if (value === '') {
+    value = '.';
+  }
+
+  if ((value.indexOf('"') !== -1) && (value.indexOf('\'') !== -1)) {
+    return sprintf('%s\n', value);
+  }
+
+  if ((value.indexOf(' ') !== -1) || (value.indexOf('\t') !== -1) ||
+    (value.indexOf('#') !== -1) || (value.startsWith('_')) ||
+    ((value.length > 4) && (value.startsWith('data_')) ||
+      (value.startsWith('save_')) || (value.startsWith('loop_')) || (value.startsWith('stop_')))) {
+
+    if (value.indexOf('"') !== -1) {
+      return sprintf('\'%s\'', value);
+    } else if (value.indexOf('\'') !== -1) {
+      return sprintf('"%s"', value);
+    } else {
+      return sprintf('\'%s\'', value);
     }
+  }
 
-    // No empty values
-    if (value === undefined) {
-        throw new Error('Empty strings are not allowed as values. Use a \'.\' or a \'?\' if needed.');
-    }
-
-    // Normally we wouldn't autoconvert null values for them but it may be appropriate here
-    if (value === '') {
-        value = '.';
-    }
-
-    if ((value.indexOf('"') !== -1) && (value.indexOf('\'') !== -1)) {
-        return sprintf('%s\n', value);
-    }
-
-    if ((value.indexOf(' ') !== -1) || (value.indexOf('\t') !== -1) ||
-        (value.indexOf('#') !== -1) || (value.startsWith('_')) ||
-        ((value.length > 4) && (value.startsWith('data_')) ||
-        (value.startsWith('save_')) || (value.startsWith('loop_')) || (value.startsWith('stop_')))) {
-
-        if (value.indexOf('"') !== -1) {
-            return sprintf('\'%s\'', value);
-        } else if (value.indexOf('\'') !== -1) {
-            return sprintf('"%s"', value);
-        } else {
-            return sprintf('\'%s\'', value);
-        }
-    }
-
-    return value;
+  return value;
 }
 
 // Function to check for illegal unicode characters in the file
@@ -72,11 +72,11 @@ export function containsIllegalNonLatinCodepoints(s): boolean {
 }
 
 export function download(filename, printable_object): void {
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printable_object.print()));
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printable_object.print()));
+  element.setAttribute('download', filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
 }

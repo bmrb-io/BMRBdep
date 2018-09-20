@@ -14,12 +14,10 @@ export class FileUploaderComponent implements OnInit {
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
-  constructor(public api: ApiService) { }
+  constructor(public api: ApiService) {
+  }
 
-  ngOnInit() { }
-
-  logit(item) {
-    console.log(item);
+  ngOnInit() {
   }
 
   updateAndSaveDataFiles() {

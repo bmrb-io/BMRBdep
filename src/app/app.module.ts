@@ -1,33 +1,33 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import {HttpClientModule} from '@angular/common/http';
 
 // https://github.com/webcat12345/ngx-ui-switch
 // https://www.npmjs.com/package/angular2-ui-switch
-import { UiSwitchModule } from 'ngx-ui-switch';
+import {UiSwitchModule} from 'ngx-ui-switch';
 // https://www.npmjs.com/package/ng-multiselect-dropdown
 
-import { AppComponent } from './app.component';
-import { SaveframeEditorComponent } from './saveframe-editor/saveframe-editor.component';
-import { AppRoutingModule } from './app-routing.module';
-import { WelcomeComponent } from './welcome/welcome.component';
+import {AppComponent} from './app.component';
+import {SaveframeEditorComponent} from './saveframe-editor/saveframe-editor.component';
+import {AppRoutingModule} from './app-routing.module';
+import {WelcomeComponent} from './welcome/welcome.component';
 
 // For the editor mode
-import { LoopComponent } from './loop/loop.component';
-import { SaveframeComponent } from './saveframe/saveframe.component';
-import { EntryComponent } from './entry/entry.component';
+import {LoopComponent} from './loop/loop.component';
+import {SaveframeComponent} from './saveframe/saveframe.component';
+import {EntryComponent} from './entry/entry.component';
 
 // For the view only mode
-import { LoopViewComponent } from './view_mode/loop/loop-view.component';
-import { SaveframeViewComponent } from './view_mode/saveframe/saveframe-view.component';
-import { TagComponent } from './tag/tag.component';
-import { TreeViewComponent } from './treeview/tree-view.component';
-import { FileUploaderComponent } from './file-uploader/file-uploader.component';
-import { MessageComponent } from './message/message.component';
+import {LoopViewComponent} from './view_mode/loop/loop-view.component';
+import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
+import {TagComponent} from './tag/tag.component';
+import {TreeViewComponent} from './treeview/tree-view.component';
+import {FileUploaderComponent} from './file-uploader/file-uploader.component';
+import {MessageComponent} from './message/message.component';
 
 // Angular Material
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatProgressBarModule, MatSelectModule} from '@angular/material';
 
 
@@ -59,4 +59,5 @@ import {MatProgressBarModule, MatSelectModule} from '@angular/material';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
