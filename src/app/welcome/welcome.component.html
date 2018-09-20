@@ -7,13 +7,14 @@
         <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
         <label for="bootstrap">To pre-fill your deposition from an existing deposition or released BMRB entry:</label><br>
         <input type="text" id="bootstrap" disabled [(ngModel)]="bootstrapID" placeholder="Disabled - implementation pending"><!--Please enter the deposition ID or BMRB ID.--><br>
-        Click <button (click)="new()"> here</button> to start a new deposition.</p>
+        Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition.</p>
   </div>
   <div>
     <h2>Resume deposition</h2>
     <input type="text" [(ngModel)]="sessionID" #name="ngModel" placeholder="Please enter your session ID.">
-    <p *ngIf="validate(); else invalid">Click <button [routerLink]="['/entry', sessionID]">here</button>
-      to resume deposition {{sessionID}}.</p>
+    <p *ngIf="validate(); else invalid">
+      Click <button [routerLink]="['/entry', sessionID]" class="fake_button">here</button> to resume deposition {{sessionID}}.
+    </p>
     <ng-template #invalid><p>Invalid or missing session ID.</ng-template>
   </div>
 </div>
