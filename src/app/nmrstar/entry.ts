@@ -35,14 +35,16 @@ export class Entry {
 
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
-  addSaveframe(saveframe: Saveframe, position: number = -1): void {
+  addSaveframe(saveframe: Saveframe, position: number = -1, refresh: boolean = true): void {
     if (position < 0) {
       this.saveframes.push(saveframe);
     } else {
       this.saveframes.splice(position, 0, saveframe);
     }
 
-    this.updateCategories();
+    if (refresh) {
+      this.refresh();
+    }
   }
 
   removeSaveframe(saveframe: Saveframe): void {
@@ -51,7 +53,7 @@ export class Entry {
       this.saveframes.splice(index, 1);
     }
 
-    this.updateCategories();
+    this.refresh();
   }
 
   updateCategories(): void {
@@ -348,7 +350,7 @@ export function entryFromJSON(jdata: Object): Entry {
 
   for (const saveframeJSON of jdata['saveframes']) {
     const new_frame = saveframeFromJSON(saveframeJSON, entry);
-    entry.addSaveframe(new_frame);
+    entry.addSaveframe(new_frame, -1, false);
   }
 
   entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
