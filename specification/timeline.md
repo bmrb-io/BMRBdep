@@ -12,6 +12,7 @@ Uncompleted tasks:
     * ORCID
         * Implement ORCID validation using OpenAuth flow - ~1 week
     * Smaller tasks
+        * At least one citation must be the 'entry citation' - 4 hours
         * Only allow one outstanding save request at a time - 4 hours
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
@@ -19,9 +20,11 @@ Uncompleted tasks:
     * Navigation bar updates
       * Redo bar to use Angular Material navigation elements - 2 days
       * Add supercategory-level navigation (also requires API update)- 3 days
-      * Add color-coding based on entry completion - 4 hours
+    * Either prevent unicode or warn about it during tag validation - 1 day
 Optimization tasks:
 * Implement saving on a saveframe-level basis to speed up saving smaller changes - 3 days
+* Use a fixed position icon to indicate save status rather than having a pop-up
+* Consider a warning before deleting a saveframe that would invalidate another one
 
 * Validation Tools
     * Write tool to print dictionary diffs - 1 day
