@@ -167,10 +167,12 @@ export class Saveframe {
   }
 
   refresh(): void {
-    // Get the SF name
-    const fc_name = this.getTagValue(this.tagPrefix + '.Sf_framecode');
-    if (fc_name) {
-      this.name = fc_name;
+    // Get the SF name from the framecode tag
+    const framecodeTag: SaveframeTag = this.tagDict[this.tagPrefix + '.Sf_framecode'];
+    if (framecodeTag.value) {
+      // Strip non-ascii values and whitespace from the tag
+      framecodeTag.value = framecodeTag.value.replace(/[^\x00-\x7F]*[\s]*/g, '');
+      this.name = framecodeTag.value;
     }
 
     // Get the category number for this SF
