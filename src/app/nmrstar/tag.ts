@@ -118,24 +118,62 @@ export class Tag {
     * 3) Is from the enum list if it a mandatory enum
     */
 
-    if ((this.schemaValues['Enumeration ties']) && (this.schemaValues['Sf pointer'] !== 'Y')) {
-      // 19 is the special case that means the enumeration tie is for a file
-      if (this.schemaValues['Enumeration ties'] === '19') {
-        this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
-      } else {
-        const parentEntry: Entry = this.getEntry();
-        let enumerationSet = parentEntry.enumerationTies[this.schemaValues['Enumeration ties']];
-        if (!enumerationSet) {
-          enumerationSet = new Set();
-          parentEntry.enumerationTies[this.schemaValues['Enumeration ties']] = enumerationSet;
+    if (this.schemaValues['Sf pointer'] === 'N') {
+      if (this.schemaValues['Enumeration ties']) {
+        // 19 is the special case that means the enumeration tie is for a file
+        if (this.schemaValues['Enumeration ties'] === '19') {
+          this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
+        } else {
+          const parentEntry: Entry = this.getEntry();
+          let enumerationSet = parentEntry.enumerationTies[this.schemaValues['Enumeration ties']];
+          if (!enumerationSet) {
+            enumerationSet = new Set();
+            parentEntry.enumerationTies[this.schemaValues['Enumeration ties']] = enumerationSet;
+          }
+          // Only add our value to the enumeration set if we have a value
+          if (this.value) {
+            enumerationSet.add(this.value);
+          }
+
+          const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
+          this.enums = new Set(function*() { yield* temp; yield* enumerationSet; }());
         }
-        // Only add our value to the enumeration set if we have a value
-        if (this.value) {
-          enumerationSet.add(this.value);
-        }
-        this.enums = enumerationSet;
       }
+
+      // Add in the native enumerations
+      if (this.schemaValues['enumerations']) {
+        for (const enumeration of this.schemaValues['enumerations']) {
+          this.enums.add(enumeration);
+        }
+      }
+
+    } else if (this.schemaValues['Sf pointer'] === 'Y') {
+        // Check if we are a pointer, if so, enumerate the saveframes to point to
+        if (this.schemaValues['Sf pointer'] === 'Y') {
+          // Show this tag as a closed enum
+          this.interfaceType = 'closed_enum';
+          const frames_of_category: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+          if (frames_of_category.length > 0) {
+            this.enums = new Set();
+            for (const sf of frames_of_category) {
+              this.enums.add('$' + sf.name);
+            }
+          } else {
+            console.log('Sf pointer set sto \'Y\' but no tags!', this);
+            this.enums = new Set(['No saveframes of category ' + this.schemaValues['Foreign Table'] +
+            ' found in entry. Please create at least one.']);
+            this.valid = false;
+          }
+          if (!this.enums.has(this.value)) {
+            this.valid = false;
+            this.validationMessage = 'Tag must have a value.';
+            this.value = null;
+          }
+        }
+    } else {
+        console.error('What is this "sf pointer" value?', this.schemaValues['Sf pointer'], this);
     }
+
 
     this.valid = true;
     this.validationMessage = '';
@@ -163,29 +201,6 @@ export class Tag {
     // Just return if we have no parent - prior to asking the parent for tags
     if (!this.parent) {
       return;
-    }
-
-    // Check if we are a pointer, if so, enumerate the saveframes to point to
-    if (this.schemaValues['Sf pointer'] === 'Y') {
-      // Show this tag as a closed enum
-      this.interfaceType = 'closed_enum';
-      const frames_of_category: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
-      if (frames_of_category.length > 0) {
-        this.enums = new Set();
-        for (const sf of frames_of_category) {
-          this.enums.add('$' + sf.name);
-        }
-      } else {
-        console.log('Sf pointer set sto \'Y\' but no tags!', this);
-        this.enums = new Set(['No saveframes of category ' + this.schemaValues['Foreign Table'] +
-        ' found in entry. Please create at least one.']);
-        this.valid = false;
-      }
-      if (!this.enums.has(this.value)) {
-        this.valid = false;
-        this.validationMessage = 'Tag must have a value.';
-        this.value = null;
-      }
     }
   }
 
