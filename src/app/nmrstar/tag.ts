@@ -118,6 +118,11 @@ export class Tag {
     * 3) Is from the enum list if it a mandatory enum
     */
 
+    // Remove unicode
+    if (this.value) {
+      this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
+    }
+
     if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
         // 19 is the special case that means the enumeration tie is for a file
