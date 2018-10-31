@@ -152,6 +152,16 @@ export class Tag {
         }
       }
 
+      // Correct capitalization on typed enumerations
+      if (this.enums && this.value) {
+        const lower_case_value = this.value.toLowerCase();
+        for (const single_enum of Array.from(this.enums)) {
+          if (single_enum.toLowerCase() === lower_case_value) {
+            this.value = single_enum;
+          }
+        }
+      }
+
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
         // Check if we are a pointer, if so, enumerate the saveframes to point to
         if (this.schemaValues['Sf pointer'] === 'Y') {
