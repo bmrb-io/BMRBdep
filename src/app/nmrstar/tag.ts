@@ -141,7 +141,7 @@ export class Tag {
           }
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
-          this.enums = new Set(function*() { yield* temp; yield* enumerationSet; }());
+          this.enums = new Set(function*() { yield* enumerationSet; yield* temp; }());
         }
       }
 
