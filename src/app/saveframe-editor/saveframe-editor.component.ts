@@ -60,7 +60,8 @@ export class SaveframeEditorComponent implements OnInit {
 
   updateCategoryLinks(): void {
     let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
-    while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0) {
+    while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
+           (!this.showAll && this.entry.saveframes[index].display === 'N') ) {
       index--;
     }
 
@@ -72,7 +73,8 @@ export class SaveframeEditorComponent implements OnInit {
 
 
     index = this.entry.saveframes.indexOf(this.saveframes[this.saveframes.length - 1]) + 1;
-    while (index <= this.entry.saveframes.length - 1 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0) {
+    while (index <= this.entry.saveframes.length - 1 &&  ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
+           (!this.showAll && this.entry.saveframes[index].display === 'N')) {
       index++;
     }
     if (index > this.entry.saveframes.length - 1) {
