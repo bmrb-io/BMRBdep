@@ -217,6 +217,24 @@ export class Entry {
     for (const sf of this.saveframes) {
       sf.refresh();
     }
+
+    // Make sure there is at least one "reference citation" saveframe
+    let referenceCitation = false;
+    for (const citationFrame of this.getSaveframesByCategory('citations')) {
+      if (citationFrame.getTagValue('_Citation.Class') === 'entry citation') {
+        referenceCitation = true;
+      }
+    }
+    if (!referenceCitation) {
+      for (const citationFrame of this.getSaveframesByCategory('citations')) {
+        const classTag = citationFrame.getTag('_Citation.Class');
+        classTag.valid = false;
+        classTag.validationMessage = 'Each deposition must have at least one saveframe of type "entry citation".' +
+          'Please either create a new citation of type "entry citation" or update one of the existing ones.';
+        citationFrame.valid = false;
+      }
+    }
+
     this.updateCategories();
     // Check entry validity
     this.valid = true;
