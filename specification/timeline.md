@@ -11,8 +11,6 @@ Uncompleted tasks:
     * Write code to "submit" deposition into existing pipeline 2-3 days
     * ORCID
         * Implement ORCID validation using OpenAuth flow - ~1 week
-    * Smaller tasks
-        * Only allow one outstanding save request at a time - 4 hours
     * Add more thorough error handling everywhere - 1 week
     * Add some sort of session support to prevent simultaneous 
     browser changes and potential data loss - 2 days
