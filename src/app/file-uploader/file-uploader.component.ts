@@ -51,6 +51,10 @@ export class FileUploaderComponent implements OnInit {
     this.fileUploadElement.nativeElement.value = '';
   }
 
+  logFileUploadSaveframe() {
+    console.log(this.entry.getLoopsByCategory('_Upload_data')[0]);
+  }
+
   uploadFile(files: FileList) {
 
     let closure = files.length;
