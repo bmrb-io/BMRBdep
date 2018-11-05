@@ -118,6 +118,14 @@ export class Saveframe {
     }
   }
 
+  getTag(fqtn: string): SaveframeTag {
+    if (fqtn in this.tagDict) {
+      return this.tagDict[fqtn];
+    } else {
+      return null;
+    }
+  }
+
   getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
     return this.parent.getSaveframesByPrefix(tag_prefix);
   }
