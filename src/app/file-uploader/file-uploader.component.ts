@@ -3,6 +3,7 @@ import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-file-uploader',
@@ -13,12 +14,14 @@ export class FileUploaderComponent implements OnInit {
 
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
+  serverURL: String = null;
 
   constructor(public api: ApiService,
               private messagesService: MessagesService) {
   }
 
   ngOnInit() {
+    this.serverURL = environment.serverURL;
   }
 
   updateAndSaveDataFiles() {
