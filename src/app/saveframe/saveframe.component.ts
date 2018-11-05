@@ -1,5 +1,5 @@
 import {ApiService} from '../api.service';
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params} from '@angular/router';
@@ -7,7 +7,8 @@ import {ActivatedRoute, Params} from '@angular/router';
 @Component({
   selector: 'app-saveframe',
   templateUrl: './saveframe.component.html',
-  styleUrls: ['./saveframe.component.css']
+  styleUrls: ['./saveframe.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
