@@ -15,23 +15,27 @@
 			  <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && showAll)"
 			      class="tag_header"
 	      		  (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
-	      		  >{{loop.data[0][c].schemaValues['Prompt']}}<span *ngIf="loop.schemaValues[c]['User full view'] == 'Y'" class="mandatory">*</span></th>
+	      		  >{{loop.data[0][c].schemaValues['Prompt']}}
+          <span *ngIf="loop.schemaValues[c]['User full view'] == 'Y'" class="mandatory">*</span>
+        </th>
 			  </ng-container>
 			</tr>
 		</thead>
 		<tbody>
 			<tr *ngFor="let row of loop.data; let r = index">
-			<td><a *ngIf="r>0" class="fake_button" (click)='deleteRow(r)'>-</a></td>
+			<td><button *ngIf="r>0" class="real_button" (click)='deleteRow(r)'>-</button></td>
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && showAll)"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
-			    <app-tag [tag]='loop.data[r][c]' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c" (contextmenu)="loop.data[r][c].log()"></app-tag>
+			    <app-tag [tag]='loop.data[r][c]'
+                   [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
+                   (contextmenu)="loop.data[r][c].log()"></app-tag>
 			  </td>
 			  </ng-container>
 			</tr>
 			<tr>
 				<td colspan=999>
-				  <a class="fake_button" (click)='addRow()'>+</a>
+				  <button class="real_button" (click)='addRow()'>+</button>
 				</td>
 			</tr>
 

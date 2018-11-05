@@ -1,11 +1,29 @@
 <div>
   <app-tree-view [entry]="entry" [active]="saveframeDescription" [showAll]="showAll"></app-tree-view>
   <div class="saveframe_editor">
-    <p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showAll" size="small" color="#CBDBFF" (click)="updateCategoryLinks()"></ui-switch></a></p>
-	<a class="fake_button line" *ngIf="previousSaveframe" [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">Previous category</a>
-	<a class="fake_button line" *ngIf="nextSaveframe" [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">Next category</a>
-	<app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showAll]="showAll" (sfReload)="reloadSaveframes()"></app-saveframe>
-	<a class="fake_button line" *ngIf="previousSaveframe" [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">Previous category</a>
-	<a class="fake_button line" *ngIf="nextSaveframe" [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">Next category</a>
+    <p>
+      <a>Display non-mandatory tags: <ui-switch [(ngModel)]="showAll"
+                                                size="small"
+                                                color="#CBDBFF"
+                                                (click)="updateCategoryLinks()"></ui-switch>
+      </a>
+    </p>
+    <button class="real_button line right_margin"
+            *ngIf="previousSaveframe"
+            [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">
+      Previous category</button>
+    <button class="real_button line"
+            *ngIf="nextSaveframe"
+            [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">
+      Next category</button>
+    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showAll]="showAll" (sfReload)="reloadSaveframes()"></app-saveframe>
+    <button class="real_button line right_margin"
+            *ngIf="previousSaveframe"
+            [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">
+      Previous category</button>
+    <button class="real_button line"
+            *ngIf="nextSaveframe"
+            [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">
+      Next category</button>
   </div>
 </div>
