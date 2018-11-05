@@ -23,7 +23,7 @@
                 (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
             <a class="fake_button line"
               *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y'"
-              (click)='saveframe.duplicate(true); processChange()'>Create New</a>
+              (click)='saveframe.duplicate(true); processChange()'>Create new</a>
             <a class="fake_button line"
               *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number']"
               (click)='saveframe.parent.removeSaveframe(saveframe); processChange()'>Delete</a>
