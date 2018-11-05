@@ -1,4 +1,4 @@
-import {Observable, of} from 'rxjs';
+import {Observable, of, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
@@ -13,6 +13,7 @@ import {Router} from '@angular/router';
 export class ApiService {
 
   cachedEntry: Entry;
+  activeSaveRequest: Subscription;
 
   JSONOptions = {
     headers: new HttpHeaders({
@@ -96,6 +97,12 @@ export class ApiService {
   }
 
   saveEntry(initial_save: boolean = false, skipMessage: boolean = false): void {
+
+    // If the previous save action is still in progress, cancel it
+    if (this.activeSaveRequest) {
+      this.activeSaveRequest.unsubscribe();
+    }
+
     if (initial_save) {
       localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
     }
@@ -105,11 +112,13 @@ export class ApiService {
     // Save to remote server if we haven't just loaded the entry
     if (!initial_save) {
       const entry_url = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-      this.http.put(entry_url, JSON.stringify(this.cachedEntry), this.JSONOptions).subscribe(
+      const parent = this;
+      this.activeSaveRequest = this.http.put(entry_url, JSON.stringify(this.cachedEntry), this.JSONOptions).subscribe(
         () => {
           if (!skipMessage) {
             this.messagesService.sendMessage(new Message('Changes saved.'));
           }
+          parent.activeSaveRequest = null;
         },
         err => this.handleError(err)
       );
