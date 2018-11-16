@@ -39,7 +39,7 @@
                         [formControl]="file.control"
                         placeholder="Please select the data type(s) for this file."
                         multiple required>
-              <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType">{{dataType[0]}}</mat-option>
+              <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType" title="{{dataType[3]}}">{{dataType[0]}}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
