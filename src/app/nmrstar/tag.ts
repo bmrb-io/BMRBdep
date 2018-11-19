@@ -123,6 +123,14 @@ export class Tag {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
     }
 
+    // Copy the value of Sf_framecode to Name if such a tag exists
+    if (this.name === 'Sf_framecode') {
+      const parentSaveframe = this.getParentSaveframe();
+      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Name']) {
+        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Name'].value = this.value;
+      }
+    }
+
     if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
         // 19 is the special case that means the enumeration tie is for a file
