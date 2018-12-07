@@ -59,6 +59,11 @@ export class SaveframeEditorComponent implements OnInit {
   }
 
   updateCategoryLinks(): void {
+
+    if (!this.saveframes.length) {
+      return;
+    }
+
     let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
     while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
            (!this.showAll && this.entry.saveframes[index].display === 'N') ) {
