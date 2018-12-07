@@ -22,3 +22,12 @@
 	margin: 0 0 0 0;
 	border: 0;
 }
+
+.hidden_div {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre-wrap;
+  height: auto;
+  width: auto;
+  /*white-space: nowrap; /* Thanks to Herb Caudill comment */
+}
