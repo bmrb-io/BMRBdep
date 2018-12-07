@@ -23,7 +23,8 @@
 }
 
 .tag_header {
-	cursor: help;	
+	cursor: help;
+  background-color: #E5E6Ef;
 }
 
 /* mostly from adit */
@@ -57,7 +58,7 @@ th {
 
 td {
     text-align: left;
-    background-color: #E5E6EF;
+    background-color: #CBDBFF;
     font-weight: normal;
     font-style: normal;
     color: black;
