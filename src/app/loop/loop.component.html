@@ -17,7 +17,7 @@
 	      		  (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
               [title]="loop.data[0][c].schemaValues['Interface']"
 	      		  >{{loop.data[0][c].schemaValues['Prompt']}}
-          <span *ngIf="loop.schemaValues[c]['User full view'] == 'Y'" class="mandatory">*</span>
+          <span *ngIf="loop.data[0][c].display == 'Y'" class="mandatory">*</span>
         </th>
 			  </ng-container>
 			</tr>
