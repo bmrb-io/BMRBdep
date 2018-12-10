@@ -68,6 +68,10 @@ export class Entry {
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     for (const category of Array.from(categories)) {
+      if (!this.schema.saveframeSchema[category]) {
+        console.error('A saveframe exists with an invalid category:', '.');
+        continue;
+      }
       const pretty_name = this.schema.saveframeSchema[category]['category_group_view_name'];
 
       const matchingSaveframes = this.getSaveframesByCategory(category);
