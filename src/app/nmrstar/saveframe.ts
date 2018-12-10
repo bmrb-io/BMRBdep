@@ -52,12 +52,15 @@ export class Saveframe {
 
     // Copy the tags
     for (const tag of this.tags) {
-      let val = clear_values ? null : tag.value;
-      if (!clear_values && tag.name === 'Sf_framecode') {
-        val = new_frame.name;
+      if (clear_values) {
+        new_frame.addTag(tag.name, null);
+      } else {
+        new_frame.addTag(tag.name, tag.value);
       }
-      new_frame.addTag(tag.name, val);
     }
+    // Set the framecode and category regardless of clear_values argument
+    new_frame.tagDict[this.tagPrefix + '.Sf_framecode'].value = frameName;
+    new_frame.tagDict[this.tagPrefix + '.Sf_category'].value = this.category;
 
     // Copy the loops
     for (const loop of this.loops) {
