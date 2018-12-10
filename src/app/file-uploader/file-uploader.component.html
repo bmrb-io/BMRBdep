@@ -12,6 +12,7 @@
     <th>
       <div style="text-align: right; float: right">
         <a class="fake_button line"
+           *ngIf="showCategoryLink"
            [routerLink]="['/entry', api.getEntryID(), 'saveframe', 'deposited_data_files', 'category']">
           View sections of this category
         </a>
