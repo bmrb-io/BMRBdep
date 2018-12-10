@@ -13,9 +13,12 @@
             [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">
       Previous category</button>
     <button class="real_button line"
-            *ngIf="nextSaveframe"
+            *ngIf="nextSaveframe ; else final_review_top"
             [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">
       Next category</button>
+    <ng-template #final_review_top>
+      <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+    </ng-template>
     <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showAll]="showAll" (sfReload)="reloadSaveframes()"></app-saveframe>
     <div *ngIf="this.saveframes.length">
       <button class="real_button line right_margin"
@@ -23,9 +26,12 @@
               [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">
         Previous category</button>
       <button class="real_button line"
-              *ngIf="nextSaveframe"
+              *ngIf="nextSaveframe; else final_review_bottom"
               [routerLink]="['/entry', entry.entryID, 'saveframe', nextSaveframe, 'category']">
         Next category</button>
+      <ng-template #final_review_bottom>
+        <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+      </ng-template>
     </div>
   </div>
 </div>
