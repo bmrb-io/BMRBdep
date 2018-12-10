@@ -4,6 +4,7 @@ import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
+import {ActivatedRoute, Params} from '@angular/router';
 
 @Component({
   selector: 'app-file-uploader',
@@ -15,13 +16,22 @@ export class FileUploaderComponent implements OnInit {
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
   serverURL: String = null;
+  showCategoryLink: boolean;
 
   constructor(public api: ApiService,
-              private messagesService: MessagesService) {
+              private messagesService: MessagesService,
+              private route: ActivatedRoute) {
+    this.showCategoryLink = true;
   }
 
   ngOnInit() {
     this.serverURL = environment.serverURL;
+    this.route.params.subscribe((params: Params) => {
+      console.log(params);
+      if (params['load_type'] === 'category' && params['saveframe_description'] === 'deposited_data_files') {
+        this.showCategoryLink = false;
+      }
+    });
   }
 
   updateAndSaveDataFiles() {
