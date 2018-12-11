@@ -7,19 +7,20 @@
 			<tr (contextmenu)="log()">
 			  <th colspan=999>
           {{loop.data[0][0].schemaValues['ADIT category view name']}}
+          <a *ngIf="loop.category == '_Citation_author' && loop.empty" class="fake_button line" (click)="copyAuthors()">Copy authors from 'Entry information'</a>
         </th>
 			</tr>
 			<tr>
-			 <th style="border-collapse: collapse;"></th>
-			<ng-container *ngFor='let col of loop.tags; let c = index'>
-			  <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && showAll)"
-			      class="tag_header"
-	      		  (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
-              [title]="loop.data[0][c].schemaValues['Interface']"
-	      		  >{{loop.data[0][c].schemaValues['Prompt']}}
-          <span *ngIf="loop.data[0][c].display == 'Y'" class="mandatory">*</span>
-        </th>
-			  </ng-container>
+        <th style="border-collapse: collapse;"></th>
+        <ng-container *ngFor='let col of loop.tags; let c = index'>
+          <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && showAll)"
+              class="tag_header"
+                (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
+                [title]="loop.data[0][c].schemaValues['Interface']"
+                >{{loop.data[0][c].schemaValues['Prompt']}}
+            <span *ngIf="loop.data[0][c].display == 'Y'" class="mandatory">*</span>
+          </th>
+          </ng-container>
 			</tr>
 		</thead>
 		<tbody>
