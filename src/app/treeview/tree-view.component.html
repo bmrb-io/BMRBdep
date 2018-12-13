@@ -1,13 +1,18 @@
 <div class="tree_box" *ngIf="(showInvalidOnly && !entry.valid) || !showInvalidOnly">
-	<!--<a [ngClass]="{'active': active=='entry', 'nav_link':true, 'complete':entry.valid, 'incomplete':!entry.valid}"
-     [routerLink]="['/entry', entry.entryID]">Entry</a>-->
-	<div *ngFor="let cat of entry.categories">
-    <ng-container *ngIf="(showInvalidOnly && !cat[2]) || !showInvalidOnly">
-		  <a *ngIf="(showAll || cat[3] == 'Y') && cat[3] != 'H'"
-         [ngClass]="{'active': active==cat[1], 'nav_link':true, 'complete':cat[2], 'incomplete':!cat[2]}"
-         [routerLink]="['/entry', entry.entryID, 'saveframe', cat[1], 'category']">{{cat[0]}}</a>
+  <div *ngFor="let superGroupCat of entry.schema.categorySupergroupsDictList">
+    <ng-container *ngIf="(showInvalidOnly && !entry.superGroups[superGroupCat[0]['category_super_group']][0]) ||
+                         (!showInvalidOnly && (entry.superGroups[superGroupCat[0]['category_super_group']][1] == 'Y' || (showAll && entry.superGroups[superGroupCat[0]['category_super_group']][1] != 'H')))">
+      <h5>{{superGroupCat[0]['category_super_group']}}</h5>
+      <ng-container *ngFor="let superGroup of superGroupCat">
+        <a *ngIf="(showAll || entry.categories[superGroup['saveframe_category']][2] == 'Y') && entry.categories[superGroup['saveframe_category']][2] != 'H'"
+           [ngClass]="{'active': active==superGroup['saveframe_category'],
+                       'nav_link':true,
+                       'complete':entry.categories[superGroup['saveframe_category']][1],
+                       'incomplete':!entry.categories[superGroup['saveframe_category']][1]}"
+           [title]="superGroup['group_view_help']"
+           [routerLink]="['/entry', entry.entryID, 'saveframe', superGroup['saveframe_category'], 'category']">{{superGroup['category_group_view_name']}}</a>
+      </ng-container>
     </ng-container>
-	</div>
-  <a class="nav_link" [routerLink]="['/entry', entry.entryID, 'review']">Review deposition</a>
-
+  </div>
+  <!--<a class="nav_link" [routerLink]="['/entry', entry.entryID, 'review']">Review deposition</a>-->
 </div>
