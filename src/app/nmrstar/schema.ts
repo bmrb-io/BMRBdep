@@ -77,6 +77,15 @@ export class Schema {
 
     // Build a data structure for the supergroups
     const temporarySuperGroupList = [];
+    const superGroupMapping = {'NMR_parameters': 'NMR parameters',
+                               'assembly_supercategory': 'Molecular assembly',
+                               'citations': 'Citations',
+                               'entry_information': 'Entry information',
+                               'experimental_details': 'Experimental details',
+                               'kinetics': 'Kinetics',
+                                'structure': 'Structure',
+                               'thermodynamics': 'Thermodynamics'};
+
     for (const supergroupRecord of this.categorySupergroups['values']) {
 
       // Generate an override dictionary for a single override
@@ -86,6 +95,7 @@ export class Schema {
           superGroupRecord[this.categorySupergroups['headers'][i]] = supergroupRecord[i];
         }
       }
+      superGroupRecord['super_group_display_name'] = superGroupMapping[superGroupRecord['category_super_group']];
       temporarySuperGroupList.push(superGroupRecord);
     }
     const temporaryGroupDict = {};
