@@ -2,7 +2,7 @@
   <div *ngFor="let superGroupCat of entry.schema.categorySupergroupsDictList">
     <ng-container *ngIf="(showInvalidOnly && !entry.superGroups[superGroupCat[0]['category_super_group']][0]) ||
                          (!showInvalidOnly && (entry.superGroups[superGroupCat[0]['category_super_group']][1] == 'Y' || (showAll && entry.superGroups[superGroupCat[0]['category_super_group']][1] != 'H')))">
-      <h5>{{superGroupCat[0]['super_group_display_name']}}</h5>
+      <p><b>{{superGroupCat[0]['super_group_display_name']}}</b></p>
       <ng-container *ngFor="let superGroup of superGroupCat">
         <a *ngIf="(showAll || entry.categories[superGroup['saveframe_category']][2] == 'Y') && entry.categories[superGroup['saveframe_category']][2] != 'H'"
            [ngClass]="{'active': active==superGroup['saveframe_category'],
