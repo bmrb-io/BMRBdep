@@ -8,15 +8,14 @@
   <br>
   <div class="wrapper">
     <input type="button"
+           class="fake_button"
            [disabled]="!entry.valid"
            (click)="entry.valid && submitEntry()"
            value="Submit deposition to BMRB">
   </div>
 
   <div class="wrapper">
-    <input type="button"
-           [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']"
-           value="Return to full overview">
+    <a class="fake_button" [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">Return to full overview</a>
   </div>
 
 </div>
