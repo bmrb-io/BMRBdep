@@ -27,7 +27,6 @@ export class FileUploaderComponent implements OnInit {
   ngOnInit() {
     this.serverURL = environment.serverURL;
     this.route.params.subscribe((params: Params) => {
-      console.log(params);
       if (params['load_type'] === 'category' && params['saveframe_description'] === 'deposited_data_files') {
         this.showCategoryLink = false;
       }
