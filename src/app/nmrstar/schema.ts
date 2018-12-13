@@ -16,6 +16,8 @@ export class Schema {
   fileUploadTypes;
   overrides: {};
   overridesDictList: Array<{}>;
+  categorySupergroups: {};
+  categorySupergroupsDictList: Array<{}>;
 
   /* Calculated during construction */
   schema: {};
@@ -25,7 +27,7 @@ export class Schema {
   toJSON(): {} {
     return {
       version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.dataTypes,
-      overrides: this.overrides, file_upload_types: this.fileUploadTypes
+      overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySupergroups
     };
   }
 
@@ -35,11 +37,13 @@ export class Schema {
     this.tags = json['tags'];
     this.dataTypes = json['data_types'];
     this.overrides = json['overrides'];
+    this.categorySupergroups = json['category_supergroups'];
     this.saveframes = json['saveframes'];
     this.fileUploadTypes = json['file_upload_types'];
     this.schema = {};
     this.saveframeSchema = {};
     this.overridesDictList = [];
+    this.categorySupergroupsDictList = [];
 
     if (!this.tags) {
       return;
@@ -69,6 +73,33 @@ export class Schema {
 
 
       this.overridesDictList.push(overrideDictionary);
+    }
+
+    // Build a data structure for the supergroups
+    const temporarySuperGroupList = [];
+    for (const supergroupRecord of this.categorySupergroups['values']) {
+
+      // Generate an override dictionary for a single override
+      const superGroupRecord = {};
+      for (let i = 0; i <= this.categorySupergroups['headers'].length; i++) {
+        if (this.categorySupergroups['headers'][i]) {
+          superGroupRecord[this.categorySupergroups['headers'][i]] = supergroupRecord[i];
+        }
+      }
+      temporarySuperGroupList.push(superGroupRecord);
+    }
+    const temporaryGroupDict = {};
+    for (const superRecord of temporarySuperGroupList) {
+      if (!(superRecord['category_super_group'] in temporaryGroupDict)) {
+        temporaryGroupDict[superRecord['category_super_group']] = [superRecord];
+      } else {
+        temporaryGroupDict[superRecord['category_super_group']].push(superRecord);
+      }
+    }
+    for (const superRecord of temporarySuperGroupList) {
+      if (!(this.categorySupergroupsDictList.indexOf(temporaryGroupDict[superRecord['category_super_group']]) > -1)) {
+        this.categorySupergroupsDictList.push(temporaryGroupDict[superRecord['category_super_group']]);
+      }
     }
 
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas
