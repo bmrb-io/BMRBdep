@@ -81,13 +81,17 @@ export class ApiService {
           console.log(this.cachedEntry);
           return this.cachedEntry;
         }),
-        catchError(() => {
-          this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
-            MessageType.ErrorMessage, 10000));
-          setTimeout(() => {
-            this.router.navigate(['/']);
-          }, 10000);
-          return of(new Entry(entry_id));
+        catchError(error => {
+          if (environment.production) {
+            this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
+              MessageType.ErrorMessage, 10000));
+            setTimeout(() => {
+              this.router.navigate(['/']);
+            }, 10000);
+            return of(new Entry(entry_id));
+          } else {
+            throw error;
+          }
         })
       );
     }
