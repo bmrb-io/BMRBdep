@@ -2,10 +2,7 @@
   <app-tree-view [entry]="entry" [active]="saveframeDescription" [showAll]="showAll"></app-tree-view>
   <div class="saveframe_editor">
     <p>
-      <a>Display non-mandatory tags: <ui-switch [(ngModel)]="showAll"
-                                                size="small"
-                                                color="#CBDBFF"
-                                                (click)="updateCategoryLinks()"></ui-switch>
+      <a>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="showAll" (click)="updateCategoryLinks()" color="#CBDBFF"></mat-slide-toggle>
       </a>
     </p>
     <button class="real_button line right_margin"
