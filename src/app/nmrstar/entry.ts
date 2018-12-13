@@ -9,7 +9,8 @@ export class Entry {
   entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
-  categories: string[][];
+  categories: {};
+  superGroups: {};
   enumerationTies: {};
   source: string;
   dataStore: DataFileStore;
@@ -58,7 +59,7 @@ export class Entry {
 
   updateCategories(): void {
 
-    this.categories = [];
+    this.categories = {};
 
     // First get the categories, and their order
     const categories = new Set();
@@ -96,7 +97,29 @@ export class Entry {
       }
 
       // Add the record
-      this.categories.push([pretty_name, category, valid, display]);
+      this.categories[category] = [pretty_name, valid, display];
+    }
+
+    // Update a record of which supergroup categories are valid and should be displayed
+    this.superGroups = {};
+    if (this.schema) {
+      for (const supergroup of this.schema.categorySupergroupsDictList) {
+        this.superGroups[supergroup[0]['category_super_group']] = [true, 'H'];
+
+        for (const group of supergroup) {
+          if (!this.categories[group['saveframe_category']][1]) {
+            this.superGroups[supergroup[0]['category_super_group']][0] = false;
+          }
+          const showSaveframe = this.categories[group['saveframe_category']][2];
+          if (this.superGroups[supergroup[0]['category_super_group']][1] === 'H') {
+            this.superGroups[supergroup[0]['category_super_group']][1] = showSaveframe;
+          } else {
+            if (showSaveframe === 'Y') {
+              this.superGroups[supergroup[0]['category_super_group']][1] = 'Y';
+            }
+          }
+        }
+      }
     }
   }
 

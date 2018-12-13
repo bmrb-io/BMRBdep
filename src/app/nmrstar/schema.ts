@@ -17,7 +17,7 @@ export class Schema {
   overrides: {};
   overridesDictList: Array<{}>;
   categorySupergroups: {};
-  categorySupergroupsDictList: Array<{}>;
+  categorySupergroupsDictList: Array<Array<{}>>;
 
   /* Calculated during construction */
   schema: {};
