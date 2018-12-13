@@ -3,11 +3,6 @@ import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 
-// https://github.com/webcat12345/ngx-ui-switch
-// https://www.npmjs.com/package/angular2-ui-switch
-import {UiSwitchModule} from 'ngx-ui-switch';
-// https://www.npmjs.com/package/ng-multiselect-dropdown
-
 import {AppComponent} from './app.component';
 import {SaveframeEditorComponent} from './saveframe-editor/saveframe-editor.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -28,9 +23,8 @@ import {MessageComponent} from './message/message.component';
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatProgressBarModule, MatSelectModule} from '@angular/material';
+import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule} from '@angular/material';
 import { ReviewComponent } from './review/review.component';
-
 
 @NgModule({
   declarations: [
@@ -53,10 +47,10 @@ import { ReviewComponent } from './review/review.component';
     FormsModule,
     HttpClientModule,
     AppRoutingModule,
-    UiSwitchModule,
     BrowserAnimationsModule,
     MatProgressBarModule,
     MatSelectModule,
+    MatSlideToggleModule,
     ReactiveFormsModule
   ],
   bootstrap: [AppComponent]
