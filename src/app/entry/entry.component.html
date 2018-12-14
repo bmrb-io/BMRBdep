@@ -2,7 +2,7 @@
   <app-tree-view [entry]="entry" [active]="'entry'"></app-tree-view>
 
   <div class="entry">
-	<p><a>Display non-mandatory tags: <ui-switch [(ngModel)]="showAll" size="small" color="#CBDBFF"></ui-switch></a></p>
+	<p><a>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="showAll"  color="#CBDBFF"></mat-slide-toggle></a></p>
 	<a class="fake_button line" (click)='download(entry.entryID + ".str", entry)'>Download Entry {{entry.entryID}}</a>
 	<ng-container *ngFor='let sf of entry.saveframes'>
 	  <a style="margin-top: 3em; display: none" class="fake_button line" [routerLink]='["/entry", entry.entryID, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>

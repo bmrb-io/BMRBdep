@@ -38,4 +38,38 @@ export class LoopComponent implements OnInit {
   log() {
     console.log(this.loop);
   }
+
+  copyAuthors(): void {
+    const entryAuthors = this.loop.parent.parent.getLoopsByCategory('_Entry_author')[0];
+
+    // Add the new rows
+    for (let i = 0; i < entryAuthors.data.length - 1; i++) {
+      this.loop.addRow();
+    }
+
+    // Figure out which columns we need to copy
+    const entryGivenNameCol = entryAuthors.tags.indexOf('Given_name');
+    const entryFamilyNameCol = entryAuthors.tags.indexOf('Family_name');
+    const entryMiddleInitialsCol = entryAuthors.tags.indexOf('Middle_initials');
+    const entryFamilyTitleCol = entryAuthors.tags.indexOf('Family_title');
+
+    const citationGivenNameCol = this.loop.tags.indexOf('Given_name');
+    const citationFamilyNameCol = this.loop.tags.indexOf('Family_name');
+    const citationMiddleInitialsCol = this.loop.tags.indexOf('Middle_initials');
+    const citationFamilyTitleCol = this.loop.tags.indexOf('Family_title');
+
+    // Copy the data
+    for (const row in this.loop.data) {
+      if (this.loop.data.hasOwnProperty(row)) {
+        this.loop.data[row][citationGivenNameCol].value = entryAuthors.data[row][entryGivenNameCol].value;
+        this.loop.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
+        this.loop.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;
+        this.loop.data[row][citationFamilyTitleCol].value = entryAuthors.data[row][entryFamilyTitleCol].value;
+      }
+    }
+
+    // Refresh and save
+    this.loop.parent.parent.refresh();
+    this.api.saveEntry();
+  }
 }

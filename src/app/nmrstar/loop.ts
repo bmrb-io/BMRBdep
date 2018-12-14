@@ -10,6 +10,7 @@ export class Loop {
   schemaValues: {}[];
   display: string;
   valid: boolean;
+  empty: boolean;
 
   toJSON(): {} {
 
@@ -37,6 +38,7 @@ export class Loop {
     this.schemaValues = [];
     this.display = 'H';
     this.valid = true;
+    this.empty = false;
 
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {
@@ -142,8 +144,25 @@ export class Loop {
     }
   }
 
+  checkEmpty(): boolean {
+    let empty = true;
+    if (this.data.length > 1) {
+      return false;
+    }
+    for (const col of this.data[0]) {
+      if (col.value !== null && col.value !== '.' && col.value !== '') {
+        empty = false;
+      }
+    }
+    return empty;
+  }
+
   refresh(): void {
 
+    // It is too costly to check this for all loops every refresh since we only need it for citation author
+    if (this.category === '_Citation_author') {
+      this.empty = this.checkEmpty();
+    }
     // Update the child data tags
     for (const row of this.data) {
       for (const item of row) {
