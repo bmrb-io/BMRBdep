@@ -19,18 +19,6 @@
     outline: none;
 }
 
-
-.tree_box {
-	float: left;
-    margin-top: 1em;
-    width: 10%;
-    padding: .5em;
-    border: 2px solid #33527b;
-    border-radius: 5px;
-    word-wrap: break-word;
-    overflow:hidden;
-}
-
 .active {
 	font-weight: bold;
 }

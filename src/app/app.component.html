@@ -2,18 +2,28 @@
 <html>
     <head>
         <title>BMRBDep</title>
-        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     </head>
 
     <body>
-        <header>
-            <h1 class="nopad">BMRBDep</h1>
-        </header>
 
-        <div>
-			    <router-outlet></router-outlet>
-		    </div>
-        <app-message></app-message>
+          <mat-toolbar>
+            <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
+            <span class="title-center">BMRBDep</span>
+          </mat-toolbar>
+
+          <mat-sidenav-container style="height: calc(100% - 64px)">
+            <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav>
+              <app-tree-view></app-tree-view>
+            </mat-sidenav>
+
+            <mat-sidenav-content>
+              <router-outlet></router-outlet>
+            </mat-sidenav-content>
+          </mat-sidenav-container>
+
+      <app-message></app-message>
     </body>
 </html>
 

@@ -1,10 +1,5 @@
 <div>
-  <app-tree-view [entry]="entry" [active]="saveframeDescription" [showAll]="showAll"></app-tree-view>
   <div class="saveframe_editor">
-    <p>
-      <a>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="showAll" (click)="updateCategoryLinks()" color="#CBDBFF"></mat-slide-toggle>
-      </a>
-    </p>
     <button class="real_button line right_margin"
             *ngIf="previousSaveframe"
             [routerLink]="['/entry', entry.entryID, 'saveframe', previousSaveframe, 'category']">
@@ -16,7 +11,7 @@
     <ng-template #final_review_top>
       <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
     </ng-template>
-    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' [showAll]="showAll" (sfReload)="reloadSaveframes()"></app-saveframe>
+    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes()"></app-saveframe>
     <div *ngIf="this.saveframes.length">
       <button class="real_button line right_margin"
               *ngIf="previousSaveframe"

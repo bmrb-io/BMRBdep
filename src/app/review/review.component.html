@@ -1,9 +1,8 @@
 <div>
   <h3 class="center" *ngIf="!entry.valid">You are viewing portions of your deposition that still need to be completed.</h3>
   <h3 class="center" *ngIf="entry.valid">Your deposition is ready to submit.</h3>
-  <app-tree-view [entry]="entry" [active]="'entry'" [showInvalidOnly]="'true'"></app-tree-view>
   <div class="eighty_five" *ngIf="!entry.valid">
-    <app-saveframe *ngFor='let saveframe of entry.saveframes' [saveframe]='saveframe' [showAll]="'false'" [showInvalidOnly]="'true'"></app-saveframe>
+    <app-saveframe *ngFor='let saveframe of entry.saveframes' [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
   </div>
   <br>
   <div class="wrapper">

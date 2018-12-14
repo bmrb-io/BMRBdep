@@ -9,7 +9,7 @@
     <ng-container *ngFor="let sftag of saveframe.tags">
       <tr class="highlight" *ngIf="sftag.value || showAll">
         <td><span class="uneditable">{{saveframe.tagPrefix + '.' + sftag.name}}</span></td>
-        <ng-container *ngIf='sftag.name != "Sf_framecode" then normal_tag else sf_framecode'></ng-container>
+        <ng-container *ngIf='sftag.name != "Sf_framecode"; then normal_tag else sf_framecode'></ng-container>
         <ng-template #normal_tag>
           <td>
           <div>
@@ -23,6 +23,6 @@
       </tr>
     </ng-container>
   </table>
-  <app-loop-view *ngFor='let loop of saveframe.loops' [loop]='loop' [showAll]="showAll"></app-loop-view>
+  <app-loop-view *ngFor='let loop of saveframe.loops' [loop]='loop'></app-loop-view>
   <span class="uneditable line">save_</span>
 </div>

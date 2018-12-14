@@ -13,7 +13,7 @@
 			<tr>
         <th style="border-collapse: collapse;"></th>
         <ng-container *ngFor='let col of loop.tags; let c = index'>
-          <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && showAll)"
+          <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && loop.parent.parent.showAll)"
               class="tag_header"
                 (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
                 [title]="loop.data[0][c].schemaValues['Interface']"
@@ -27,7 +27,7 @@
 			<tr *ngFor="let row of loop.data; let r = index">
 			<td><button *ngIf="r>0" class="real_button" (click)='deleteRow(r)'>-</button></td>
 			<ng-container *ngFor="let col of row; let c = index">
-			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && showAll)"
+			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && loop.parent.parent.showAll)"
 	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
 			    <app-tag [tag]='loop.data[r][c]'
                    [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"

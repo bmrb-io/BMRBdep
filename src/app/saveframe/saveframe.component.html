@@ -1,7 +1,7 @@
 <ng-container *ngIf="(showInvalidOnly && !saveframe.valid) || !showInvalidOnly">
 <app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal" [entry]="saveframe.parent"></app-file-uploader>
 <ng-template #normal>
-  <div *ngIf="saveframe.display == 'Y' || (showAll && saveframe.display == 'N')">
+  <div *ngIf="saveframe.display == 'Y' || (saveframe.parent.showAll && saveframe.display == 'N')">
 
     <table style="width: 100%">
       <colgroup>
@@ -36,7 +36,7 @@
       </thead>
       <tbody>
       <ng-container *ngFor="let sftag of saveframe.tags">
-        <tr *ngIf="sftag.display == 'Y' || (showAll && sftag.display == 'N')"
+        <tr *ngIf="sftag.display == 'Y' || (saveframe.parent.showAll && sftag.display == 'N')"
               (contextmenu)="sftag.log()">
           <td *ngIf="sftag.display == 'Y'; else non_mandatory" class="tag_description"
                 [title]="sftag.schemaValues['Interface']"
@@ -51,7 +51,7 @@
             </td>
           </ng-template>
           <td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
-            <app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name" ></app-tag>
+            <app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name"></app-tag>
           </td>
         </tr>
       </ng-container>
@@ -67,9 +67,8 @@
     </div>
 
     <ng-container *ngFor='let loop of saveframe.loops'>
-      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && showAll)"
+      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && saveframe.parent.showAll)"
                 [loop]='loop'
-                [showAll]="showAll"
                 [showInvalidOnly]="showInvalidOnly"></app-loop>
     </ng-container>
   </div>

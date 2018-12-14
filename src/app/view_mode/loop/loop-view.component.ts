@@ -9,7 +9,6 @@ import {Component, Input, OnInit} from '@angular/core';
 
 export class LoopViewComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() showAll: boolean;
 
   constructor() {
   }
