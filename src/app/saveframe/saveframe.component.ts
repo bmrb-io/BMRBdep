@@ -12,7 +12,6 @@ import {ActivatedRoute, Params} from '@angular/router';
 })
 export class SaveframeComponent implements OnInit {
   @Input() saveframe: Saveframe;
-  @Input() showAll: false;
   @Input() showInvalidOnly: false;
   @Output() sfReload = new EventEmitter<string>();
   activeTag: SaveframeTag;

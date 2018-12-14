@@ -15,12 +15,14 @@ export class Entry {
   source: string;
   dataStore: DataFileStore;
   valid: boolean;
+  showAll: boolean;
 
   constructor(data_name: string) {
     this.entryID = data_name;
     this.saveframes = [];
     this.enumerationTies = {};
     this.valid = true;
+    this.showAll = true;
 
     this.updateCategories();
   }

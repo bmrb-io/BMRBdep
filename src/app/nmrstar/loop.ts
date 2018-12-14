@@ -199,7 +199,6 @@ export class Loop {
 
     // If this is the contact person loop, an extra check is needed
     if (this.category === '_Contact_person') {
-      console.log('Checking', this);
       let valid = false;
       const roleTags: LoopTag[] = [];
 

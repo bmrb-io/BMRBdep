@@ -12,12 +12,10 @@ import {download} from '../nmrstar/nmrstar';
 })
 export class EntryComponent implements OnInit {
   entry: Entry;
-  showAll: boolean;
 
   constructor(private route: ActivatedRoute,
               private api: ApiService) {
     this.entry = new Entry('');
-    this.showAll = true;
   }
 
   ngOnInit() {

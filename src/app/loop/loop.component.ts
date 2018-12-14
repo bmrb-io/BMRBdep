@@ -10,7 +10,6 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class LoopComponent implements OnInit {
   @Input() loop: Loop;
-  @Input() showAll: boolean;
   @Input() showInvalidOnly: false;
   activeTag: LoopTag;
 
