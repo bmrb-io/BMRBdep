@@ -46,10 +46,13 @@
 </ng-container>
 
 <ng-container *ngIf="tag.interfaceType == 'text'" >
+  <div class="hidden_div" #size>{{tag.value}}</div>
   <textarea [(ngModel)]="tag.value"
             [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
             [placeholder]="tag.schemaValues['default value']"
             (change)="validateTag(tag)"
-            [title]="tag.validationMessage"></textarea>
+            [title]="tag.validationMessage"
+            (ngModelChange)="height=size.clientHeight"
+            [style.height.px]="height"></textarea>
 
 </ng-container>
