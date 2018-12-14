@@ -1,5 +1,6 @@
-import {Entry} from '../nmrstar/entry';
 import {Component, Input, OnInit} from '@angular/core';
+import {ApiService} from '../api.service';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-tree-view',
@@ -7,15 +8,33 @@ import {Component, Input, OnInit} from '@angular/core';
   styleUrls: ['./tree-view.component.css']
 })
 export class TreeViewComponent implements OnInit {
-  @Input() entry: Entry;
-  @Input() active: string;
-  @Input() showAll: boolean;
+  active: string;
   @Input() showInvalidOnly: boolean;
 
-  constructor() {
+  constructor(public api: ApiService,
+              private router: Router,
+              private route: ActivatedRoute) {
   }
 
+  // TODO: Get review to work by getting showInvalidOnly from URL
+
   ngOnInit() {
+
+    const parent = this;
+    this.router.events.subscribe((event: any) => {
+      let r = this.route;
+      while (r.firstChild) {
+        r = r.firstChild;
+      }
+      r.params.subscribe(params => {
+        // do stuff with params['yourParam']
+        if (params['saveframe_description'] !== undefined) {
+          parent.active = params['saveframe_description'];
+        }
+      });
+    });
+
+
   }
 
 }

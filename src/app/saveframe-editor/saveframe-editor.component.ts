@@ -12,7 +12,6 @@ import {Schema} from '../nmrstar/schema';
 })
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
-  showAll: boolean;
   entry: Entry;
   saveframeDescription: string;
   loadType: string;
@@ -24,7 +23,6 @@ export class SaveframeEditorComponent implements OnInit {
     const sf = new Saveframe('', '', '', new Entry(''));
     sf.parent.schema = new Schema({});
     this.saveframes = [sf];
-    this.showAll = true;
     this.entry = new Entry('');
     this.nextSaveframe = null;
     this.previousSaveframe = null;
@@ -66,7 +64,7 @@ export class SaveframeEditorComponent implements OnInit {
 
     let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
     while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
-           (!this.showAll && this.entry.saveframes[index].display === 'N') ) {
+           (!this.entry.showAll && this.entry.saveframes[index].display === 'N') ) {
       index--;
     }
 
@@ -79,7 +77,7 @@ export class SaveframeEditorComponent implements OnInit {
 
     index = this.entry.saveframes.indexOf(this.saveframes[this.saveframes.length - 1]) + 1;
     while (index <= this.entry.saveframes.length - 1 &&  ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
-           (!this.showAll && this.entry.saveframes[index].display === 'N')) {
+           (!this.entry.showAll && this.entry.saveframes[index].display === 'N')) {
       index++;
     }
     if (index > this.entry.saveframes.length - 1) {

@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, NavigationEnd} from '@angular/router';
+import {Entry} from './nmrstar/entry';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,11 @@ import {Router, NavigationEnd} from '@angular/router';
 })
 export class AppComponent implements OnInit {
 
+  entry: Entry;
+  sidenav_open: boolean;
+
   constructor(private router: Router) {
+    this.sidenav_open = false;
   }
 
   ngOnInit() {

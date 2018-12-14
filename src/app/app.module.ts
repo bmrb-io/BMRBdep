@@ -4,27 +4,32 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 
 import {AppComponent} from './app.component';
-import {SaveframeEditorComponent} from './saveframe-editor/saveframe-editor.component';
 import {AppRoutingModule} from './app-routing.module';
 import {WelcomeComponent} from './welcome/welcome.component';
 
-// For the editor mode
+// For the deposition mode
+import {TagComponent} from './tag/tag.component';
 import {LoopComponent} from './loop/loop.component';
 import {SaveframeComponent} from './saveframe/saveframe.component';
 import {EntryComponent} from './entry/entry.component';
-
-// For the view only mode
-import {LoopViewComponent} from './view_mode/loop/loop-view.component';
-import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
-import {TagComponent} from './tag/tag.component';
+import {SaveframeEditorComponent} from './saveframe-editor/saveframe-editor.component';
+import {ReviewComponent} from './review/review.component';
 import {TreeViewComponent} from './treeview/tree-view.component';
 import {FileUploaderComponent} from './file-uploader/file-uploader.component';
 import {MessageComponent} from './message/message.component';
 
+// For the view only mode
+import {LoopViewComponent} from './view_mode/loop/loop-view.component';
+import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
+
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule} from '@angular/material';
-import { ReviewComponent } from './review/review.component';
+import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule,
+  MatSidenavModule,
+  MatListModule,
+  MatToolbarModule,
+  MatIconModule} from '@angular/material';
+
 
 @NgModule({
   declarations: [
@@ -48,10 +53,14 @@ import { ReviewComponent } from './review/review.component';
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    ReactiveFormsModule,
     MatProgressBarModule,
     MatSelectModule,
     MatSlideToggleModule,
-    ReactiveFormsModule
+    MatSidenavModule,
+    MatListModule,
+    MatToolbarModule,
+    MatIconModule
   ],
   bootstrap: [AppComponent]
 })
