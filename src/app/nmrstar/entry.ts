@@ -4,13 +4,29 @@ import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
 
+export class CategoryInfo {
+  category: string;
+  displayName: string;
+  valid: boolean;
+  display: string;
+
+  constructor(category: string,
+              displayName: string,
+              valid: boolean = true,
+              display: string = 'H') {
+    this.category = category;
+    this.displayName = displayName;
+    this.valid = valid;
+    this.display = display;
+  }
+}
 
 export class Entry {
   entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
-  categories: {};
-  superGroups: {};
+  categoryOrder: Array<string>;
+  superGroups: Array<{}>;
   enumerationTies: {};
   source: string;
   dataStore: DataFileStore;
@@ -61,13 +77,16 @@ export class Entry {
 
   updateCategories(): void {
 
-    this.categories = {};
+    if (!this.schema) {
+      return;
+    }
 
     // First get the categories, and their order
     const categories = new Set();
     for (const sf of this.saveframes) {
       categories.add(sf.category);
     }
+    const categoryStatusDict = {};
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     for (const category of Array.from(categories)) {
@@ -99,32 +118,41 @@ export class Entry {
       }
 
       // Add the record
-      this.categories[category] = [pretty_name, valid, display];
+      categoryStatusDict[category] = new CategoryInfo(category, pretty_name, valid, display);
     }
 
     // Update a record of which supergroup categories are valid and should be displayed
-    this.superGroups = {};
+    this.categoryOrder = [];
+    this.superGroups = [];
     if (this.schema) {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
-        this.superGroups[supergroup[0]['category_super_group']] = [true, 'H'];
+
+
+        const singleSuperRecord = [supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name'], true, 'H', []];
+        this.superGroups.push(singleSuperRecord);
 
         for (const group of supergroup) {
           // Handle the case that the specific saveframe has been deleted
-          if (this.categories[group['saveframe_category']] === undefined){
-            return;
+          if (categoryStatusDict[group['saveframe_category']] === undefined) {
+            continue;
           }
 
+          // Add the category to the supergroup
+          const singleCategoryRecord = categoryStatusDict[group['saveframe_category']];
+          singleSuperRecord[4].push(singleCategoryRecord);
+          this.categoryOrder.push(singleCategoryRecord.category);
+
           // Update the valid value
-          if (!this.categories[group['saveframe_category']][1]) {
-            this.superGroups[supergroup[0]['category_super_group']][0] = false;
+          if (!categoryStatusDict[group['saveframe_category']].valid) {
+            singleSuperRecord[2] = false;
           }
           // Update the show saveframe value
-          const showSaveframe = this.categories[group['saveframe_category']][2];
-          if (this.superGroups[supergroup[0]['category_super_group']][1] === 'H') {
-            this.superGroups[supergroup[0]['category_super_group']][1] = showSaveframe;
+          const showSaveframe = categoryStatusDict[group['saveframe_category']].display;
+          if (singleSuperRecord[3] === 'H') {
+            singleSuperRecord[3] = showSaveframe;
           } else {
             if (showSaveframe === 'Y') {
-              this.superGroups[supergroup[0]['category_super_group']][1] = 'Y';
+              singleSuperRecord[3] = 'Y';
             }
           }
         }
