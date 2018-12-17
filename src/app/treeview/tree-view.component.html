@@ -4,18 +4,18 @@
   </p>
 <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
   <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
-    <ng-container *ngIf="(showInvalidOnly && !superGroupCat[2]) ||
-                         (!showInvalidOnly && (superGroupCat[3] == 'Y' ||
-                              (api.cachedEntry.showAll && superGroupCat[3] != 'H')))">
-      <p><b>{{superGroupCat[1]}}</b></p>
-      <ng-container *ngFor="let superGroup of superGroupCat[4]">
-        <p><a *ngIf="(api.cachedEntry.showAll || superGroup.display == 'Y') && superGroup.display != 'H'"
-           [ngClass]="{'active': active==superGroup.category,
+    <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
+                         (!showInvalidOnly && (superGroupCat.display == 'Y' ||
+                              (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
+      <p><b>{{superGroupCat.displayName}}</b></p>
+      <ng-container *ngFor="let category of superGroupCat.children">
+        <p><a *ngIf="(api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H'"
+           [ngClass]="{'active': active==category.category,
                        'nav_link':true,
-                       'complete':superGroup.valid,
-                       'incomplete':!superGroup.valid}"
-           [title]="superGroup.displayName"
-           [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', superGroup.category, 'category']">{{superGroup.displayName}}</a></p>
+                       'complete':category.valid,
+                       'incomplete':!category.valid}"
+           [title]="category.displayName"
+           [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a></p>
       </ng-container>
     </ng-container>
   </div>
