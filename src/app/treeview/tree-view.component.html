@@ -1,7 +1,5 @@
 <ng-container *ngIf="api.cachedEntry!==undefined && api.cachedEntry.schema!==undefined">
-  <p>
-    <a>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()" color="#CBDBFF"></mat-slide-toggle></a>
-  </p>
+  <p>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()" color="#CBDBFF"></mat-slide-toggle></p>
 <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
   <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
     <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
