@@ -3,22 +3,23 @@
     <a>Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll"  color="#CBDBFF"></mat-slide-toggle></a><!--(click)="updateCategoryLinks()"-->
   </p>
 <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-  <div *ngFor="let superGroupCat of api.cachedEntry.schema.categorySupergroupsDictList">
-    <ng-container *ngIf="(showInvalidOnly && !api.cachedEntry.superGroups[superGroupCat[0]['category_super_group']][0]) ||
-                         (!showInvalidOnly && (api.cachedEntry.superGroups[superGroupCat[0]['category_super_group']][1] == 'Y' ||
-                              (api.cachedEntry.showAll && api.cachedEntry.superGroups[superGroupCat[0]['category_super_group']][1] != 'H')))">
-      <p><b>{{superGroupCat[0]['super_group_display_name']}}</b></p>
-      <ng-container *ngFor="let superGroup of superGroupCat">
-        <p><a *ngIf="api.cachedEntry.categories[superGroup['saveframe_category']] !== undefined && ((api.cachedEntry.showAll || api.cachedEntry.categories[superGroup['saveframe_category']][2] == 'Y') && api.cachedEntry.categories[superGroup['saveframe_category']][2] != 'H')"
-           [ngClass]="{'active': active==superGroup['saveframe_category'],
+  <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
+    <ng-container *ngIf="(showInvalidOnly && !superGroupCat[2]) ||
+                         (!showInvalidOnly && (superGroupCat[3] == 'Y' ||
+                              (api.cachedEntry.showAll && superGroupCat[3] != 'H')))">
+      <p><b>{{superGroupCat[1]}}</b></p>
+      <ng-container *ngFor="let superGroup of superGroupCat[4]">
+        <p><a *ngIf="(api.cachedEntry.showAll || superGroup.display == 'Y') && superGroup.display != 'H'"
+           [ngClass]="{'active': active==superGroup.category,
                        'nav_link':true,
-                       'complete':api.cachedEntry.categories[superGroup['saveframe_category']][1],
-                       'incomplete':!api.cachedEntry.categories[superGroup['saveframe_category']][1]}"
-           [title]="superGroup['group_view_help']"
-           [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', superGroup['saveframe_category'], 'category']">{{superGroup['category_group_view_name']}}</a></p>
+                       'complete':superGroup.valid,
+                       'incomplete':!superGroup.valid}"
+           [title]="superGroup.displayName"
+           [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', superGroup.category, 'category']">{{superGroup.displayName}}</a></p>
       </ng-container>
     </ng-container>
   </div>
-  <!--<a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a>-->
+  <br>
+  <a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a>
 </div>
 </ng-container>
