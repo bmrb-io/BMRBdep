@@ -15,6 +15,8 @@ export class Saveframe {
   tagDict: {};
   schemaValues: {};
   index: number;
+  nextCategory: string;
+  previousCategory: string;
 
   constructor(name: string, category: string, tag_prefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
@@ -27,6 +29,8 @@ export class Saveframe {
     this.display = 'H';
     this.valid = true;
     this.index = 0;
+    this.nextCategory = null;
+    this.previousCategory = null;
     if (this.parent.schema) {
       this.schemaValues = this.parent.schema.saveframeSchema[this.category];
     }
