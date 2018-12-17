@@ -25,7 +25,6 @@ export class Entry {
   entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
-  categoryOrder: Array<string>;
   superGroups: Array<{}>;
   enumerationTies: {};
   source: string;
@@ -122,7 +121,7 @@ export class Entry {
     }
 
     // Update a record of which supergroup categories are valid and should be displayed
-    this.categoryOrder = [];
+    const categoryOrder = [];
     this.superGroups = [];
     if (this.schema) {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
@@ -140,7 +139,11 @@ export class Entry {
           // Add the category to the supergroup
           const singleCategoryRecord = categoryStatusDict[group['saveframe_category']];
           singleSuperRecord[4].push(singleCategoryRecord);
-          this.categoryOrder.push(singleCategoryRecord.category);
+
+          // Determine whether or not to set a saveframe in the record of saveframe order
+          if (singleCategoryRecord.display === 'Y' || (singleCategoryRecord.display === 'N' && this.showAll)) {
+            categoryOrder.push(singleCategoryRecord.category);
+          }
 
           // Update the valid value
           if (!categoryStatusDict[group['saveframe_category']].valid) {
@@ -157,6 +160,26 @@ export class Entry {
           }
         }
       }
+    }
+
+    function setNextAndPreviousCategories(saveframe) {
+      const index = categoryOrder.indexOf(saveframe.category);
+      if (index - 1 < 0) {
+        saveframe.previousCategory = null;
+      } else {
+        saveframe.previousCategory = categoryOrder[index - 1];
+      }
+
+      if (index + 1 === categoryOrder.length || index < 0) {
+        saveframe.nextCategory = null;
+      } else {
+        saveframe.nextCategory = categoryOrder[index + 1];
+      }
+    }
+
+    // Set the "next" and "previous" saveframes
+    for (const saveframe of this.saveframes) {
+      setNextAndPreviousCategories(saveframe);
     }
   }
 
