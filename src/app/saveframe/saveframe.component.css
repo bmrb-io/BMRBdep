@@ -32,13 +32,13 @@
 }
 
 table {
-	width: auto;
-    background-color: #E5E6Ef;
-    margin-bottom: 1em;
-    margin-right: 1em;
-    padding: 0 0.25em;
-    border-collapse: collapse;
-    border-radius: 5px;
+  width: 100%;
+  background-color: #E5E6Ef;
+  margin-bottom: 1em;
+  margin-right: 1em;
+  padding: 0 0.25em;
+  border-collapse: collapse;
+  border-radius: 5px;
 }
 
 th {
