@@ -1,6 +1,7 @@
 .saveframe_editor {
-	margin: 1em;
-	float: left;
+	padding: 1em;
+  width: 100%;
+  display: block;
 }
 
 .right_margin {
