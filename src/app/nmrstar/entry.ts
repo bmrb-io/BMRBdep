@@ -4,7 +4,26 @@ import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
 
-export class CategoryInfo {
+class SuperCategoryInfo {
+  superCategory: string;
+  displayName: string;
+  valid: boolean;
+  display: string;
+  children: Array<CategoryInfo>;
+
+  constructor(superCategory: string,
+              displayName: string,
+              valid: boolean = true,
+              display: string = 'H') {
+    this.superCategory = superCategory;
+    this.displayName = displayName;
+    this.valid = valid;
+    this.display = display;
+    this.children = [];
+  }
+}
+
+class CategoryInfo {
   category: string;
   displayName: string;
   valid: boolean;
@@ -25,7 +44,7 @@ export class Entry {
   entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
-  superGroups: Array<{}>;
+  superGroups: Array<SuperCategoryInfo>;
   enumerationTies: {};
   source: string;
   dataStore: DataFileStore;
@@ -127,7 +146,7 @@ export class Entry {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
 
 
-        const singleSuperRecord = [supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name'], true, 'H', []];
+        const singleSuperRecord = new SuperCategoryInfo(supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name']);
         this.superGroups.push(singleSuperRecord);
 
         for (const group of supergroup) {
@@ -138,7 +157,7 @@ export class Entry {
 
           // Add the category to the supergroup
           const singleCategoryRecord = categoryStatusDict[group['saveframe_category']];
-          singleSuperRecord[4].push(singleCategoryRecord);
+          singleSuperRecord.children.push(singleCategoryRecord);
 
           // Determine whether or not to set a saveframe in the record of saveframe order
           if (singleCategoryRecord.display === 'Y' || (singleCategoryRecord.display === 'N' && this.showAll)) {
@@ -147,15 +166,15 @@ export class Entry {
 
           // Update the valid value
           if (!categoryStatusDict[group['saveframe_category']].valid) {
-            singleSuperRecord[2] = false;
+            singleSuperRecord.valid = false;
           }
           // Update the show saveframe value
           const showSaveframe = categoryStatusDict[group['saveframe_category']].display;
-          if (singleSuperRecord[3] === 'H') {
-            singleSuperRecord[3] = showSaveframe;
+          if (singleSuperRecord.display === 'H') {
+            singleSuperRecord.display = showSaveframe;
           } else {
             if (showSaveframe === 'Y') {
-              singleSuperRecord[3] = 'Y';
+              singleSuperRecord.display = 'Y';
             }
           }
         }
