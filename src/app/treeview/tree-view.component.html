@@ -9,7 +9,7 @@
                               (api.cachedEntry.showAll && api.cachedEntry.superGroups[superGroupCat[0]['category_super_group']][1] != 'H')))">
       <p><b>{{superGroupCat[0]['super_group_display_name']}}</b></p>
       <ng-container *ngFor="let superGroup of superGroupCat">
-        <p><a *ngIf="(api.cachedEntry.showAll || api.cachedEntry.categories[superGroup['saveframe_category']][2] == 'Y') && api.cachedEntry.categories[superGroup['saveframe_category']][2] != 'H'"
+        <p><a *ngIf="api.cachedEntry.categories[superGroup['saveframe_category']] !== undefined && ((api.cachedEntry.showAll || api.cachedEntry.categories[superGroup['saveframe_category']][2] == 'Y') && api.cachedEntry.categories[superGroup['saveframe_category']][2] != 'H')"
            [ngClass]="{'active': active==superGroup['saveframe_category'],
                        'nav_link':true,
                        'complete':api.cachedEntry.categories[superGroup['saveframe_category']][1],
