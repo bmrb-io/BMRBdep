@@ -15,16 +15,21 @@ export class TagComponent implements OnInit {
   constructor(public api: ApiService) { }
 
   ngOnInit() {
+    if (this.tag.interfaceType === 'text') {
+      this.recalculateHeight();
+    }
+  }
+
+  recalculateHeight() {
     // Set the height if this is a textarea tag
     if (this.tag.value) {
       const matches = this.tag.value.match(/\n/g);
       if (matches) {
-        this.height = matches.length * 20;
+        this.height = matches.length + 4;
       } else {
-        this.height = 50;
+        this.height = 4;
       }
     }
-
   }
 
   validateTag(tag: Tag): void {
