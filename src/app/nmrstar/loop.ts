@@ -1,6 +1,7 @@
 import {cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
 import {LoopTag, Tag} from './tag';
+import {sprintf} from 'sprintf-js';
 
 export class Loop {
   category: string;

@@ -2,6 +2,7 @@ import {Entry} from './entry';
 import {Loop} from './loop';
 import {cleanValue} from './nmrstar';
 import {SaveframeTag, Tag} from './tag';
+import {sprintf} from 'sprintf-js';
 
 export class Saveframe {
   name: string;
