@@ -7,9 +7,9 @@
 .tag_info_box{
 	margin: 1em;
 	padding: 1em;
-    border: 2px solid #33527b;
-    border-radius: 5px;
-    word-wrap: break-word;
+  border: 2px solid #33527b;
+  border-radius: 5px;
+  word-wrap: break-word;
 }
 
 .invisible {
@@ -31,19 +31,19 @@
 .header_text {
 	vertical-align: middle;
 	font-size: larger;
-    font-weight: bold;
+  font-weight: bold;
 }
 
 table {
 	width: 100%;
-    background-color: #E5E6Ef;
-    margin-bottom: 1em;
-    margin-right: 1em;
-    margin-left: 1em;
-    
-    padding: 0em .25em 0em .25em;
-    border-collapse: collapse;
-    border-radius: 5px;
+  background-color: #E5E6Ef;
+  margin-bottom: 1em;
+  margin-right: 1em;
+  margin-left: 1em;
+
+  padding: 0em .25em 0em .25em;
+  border-collapse: collapse;
+  border-radius: 5px;
 }
 
 th {
