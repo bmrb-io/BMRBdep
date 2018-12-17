@@ -1,5 +1,5 @@
 <div>
-  <div class="saveframe_editor">
+  <div class="saveframe_editor" *ngIf="saveframes.length > 0; else missing">
     <button class="real_button line right_margin"
             *ngIf="saveframes[0].previousCategory"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
@@ -26,4 +26,9 @@
       </ng-template>
     </div>
   </div>
+  <ng-template #missing>
+    <h3 class="red">No matching saveframes found in this entry. Click
+      <a [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">here</a>
+       to return to a category that exists.</h3>
+  </ng-template>
 </div>
