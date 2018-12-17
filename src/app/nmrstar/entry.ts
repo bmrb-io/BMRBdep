@@ -109,9 +109,16 @@ export class Entry {
         this.superGroups[supergroup[0]['category_super_group']] = [true, 'H'];
 
         for (const group of supergroup) {
+          // Handle the case that the specific saveframe has been deleted
+          if (this.categories[group['saveframe_category']] === undefined){
+            return;
+          }
+
+          // Update the valid value
           if (!this.categories[group['saveframe_category']][1]) {
             this.superGroups[supergroup[0]['category_super_group']][0] = false;
           }
+          // Update the show saveframe value
           const showSaveframe = this.categories[group['saveframe_category']][2];
           if (this.superGroups[supergroup[0]['category_super_group']][1] === 'H') {
             this.superGroups[supergroup[0]['category_super_group']][1] = showSaveframe;
