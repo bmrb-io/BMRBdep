@@ -45,11 +45,15 @@ export class SaveframeEditorComponent implements OnInit {
 
   reloadSaveframes(): void {
     if (this.loadType === 'name') {
-      this.saveframes = [this.entry.getSaveframeByName(this.saveframeDescription)];
+      const theSaveframe = this.entry.getSaveframeByName(this.saveframeDescription);
+      if (theSaveframe !== null) {
+        this.saveframes = [theSaveframe];
+      } else {
+        this.saveframes = [];
+      }
     } else if (this.loadType === 'category') {
       this.saveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
     }
     this.entry.updateCategories();
-
   }
 }
