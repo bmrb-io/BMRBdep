@@ -15,8 +15,6 @@ export class SaveframeEditorComponent implements OnInit {
   entry: Entry;
   saveframeDescription: string;
   loadType: string;
-  nextSaveframe: string;
-  previousSaveframe: string;
 
   constructor(private route: ActivatedRoute,
               private api: ApiService) {
@@ -24,8 +22,6 @@ export class SaveframeEditorComponent implements OnInit {
     sf.parent.schema = new Schema({});
     this.saveframes = [sf];
     this.entry = new Entry('');
-    this.nextSaveframe = null;
-    this.previousSaveframe = null;
   }
 
   ngOnInit() {
@@ -53,37 +49,7 @@ export class SaveframeEditorComponent implements OnInit {
     } else if (this.loadType === 'category') {
       this.saveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
     }
-    this.updateCategoryLinks();
-  }
+    this.entry.updateCategories();
 
-  updateCategoryLinks(): void {
-
-    if (!this.saveframes.length) {
-      return;
-    }
-
-    let index = this.entry.saveframes.indexOf(this.saveframes[0]) - 1;
-    while (index > 0 && ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
-           (!this.entry.showAll && this.entry.saveframes[index].display === 'N') ) {
-      index--;
-    }
-
-    if (index <= 0) {
-      this.previousSaveframe = null;
-    } else {
-      this.previousSaveframe = this.entry.saveframes[index].category;
-    }
-
-
-    index = this.entry.saveframes.indexOf(this.saveframes[this.saveframes.length - 1]) + 1;
-    while (index <= this.entry.saveframes.length - 1 &&  ['Y', 'N'].indexOf(this.entry.saveframes[index].display) < 0 ||
-           (!this.entry.showAll && this.entry.saveframes[index].display === 'N')) {
-      index++;
-    }
-    if (index > this.entry.saveframes.length - 1) {
-      this.nextSaveframe = null;
-    } else {
-      this.nextSaveframe = this.entry.saveframes[index].category;
-    }
   }
 }
