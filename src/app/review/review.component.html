@@ -1,20 +1,20 @@
 <div>
-  <h3 class="center" *ngIf="!entry.valid">You are viewing portions of your deposition that still need to be completed.</h3>
-  <h3 class="center" *ngIf="entry.valid">Your deposition is ready to submit.</h3>
-  <div class="eighty_five" *ngIf="!entry.valid">
-    <app-saveframe *ngFor='let saveframe of entry.saveframes' [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
+  <h3 class="center" *ngIf="!api.cachedEntry.valid">You are viewing portions of your deposition that still need to be completed.</h3>
+  <h3 class="center" *ngIf="api.cachedEntry.valid" (click)="log()">Your deposition is ready to submit.</h3>
+  <div class="eighty_five" *ngIf="!api.cachedEntry.valid">
+    <app-saveframe *ngFor='let saveframe of api.cachedEntry.saveframes' [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
   </div>
   <br>
   <div class="wrapper">
     <input type="button"
            class="fake_button"
-           [disabled]="!entry.valid"
-           (click)="entry.valid && submitEntry()"
+           [disabled]="!api.cachedEntry.valid"
+           (click)="api.cachedEntry.valid && submitEntry()"
            value="Submit deposition to BMRB">
   </div>
 
   <div class="wrapper">
-    <a class="fake_button" [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">Return to full overview</a>
+    <a class="fake_button" [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', 'deposited_data_files', 'category']">Return to full overview</a>
   </div>
 
 </div>
