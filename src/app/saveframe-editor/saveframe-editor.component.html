@@ -1,4 +1,4 @@
-<div>
+<div *ngIf="entry">
   <div class="saveframe_editor" *ngIf="saveframes.length > 0; else missing">
     <button class="real_button line right_margin"
             *ngIf="saveframes[0].previousCategory"
