@@ -31,8 +31,10 @@ export class TreeViewComponent implements OnInit {
         parent.showInvalidOnly = this.router.url.endsWith('/review');
       });
     });
+  }
 
-
+  logEntry(): void {
+    console.log(this.api.cachedEntry);
   }
 
 }
