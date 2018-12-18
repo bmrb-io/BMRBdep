@@ -15,7 +15,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, {scrollPositionRestoration: 'top'})
+    RouterModule.forRoot(routes, {scrollPositionRestoration: 'enabled'})
   ],
   exports: [
     RouterModule
