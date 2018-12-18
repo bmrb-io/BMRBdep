@@ -7,7 +7,7 @@
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
       <p><b>{{superGroupCat.displayName}}</b></p>
       <ng-container *ngFor="let category of superGroupCat.children">
-        <p><a *ngIf="(api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H'"
+        <p><a *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
            [ngClass]="{'active': active==category.category,
                        'nav_link':true,
                        'complete':category.valid,
