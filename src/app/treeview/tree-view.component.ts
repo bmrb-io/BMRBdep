@@ -16,8 +16,6 @@ export class TreeViewComponent implements OnInit {
               private route: ActivatedRoute) {
   }
 
-  // TODO: Get review to work by getting showInvalidOnly from URL
-
   ngOnInit() {
 
     const parent = this;
