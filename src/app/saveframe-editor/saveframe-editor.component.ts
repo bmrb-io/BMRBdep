@@ -3,7 +3,6 @@ import {Entry} from '../nmrstar/entry';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
-import {Schema} from '../nmrstar/schema';
 
 @Component({
   selector: 'app-saveframe-editor',
@@ -18,10 +17,7 @@ export class SaveframeEditorComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               private api: ApiService) {
-    const sf = new Saveframe('', '', '', new Entry(''));
-    sf.parent.schema = new Schema({});
-    this.saveframes = [sf];
-    this.entry = new Entry('');
+    this.saveframes = [];
   }
 
   ngOnInit() {
@@ -30,17 +26,13 @@ export class SaveframeEditorComponent implements OnInit {
     this.route.params.subscribe(function (params) {
       parent.loadType = params['load_type'];
       parent.saveframeDescription = params['saveframe_description'];
-      parent.loadEntry(params['entry']);
-    });
-  }
 
-  loadEntry(entry: string): void {
-    const parent = this;
-    parent.api.getEntry(entry)
-      .subscribe(ret_entry => {
-        parent.entry = ret_entry;
-        this.reloadSaveframes();
-      });
+      parent.api.getEntry(params['entry'])
+        .subscribe(ret_entry => {
+          parent.entry = ret_entry;
+          parent.reloadSaveframes();
+        });
+    });
   }
 
   reloadSaveframes(): void {
