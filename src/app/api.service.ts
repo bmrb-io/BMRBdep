@@ -66,7 +66,18 @@ export class ApiService {
       this.cachedEntry['source'] = 'session memory';
     // The page is being reloaded, but we can get the entry from the browser cache
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
-      this.loadLocal();
+
+      // Make sure both the entry and schema are saved locally - if not, getEntry() but force load from server
+      const raw_json = JSON.parse(localStorage.getItem('entry'));
+      if (raw_json === null) {
+        return this.getEntry(entry_id, true);
+      }
+      raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
+      if (raw_json['schema'] === null) {
+        return this.getEntry(entry_id, true);
+      }
+
+      this.cachedEntry = entryFromJSON(raw_json);
       this.cachedEntry['source'] = 'browser cache';
     // We either don't have the entry or have a different one, so fetch from the API
     } else {
@@ -74,11 +85,8 @@ export class ApiService {
       return this.http.get(entry_url).pipe(
         map(json_data => {
           this.cachedEntry = entryFromJSON(json_data);
-          // TODO: This probably won't be necessary later
-          this.cachedEntry.entryID = entry_id;
           this.cachedEntry['source'] = 'API server';
           this.saveEntry(true);
-          console.log(this.cachedEntry);
           return this.cachedEntry;
         }),
         catchError(error => {
@@ -96,7 +104,6 @@ export class ApiService {
       );
     }
 
-    console.log(this.cachedEntry);
     return of(this.cachedEntry);
   }
 
@@ -159,14 +166,6 @@ export class ApiService {
         // Convert the error into something we can handle
         catchError((error: HttpErrorResponse) => this.handleError(error))
       );
-  }
-
-  private loadLocal(): void {
-    // TODO: This will throw an uncaught exception if entry_key in local storage but the entry itself isn't
-    const raw_json = JSON.parse(localStorage.getItem('entry'));
-    raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
-    this.cachedEntry = entryFromJSON(raw_json);
-    console.log('Loaded entry from local storage.');
   }
 
   getEntryID(): string {
