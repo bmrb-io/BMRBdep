@@ -21,16 +21,16 @@ export class TreeViewComponent implements OnInit {
   ngOnInit() {
 
     const parent = this;
-    this.router.events.subscribe((event: any) => {
+    this.router.events.subscribe(() => {
       let r = this.route;
       while (r.firstChild) {
         r = r.firstChild;
       }
       r.params.subscribe(params => {
-        // do stuff with params['yourParam']
         if (params['saveframe_description'] !== undefined) {
           parent.active = params['saveframe_description'];
         }
+        parent.showInvalidOnly = this.router.url.endsWith('/review');
       });
     });
 
