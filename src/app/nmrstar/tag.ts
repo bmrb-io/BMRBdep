@@ -204,7 +204,7 @@ export class Tag {
 
     // If null, make sure that null is allowed - no need to check regex.
     if (!this.value) {
-      // TODO: This only works after updateVisibity() is called on this tag. Should be fixed after rewrite of conditional visiblity code
+      // TODO: This only works after updateVisibility() is called on this tag. Should be fixed after rewrite of conditional visibility code
       // but may require some addition refactoring
       if (this.display === 'Y') {
         this.valid = false;

@@ -16,7 +16,7 @@ export class Schema {
   fileUploadTypes;
   overrides: {};
   overridesDictList: Array<{}>;
-  categorySupergroups: {};
+  categorySuperGroups: {};
   categorySupergroupsDictList: Array<Array<{}>>;
 
   /* Calculated during construction */
@@ -27,8 +27,16 @@ export class Schema {
   toJSON(): {} {
     return {
       version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.dataTypes,
-      overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySupergroups
+      overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySuperGroups
     };
+  }
+
+  /* Delete unnecessary un-parsed schema data. Only run once serialized and saved locally. */
+  cleanUp(): void {
+    delete this.tags;
+    delete this.overrides;
+    delete this.categorySuperGroups;
+    delete this.saveframes;
   }
 
   constructor(json: Object) {
@@ -37,7 +45,7 @@ export class Schema {
     this.tags = json['tags'];
     this.dataTypes = json['data_types'];
     this.overrides = json['overrides'];
-    this.categorySupergroups = json['category_supergroups'];
+    this.categorySuperGroups = json['category_supergroups'];
     this.saveframes = json['saveframes'];
     this.fileUploadTypes = json['file_upload_types'];
     this.schema = {};
@@ -86,13 +94,13 @@ export class Schema {
                                 'structure': 'Structure',
                                'thermodynamics': 'Thermodynamics'};
 
-    for (const supergroupRecord of this.categorySupergroups['values']) {
+    for (const supergroupRecord of this.categorySuperGroups['values']) {
 
       // Generate an override dictionary for a single override
       const superGroupRecord = {};
-      for (let i = 0; i <= this.categorySupergroups['headers'].length; i++) {
-        if (this.categorySupergroups['headers'][i]) {
-          superGroupRecord[this.categorySupergroups['headers'][i]] = supergroupRecord[i];
+      for (let i = 0; i <= this.categorySuperGroups['headers'].length; i++) {
+        if (this.categorySuperGroups['headers'][i]) {
+          superGroupRecord[this.categorySuperGroups['headers'][i]] = supergroupRecord[i];
         }
       }
       superGroupRecord['super_group_display_name'] = superGroupMapping[superGroupRecord['category_super_group']];

@@ -19,7 +19,7 @@
 
 .tag_info_box{
 	margin: 1em;
-	padding: 1em 1em 0em 1em;
+	padding: 1em 1em 0 1em;
     border: 2px solid #33527b;
     border-radius: 5px;
     word-wrap: break-word;

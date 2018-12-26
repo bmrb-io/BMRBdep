@@ -1,7 +1,7 @@
-table.alternatingcolor tr:nth-child(even) {
+table.alternating_color tr:nth-child(even) {
     background-color: #CBDBFF;
 }
-table.alternatingcolor tr:nth-child(even) .datum {
+table.alternating_color tr:nth-child(even) .datum {
     background-color: #CBDBFF;
 }
 .datum {

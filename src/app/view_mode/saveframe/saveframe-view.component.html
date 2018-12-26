@@ -1,24 +1,28 @@
-
 <div class="saveframe">
-  <span class="uneditable line">save_</span><input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
-  <table class="oneindent">
+  <span class="uneditable line">save_</span>
+  <input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
+  <table class="one_indent">
     <tr>
       <th style="width: 30%"></th>
       <th></th>
     </tr>
-    <ng-container *ngFor="let sftag of saveframe.tags">
-      <tr class="highlight" *ngIf="sftag.value || showAll">
-        <td><span class="uneditable">{{saveframe.tagPrefix + '.' + sftag.name}}</span></td>
-        <ng-container *ngIf='sftag.name != "Sf_framecode"; then normal_tag else sf_framecode'></ng-container>
+    <ng-container *ngFor="let saveframeTag of saveframe.tags">
+      <tr class="highlight" *ngIf="saveframeTag.value || saveframe.parent.showAll">
+        <td><span class="uneditable">{{saveframe.tagPrefix + '.' + saveframeTag.name}}</span></td>
+        <ng-container *ngIf='saveframeTag.name != "Sf_framecode"; then normal_tag else sf_framecode'></ng-container>
         <ng-template #normal_tag>
           <td>
-          <div>
-            <a *ngIf='sftag.value && sftag.value.indexOf("$")==0' [routerLink]="['/entry', saveframe.getID(), 'saveframe', sftag.value.substring(1), 'name']">Jump to: </a>
-            <input class="datum" style="width:80%" [(ngModel)]="sftag.value" placeholder=".">
+            <div>
+              <a *ngIf='saveframeTag.value && saveframeTag.value.indexOf("$")==0'
+                 [routerLink]="['/entry', saveframe.getID(), 'saveframe', saveframeTag.value.substring(1), 'name']">Jump
+                to: </a>
+              <input class="datum" style="width:80%" [(ngModel)]="saveframeTag.value" placeholder=".">
             </div>
           </td>
         </ng-template>
-        <ng-template #sf_framecode><td><input class="datum" [(ngModel)]="saveframe.name" placeholder="."></td></ng-template>
+        <ng-template #sf_framecode>
+          <td><input class="datum" [(ngModel)]="saveframe.name" placeholder="."></td>
+        </ng-template>
 
       </tr>
     </ng-container>

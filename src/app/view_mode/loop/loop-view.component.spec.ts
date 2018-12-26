@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LoopViewComponent } from './loop.component';
+import { LoopViewComponent } from './loop-view.component';
 
-describe('LoopComponent', () => {
-  let component: LoopComponent;
-  let fixture: ComponentFixture<LoopComponent>;
+describe('LoopViewComponent', () => {
+  let component: LoopViewComponent;
+  let fixture: ComponentFixture<LoopViewComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ LoopComponent ]
+      declarations: [ LoopViewComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LoopComponent);
+    fixture = TestBed.createComponent(LoopViewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
