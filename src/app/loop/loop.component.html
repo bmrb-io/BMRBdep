@@ -12,13 +12,13 @@
 			</tr>
 			<tr>
         <th style="border-collapse: collapse;"></th>
-        <ng-container *ngFor='let col of loop.tags; let c = index'>
-          <th *ngIf="loop.data[0][c].display == 'Y' || (loop.data[0][c].display == 'N' && loop.parent.parent.showAll)"
+        <ng-container *ngFor='let col of loop.data[0]'>
+          <th *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
               class="tag_header"
-                (click)="activeTag = (activeTag != loop.data[0][c] ? loop.data[0][c] : null)"
-                [title]="loop.data[0][c].schemaValues['Interface']"
-                >{{loop.data[0][c].schemaValues['Prompt']}}
-            <span *ngIf="loop.data[0][c].display == 'Y'" class="mandatory">*</span>
+                (click)="activeTag = (activeTag != col ? col : null)"
+                [title]="col.schemaValues['Interface']"
+                >{{col.schemaValues['Prompt']}}
+            <span *ngIf="col.display == 'Y'" class="mandatory">*</span>
           </th>
           </ng-container>
 			</tr>
@@ -27,11 +27,11 @@
 			<tr *ngFor="let row of loop.data; let r = index">
 			<td><button *ngIf="r>0" class="real_button" (click)='deleteRow(r)'>-</button></td>
 			<ng-container *ngFor="let col of row; let c = index">
-			  <td *ngIf="loop.data[r][c].display == 'Y' || (loop.data[r][c].display == 'N' && loop.parent.parent.showAll)"
-	      		  [ngClass]="{'invisible': true, 'invalid': !loop.data[r][c].valid}">
-			    <app-tag [tag]='loop.data[r][c]'
+			  <td *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
+	      		  [ngClass]="{'invisible': true, 'invalid': !col.valid}">
+			    <app-tag [tag]='col'
                    [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
-                   (contextmenu)="loop.data[r][c].log()"></app-tag>
+                   (contextmenu)="col.log()"></app-tag>
 			  </td>
 			  </ng-container>
 			</tr>

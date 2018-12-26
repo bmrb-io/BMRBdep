@@ -1,6 +1,6 @@
 <div>
   <h3 class="center" *ngIf="!api.cachedEntry.valid">You are viewing portions of your deposition that still need to be completed.</h3>
-  <h3 class="center" *ngIf="api.cachedEntry.valid" (click)="log()">Your deposition is ready to submit.</h3>
+  <h3 class="center" *ngIf="api.cachedEntry.valid">Your deposition is ready to submit.</h3>
   <div class="eighty_five" *ngIf="!api.cachedEntry.valid">
     <app-saveframe *ngFor='let saveframe of api.cachedEntry.saveframes' [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
   </div>

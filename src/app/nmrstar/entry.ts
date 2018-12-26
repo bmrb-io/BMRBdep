@@ -264,8 +264,6 @@ export class Entry {
     // Reset the enumeration ties
     this.enumerationTies = {};
 
-    // TODO: Refresh all the tag visibilities based on the override rules
-
     // First reset all the tag display values to the default
     for (const saveframe of this.saveframes) {
       for (const tag of saveframe.tags) {
