@@ -40,7 +40,7 @@ export function cleanValue(value): string {
     throw new Error('Empty strings are not allowed as values. Use a \'.\' or a \'?\' if needed.');
   }
 
-  // Normally we wouldn't autoconvert null values for them but it may be appropriate here
+  // Normally we wouldn't auto-convert null values for them but it may be appropriate here
   if (value === '') {
     value = '.';
   }
@@ -64,11 +64,6 @@ export function cleanValue(value): string {
   }
 
   return value;
-}
-
-// Function to check for illegal unicode characters in the file
-export function containsIllegalNonLatinCodepoints(s): boolean {
-  return /[^\u0000-\u00ff]/.test(s.replace(/⏎/g, '\n'));
 }
 
 export function download(filename, printable_object): void {

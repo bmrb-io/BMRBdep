@@ -1,25 +1,25 @@
-<div class="line highlight oneindent">
+<div class="line highlight one_indent">
   <span class="uneditable">loop_</span>
 </div>
-<ng-container *ngFor='let col of loop.tags; let i = index'>
+<ng-container *ngFor='let col of loop.tags'>
 	<div class="line highlight">
-	  <span class="uneditable twoindent" >{{loop.category + '.' + col}}</span>
+	  <span class="uneditable two_indent" >{{loop.category + '.' + col}}</span>
 	</div>
 </ng-container>
-<table class="twoindent alternatingcolor" style="max-width: 95%; table-layout: auto">
+<table class="two_indent alternating_color" style="max-width: 95%; table-layout: auto">
   <tbody>
-    <tr *ngFor='let row of loop.data; let n = index;'>
-      <ng-container *ngFor='let datum of loop.data[n]; let i = index;'>
+    <tr *ngFor='let row of loop.data'>
+      <ng-container *ngFor='let datum of row'>
 	    <td>
 	      <input class="datum highlight"
-               [(ngModel)]="loop.data[n][i].value"
+               [(ngModel)]="datum.value"
                placeholder="."
-               [style.width.ch]='(loop.data[n][i].value !== null) ? loop.data[n][i].value.length + 2 : 2'><!-- [style.width.ch]='(loop.data[n][i] !== null) ? loop.data[n][i].length + 2 : 2' -->
+               [style.width.ch]='(datum.value !== null) ? datum.value.length + 2 : 2'>
 	    </td>
       </ng-container>
     </tr>
   </tbody>
 </table>
-<div class="line highlight oneindent">
+<div class="line highlight one_indent">
   <span class="uneditable">stop_</span>
 </div>

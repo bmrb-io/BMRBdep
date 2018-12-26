@@ -13,7 +13,7 @@
 .invisible {
 	background-color: white;
 	padding: 1px;
-	margin: 0px;
+	margin: 0;
 }
 
 .invalid {
@@ -25,7 +25,6 @@
   background-color: #E5E6Ef;
 }
 
-/* mostly from adit */
 .header_text {
 	vertical-align: middle;
 	font-size: larger;
@@ -38,7 +37,7 @@ table {
   margin-bottom: 1em;
   margin-left: 1em;
 
-  padding: 0em .25em 0em .25em;
+  padding: 0 .25em 0 .25em;
   border-collapse: collapse;
   border-radius: 5px;
 }

@@ -35,23 +35,23 @@
         </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let sftag of saveframe.tags">
-        <tr *ngIf="sftag.display == 'Y' || (saveframe.parent.showAll && sftag.display == 'N')"
-              (contextmenu)="sftag.log()">
-          <td *ngIf="sftag.display == 'Y'; else non_mandatory" class="tag_description"
-                [title]="sftag.schemaValues['Interface']"
-                [innerHTML]="sftag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
-                (click)="activeTag = (activeTag != sftag ? sftag : null)">
+      <ng-container *ngFor="let saveframeTag of saveframe.tags">
+        <tr *ngIf="saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')"
+              (contextmenu)="saveframeTag.log()">
+          <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag_description"
+                [title]="saveframeTag.schemaValues['Interface']"
+                [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
+                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
           </td>
           <ng-template #non_mandatory>
             <td class="tag_description"
-                [title]="sftag.schemaValues['Interface']"
-                [innerHTML]="sftag.schemaValues['Prompt']"
-                (click)="activeTag = (activeTag != sftag ? sftag : null)">
+                [title]="saveframeTag.schemaValues['Interface']"
+                [innerHTML]="saveframeTag.schemaValues['Prompt']"
+                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
             </td>
           </ng-template>
-          <td [ngClass]="{'invisible': true, 'invalid': !sftag.valid}">
-            <app-tag [tag]='sftag' [unique_identifier]="'_' + saveframe.name"></app-tag>
+          <td [ngClass]="{'invisible': true, 'invalid': !saveframeTag.valid}">
+            <app-tag [tag]='saveframeTag' [unique_identifier]="'_' + saveframe.name"></app-tag>
           </td>
         </tr>
       </ng-container>
@@ -63,7 +63,7 @@
       <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
       <p *ngIf="activeTag.schemaValues['Example'] != '?'" [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
       <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
-      <p *ngIf='activeTag.validationMessage' [class]="'mandatory'">{{activeTag.validationMessage}}</p>
+      <p *ngIf='activeTag.validationMessage' class='mandatory'>{{activeTag.validationMessage}}</p>
     </div>
 
     <ng-container *ngFor='let loop of saveframe.loops'>
