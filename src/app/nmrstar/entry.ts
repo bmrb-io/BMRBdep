@@ -373,7 +373,6 @@ export class Entry {
     /*
     First, update the uploaded_data loop
      */
-    // TODO: 1) Add the tags in a tag-order agnostic way
     const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
     const newData = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
@@ -390,17 +389,17 @@ export class Entry {
           sfCat = this.dataStore.dataFiles[i].control.value[n][0];
           sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
         }
-        newData.push([
-          new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop),
-          new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop),
-          new LoopTag('Data_file_content_type', sfCat, dfLoop),
-          new LoopTag('Data_file_Sf_category', sfDescription, dfLoop),
-          new LoopTag('Data_file_syntax', null, dfLoop),
-          new LoopTag('Data_file_immutable_flag', null, dfLoop),
-          new LoopTag('Sf_ID', null, dfLoop),
-          new LoopTag('Entry_ID', this.entryID, dfLoop),
-          new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop)
-        ]);
+        const new_row = new Array(dfLoop.tags.length).fill('.');
+        new_row[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop);
+        new_row[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
+        new_row[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', sfCat, dfLoop);
+        new_row[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfDescription, dfLoop);
+        new_row[dfLoop.tags.indexOf('Data_file_syntax')] = new LoopTag('Data_file_syntax', null, dfLoop);
+        new_row[dfLoop.tags.indexOf('Data_file_immutable_flag')] = new LoopTag('Data_file_immutable_flag', null, dfLoop);
+        new_row[dfLoop.tags.indexOf('Sf_ID')] = new LoopTag('Sf_ID', null, dfLoop);
+        new_row[dfLoop.tags.indexOf('Entry_ID')] = new LoopTag('Entry_ID', this.entryID, dfLoop);
+        new_row[dfLoop.tags.indexOf('Deposited_data_files_ID')] = new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop);
+        newData.push(new_row);
       }
     }
     if (newData.length) {
