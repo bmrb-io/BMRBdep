@@ -434,12 +434,9 @@ export class Entry {
     const dataStore = new DataFileStore([], this.schema.fileUploadTypes);
     const dataLoop = this.getLoopsByCategory('_Upload_data')[0];
 
-    function getSelectionByDescription(category: string) {
-      if (category === null) {
-        return null;
-      }
+    function getSelectionByDescription(description: string) {
       for (const dropDownItem of dataStore.dropDownList) {
-        if (dropDownItem[1] === category) {
+        if (dropDownItem[0] === description) {
           return dropDownItem;
         }
       }
@@ -447,17 +444,23 @@ export class Entry {
 
     const dataBuilder = {};
     const nameList = [];
+    const dataDescriptionRow = dataLoop.tags.indexOf('Data_file_content_type');
+    const dataFileNameRow = dataLoop.tags.indexOf('Data_file_name');
     for (const dataRow of dataLoop.data) {
-      if (!dataRow[1].value) {
+      if (!dataRow[dataFileNameRow].value) {
         continue;
       }
-      const sel = getSelectionByDescription(dataRow[3].value);
-      if (!dataBuilder[dataRow[1].value]) {
-        dataBuilder[dataRow[1].value] = [];
-        nameList.push(dataRow[1].value);
+      const sel = getSelectionByDescription(dataRow[dataDescriptionRow].value);
+      if (!sel) {
+        console.error('Could not match saved data type "' + dataRow[dataDescriptionRow].value +
+                      '" - this is a serious problem as data associations for this file will be lost.');
+      }
+      if (!dataBuilder[dataRow[dataFileNameRow].value]) {
+        dataBuilder[dataRow[dataFileNameRow].value] = [];
+        nameList.push(dataRow[dataFileNameRow].value);
       }
       if (sel) {
-        dataBuilder[dataRow[1].value].push(sel);
+        dataBuilder[dataRow[dataFileNameRow].value].push(sel);
       }
     }
 
