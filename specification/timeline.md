@@ -16,7 +16,6 @@ Uncompleted tasks:
     browser changes and potential data loss - 2 days
     * Navigation bar updates
       * Redo bar to use Angular Material navigation elements - 2 days
-      * Add supercategory-level navigation (also requires API update)- 3 days
     * Either prevent unicode or warn about it during tag validation - 1 day
 Optimization tasks:
 * Implement saving on a saveframe-level basis to speed up saving smaller changes - 3 days
