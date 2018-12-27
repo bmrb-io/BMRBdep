@@ -31,6 +31,10 @@
   font-weight: bold;
 }
 
+.button_column {
+  width: 2.5em;
+}
+
 table {
 	width:calc(100% - 1em);
   background-color: #E5E6Ef;

@@ -3,27 +3,29 @@
 
 /* You can add global styles to this file, and also import other style files */
 .one_indent {
-    position: relative;
-    left: 30px;
-    width: 100%;
+  position: relative;
+  left: 30px;
+  width: 100%;
 }
+
 .two_indent {
-    position: relative;
-    left: 60px;
+  position: relative;
+  left: 60px;
 }
+
 .uneditable {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .real_button {
   color: #333333;
-  text-decoration:none;
+  text-decoration: none;
   font-weight: bold;
   border-radius: 3px;
   border: 1px solid #C8C8C8;
   padding: 5px 10px 5px 10px;
   display: inline-block;
-  background-color:#ededed;
+  background-color: #ededed;
   font-size: 1em;
 }
 
@@ -35,29 +37,30 @@
 
 
 .fake_button, .fake_button:visited {
-    color: #333333;
-    text-decoration:none;
-    font-weight: bold;
+  color: #333333;
+  text-decoration: none;
+  font-weight: bold;
 
-    border-radius: 3px;
-    border: 1px solid #C8C8C8;
-    padding: 5px 10px 5px 10px;
-    display: inline-block;
-    background-color:#ededed;
+  border-radius: 3px;
+  border: 1px solid #C8C8C8;
+  padding: 5px 10px 5px 10px;
+  display: inline-block;
+  background-color: #ededed;
 }
 
 .fake_button:hover {
-    box-shadow: 0 0 2px #666666 inset;
-    border: 1px solid #666666;
-    outline: none;
+  box-shadow: 0 0 2px #666666 inset;
+  border: 1px solid #666666;
+  outline: none;
 }
 
 .line {
-    margin-top: 5px;
-    margin-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
+
 .highlight:hover {
-    background-color: #ededed !important;
+  background-color: #ededed !important;
 }
 
 .details_box {
@@ -83,5 +86,12 @@
   text-align: center;
 }
 
-html { height: 100%; overflow:auto; }
-body { height: 100%; margin: 0;}
+html {
+  height: 100%;
+  overflow: auto;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
