@@ -24,11 +24,15 @@ import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.compo
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule,
-  MatSidenavModule,
+import {
+  MatIconModule,
   MatListModule,
-  MatToolbarModule,
-  MatIconModule} from '@angular/material';
+  MatProgressBarModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSlideToggleModule,
+  MatToolbarModule
+} from '@angular/material';
 
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Loading directive // Loading animation component
 
