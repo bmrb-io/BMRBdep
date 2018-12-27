@@ -1,16 +1,17 @@
-<table style="width: 100%">
+<table class="full_width">
   <colgroup>
-    <col span="1" style="width: 20%;">
-    <col span="1" style="width: 70%;">
+    <col class="index_column">
+    <col class="file_status_column">
+    <col class="file_type_column">
   </colgroup>
 
   <thead>
   <tr>
-    <th (contextmenu)="logFileUploadSaveframe()">
-      <a class="header_text" >Deposit data files</a>
+    <th colspan="2" (contextmenu)="logFileUploadSaveframe()">
+      <a class="header_text">Deposit data files</a>
     </th>
     <th>
-      <div style="text-align: right; float: right">
+      <div class="right_float">
         <a class="fake_button line"
            *ngIf="showCategoryLink"
            [routerLink]="['/entry', api.getEntryID(), 'saveframe', 'deposited_data_files', 'category']">
@@ -21,16 +22,22 @@
   </tr>
   </thead>
   <tbody>
-    <ng-container *ngIf="entry">
-    <tr *ngFor="let file of entry.dataStore.dataFiles">
+  <ng-container *ngIf="entry">
+    <tr *ngFor="let file of entry.dataStore.dataFiles; let i = index">
+      <td><p class="center_text">{{i + 1}}</p></td>
       <td>
         <div class="file-upload">
           <div *ngIf="file.fileName">
             <button class="fake_button" (click)="deleteFile(file.fileName)">-</button>&nbsp;
-            <a download *ngIf="file.percent == 100; else uploading" [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName">{{file.fileName}}</a>
+            <a download *ngIf="file.percent == 100; else uploading"
+               [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName">{{file.fileName}}</a>
             <ng-template #uploading>{{file.fileName}}</ng-template>
           </div>
-          <mat-progress-bar *ngIf="file.fileName && file.percent != 100" mode="determinate" [value]="file.percent" color="#33527b">Uploading file: </mat-progress-bar>
+          <mat-progress-bar *ngIf="file.fileName && file.percent != 100"
+                            mode="determinate"
+                            [value]="file.percent"
+                            color="#33527b">Uploading file:
+          </mat-progress-bar>
         </div>
       </td>
       <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
@@ -40,22 +47,25 @@
                         [formControl]="file.control"
                         placeholder="Please select the data type(s) for this file."
                         multiple required>
-              <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType" title="{{dataType[3]}}">{{dataType[0]}}</mat-option>
+              <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType"
+                          title="{{dataType[3]}}">{{dataType[0]}}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
       </td>
     </tr>
-    </ng-container>
-    <tr>
-      <td>
-        <div class="file-upload">
-          <input type="file" (change)="selectFile($event)" placeholder="Upload file" multiple #inputFile>
-        </div>
-      </td>
-      <td class="dragTD" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
-        <div class="dragBox"><div class="dragText">Or drag and drop files here</div></div>
-      </td>
-    </tr>
+  </ng-container>
+  <tr>
+    <td colspan="2">
+      <div class="file-upload">
+        <input type="file" (change)="selectFile($event)" placeholder="Upload file" multiple #inputFile>
+      </div>
+    </td>
+    <td class="dragTD" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
+      <div class="dragBox">
+        <div class="dragText">Or drag and drop files here</div>
+      </div>
+    </td>
+  </tr>
   </tbody>
 </table>
