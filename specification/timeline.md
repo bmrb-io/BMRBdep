@@ -20,7 +20,6 @@ Uncompleted tasks:
     * Either prevent unicode or warn about it during tag validation - 1 day
 Optimization tasks:
 * Implement saving on a saveframe-level basis to speed up saving smaller changes - 3 days
-* Use a fixed position icon to indicate save status rather than having a pop-up
 * Consider a warning before deleting a saveframe that would invalidate another one
 
 * Validation Tools
@@ -32,4 +31,4 @@ Optimization tasks:
     * Configure new API server cluster - 1-2 days
     * (Maybe) Update API and BMRBDep servers to run inside of docker - 1-2 weeks 
 
-<b>Targeted first beta completion: September 26th.</b>
+<b>Targeted second beta completion: January 18th.</b>
