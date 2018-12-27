@@ -71,3 +71,15 @@ td {
 .invalid {
   background-color: #ffe4e1;
 }
+
+.index_column {
+  width: 2%;
+}
+
+.file_status_column {
+  width: 20%;
+}
+
+.file_type_column {
+  width: 68%;
+}
