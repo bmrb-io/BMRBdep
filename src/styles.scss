@@ -70,5 +70,18 @@
   overflow: auto;
 }
 
+.full_width {
+  width: 100% !important;
+}
+
+.right_float {
+  text-align: right;
+  float: right
+}
+
+.center_text {
+  text-align: center;
+}
+
 html { height: 100%; overflow:auto; }
 body { height: 100%; margin: 0;}
