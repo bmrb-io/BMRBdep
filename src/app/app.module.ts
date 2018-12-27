@@ -34,7 +34,8 @@ import {
   MatToolbarModule
 } from '@angular/material';
 
-import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Loading directive // Loading animation component
+// From https://github.com/mika-el/angular-loading-page
+import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Saving/loading bar
 
 @NgModule({
   declarations: [
