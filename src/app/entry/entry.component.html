@@ -1,8 +1,6 @@
 <div>
   <div class="entry">
-	<a class="fake_button line" (click)='download(entry.entryID + ".str", entry)'>Download Entry {{entry.entryID}}</a>
 	<ng-container *ngFor='let sf of entry.saveframes'>
-	  <a style="margin-top: 3em; display: none" class="fake_button line" [routerLink]='["/entry", entry.entryID, "saveframe", sf.name, "name"]'>Direct edit {{sf.name}}</a>
 	  <app-saveframe [saveframe]='sf'></app-saveframe>
 	</ng-container>
   </div>
