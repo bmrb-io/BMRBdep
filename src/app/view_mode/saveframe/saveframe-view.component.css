@@ -1,21 +1,29 @@
 .star {
-    border: solid 2px #33527b;
-    margin-top: 0.5em;
-    max-width: 98%;
+  border: solid 2px #33527b;
+  margin-top: 0.5em;
+  max-width: 98%;
 }
 
 .saveframe {
-	max-width: 90%;
+  max-width: 90%;
 }
 
 .sf_name {
-	border:none;
-	font-weight: normal;
-	width: 90%;
+  border: none;
+  font-weight: normal;
+  width: 90%;
 }
 
 .datum {
-	border:none;
-	font-weight: normal;
-	width: 100%;
+  border: none;
+  font-weight: normal;
+  width: 100%;
+}
+
+.tag_column {
+  width: 30%;
+}
+
+.value_column {
+  width: 70%
 }

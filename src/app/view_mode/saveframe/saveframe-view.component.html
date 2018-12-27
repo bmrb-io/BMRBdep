@@ -3,8 +3,8 @@
   <input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
   <table class="one_indent">
     <tr>
-      <th style="width: 30%"></th>
-      <th></th>
+      <th class="tag_column"></th>
+      <th class="value_column"></th>
     </tr>
     <ng-container *ngFor="let saveframeTag of saveframe.tags">
       <tr class="highlight" *ngIf="saveframeTag.value || saveframe.parent.showAll">
@@ -16,7 +16,7 @@
               <a *ngIf='saveframeTag.value && saveframeTag.value.indexOf("$")==0'
                  [routerLink]="['/entry', saveframe.getID(), 'saveframe', saveframeTag.value.substring(1), 'name']">Jump
                 to: </a>
-              <input class="datum" style="width:80%" [(ngModel)]="saveframeTag.value" placeholder=".">
+              <input class="datum" [(ngModel)]="saveframeTag.value" placeholder=".">
             </div>
           </td>
         </ng-template>
