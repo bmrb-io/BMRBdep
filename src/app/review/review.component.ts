@@ -10,7 +10,7 @@ import {Message, MessagesService, MessageType} from '../messages.service';
 })
 export class ReviewComponent implements OnInit {
 
-  constructor(private api: ApiService,
+  constructor(public api: ApiService,
               private route: ActivatedRoute,
               private messagesService: MessagesService,
               private router: Router) {
