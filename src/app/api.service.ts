@@ -107,7 +107,7 @@ export class ApiService {
     return of(this.cachedEntry);
   }
 
-  saveEntry(initial_save: boolean = false, skipMessage: boolean = false): void {
+  saveEntry(initial_save: boolean = false, skipMessage: boolean = true): void {
 
     // If the previous save action is still in progress, cancel it
     if (this.activeSaveRequest) {

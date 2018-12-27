@@ -30,6 +30,7 @@ import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule,
   MatToolbarModule,
   MatIconModule} from '@angular/material';
 
+import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Loading directive // Loading animation component
 
 @NgModule({
   declarations: [
@@ -60,7 +61,9 @@ import {MatProgressBarModule, MatSelectModule, MatSlideToggleModule,
     MatSidenavModule,
     MatListModule,
     MatToolbarModule,
-    MatIconModule
+    MatIconModule,
+    LoadingPageModule,
+    SlidingBarModule
   ],
   bootstrap: [AppComponent]
 })
