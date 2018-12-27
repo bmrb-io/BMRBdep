@@ -1,7 +1,7 @@
 <div *ngIf="(showInvalidOnly && !loop.valid) || !showInvalidOnly">
 	<table class="loop">
    		<colgroup>
-	      <col span="1" style="width: 2.5em;">
+	      <col span="1" class="button_column">
 	   </colgroup>
 		<thead>
 			<tr (contextmenu)="log()">
@@ -11,7 +11,7 @@
         </th>
 			</tr>
 			<tr>
-        <th style="border-collapse: collapse;"></th>
+        <th></th>
         <ng-container *ngFor='let col of loop.data[0]'>
           <th *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
               class="tag_header"
