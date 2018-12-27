@@ -1,23 +1,29 @@
 <ng-container *ngIf="api.cachedEntry!==undefined">
-  <p (click)="logEntry()">Display non-mandatory tags: <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()" color="#CBDBFF"></mat-slide-toggle></p>
-<div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-  <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
-    <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
+  <p (click)="logEntry()">Display non-mandatory tags:
+    <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
+                      color="#CBDBFF"></mat-slide-toggle>
+  </p>
+  <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+    <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
+      <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
-      <p><b>{{superGroupCat.displayName}}</b></p>
-      <ng-container *ngFor="let category of superGroupCat.children">
-        <p><a *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
-           [ngClass]="{'active': active==category.category,
+        <p><b>{{superGroupCat.displayName}}</b></p>
+        <ng-container *ngFor="let category of superGroupCat.children">
+          <p><a
+            *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
+            [ngClass]="{'active': active==category.category,
                        'nav_link':true,
                        'complete':category.valid,
                        'incomplete':!category.valid}"
-           [title]="category.displayName"
-           [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a></p>
+            [title]="category.displayName"
+            [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a>
+          </p>
+        </ng-container>
       </ng-container>
-    </ng-container>
+    </div>
+    <br>
+    <p><a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a></p>
+    <p><a class="nav_link" (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry</a></p>
   </div>
-  <br>
-  <a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a>
-</div>
 </ng-container>

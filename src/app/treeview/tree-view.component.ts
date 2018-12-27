@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {download} from '../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-tree-view',
@@ -31,6 +32,10 @@ export class TreeViewComponent implements OnInit {
         parent.showInvalidOnly = this.router.url.endsWith('/review');
       });
     });
+  }
+
+  download(name: string, printable_object): void {
+    download(name, printable_object);
   }
 
   logEntry(): void {
