@@ -2,8 +2,6 @@ import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {download} from '../nmrstar/nmrstar';
-
 
 @Component({
   selector: 'app-entry',
@@ -35,10 +33,6 @@ export class EntryComponent implements OnInit {
           parent.entry = fetched_entry;
         }
       );
-  }
-
-  download(name: string, printable_object): void {
-    download(name, printable_object);
   }
 
 }
