@@ -2,6 +2,7 @@ import {Saveframe} from './saveframe';
 import {Loop} from './loop';
 import {Schema} from './schema';
 import {Entry} from './entry';
+import {environment} from '../../environments/environment';
 
 export class Tag {
   name: string;
@@ -182,8 +183,9 @@ export class Tag {
               this.enums.add('$' + sf.name);
             }
           } else {
-            // TODO: Track down all these tags
-            // console.log('Sf pointer set to \'Y\' but no tags!', this);
+            if (!environment.production) {
+              console.warn('Sf pointer set to \'Y\' but no tags!', this);
+            }
             this.enums = new Set(['No saveframes of category ' + this.schemaValues['Foreign Table'] +
             ' found in entry. Please create at least one.']);
             this.valid = false;
