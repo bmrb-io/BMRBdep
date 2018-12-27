@@ -203,8 +203,6 @@ export class Saveframe {
       loop.refresh();
     }
 
-    // TODO: update display for loops
-
     // Update whether this saveframe has anything to display and is complete
     this.display = 'H';
     for (const tag of this.tags) {
