@@ -24,6 +24,9 @@
     </div>
     <br>
     <p><a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a></p>
+    <h4>Development features:</h4>
     <p><a class="nav_link" (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry</a></p>
+    <p><a class="nav_link" (click)='refresh()'>Refresh cache/page</a></p>
+
   </div>
 </ng-container>
