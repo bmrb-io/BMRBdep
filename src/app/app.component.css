@@ -5,3 +5,11 @@
 mat-sidenav-container {
   height: calc(100% - 64px);
 }
+
+mat-sidenav,
+mat-sidenav.mat-locked-open,
+mat-sidenav.mat-closed.mat-locked-open-add-active {
+  min-width: 10em !important;
+  width: 85vw !important;
+  max-width: 20em !important;
+}
