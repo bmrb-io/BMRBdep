@@ -10,7 +10,7 @@ export class Tag {
 
   valid: boolean;
   validationMessage: string;
-  data_type: string;
+  dataType: string;
   interfaceType: string;
   schemaValues: {};
   display: string;
@@ -18,7 +18,7 @@ export class Tag {
   enums: Set<string>;
   parent?: Object;
 
-  constructor(name: string, value: string, tag_prefix: string, schema: Schema) {
+  constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
       this.value = null;
@@ -26,7 +26,7 @@ export class Tag {
       this.value = value;
     }
 
-    this.fullyQualifiedTagName = tag_prefix + '.' + this.name;
+    this.fullyQualifiedTagName = tagPrefix + '.' + this.name;
     this.schemaValues = schema.getTag(this.fullyQualifiedTagName);
     if (this.schemaValues) {
       this.enums = this.schemaValues['enumerations'] ? new Set(this.schemaValues['enumerations']) : new Set();
@@ -85,14 +85,14 @@ export class Tag {
     }
 
     // If this is a standard 'input' element, determine the data type
-    const data_type_map = {
+    const dataTypeMap = {
       'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
       'yyyy-mm-dd:hh:mm': 'datetime-local',
       'email': 'email', 'fax': 'tel', 'phone': 'tel'
     };
-    this.data_type = data_type_map[dt];
-    if (this.data_type === undefined) {
-      this.data_type = 'string';
+    this.dataType = dataTypeMap[dt];
+    if (this.dataType === undefined) {
+      this.dataType = 'string';
     }
   }
 
@@ -163,10 +163,10 @@ export class Tag {
 
       // Correct capitalization on typed enumerations
       if (this.enums && this.value) {
-        const lower_case_value = this.value.toLowerCase();
-        for (const single_enum of Array.from(this.enums)) {
-          if (single_enum.toLowerCase() === lower_case_value) {
-            this.value = single_enum;
+        const lowerCaseValue = this.value.toLowerCase();
+        for (const singleEnum of Array.from(this.enums)) {
+          if (singleEnum.toLowerCase() === lowerCaseValue) {
+            this.value = singleEnum;
           }
         }
       }
@@ -176,10 +176,10 @@ export class Tag {
         if (this.schemaValues['Sf pointer'] === 'Y') {
           // Show this tag as a closed enum
           this.interfaceType = 'closed_enum';
-          const frames_of_category: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
-          if (frames_of_category.length > 0) {
+          const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+          if (framesOfCategory.length > 0) {
             this.enums = new Set();
-            for (const sf of frames_of_category) {
+            for (const sf of framesOfCategory) {
               this.enums.add('$' + sf.name);
             }
           } else {

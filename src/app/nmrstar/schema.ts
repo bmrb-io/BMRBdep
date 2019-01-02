@@ -151,8 +151,8 @@ export class Schema {
     }
   }
 
-  getTag(tag_name: string): {} {
-    return this.schema[tag_name];
+  getTag(tagName: string): {} {
+    return this.schema[tagName];
   }
 
 }

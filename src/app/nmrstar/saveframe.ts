@@ -19,10 +19,10 @@ export class Saveframe {
   nextCategory: string;
   previousCategory: string;
 
-  constructor(name: string, category: string, tag_prefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
+  constructor(name: string, category: string, tagPrefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
     this.category = category;
-    this.tagPrefix = tag_prefix;
+    this.tagPrefix = tagPrefix;
     this.tags = tags;
     this.loops = loops;
     this.parent = parent;
@@ -45,7 +45,7 @@ export class Saveframe {
     console.log(this);
   }
 
-  duplicate(clear_values: boolean = false): Saveframe {
+  duplicate(clearValues: boolean = false): Saveframe {
     let frameIndex = this.parent.getSaveframesByCategory(this.category).length + 1;
     let frameName = this.category + '_' + frameIndex;
     while (this.parent.getSaveframeByName(frameName)) {
@@ -53,32 +53,32 @@ export class Saveframe {
       frameName = this.category + '_' + frameIndex;
     }
 
-    const new_frame = new Saveframe(frameName, this.category, this.tagPrefix, this.parent);
+    const newFrame = new Saveframe(frameName, this.category, this.tagPrefix, this.parent);
 
     // Copy the tags
     for (const tag of this.tags) {
-      if (clear_values) {
-        new_frame.addTag(tag.name, null);
+      if (clearValues) {
+        newFrame.addTag(tag.name, null);
       } else {
-        new_frame.addTag(tag.name, tag.value);
+        newFrame.addTag(tag.name, tag.value);
       }
     }
-    // Set the framecode and category regardless of clear_values argument
-    new_frame.tagDict[this.tagPrefix + '.Sf_framecode'].value = frameName;
-    new_frame.tagDict[this.tagPrefix + '.Sf_category'].value = this.category;
+    // Set the framecode and category regardless of clearValues argument
+    newFrame.tagDict[this.tagPrefix + '.Sf_framecode'].value = frameName;
+    newFrame.tagDict[this.tagPrefix + '.Sf_category'].value = this.category;
 
     // Copy the loops
     for (const loop of this.loops) {
-      const nl = loop.duplicate(clear_values);
-      new_frame.addLoop(nl);
+      const nl = loop.duplicate(clearValues);
+      newFrame.addLoop(nl);
     }
 
-    new_frame.refresh();
-    const my_pos = this.parent.saveframes.indexOf(this);
-    this.parent.addSaveframe(new_frame, my_pos + 1);
+    newFrame.refresh();
+    const myPosition = this.parent.saveframes.indexOf(this);
+    this.parent.addSaveframe(newFrame, myPosition + 1);
 
     // The work is already done, as the new saveframe is inserted, but return it for reference
-    return new_frame;
+    return newFrame;
   }
 
   toJSON(): {} {
@@ -86,17 +86,17 @@ export class Saveframe {
   }
 
   addTag(name: string, value: string): void {
-    const new_tag = new SaveframeTag(name, value, this);
-    this.tags.push(new_tag);
-    this.tagDict[new_tag.fullyQualifiedTagName] = new_tag;
+    const newTag = new SaveframeTag(name, value, this);
+    this.tags.push(newTag);
+    this.tagDict[newTag.fullyQualifiedTagName] = newTag;
   }
 
-  addTags(tag_list: string[][]): void {
-    for (const tag_pair of tag_list) {
-      if (tag_pair[0]) {
-        this.addTag(tag_pair[0], tag_pair[1]);
+  addTags(tagList: string[][]): void {
+    for (const tagPair of tagList) {
+      if (tagPair[0]) {
+        this.addTag(tagPair[0], tagPair[1]);
       } else {
-        this.addTag(tag_pair['name'], tag_pair['value']);
+        this.addTag(tagPair['name'], tagPair['value']);
       }
     }
   }
@@ -111,7 +111,7 @@ export class Saveframe {
    * @param fqtn The fully qualified tag name.
    * @returns    The value of the queried tag, or null if not found
    */
-  getTagValue(fqtn: string, full_entry: boolean = false): string {
+  getTagValue(fqtn: string, fullEntry: boolean = false): string {
     if (fqtn in this.tagDict) {
       return this.tagDict[fqtn].value;
     }
@@ -119,7 +119,7 @@ export class Saveframe {
     // Ask the parent entry to search the other saveframes if this is a full search
     // (The parent entry may call this method on us, in which case don't make an
     // infinite recursion)
-    if (full_entry) {
+    if (fullEntry) {
       return this.parent.getTagValue(fqtn, this);
     } else {
       return null;
@@ -144,12 +144,12 @@ export class Saveframe {
   }
 
   getID(): string {
-    let entry_id_tag = 'Entry_ID';
+    let entryIDTag = 'Entry_ID';
     if (this.category === 'entry_information') {
-      entry_id_tag = 'ID';
+      entryIDTag = 'ID';
     }
     for (const tag of this.tags) {
-      if (tag['name'] === entry_id_tag) {
+      if (tag['name'] === entryIDTag) {
         return tag['value'];
       }
     }
@@ -258,27 +258,25 @@ export class Saveframe {
     width += this.tagPrefix.length + 2;
 
     // Print the saveframe
-    let ret_string = sprintf('save_%s\n', this.name);
-    const pstring = sprintf('   %%-%ds  %%s\n', width);
-    const mstring = sprintf('   %%-%ds\n;\n%%s;\n', width);
-
-    const tag_prefix = this.tagPrefix;
+    let returnString = sprintf('save_%s\n', this.name);
+    const standardFormatString = sprintf('   %%-%ds  %%s\n', width);
+    const multiLineFormatString = sprintf('   %%-%ds\n;\n%%s;\n', width);
 
     for (const tag of this.tags) {
-      const cleaned_tag = cleanValue(tag.value);
+      const cleanedTag = cleanValue(tag.value);
 
-      if (cleaned_tag.indexOf('\n') === -1) {
-        ret_string += sprintf(pstring, tag_prefix + '.' + tag.name, cleaned_tag);
+      if (cleanedTag.indexOf('\n') === -1) {
+        returnString += sprintf(standardFormatString, this.tagPrefix + '.' + tag.name, cleanedTag);
       } else {
-        ret_string += sprintf(mstring, tag_prefix + '.' + tag.name, cleaned_tag);
+        returnString += sprintf(multiLineFormatString, this.tagPrefix + '.' + tag.name, cleanedTag);
       }
     }
 
     for (const loop of this.loops) {
-      ret_string += loop.print();
+      returnString += loop.print();
     }
 
-    return ret_string + 'save_\n';
+    return returnString + 'save_\n';
   }
 
 }
