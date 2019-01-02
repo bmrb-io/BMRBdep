@@ -66,17 +66,22 @@ export class Loop {
     }
   }
 
-  addRow(): void {
+  addRow(refresh: boolean = true): Array<LoopTag> {
     const new_row = [];
     for (const tag of this.tags) {
       new_row.push(new LoopTag(tag, null, this));
     }
     this.data.push(new_row);
-    this.refresh();
+
+    if (refresh) {
+      this.refresh();
+    }
+
+    return new_row;
   }
 
-  deleteRow(row_id): void {
-    this.data.splice(row_id, 1);
+  deleteRow(rowID): void {
+    this.data.splice(rowID, 1);
   }
 
   // Creates a duplicate of this loop, or an empty loop of the same type
