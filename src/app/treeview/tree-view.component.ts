@@ -42,4 +42,12 @@ export class TreeViewComponent implements OnInit {
     console.log(this.api.cachedEntry);
   }
 
+  refresh(): void {
+    this.api.saveEntry();
+    localStorage.removeItem('entry_key');
+    localStorage.removeItem('entry');
+    localStorage.removeItem('schema');
+    window.location.reload();
+  }
+
 }
