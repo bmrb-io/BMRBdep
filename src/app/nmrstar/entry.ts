@@ -51,8 +51,8 @@ export class Entry {
   valid: boolean;
   showAll: boolean;
 
-  constructor(data_name: string) {
-    this.entryID = data_name;
+  constructor(dataName: string) {
+    this.entryID = dataName;
     this.saveframes = [];
     this.enumerationTies = {};
     this.valid = true;
@@ -219,49 +219,49 @@ export class Entry {
 
   getTagValue(fqtn: string, skip: Saveframe = null): string {
 
-    for (const sf of this.saveframes) {
+    for (const saveframe of this.saveframes) {
       // Skip checking the saveframe that called us, if one did
-      if (sf === skip) {
+      if (saveframe === skip) {
         continue;
       }
 
       // Ask the saveframe for the tag, return it if found
-      const sf_res = sf.getTagValue(fqtn);
-      if (sf_res) {
-        return sf_res;
+      const saveframeResult = saveframe.getTagValue(fqtn);
+      if (saveframeResult) {
+        return saveframeResult;
       }
     }
 
     return null;
   }
 
-  getSaveframeByName(sf_name: string): Saveframe {
+  getSaveframeByName(saveframeName: string): Saveframe {
     for (const sf of this.saveframes) {
-      if (sf.name === sf_name) {
+      if (sf.name === saveframeName) {
         return sf;
       }
     }
     return null;
   }
 
-  getSaveframesByCategory(sf_category: string): Saveframe[] {
-    const return_list: Saveframe[] = [];
+  getSaveframesByCategory(saveframeCategory: string): Saveframe[] {
+    const returnList: Saveframe[] = [];
     for (const sf of this.saveframes) {
-      if (sf.category.toLowerCase() === sf_category.toLowerCase()) {
-        return_list.push(sf);
+      if (sf.category.toLowerCase() === saveframeCategory.toLowerCase()) {
+        returnList.push(sf);
       }
     }
-    return return_list;
+    return returnList;
   }
 
-  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
-    const return_list: Saveframe[] = [];
+  getSaveframesByPrefix(tagPrefix: string): Saveframe[] {
+    const returnList: Saveframe[] = [];
     for (const sf of this.saveframes) {
-      if (sf.tagPrefix === tag_prefix) {
-        return_list.push(sf);
+      if (sf.tagPrefix === tagPrefix) {
+        returnList.push(sf);
       }
     }
-    return return_list;
+    return returnList;
   }
 
   refresh(): void {
@@ -382,7 +382,7 @@ export class Entry {
     const newData = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
       for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
-        let sfCat = null;
+        let sfCategory = null;
         let sfDescription = null;
 
         // Make sure there is at least an empty record for each file
@@ -391,20 +391,20 @@ export class Entry {
             continue;
           }
         } else {
-          sfCat = this.dataStore.dataFiles[i].control.value[n][0];
+          sfCategory = this.dataStore.dataFiles[i].control.value[n][0];
           sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
         }
-        const new_row = new Array(dfLoop.tags.length).fill('.');
-        new_row[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop);
-        new_row[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
-        new_row[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', sfCat, dfLoop);
-        new_row[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfDescription, dfLoop);
-        new_row[dfLoop.tags.indexOf('Data_file_syntax')] = new LoopTag('Data_file_syntax', null, dfLoop);
-        new_row[dfLoop.tags.indexOf('Data_file_immutable_flag')] = new LoopTag('Data_file_immutable_flag', null, dfLoop);
-        new_row[dfLoop.tags.indexOf('Sf_ID')] = new LoopTag('Sf_ID', null, dfLoop);
-        new_row[dfLoop.tags.indexOf('Entry_ID')] = new LoopTag('Entry_ID', this.entryID, dfLoop);
-        new_row[dfLoop.tags.indexOf('Deposited_data_files_ID')] = new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop);
-        newData.push(new_row);
+        const newRow = new Array(dfLoop.tags.length).fill('.');
+        newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', sfCategory, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfDescription, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_syntax')] = new LoopTag('Data_file_syntax', null, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_immutable_flag')] = new LoopTag('Data_file_immutable_flag', null, dfLoop);
+        newRow[dfLoop.tags.indexOf('Sf_ID')] = new LoopTag('Sf_ID', null, dfLoop);
+        newRow[dfLoop.tags.indexOf('Entry_ID')] = new LoopTag('Entry_ID', this.entryID, dfLoop);
+        newRow[dfLoop.tags.indexOf('Deposited_data_files_ID')] = new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop);
+        newData.push(newRow);
       }
     }
     if (newData.length) {
@@ -483,8 +483,8 @@ export function entryFromJSON(jdata: Object): Entry {
   entry.schema = new Schema(jdata['schema']);
 
   for (const saveframeJSON of jdata['saveframes']) {
-    const new_frame = saveframeFromJSON(saveframeJSON, entry);
-    entry.addSaveframe(new_frame, -1, false);
+    const newFrame = saveframeFromJSON(saveframeJSON, entry);
+    entry.addSaveframe(newFrame, -1, false);
   }
 
   entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
