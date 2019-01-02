@@ -90,7 +90,7 @@ export class ApiService {
           return this.cachedEntry;
         }),
         catchError(error => {
-          if (environment.production) {
+          if (!environment.debug) {
             this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
               MessageType.ErrorMessage, 10000));
             setTimeout(() => {
