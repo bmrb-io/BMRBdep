@@ -4,7 +4,7 @@
          [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
          [placeholder]="tag.schemaValues['default value']"
          (change)="validateTag(tag)"
-         [type]="tag.data_type"
+         [type]="tag.dataType"
          [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
          [title]="tag.validationMessage">
 </label>

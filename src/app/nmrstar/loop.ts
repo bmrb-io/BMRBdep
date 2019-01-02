@@ -16,7 +16,7 @@ export class Loop {
   toJSON(): {} {
 
     // Turn the loop tags into a simple array of values
-    const reduced_data = [];
+    const reducedData = [];
     for (const row of this.data) {
       const outputRow = [];
       for (const item of row) {
@@ -26,10 +26,10 @@ export class Loop {
           outputRow.push(item.value);
         }
       }
-      reduced_data.push(outputRow);
+      reducedData.push(outputRow);
     }
 
-    return {category: this.category, tags: this.tags, data: reduced_data};
+    return {category: this.category, tags: this.tags, data: reducedData};
   }
 
   constructor(category: string, tags: string[], data: string[][], parent: Saveframe) {
@@ -55,8 +55,8 @@ export class Loop {
     for (const rawRow of data) {
       const row = [];
       for (let c = 0; c < rawRow.length; c++) {
-        const new_tag = new LoopTag(this.tags[c], rawRow[c], this);
-        row.push(new_tag);
+        const newTag = new LoopTag(this.tags[c], rawRow[c], this);
+        row.push(newTag);
       }
       this.data.push(row);
     }
@@ -67,17 +67,17 @@ export class Loop {
   }
 
   addRow(refresh: boolean = true): Array<LoopTag> {
-    const new_row = [];
+    const newRow = [];
     for (const tag of this.tags) {
-      new_row.push(new LoopTag(tag, null, this));
+      newRow.push(new LoopTag(tag, null, this));
     }
-    this.data.push(new_row);
+    this.data.push(newRow);
 
     if (refresh) {
       this.refresh();
     }
 
-    return new_row;
+    return newRow;
   }
 
   deleteRow(rowID): void {
@@ -85,23 +85,23 @@ export class Loop {
   }
 
   // Creates a duplicate of this loop, or an empty loop of the same type
-  duplicate(clear_values: boolean = false): Loop {
-    const new_loop = new Loop(this.category, this.tags.slice(), [], this.parent);
+  duplicate(clearValues: boolean = false): Loop {
+    const newLoop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
     for (const row of this.data) {
-      const new_row = [];
+      const newRow = [];
       for (const item of row) {
-        const val = clear_values ? null : item.value;
-        new_row.push(new LoopTag(item.name, val, new_loop));
+        const val = clearValues ? null : item.value;
+        newRow.push(new LoopTag(item.name, val, newLoop));
       }
-      new_loop.data.push(new_row);
+      newLoop.data.push(newRow);
       // Just one row of null data if cloning
-      if (clear_values) {
-        return new_loop;
+      if (clearValues) {
+        return newLoop;
       }
     }
 
-    return new_loop;
+    return newLoop;
   }
 
   // Sets the visibility of all tags in the loop
@@ -238,10 +238,6 @@ export class Loop {
     return this.parent.getTagValue(fqtn, true);
   }
 
-  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
-    return this.parent.parent.getSaveframesByPrefix(tag_prefix);
-  }
-
   print(): string {
 
     const parent = this;
@@ -268,9 +264,9 @@ export class Loop {
     }
 
     // Start the loop
-    let ret_string = '\n   loop_\n';
+    let returnString = '\n   loop_\n';
     // Print the columns
-    const pstring = '      %-s\n';
+    const rowFormatString = '      %-s\n';
 
     // Check to make sure our category is set
     if (this.category === undefined) {
@@ -279,12 +275,12 @@ export class Loop {
     }
 
     // Print the categories
-    const loop_category = this.category;
+    const loopCategory = this.category;
     for (const column of this.tags) {
-      ret_string += sprintf(pstring, loop_category + '.' + column);
+      returnString += sprintf(rowFormatString, loopCategory + '.' + column);
     }
 
-    ret_string += '\n';
+    returnString += '\n';
 
     // If there is data to print, print it
     if (this.data.length !== 0) {
@@ -310,27 +306,27 @@ export class Loop {
       for (const row of this.data) {
 
         // Each row starts with whitespace
-        ret_string += '     ';
+        returnString += '     ';
 
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
-          let datum_copy = cleanValue(row[n].value);
-          if (datum_copy.indexOf('\n') !== -1) {
-            datum_copy = sprintf('\n;\n%s;\n', datum_copy);
+          let datumCopy = cleanValue(row[n].value);
+          if (datumCopy.indexOf('\n') !== -1) {
+            datumCopy = sprintf('\n;\n%s;\n', datumCopy);
           }
 
           // Add the data to the return string
-          ret_string += sprintf('%-' + widths[n] + 's', datum_copy);
+          returnString += sprintf('%-' + widths[n] + 's', datumCopy);
         }
 
         // End the row
-        ret_string += ' \n';
+        returnString += ' \n';
       }
     }
 
     // Close the loop
-    ret_string += '\n   stop_\n';
-    return ret_string;
+    returnString += '\n   stop_\n';
+    return returnString;
   }
 }
