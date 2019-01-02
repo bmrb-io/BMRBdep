@@ -183,15 +183,20 @@ export class Entry {
 
     function setNextAndPreviousCategories(saveframe) {
       const index = categoryOrder.indexOf(saveframe.category);
-      if (index - 1 < 0) {
+
+      /* In the case that the saveframe is no longer displayed (i.e. index < 0)
+         do not reset the next and previous saveframes - just keep what was there before
+         the update. Otherwise navigation breaks if viewing a saveframe with all non-mandatory tags
+         which is hid upon toggling 'Display non-mandatory tags'. */
+      if (index === 0) {
         saveframe.previousCategory = null;
-      } else {
+      } else if (index > 0) {
         saveframe.previousCategory = categoryOrder[index - 1];
       }
 
-      if (index + 1 === categoryOrder.length || index < 0) {
+      if (index + 1 === categoryOrder.length) {
         saveframe.nextCategory = null;
-      } else {
+      } else if (index >= 0) {
         saveframe.nextCategory = categoryOrder[index + 1];
       }
     }
