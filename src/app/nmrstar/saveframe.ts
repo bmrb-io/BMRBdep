@@ -134,8 +134,13 @@ export class Saveframe {
     }
   }
 
-  getSaveframesByPrefix(tag_prefix: string): Saveframe[] {
-    return this.parent.getSaveframesByPrefix(tag_prefix);
+  getLoopByPrefix(tagPrefix): Loop {
+    for (const loop of this.loops) {
+      if (loop.category === tagPrefix) {
+        return loop;
+      }
+    }
+    return null;
   }
 
   getID(): string {
