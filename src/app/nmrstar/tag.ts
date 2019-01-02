@@ -183,7 +183,7 @@ export class Tag {
               this.enums.add('$' + sf.name);
             }
           } else {
-            if (!environment.production) {
+            if (environment.debug) {
               console.warn('Sf pointer set to \'Y\' but no tags!', this);
             }
             this.enums = new Set(['No saveframes of category ' + this.schemaValues['Foreign Table'] +
