@@ -2,6 +2,10 @@
   margin: 0 auto;
 }
 
+.loading_bar_holder {
+  min-height: 4px;
+}
+
 mat-sidenav-container {
   height: calc(100% - 64px);
 }
