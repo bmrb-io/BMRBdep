@@ -39,14 +39,14 @@
        [title]="tag.validationMessage">
     <label>Yes
       <input type="radio"
-             [name]="tag.fullyQualifiedTagName + unique_identifier"
+             [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
              [value]="'yes'">
     </label>
     <label>No
       <input type="radio"
-             [name]="tag.fullyQualifiedTagName + unique_identifier"
+             [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
              [value]="'no'">
