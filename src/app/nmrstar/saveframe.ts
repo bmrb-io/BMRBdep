@@ -4,6 +4,16 @@ import {cleanValue} from './nmrstar';
 import {SaveframeTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
 
+export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
+  const test: Saveframe = new Saveframe(jdata['name'], jdata['category'], jdata['tag_prefix'], parent);
+  test.addTags(jdata['tags']);
+  for (const loopJSON of jdata['loops']) {
+    const newLoop = new Loop(loopJSON['category'], loopJSON['tags'], loopJSON['data'], test);
+    test.addLoop(newLoop);
+  }
+  return test;
+}
+
 export class Saveframe {
   name: string;
   category: string;
@@ -229,6 +239,9 @@ export class Saveframe {
       }
     }
 
+    // Apply the special rules
+    this.specialRules();
+
     // Update the validity value
     this.valid = true;
     for (const tag of this.tags) {
@@ -279,17 +292,30 @@ export class Saveframe {
     return returnString + 'save_\n';
   }
 
-}
+  /* Special rules that aren't in the dictionary */
+  specialRules(): void {
 
-export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
-  const test: Saveframe = new Saveframe(jdata['name'],
-    jdata['category'],
-    jdata['tag_prefix'],
-    parent);
-  test.addTags(jdata['tags']);
-  for (const loopJSON of jdata['loops']) {
-    const newLoop = new Loop(loopJSON['category'], loopJSON['tags'], loopJSON['data'], test);
-    test.addLoop(newLoop);
+    // Check that at least one chemical shift reference is present
+    if (this.category === 'chem_shift_reference') {
+      let allNo = true;
+      const tagsToCheck = ['_Chem_shift_reference.Proton_shifts_flag',
+        '_Chem_shift_reference.Carbon_shifts_flag',
+        '_Chem_shift_reference.Nitrogen_shifts_flag',
+        '_Chem_shift_reference.Phosphorus_shifts_flag',
+        '_Chem_shift_reference.Other_shifts_flag'
+      ];
+      for (const tag of tagsToCheck) {
+        if (this.tagDict[tag].value !== 'no') {
+          allNo = false;
+          break;
+        }
+      }
+      if (allNo) {
+        for (const tag of tagsToCheck) {
+          this.tagDict[tag].valid = false;
+          this.tagDict[tag].validationMessage = 'At least one chemical shift reference must be given.';
+        }
+      }
+    }
   }
-  return test;
 }
