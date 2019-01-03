@@ -33,7 +33,6 @@ export class TagComponent implements OnInit {
   }
 
   validateTag(tag: Tag): void {
-    tag.changed();
     tag.getEntry().refresh();
     this.api.saveEntry();
   }

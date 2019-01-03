@@ -239,10 +239,6 @@ export class Tag {
   getParentSaveframe(): Saveframe {
     return null;
   }
-
-  changed(): void {
-
-  }
 }
 
 export class SaveframeTag extends Tag {
@@ -259,11 +255,6 @@ export class SaveframeTag extends Tag {
 
   getParentSaveframe(): Saveframe {
     return this.parent;
-  }
-
-  changed() {
-    // This rule only applies to saveframe tags
-    automaticChemShiftReference(this);
   }
 
 }
@@ -288,92 +279,4 @@ export class LoopTag extends Tag {
 
 
 /* Special rules that aren't in the dictionary */
-function automaticChemShiftReference(tag: SaveframeTag): void {
-  const updateTags = ['_Chem_shift_reference.Proton_shifts_flag',
-    '_Chem_shift_reference.Carbon_shifts_flag',
-    '_Chem_shift_reference.Nitrogen_shifts_flag',
-    '_Chem_shift_reference.Phosphorus_shifts_flag'
-  ];
-  if (updateTags.indexOf(tag.fullyQualifiedTagName) >= 0) {
 
-    let atomNumber = null;
-    let atomName = null;
-    let shiftRatio = null;
-    if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Proton_shifts_flag') {
-      atomNumber = '1';
-      atomName = 'H';
-      shiftRatio = '1.000000000';
-    }
-    if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Carbon_shifts_flag') {
-      atomNumber = '13';
-      atomName = 'C';
-      shiftRatio = '0.251449530';
-    }
-    if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Nitrogen_shifts_flag') {
-      atomNumber = '15';
-      atomName = 'N';
-      shiftRatio = '0.101329118';
-    }
-    if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Phosphorus_shifts_flag') {
-      atomNumber = '31';
-      atomName = 'P';
-      shiftRatio = '0.404808636';
-    }
-
-    const referenceLoop = tag.getParentSaveframe().getLoopByPrefix('_Chem_shift_ref');
-    const atomNameCol = referenceLoop.tags.indexOf('Atom_type');
-    const atomNumberCol = referenceLoop.tags.indexOf('Atom_isotope_number');
-
-    const checkNullRow = (row: LoopTag[]): boolean => {
-      let empty = true;
-      for (const rowTag of row) {
-        if (!(rowTag.value === '.' || rowTag.value === '' || rowTag.value === null)) {
-          empty = false;
-        }
-      }
-      return empty;
-    };
-
-    // They are adding reference data
-    if (tag.value.indexOf('yes') >= 0) {
-
-      let dataRow = null;
-      for (const row of referenceLoop.data) {
-        if ((row[atomNameCol].value === atomName && row[atomNumberCol].value === atomNumber) || checkNullRow(row)) {
-          dataRow = row;
-        }
-      }
-
-      if (dataRow === null) {
-        dataRow = referenceLoop.addRow();
-      }
-
-      dataRow[atomNameCol] = new LoopTag('Atom_type', atomName, referenceLoop);
-      dataRow[atomNumberCol] = new LoopTag('Atom_isotope_number', atomNumber, referenceLoop);
-
-      // Add the IUPAC rules
-      if (tag.value.indexOf('IUPAC') >= 0) {
-        dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = shiftRatio;
-        dataRow[referenceLoop.tags.indexOf('Mol_common_name')].value = 'DSS';
-        dataRow[referenceLoop.tags.indexOf('Atom_group')].value = 'methyl protons';
-        dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].value = 'ppm';
-        dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].value = '0.00';
-        dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'internal';
-        dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'direct';
-      }
-
-    // They are deleting the reference data
-    } else {
-      for (let loopRow = 0; loopRow < referenceLoop.data.length; loopRow++) {
-        if (referenceLoop.data[loopRow][atomNameCol].value === atomName &&
-            referenceLoop.data[loopRow][atomNumberCol].value === atomNumber) {
-          referenceLoop.deleteRow(loopRow);
-          if (referenceLoop.data.length === 0) {
-            referenceLoop.addRow();
-          }
-        }
-      }
-
-    }
-  }
-}
