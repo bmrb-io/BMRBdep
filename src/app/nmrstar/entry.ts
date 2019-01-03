@@ -336,8 +336,28 @@ export class Entry {
               }
             }
           }
-        }
+          // Check if the rule applies to the value of a tag in the loop
+        } else {
+          for (const loop of saveframe.loops) {
+            if (rule['Conditional tag prefix'] === loop.category) {
+              // We need to check each row
+              const tagCol = loop.tags.indexOf(rule['Conditional tag'].substr(rule['Conditional tag'].indexOf('.') + 1));
+              const applyCol = loop.tags.indexOf(rule['Tag'].substr(rule['Tag'].indexOf('.') + 1));
+              for (const row of loop.data) {
+                if (rule['Regex'].test(row[tagCol].value)) {
+                  if (rule['Tag category'] === loop.category) {
+                    row[applyCol].display = rule['Override view value'];
+                  } else {
+                    console.error('Rule applies to another loop/saveframe: not implemented');
+                  }
+                }
+              }
 
+              // There is no way the rule applies to multiple loops in one saveframe
+              break;
+            }
+          }
+        }
       }
     }
 

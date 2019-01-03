@@ -12,13 +12,13 @@
 			</tr>
 			<tr>
         <th></th>
-        <ng-container *ngFor='let col of loop.data[0]'>
-          <th *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
+        <ng-container *ngFor='let sampleTag of loop.data[0]; let col = index'>
+          <th *ngIf="loop.displayTags[col] == 'Y' || (loop.displayTags[col] == 'N' && loop.parent.parent.showAll)"
               class="tag_header"
-                (click)="activeTag = (activeTag != col ? col : null)"
-                [title]="col.schemaValues['Interface']"
-                >{{col.schemaValues['Prompt']}}
-            <span *ngIf="col.display == 'Y'" class="mandatory">*</span>
+                (click)="activeTag = (activeTag != sampleTag ? sampleTag : null)"
+                [title]="sampleTag.schemaValues['Interface']"
+                >{{sampleTag.schemaValues['Prompt']}}
+            <span *ngIf="loop.displayTags[col] == 'Y'" class="mandatory">*</span>
           </th>
           </ng-container>
 			</tr>
@@ -27,9 +27,12 @@
 			<tr *ngFor="let row of loop.data; let r = index">
 			<td><button *ngIf="r>0" class="real_button" (click)='deleteRow(r)'>-</button></td>
 			<ng-container *ngFor="let col of row; let c = index">
-			  <td *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
-	      		  [ngClass]="{'invisible': true, 'invalid': !col.valid}">
-			    <app-tag [tag]='col'
+			  <td *ngIf="loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)"
+	      		  [ngClass]="{'invisible': true,
+	      		              'invalid': !col.valid && (col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)),
+	      		              'greyed_out': (!(col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)))}">
+			    <app-tag *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
+                   [tag]='col'
                    [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
                    (contextmenu)="col.log()"></app-tag>
 			  </td>

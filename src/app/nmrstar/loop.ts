@@ -10,6 +10,7 @@ export class Loop {
   parent: Saveframe;
   schemaValues: {}[];
   display: string;
+  displayTags: string[];
   valid: boolean;
   empty: boolean;
 
@@ -38,6 +39,7 @@ export class Loop {
     this.parent = parent;
     this.schemaValues = [];
     this.display = 'H';
+    this.displayTags = new Array(tags.length).fill('H');
     this.valid = true;
     this.empty = false;
 
@@ -168,20 +170,30 @@ export class Loop {
       }
     }
 
-    // Check the loop visibility
-    this.display = 'H';
-    visibilityCheck:
-      for (const row of this.data) {
-        for (const item of row) {
-          if (item.display === 'Y') {
-            this.display = 'Y';
-            break visibilityCheck;
-          }
-          if (this.display === 'H') {
-            this.display = item.display;
-          }
+    // Update the per-tag visibility
+    this.displayTags  = new Array(this.displayTags.length).fill('H');
+    for (const row of this.data) {
+      for (let col = 0; col < row.length; col++) {
+        if (row[col].display === 'Y') {
+          this.displayTags[col] = 'Y';
+        }
+        if (this.displayTags[col] === 'H') {
+          this.displayTags[col] = row[col].display;
         }
       }
+    }
+
+    // Update the 'overview' visibility
+    this.display = 'H';
+    for (const display of this.displayTags) {
+      if (display === 'Y') {
+        this.display = 'Y';
+        break;
+      }
+      if (this.display === 'H') {
+        this.display = display;
+      }
+    }
 
     // Check if the loop is valid
     this.valid = true;
