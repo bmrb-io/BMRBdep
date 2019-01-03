@@ -217,7 +217,7 @@ export class Tag {
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
-        if (this.enums.size === 0) {
+        if (this.enums.size === 0 && this.fullyQualifiedTagName !== '_Upload_data.Data_file_name') {
           this.value = null;
         } else {
           this.valid = false;
