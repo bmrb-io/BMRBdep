@@ -43,7 +43,6 @@ export class TreeViewComponent implements OnInit {
   }
 
   refresh(): void {
-    this.api.saveEntry();
     localStorage.removeItem('entry_key');
     localStorage.removeItem('entry');
     localStorage.removeItem('schema');
