@@ -322,4 +322,34 @@ export class Loop {
       }
     }
   }
+
+  copyAuthors(): void {
+    const entryAuthors = this.parent.parent.getLoopsByCategory('_Entry_author')[0];
+
+    // Add the new rows
+    for (let i = 0; i < entryAuthors.data.length - 1; i++) {
+      this.addRow();
+    }
+
+    // Figure out which columns we need to copy
+    const entryGivenNameCol = entryAuthors.tags.indexOf('Given_name');
+    const entryFamilyNameCol = entryAuthors.tags.indexOf('Family_name');
+    const entryMiddleInitialsCol = entryAuthors.tags.indexOf('Middle_initials');
+    const entryFamilyTitleCol = entryAuthors.tags.indexOf('Family_title');
+
+    const citationGivenNameCol = this.tags.indexOf('Given_name');
+    const citationFamilyNameCol = this.tags.indexOf('Family_name');
+    const citationMiddleInitialsCol = this.tags.indexOf('Middle_initials');
+    const citationFamilyTitleCol = this.tags.indexOf('Family_title');
+
+    // Copy the data
+    for (const row in this.data) {
+      if (this.data.hasOwnProperty(row)) {
+        this.data[row][citationGivenNameCol].value = entryAuthors.data[row][entryGivenNameCol].value;
+        this.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
+        this.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;
+        this.data[row][citationFamilyTitleCol].value = entryAuthors.data[row][entryFamilyTitleCol].value;
+      }
+    }
+  }
 }
