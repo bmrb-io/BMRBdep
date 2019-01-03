@@ -382,15 +382,33 @@ export class Saveframe {
             dataRow[atomNameCol] = new LoopTag('Atom_type', atomName, referenceLoop);
             dataRow[atomNumberCol] = new LoopTag('Atom_isotope_number', atomNumber, referenceLoop);
 
+            dataRow[atomNameCol].disabled = true;
+            dataRow[atomNumberCol].disabled = true;
+
             // Add the IUPAC rules
             if (tag.value.indexOf('IUPAC') >= 0) {
               dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = shiftRatio;
+              dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Mol_common_name')].value = 'DSS';
+              dataRow[referenceLoop.tags.indexOf('Mol_common_name')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Atom_group')].value = 'methyl protons';
+              dataRow[referenceLoop.tags.indexOf('Atom_group')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].value = 'ppm';
+              dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].value = '0.00';
+              dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'internal';
+              dataRow[referenceLoop.tags.indexOf('Ref_method')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'direct';
+              dataRow[referenceLoop.tags.indexOf('Ref_type')].disabled = true;
+            } else {
+              dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Mol_common_name')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Atom_group')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Ref_method')].disabled = false;
+              dataRow[referenceLoop.tags.indexOf('Ref_type')].disabled = false;
             }
             // They are deleting the reference data
           } else {
