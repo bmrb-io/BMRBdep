@@ -9,6 +9,7 @@ export class Tag {
   value: string;
 
   valid: boolean;
+  disabled: boolean;
   validationMessage: string;
   dataType: string;
   interfaceType: string;
@@ -43,6 +44,8 @@ export class Tag {
       this.enums = null;
       this.display = 'H';
     }
+
+    this.disabled = false;
 
     /* Will be updated with updateTagStatus */
     this.valid = true;

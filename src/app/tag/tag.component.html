@@ -6,7 +6,8 @@
          (change)="validateTag(tag)"
          [type]="tag.dataType"
          [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
-         [title]="tag.validationMessage">
+         [title]="tag.validationMessage"
+         [disabled]="tag.disabled">
 </label>
 
 <label>
@@ -14,7 +15,8 @@
           [(ngModel)]="tag.value"
           [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
           (change)="validateTag(tag)"
-          [title]="tag.validationMessage">
+          [title]="tag.validationMessage"
+          [disabled]="tag.disabled">
     <option *ngFor="let val of tag.enums" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
   </select>
 </label>
@@ -26,7 +28,8 @@
            [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
            [placeholder]="tag.schemaValues['default value']"
            (change)="validateTag(tag)"
-           [title]="tag.validationMessage"/>
+           [title]="tag.validationMessage"
+           [disabled]="tag.disabled"/>
   </label>
   <datalist [id]="tag.fullyQualifiedTagName">
     <option *ngFor="let val of tag.enums" [value]="val">
@@ -42,14 +45,16 @@
              [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
-             [value]="'yes'">
+             [value]="'yes'"
+             [disabled]="tag.disabled">
     </label>
     <label>No
       <input type="radio"
              [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
-             [value]="'no'">
+             [value]="'no'"
+             [disabled]="tag.disabled">
     </label>
   </div>
 </ng-container>
@@ -62,7 +67,8 @@
               (change)="validateTag(tag)"
               [title]="tag.validationMessage"
               (ngModelChange)="recalculateHeight()"
-              [style.height.em]="height"></textarea>
+              [style.height.em]="height"
+              [disabled]="tag.disabled"></textarea>
   </label>
 
 </ng-container>
