@@ -16,7 +16,7 @@
                        'nav_link':true,
                        'complete':category.valid,
                        'incomplete':!category.valid}"
-            [title]="category.displayName"
+            [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
             [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a>
           </p>
         </ng-container>
