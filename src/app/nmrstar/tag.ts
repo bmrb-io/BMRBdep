@@ -217,8 +217,12 @@ export class Tag {
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
-        this.valid = false;
-        this.validationMessage = 'Tag does not match one of the allowed options.';
+        if (this.enums.size === 0) {
+          this.value = null;
+        } else {
+          this.valid = false;
+          this.validationMessage = 'Tag does not match one of the allowed options.';
+        }
       }
     }
 
