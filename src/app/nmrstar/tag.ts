@@ -292,8 +292,7 @@ function automaticChemShiftReference(tag: SaveframeTag): void {
   const updateTags = ['_Chem_shift_reference.Proton_shifts_flag',
     '_Chem_shift_reference.Carbon_shifts_flag',
     '_Chem_shift_reference.Nitrogen_shifts_flag',
-    '_Chem_shift_reference.Phosphorus_shifts_flag',
-    '_Chem_shift_reference.Other_shifts_flag'
+    '_Chem_shift_reference.Phosphorus_shifts_flag'
   ];
   if (updateTags.indexOf(tag.fullyQualifiedTagName) >= 0) {
 
@@ -320,21 +319,27 @@ function automaticChemShiftReference(tag: SaveframeTag): void {
       atomName = 'P';
       shiftRatio = '0.404808636';
     }
-    if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Other_shifts_flag') {
-      atomNumber = null;
-      atomName = '?';
-    }
 
     const referenceLoop = tag.getParentSaveframe().getLoopByPrefix('_Chem_shift_ref');
     const atomNameCol = referenceLoop.tags.indexOf('Atom_type');
     const atomNumberCol = referenceLoop.tags.indexOf('Atom_isotope_number');
+
+    const checkNullRow = (row: LoopTag[]): boolean => {
+      let empty = true;
+      for (const rowTag of row) {
+        if (!(rowTag.value === '.' || rowTag.value === '' || rowTag.value === null)) {
+          empty = false;
+        }
+      }
+      return empty;
+    };
 
     // They are adding reference data
     if (tag.value.indexOf('yes') >= 0) {
 
       let dataRow = null;
       for (const row of referenceLoop.data) {
-        if (row[atomNameCol].value === atomName) {
+        if ((row[atomNameCol].value === atomName && row[atomNumberCol].value === atomNumber) || checkNullRow(row)) {
           dataRow = row;
         }
       }
@@ -360,8 +365,12 @@ function automaticChemShiftReference(tag: SaveframeTag): void {
     // They are deleting the reference data
     } else {
       for (let loopRow = 0; loopRow < referenceLoop.data.length; loopRow++) {
-        if (referenceLoop.data[loopRow][atomNameCol].value === atomName) {
+        if (referenceLoop.data[loopRow][atomNameCol].value === atomName &&
+            referenceLoop.data[loopRow][atomNumberCol].value === atomNumber) {
           referenceLoop.deleteRow(loopRow);
+          if (referenceLoop.data.length === 0) {
+            referenceLoop.addRow();
+          }
         }
       }
 
