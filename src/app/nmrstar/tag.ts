@@ -351,7 +351,6 @@ function automaticChemShiftReference(tag: SaveframeTag): void {
         dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].value = '0.00';
         dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'internal';
         dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'direct';
-        dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = '1.000000000';
       }
 
     // They are deleting the reference data
