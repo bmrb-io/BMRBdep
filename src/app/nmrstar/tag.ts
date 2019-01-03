@@ -338,7 +338,7 @@ function automaticChemShiftReference(tag: SaveframeTag): void {
       }
 
       if (dataRow === null) {
-        dataRow = referenceLoop.addRow(false);
+        dataRow = referenceLoop.addRow();
       }
 
       dataRow[atomNameCol] = new LoopTag('Atom_type', atomName, referenceLoop);

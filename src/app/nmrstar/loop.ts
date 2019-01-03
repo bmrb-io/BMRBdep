@@ -66,16 +66,12 @@ export class Loop {
     }
   }
 
-  addRow(refresh: boolean = true): Array<LoopTag> {
+  addRow(): Array<LoopTag> {
     const newRow = [];
     for (const tag of this.tags) {
       newRow.push(new LoopTag(tag, null, this));
     }
     this.data.push(newRow);
-
-    if (refresh) {
-      this.refresh();
-    }
 
     return newRow;
   }
@@ -164,7 +160,6 @@ export class Loop {
   }
 
   refresh(): void {
-
     // It is too costly to check this for all loops every refresh since we only need it for citation author
     if (this.category === '_Citation_author') {
       this.empty = this.checkEmpty();
@@ -227,7 +222,6 @@ export class Loop {
         }
       }
     }
-
   }
 
   /*
