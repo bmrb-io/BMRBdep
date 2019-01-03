@@ -283,9 +283,7 @@ export class LoopTag extends Tag {
 }
 
 
-
 /* Special rules that aren't in the dictionary */
-
 function automaticChemShiftReference(tag: SaveframeTag): void {
   const updateTags = ['_Chem_shift_reference.Proton_shifts_flag',
     '_Chem_shift_reference.Carbon_shifts_flag',
