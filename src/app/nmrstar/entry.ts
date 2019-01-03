@@ -40,6 +40,20 @@ class CategoryInfo {
   }
 }
 
+export function entryFromJSON(jdata: Object): Entry {
+  const entry = new Entry(jdata['entry_id']);
+  entry.schema = new Schema(jdata['schema']);
+
+  for (const saveframeJSON of jdata['saveframes']) {
+    const newFrame = saveframeFromJSON(saveframeJSON, entry);
+    entry.addSaveframe(newFrame, -1, false);
+  }
+
+  entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
+  entry.refresh();
+  return entry;
+}
+
 export class Entry {
   entryID: string;
   saveframes: Saveframe[];
@@ -332,23 +346,10 @@ export class Entry {
       sf.refresh();
     }
 
-    // Make sure there is at least one "reference citation" saveframe
-    let referenceCitation = false;
-    for (const citationFrame of this.getSaveframesByCategory('citations')) {
-      if (citationFrame.getTagValue('_Citation.Class') === 'entry citation') {
-        referenceCitation = true;
-      }
-    }
-    if (!referenceCitation) {
-      for (const citationFrame of this.getSaveframesByCategory('citations')) {
-        const classTag = citationFrame.getTag('_Citation.Class');
-        classTag.valid = false;
-        classTag.validationMessage = 'Each deposition must have at least one saveframe of type "entry citation".' +
-          'Please either create a new citation of type "entry citation" or update one of the existing ones.';
-        citationFrame.valid = false;
-      }
-    }
+    // Applies special non-dictionary based behavior to specific saveframes.
+    this.specialRules();
 
+    // Update the category order
     this.updateCategories();
     // Check entry validity
     this.valid = true;
@@ -476,18 +477,24 @@ export class Entry {
     this.dataStore = dataStore;
   }
 
-}
 
-export function entryFromJSON(jdata: Object): Entry {
-  const entry = new Entry(jdata['entry_id']);
-  entry.schema = new Schema(jdata['schema']);
-
-  for (const saveframeJSON of jdata['saveframes']) {
-    const newFrame = saveframeFromJSON(saveframeJSON, entry);
-    entry.addSaveframe(newFrame, -1, false);
+  /* Special rules that aren't in the dictionary */
+  specialRules(): void {
+    // Make sure there is at least one "reference citation" saveframe
+    let referenceCitation = false;
+    for (const citationFrame of this.getSaveframesByCategory('citations')) {
+      if (citationFrame.getTagValue('_Citation.Class') === 'entry citation') {
+        referenceCitation = true;
+      }
+    }
+    if (!referenceCitation) {
+      for (const citationFrame of this.getSaveframesByCategory('citations')) {
+        const classTag = citationFrame.getTag('_Citation.Class');
+        classTag.valid = false;
+        classTag.validationMessage = 'Each deposition must have at least one saveframe of type "entry citation". ' +
+          'Please either create a new citation of type "entry citation" or update one of the existing ones.';
+        citationFrame.valid = false;
+      }
+    }
   }
-
-  entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
-  entry.refresh();
-  return entry;
 }

@@ -160,10 +160,7 @@ export class Loop {
   }
 
   refresh(): void {
-    // It is too costly to check this for all loops every refresh since we only need it for citation author
-    if (this.category === '_Citation_author') {
-      this.empty = this.checkEmpty();
-    }
+
     // Update the child data tags
     for (const row of this.data) {
       for (const item of row) {
@@ -198,38 +195,7 @@ export class Loop {
         }
       }
 
-    // If this is the contact person loop, an extra check is needed
-    if (this.category === '_Contact_person') {
-      let valid = false;
-      const roleTags: LoopTag[] = [];
-
-      for (const row of this.data) {
-        for (const item of row) {
-          if (item.name === 'Role') {
-            if (item.value === 'principal investigator') {
-              valid = true;
-            }
-            roleTags.push(item);
-          }
-        }
-      }
-
-      if (!valid) {
-        this.valid = false;
-        for (const tag of roleTags) {
-          tag.valid = false;
-          tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
-        }
-      }
-    }
-  }
-
-  /*
-   * Currently we don't check loop tags, but if we had to
-   * in the future, just have this check those tags preferentially
-   */
-  getTagValue(fqtn: string): string {
-    return this.parent.getTagValue(fqtn, true);
+    this.specialRules();
   }
 
   print(): string {
@@ -322,5 +288,38 @@ export class Loop {
     // Close the loop
     returnString += '\n   stop_\n';
     return returnString;
+  }
+
+
+  /* Special rules that aren't in the dictionary */
+  specialRules(): void {
+    // It is too costly to check this for all loops every refresh since we only need it for citation author
+    if (this.category === '_Citation_author') {
+      this.empty = this.checkEmpty();
+    }
+    // If this is the contact person loop, an extra check is needed
+    if (this.category === '_Contact_person') {
+      let valid = false;
+      const roleTags: LoopTag[] = [];
+
+      for (const row of this.data) {
+        for (const item of row) {
+          if (item.name === 'Role') {
+            if (item.value === 'principal investigator') {
+              valid = true;
+            }
+            roleTags.push(item);
+          }
+        }
+      }
+
+      if (!valid) {
+        this.valid = false;
+        for (const tag of roleTags) {
+          tag.valid = false;
+          tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
+        }
+      }
+    }
   }
 }
