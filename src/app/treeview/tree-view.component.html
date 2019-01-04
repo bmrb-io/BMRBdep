@@ -1,4 +1,4 @@
-<ng-container *ngIf="api.cachedEntry!==undefined">
+<ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID()">
   <p (click)="logEntry()">Display non-mandatory tags:
     <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
                       color="#CBDBFF"></mat-slide-toggle>
