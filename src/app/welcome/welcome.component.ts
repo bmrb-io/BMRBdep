@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {ApiService} from '../api.service';
 
@@ -13,6 +13,7 @@ export class WelcomeComponent implements OnInit {
   authorORCID: string;
   bootstrapID: string;
   error: string;
+  @ViewChild('inputFile') fileUploadElement: ElementRef;
 
   constructor(private router: Router, private api: ApiService) {
     this.sessionID = '';
@@ -31,7 +32,7 @@ export class WelcomeComponent implements OnInit {
   }
 
   new() {
-    this.api.newDeposition(this.authorEmail, this.authorORCID).subscribe(response => {
+    this.api.newDeposition(this.authorEmail, this.authorORCID, this.fileUploadElement.nativeElement.files[0]).subscribe(response => {
       if (response) {
         this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
       }

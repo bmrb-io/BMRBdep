@@ -7,7 +7,8 @@
         <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
         <label for="bootstrap">To pre-fill your deposition from an existing deposition or released BMRB entry:</label><br>
         <input type="text" id="bootstrap" disabled [(ngModel)]="bootstrapID" placeholder="Disabled - implementation pending"><!--Please enter the deposition ID or BMRB ID.--><br>
-        Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition.</p>
+        <p><input type="file" placeholder="Upload file" multiple #inputFile></p>
+    <p>Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition.</p>
   </div>
   <div>
     <h2>Resume deposition</h2>
