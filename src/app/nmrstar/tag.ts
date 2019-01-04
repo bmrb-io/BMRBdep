@@ -39,7 +39,7 @@ export class Tag {
         'BMRB data type': 'any', 'Nullable': true,
         'Prompt': 'Tag not in dictionary', 'Interface': 'Tag not in dictionary',
         'default value': '?', 'Example': '?', 'ADIT category view name': 'Missing',
-        'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': null
+        'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': 'N'
       };
       this.enums = null;
       this.display = 'H';

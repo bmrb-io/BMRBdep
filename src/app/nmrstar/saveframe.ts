@@ -45,6 +45,15 @@ export class Saveframe {
     if (this.parent.schema) {
       this.schemaValues = this.parent.schema.saveframeSchema[this.category];
     }
+    // Add default values if a saveframe exists that the schema can't handle
+    if (!this.schemaValues) {
+      this.schemaValues = {
+        'ADIT replicable': 'N',
+        'category_group_view_name': 'Unknown saveframe category.',
+        'group_view_help': 'Unknown category - no help available.',
+        'mandatory_number': 0
+      };
+    }
 
     for (const tag of this.tags) {
       this.tagDict[tag.fullyQualifiedTagName] = tag;
@@ -366,7 +375,7 @@ export class Saveframe {
           };
 
           // They are adding reference data
-          if (tag.value.indexOf('yes') >= 0) {
+          if (tag.value && tag.value.indexOf('yes') >= 0) {
 
             let dataRow = null;
             for (const row of referenceLoop.data) {
