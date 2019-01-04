@@ -136,12 +136,23 @@ export class ApiService {
     }
   }
 
-  newDeposition(author_email: string, orcid: string): Observable<any> {
+  newDeposition(author_email: string, orcid: string, file: File = null): Observable<any> {
     const apiEndPoint = `${environment.serverURL}/new`;
-    const body = {'email': author_email, 'orcid': orcid};
+    // const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
-    return this.http.post(apiEndPoint, JSON.stringify(body), this.JSONOptions)
+
+    const body = new FormData();
+    body.append('nmrstar_file', file);
+    body.append('email', author_email);
+    body.append('orcid', orcid);
+
+    const options = {
+      params: new HttpParams(),
+      reportProgress: true,
+    };
+
+    return this.http.post(apiEndPoint, body, options)
       .pipe(
         map(json_data => {
           this.messagesService.clearMessage();
