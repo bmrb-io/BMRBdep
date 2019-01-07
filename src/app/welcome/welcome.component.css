@@ -37,3 +37,11 @@ input[type="submit"], input[type="reset"], input[type="button"], input[type="fil
 .full_margin {
   margin: 1em;
 }
+
+.minor_box {
+  border: solid 1px #33527b;
+  padding: .5em;
+  border-radius: 5px;
+  overflow: auto;
+  width: fit-content;
+}

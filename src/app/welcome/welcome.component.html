@@ -2,13 +2,17 @@
   <h1>Welcome to BMRBDep!</h1>
   <div>
     <h2>Start new deposition</h2>
-      <h3>From scratch:</h3>
-      <p><input [(ngModel)]="authorEmail" placeholder="Please enter your e-mail." [class.red-background]="!authorEmail"><br>
+      <input [(ngModel)]="authorEmail" placeholder="Please enter your e-mail." [class.red-background]="!authorEmail"><br>
         <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
-        <label for="bootstrap">To pre-fill your deposition from an existing deposition or released BMRB entry:</label><br>
-        <input type="text" id="bootstrap" disabled [(ngModel)]="bootstrapID" placeholder="Disabled - implementation pending"><!--Please enter the deposition ID or BMRB ID.--><br>
-        <p><input type="file" placeholder="Upload file" multiple #inputFile></p>
-    <p>Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition.</p>
+        <div class="minor_box">
+              <label for="bootstrap">To pre-fill your deposition from a released entry or an uploaded NMR-STAR file:</label><br>
+              <input #bmrbid type="text" id="bootstrap" [disabled]="inputFile.files[0]" [(ngModel)]="bootstrapID" placeholder="BMRB ID"><br>
+          or
+              <p><input type="file" [disabled]="bmrbid.value" placeholder="Upload file" #inputFile (change)="fileChangeEvent($event)"></p>
+        </div>
+        <p *ngIf="!inputFile.files[0] && !bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from scratch.</p>
+        <p *ngIf="!inputFile.files[0] && bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from the existing entry {{bmrbid.value}}.</p>
+        <p *ngIf="inputFile.files[0] && !bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from the selected file - "{{inputFile.files[0].name}}".</p>
   </div>
   <div>
     <h2>Resume deposition</h2>
