@@ -8,7 +8,7 @@
               <label for="bootstrap">To pre-fill your deposition from a released entry or an uploaded NMR-STAR file:</label><br>
               <input #bmrbid type="text" id="bootstrap" [disabled]="inputFile.files[0]" [(ngModel)]="bootstrapID" placeholder="BMRB ID"><br>
           or
-              <p><input type="file" [disabled]="bmrbid.value" placeholder="Upload file" #inputFile (change)="fileChangeEvent($event)"></p>
+              <p><input type="file" [disabled]="bmrbid.value" placeholder="Upload file" #inputFile (change)="fileChangeEvent()"></p>
         </div>
         <p *ngIf="!inputFile.files[0] && !bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from scratch.</p>
         <p *ngIf="!inputFile.files[0] && bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from the existing entry {{bmrbid.value}}.</p>
