@@ -400,7 +400,7 @@ export class Entry {
     First, update the uploaded_data loop
      */
     const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
-    const newData = [];
+    dfLoop.data = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
       for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
         let sfCategory = null;
@@ -415,8 +415,8 @@ export class Entry {
           sfCategory = this.dataStore.dataFiles[i].control.value[n][0];
           sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
         }
-        const newRow = new Array(dfLoop.tags.length).fill('.');
-        newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(newData.length + 1), dfLoop);
+        const newRow = dfLoop.addRow();
+        newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length + 1), dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', sfCategory, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfDescription, dfLoop);
@@ -425,11 +425,11 @@ export class Entry {
         newRow[dfLoop.tags.indexOf('Sf_ID')] = new LoopTag('Sf_ID', null, dfLoop);
         newRow[dfLoop.tags.indexOf('Entry_ID')] = new LoopTag('Entry_ID', this.entryID, dfLoop);
         newRow[dfLoop.tags.indexOf('Deposited_data_files_ID')] = new LoopTag('Deposited_data_files_ID', String(i + 1), dfLoop);
-        newData.push(newRow);
       }
     }
-    if (newData.length) {
-      dfLoop.data = newData;
+    // Ensure the loop always has at least one empty row
+    if (!dfLoop.data.length) {
+      dfLoop.addRow();
     }
 
     /*
