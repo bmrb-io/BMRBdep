@@ -207,14 +207,6 @@ export class Saveframe {
   }
 
   refresh(): void {
-    // Get the SF name from the framecode tag
-    const framecodeTag: SaveframeTag = this.tagDict[this.tagPrefix + '.Sf_framecode'];
-    if (framecodeTag.value) {
-      // Strip whitespace from the tag
-      framecodeTag.value = framecodeTag.value.replace(/[\s+]/g, '_');
-      this.name = framecodeTag.value;
-    }
-
     // Get the category number for this SF
     this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
@@ -266,6 +258,15 @@ export class Saveframe {
           break;
         }
       }
+    }
+
+    // Get the SF name from the framecode tag
+    // Do this last because sf_framecode might have been modified elsewhere (in the tag code)
+    const framecodeTag: SaveframeTag = this.tagDict[this.tagPrefix + '.Sf_framecode'];
+    if (framecodeTag.value) {
+      // Strip whitespace from the tag
+      framecodeTag.value = framecodeTag.value.replace(/[\s+]/g, '_');
+      this.name = framecodeTag.value;
     }
   }
 
