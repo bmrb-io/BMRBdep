@@ -114,7 +114,7 @@ export class Tag {
 
   }
 
-  updateTagStatus() {
+  updateTagStatus(): void {
 
     /* Check that the tag is valid
     * 1) Matches the data type regex
@@ -125,14 +125,6 @@ export class Tag {
     // Remove unicode
     if (this.value) {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
-    }
-
-    // Copy the value of Name to Sf_framecode if such a tag exists
-    if (this.name === 'Name' && this.value) {
-      const parentSaveframe = this.getParentSaveframe();
-      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode']) {
-        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode'].value = this.value;
-      }
     }
 
     if (this.schemaValues['Sf pointer'] === 'N') {
@@ -229,10 +221,6 @@ export class Tag {
       }
     }
 
-    // Just return if we have no parent - prior to asking the parent for tags
-    if (!this.parent) {
-      return;
-    }
   }
 
   getEntry(): Entry {
@@ -260,6 +248,18 @@ export class SaveframeTag extends Tag {
     return this.parent;
   }
 
+  updateTagStatus(): void {
+    super.updateTagStatus();
+
+    // Copy the value of Name to Sf_framecode if such a tag exists
+    if (this.name === 'Name' && this.value) {
+      const parentSaveframe = this.getParentSaveframe();
+      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode']) {
+        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode'].value = this.value;
+      }
+    }
+  }
+
 }
 
 export class LoopTag extends Tag {
@@ -276,6 +276,10 @@ export class LoopTag extends Tag {
 
   getParentSaveframe(): Saveframe {
     return this.parent.parent;
+  }
+
+  updateTagStatus(): void {
+    super.updateTagStatus();
   }
 
 }
