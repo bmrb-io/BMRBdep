@@ -127,11 +127,11 @@ export class Tag {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
     }
 
-    // Copy the value of Sf_framecode to Name if such a tag exists
-    if (this.name === 'Sf_framecode') {
+    // Copy the value of Name to Sf_framecode if such a tag exists
+    if (this.name === 'Name' && this.value) {
       const parentSaveframe = this.getParentSaveframe();
-      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Name']) {
-        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Name'].value = this.value;
+      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode']) {
+        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode'].value = this.value;
       }
     }
 
