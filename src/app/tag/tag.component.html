@@ -43,6 +43,7 @@
     <label>Yes
       <input type="radio"
              [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
+             [name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
              [value]="'yes'"
@@ -51,6 +52,7 @@
     <label>No
       <input type="radio"
              [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
+             [name]="tag.fullyQualifiedTagName + unique_identifier"
              [(ngModel)]="tag.value"
              [id]="tag.fullyQualifiedTagName + unique_identifier"
              [value]="'no'"
