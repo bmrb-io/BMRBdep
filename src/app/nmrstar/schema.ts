@@ -19,6 +19,7 @@ export class Schema {
   categorySuperGroups: {};
   categorySupergroupsDictList: Array<Array<{}>>;
   categorySuperGroupsDescription: {};
+  categorySuperGroupsDescriptionDict: {};
 
   /* Calculated during construction */
   schema: {};
@@ -49,6 +50,7 @@ export class Schema {
     this.overrides = json['overrides'];
     this.categorySuperGroups = json['category_supergroups'];
     this.categorySuperGroupsDescription = json['supergroup_descriptions'];
+    this.categorySuperGroupsDescriptionDict = {};
     this.saveframes = json['saveframes'];
     this.fileUploadTypes = json['file_upload_types'];
     this.schema = {};
@@ -86,12 +88,16 @@ export class Schema {
       this.overridesDictList.push(overrideDictionary);
     }
 
-    const superGroupMapping = {};
-    const superGroupIDCol = json['supergroup_descriptions']['headers'].indexOf('super_group_ID');
-    const superGroupDisplayNameCol = json['supergroup_descriptions']['headers'].indexOf('super_group_name');
-    const superGroupHelpCol = json['supergroup_descriptions']['headers'].indexOf('Description');
-    for (const superGroup of json['supergroup_descriptions']['values']) {
-      superGroupMapping[superGroup[superGroupIDCol]] = [superGroup[superGroupDisplayNameCol], superGroup[superGroupHelpCol]];
+    // Load the super group help data
+    for (const superGroup of this.categorySuperGroupsDescription['values']) {
+      // Generate an override dictionary for a single override
+      const superGroupRecord = {};
+      for (let i = 0; i <= this.categorySuperGroupsDescription['headers'].length; i++) {
+        if (this.categorySuperGroupsDescription['headers'][i]) {
+          superGroupRecord[this.categorySuperGroupsDescription['headers'][i]] = superGroup[i];
+        }
+      }
+      this.categorySuperGroupsDescriptionDict[superGroup[0]] = superGroupRecord;
     }
 
     // Build a data structure for the supergroups
@@ -105,8 +111,6 @@ export class Schema {
           superGroupRecord[this.categorySuperGroups['headers'][i]] = supergroupRecord[i];
         }
       }
-      superGroupRecord['super_group_display_name'] = superGroupMapping[superGroupRecord['category_super_group_ID']][0];
-      superGroupRecord['super_group_help'] = superGroupMapping[superGroupRecord['category_super_group_ID']][1];
       temporarySuperGroupList.push(superGroupRecord);
     }
     const temporaryGroupDict = {};
