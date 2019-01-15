@@ -162,8 +162,9 @@ export class Entry {
     if (this.schema) {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
 
-        const singleSuperRecord = new SuperCategoryInfo(supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name'],
-          supergroup[0]['super_group_help']);
+        const singleSuperRecord = new SuperCategoryInfo(supergroup[0]['category_super_group'],
+          this.schema.categorySuperGroupsDescriptionDict[supergroup[0]['category_super_group_ID']]['super_group_name'],
+          this.schema.categorySuperGroupsDescriptionDict[supergroup[0]['category_super_group_ID']]['Description']);
         this.superGroups.push(singleSuperRecord);
 
         for (const group of supergroup) {
