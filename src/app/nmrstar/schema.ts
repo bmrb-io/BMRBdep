@@ -18,6 +18,7 @@ export class Schema {
   overridesDictList: Array<{}>;
   categorySuperGroups: {};
   categorySupergroupsDictList: Array<Array<{}>>;
+  categorySuperGroupsDescription: {};
 
   /* Calculated during construction */
   schema: {};
@@ -27,7 +28,8 @@ export class Schema {
   toJSON(): {} {
     return {
       version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.dataTypes,
-      overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySuperGroups
+      overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySuperGroups,
+      supergroup_descriptions: this.categorySuperGroupsDescription
     };
   }
 
@@ -46,6 +48,7 @@ export class Schema {
     this.dataTypes = json['data_types'];
     this.overrides = json['overrides'];
     this.categorySuperGroups = json['category_supergroups'];
+    this.categorySuperGroupsDescription = json['supergroup_descriptions'];
     this.saveframes = json['saveframes'];
     this.fileUploadTypes = json['file_upload_types'];
     this.schema = {};
@@ -83,17 +86,16 @@ export class Schema {
       this.overridesDictList.push(overrideDictionary);
     }
 
+    const superGroupMapping = {};
+    const superGroupIDCol = json['supergroup_descriptions']['headers'].indexOf('super_group_ID');
+    const superGroupDisplayNameCol = json['supergroup_descriptions']['headers'].indexOf('super_group_name');
+    const superGroupHelpCol = json['supergroup_descriptions']['headers'].indexOf('Description');
+    for (const superGroup of json['supergroup_descriptions']['values']) {
+      superGroupMapping[superGroup[superGroupIDCol]] = [superGroup[superGroupDisplayNameCol], superGroup[superGroupHelpCol]];
+    }
+
     // Build a data structure for the supergroups
     const temporarySuperGroupList = [];
-    const superGroupMapping = {'NMR_parameters': 'NMR parameters',
-                               'assembly_supercategory': 'Molecular assembly',
-                               'citations': 'Citations',
-                               'entry_information': 'Entry information',
-                               'experimental_details': 'Experimental details',
-                               'kinetics': 'Kinetics',
-                                'structure': 'Structure',
-                               'thermodynamics': 'Thermodynamics'};
-
     for (const supergroupRecord of this.categorySuperGroups['values']) {
 
       // Generate an override dictionary for a single override
@@ -103,7 +105,8 @@ export class Schema {
           superGroupRecord[this.categorySuperGroups['headers'][i]] = supergroupRecord[i];
         }
       }
-      superGroupRecord['super_group_display_name'] = superGroupMapping[superGroupRecord['category_super_group']];
+      superGroupRecord['super_group_display_name'] = superGroupMapping[superGroupRecord['category_super_group_ID']][0];
+      superGroupRecord['super_group_help'] = superGroupMapping[superGroupRecord['category_super_group_ID']][1];
       temporarySuperGroupList.push(superGroupRecord);
     }
     const temporaryGroupDict = {};
