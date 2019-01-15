@@ -7,16 +7,19 @@ import {Loop} from './loop';
 class SuperCategoryInfo {
   superCategory: string;
   displayName: string;
+  displayHelp: string;
   valid: boolean;
   display: string;
   children: Array<CategoryInfo>;
 
   constructor(superCategory: string,
               displayName: string,
+              displayHelp: string,
               valid: boolean = true,
               display: string = 'H') {
     this.superCategory = superCategory;
     this.displayName = displayName;
+    this.displayHelp = displayHelp;
     this.valid = valid;
     this.display = display;
     this.children = [];
@@ -159,8 +162,8 @@ export class Entry {
     if (this.schema) {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
 
-
-        const singleSuperRecord = new SuperCategoryInfo(supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name']);
+        const singleSuperRecord = new SuperCategoryInfo(supergroup[0]['category_super_group'], supergroup[0]['super_group_display_name'],
+          supergroup[0]['super_group_help']);
         this.superGroups.push(singleSuperRecord);
 
         for (const group of supergroup) {
