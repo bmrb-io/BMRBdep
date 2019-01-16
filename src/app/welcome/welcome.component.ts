@@ -33,11 +33,11 @@ export class WelcomeComponent implements OnInit {
 
   fileChangeEvent() {
     this.bootstrapID = null;
-    console.log(this.fileUploadElement.nativeElement.files[0]);
   }
 
   new() {
-    this.api.newDeposition(this.authorEmail, this.authorORCID, this.fileUploadElement.nativeElement.files[0], this.bootstrapID).subscribe(response => {
+    this.api.newDeposition(this.authorEmail, this.authorORCID, this.fileUploadElement.nativeElement.files[0],
+      this.bootstrapID).subscribe(response => {
       if (response) {
         this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
       }
