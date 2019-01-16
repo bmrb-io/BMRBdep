@@ -229,7 +229,7 @@ export class Entry {
     let result = 'data_' + this.entryID + '\n\n';
 
     for (const sf of this.saveframes) {
-      result += sf.print() + '\n';
+      result += sf.print();
     }
 
     return result;

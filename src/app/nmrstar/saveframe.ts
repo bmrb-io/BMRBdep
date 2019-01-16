@@ -1,6 +1,6 @@
 import {Entry} from './entry';
 import {Loop} from './loop';
-import {cleanValue} from './nmrstar';
+import {checkTagIsNull, checkTagIsRequired, cleanValue} from './nmrstar';
 import {LoopTag, SaveframeTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
 
@@ -270,7 +270,39 @@ export class Saveframe {
     }
   }
 
+  checkEmpty() {
+
+    // Check the tags
+    for (const tag of this.tags) {
+      if (!checkTagIsNull(tag)) {
+        if (!checkTagIsRequired(tag)) {
+          if (tag.display !== 'H') {
+            return false;
+          }
+        }
+      }
+    }
+
+    // Check the loops
+    for (const loop of this.loops) {
+      if (loop.display !== 'H' && !loop.checkEmpty()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   print(): string {
+
+    const mandatoryDisplay = this.category === 'entry_information' || this.category === 'deposited_data_files' ||
+      this.category === 'entry_interview';
+
+    // Skip if we have no data
+    if (this.checkEmpty() && !mandatoryDisplay) {
+        return '';
+    }
+
     let width = 0;
 
     for (const tag of this.tags) {
@@ -286,6 +318,16 @@ export class Saveframe {
     const multiLineFormatString = sprintf('   %%-%ds\n;\n%%s;\n', width);
 
     for (const tag of this.tags) {
+      // Don't show null tags
+      if (checkTagIsNull(tag)) {
+        continue;
+      }
+
+      // Don't show hidden tags, unless one of the special types
+      if (!mandatoryDisplay && tag.display === 'H' && !checkTagIsRequired(tag)) {
+        continue;
+      }
+
       const cleanedTag = cleanValue(tag.value);
 
       if (cleanedTag.indexOf('\n') === -1) {
@@ -299,7 +341,7 @@ export class Saveframe {
       returnString += loop.print();
     }
 
-    return returnString + 'save_\n';
+    return returnString + 'save_\n\n';
   }
 
   /* Special rules that aren't in the dictionary */

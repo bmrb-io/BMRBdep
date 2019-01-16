@@ -66,6 +66,15 @@ export function cleanValue(value): string {
   return value;
 }
 
+export function checkTagIsNull(tag) {
+  return tag.value === null || tag.value === '.' && tag.value === '';
+}
+
+export function checkTagIsRequired(tag) {
+  const alwaysDisplay = ['sf_framecode', 'entry_id', 'id', 'sf_category', 'name'];
+  return alwaysDisplay.indexOf(tag.name.toLowerCase()) >= 0;
+}
+
 export function download(filename, printableObject): void {
   const element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printableObject.print()));
