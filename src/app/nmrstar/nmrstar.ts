@@ -67,7 +67,7 @@ export function cleanValue(value): string {
 }
 
 export function checkTagIsNull(tag) {
-  return tag.value === null || tag.value === '.' && tag.value === '';
+  return tag.value === null || tag.value === '.' || tag.value === '' || tag.value === '?' || tag.value === undefined;
 }
 
 export function checkTagIsRequired(tag) {
