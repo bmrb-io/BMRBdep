@@ -6,6 +6,5 @@
 export const environment = {
   production: false,
   debug: false,
-  // serverURL: 'http://localhost:9000/deposition'
-  serverURL: 'https://webapi.bmrb.wisc.edu/devel/deposition'
+  serverURL: 'http://localhost:9000/deposition'
 };
