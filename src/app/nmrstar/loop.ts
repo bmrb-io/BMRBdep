@@ -344,6 +344,12 @@ export class Loop {
         }
       }
     }
+
+    // Lock the first data row author email for contact person
+    if (this.category === '_Contact_person') {
+      const emailID = this.tags.indexOf('Email_address');
+      this.data[0][emailID].disabled = true;
+    }
   }
 
   copyAuthors(): void {
