@@ -379,6 +379,11 @@ export class Saveframe {
       for (const tag of this.tags) {
         if (updateTags.indexOf(tag.fullyQualifiedTagName) >= 0) {
 
+          // Don't apply the rules until they have either selected or unselected something
+          if (tag.value === null) {
+            continue;
+          }
+
           let atomNumber = null;
           let atomName = null;
           let shiftRatio = null;
