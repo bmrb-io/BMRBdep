@@ -1,4 +1,4 @@
-import {cleanValue} from './nmrstar';
+import {checkTagIsNull, cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
 import {LoopTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
@@ -149,16 +149,19 @@ export class Loop {
   }
 
   checkEmpty(): boolean {
-    let empty = true;
+    this.empty = true;
     if (this.data.length > 1) {
-      return false;
+      this.empty = false;
+      return this.empty;
     }
     for (const col of this.data[0]) {
-      if (col.value !== null && col.value !== '.' && col.value !== '') {
-        empty = false;
+      if (!checkTagIsNull(col)) {
+        this.empty = false;
+        return this.empty;
       }
     }
-    return empty;
+
+    return this.empty;
   }
 
   refresh(): void {
@@ -212,12 +215,20 @@ export class Loop {
 
   print(): string {
 
+    if (this.category === '_Upload_data') {
+      console.log(this, this.checkEmpty());
+    }
+
     const parent = this;
-    // Check for empty loops
-    if (this.data.length === 0) {
-      if (this.tags.length === 0) {
-        return '\n   loop_\n\n   stop_\n';
-      }
+
+    // Check for totally empty loops
+    if (this.checkEmpty()) {
+      return '';
+    }
+
+    // Check for loops that have data, but only imported data
+    if (this.display === 'H') {
+      return '';
     }
 
     // Can't print data without columns
