@@ -25,7 +25,10 @@
 		</thead>
 		<tbody>
 			<tr *ngFor="let row of loop.data; let r = index">
-			<td><button *ngIf="loop.data.length > 1" class="real_button" (click)='deleteRow(r)'>-</button></td>
+        <td>
+          <button *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 0)"
+                  class="real_button" (click)='deleteRow(r)'>-</button>
+        </td>
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)"
 	      		  [ngClass]="{'invisible': true,
