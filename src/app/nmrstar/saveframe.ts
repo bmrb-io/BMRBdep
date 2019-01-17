@@ -460,19 +460,12 @@ export class Saveframe {
               dataRow[referenceLoop.tags.indexOf('Ref_type')].disabled = true;
             } else {
               dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = null;
               dataRow[referenceLoop.tags.indexOf('Mol_common_name')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Mol_common_name')].value = null;
               dataRow[referenceLoop.tags.indexOf('Atom_group')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Atom_group')].value = null;
               dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].value = null;
               dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].value = null;
               dataRow[referenceLoop.tags.indexOf('Ref_method')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Ref_method')].value = null;
               dataRow[referenceLoop.tags.indexOf('Ref_type')].disabled = false;
-              dataRow[referenceLoop.tags.indexOf('Ref_type')].value = null;
             }
             // They are deleting the reference data
           } else {
