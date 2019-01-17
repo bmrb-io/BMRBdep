@@ -85,6 +85,7 @@ export class Saveframe {
     // Set the framecode and category regardless of clearValues argument
     newFrame.tagDict[this.tagPrefix + '.Sf_framecode'].value = frameName;
     newFrame.tagDict[this.tagPrefix + '.Sf_category'].value = this.category;
+    newFrame.tagDict[this.tagPrefix + '.Name'].value = frameName.replace('_', ' ');
 
     // Copy the loops
     for (const loop of this.loops) {
