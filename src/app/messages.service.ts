@@ -16,7 +16,7 @@ export class Message {
 
   constructor(messageBody: string,
               messageType: MessageType = MessageType.SuccessMessage,
-              messageTimeout: number = 3000) {
+              messageTimeout: number = 15000) {
     this.messageBody = messageBody;
     this.messageType = messageType;
     this.messageTimeout = messageTimeout;
