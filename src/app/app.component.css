@@ -22,5 +22,5 @@ mat-sidenav.mat-closed.mat-locked-open-add-active {
   display: inline-flex;
   vertical-align: middle;
   align-items: center;
-  cursor:pointer;
+  cursor: pointer;
 }
