@@ -17,3 +17,9 @@ mat-sidenav.mat-closed.mat-locked-open-add-active {
   width: 85vw !important;
   max-width: 20em !important;
 }
+
+.valign-center {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+}
