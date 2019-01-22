@@ -3,7 +3,7 @@
          [(ngModel)]="tag.value"
          [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
          [placeholder]="tag.schemaValues['default value']"
-         (change)="validateTag(tag)"
+         (change)="validateTag()"
          [type]="tag.dataType"
          [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
          [title]="tag.validationMessage"
@@ -14,7 +14,7 @@
   <select *ngIf="tag.interfaceType == 'closed_enum'"
           [(ngModel)]="tag.value"
           [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-          (change)="validateTag(tag)"
+          (change)="validateTag()"
           [title]="tag.validationMessage"
           [disabled]="tag.disabled">
     <option *ngIf="!tag.valid && tag.value" disabled [value]="tag.value">Current invalid value: {{tag.value}}</option>
@@ -28,7 +28,7 @@
            [(ngModel)]="tag.value"
            [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
            [placeholder]="storedValue"
-           (change)="validateTag(tag)"
+           (change)="validateTag()"
            [title]="tag.validationMessage"
            [disabled]="tag.disabled"
            (focus)="storeValue()"
@@ -41,7 +41,7 @@
 
 <ng-container *ngIf="tag.interfaceType == 'yes_no'">
   <div [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-       (change)="validateTag(tag)"
+       (change)="validateTag()"
        [title]="tag.validationMessage">
     <label>Yes
       <input type="radio"
@@ -69,7 +69,7 @@
     <textarea [(ngModel)]="tag.value"
               [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
               [placeholder]="tag.schemaValues['default value']"
-              (change)="validateTag(tag)"
+              (change)="validateTag()"
               [title]="tag.validationMessage"
               (ngModelChange)="recalculateHeight()"
               [style.height.em]="height"
