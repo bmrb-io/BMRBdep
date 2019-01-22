@@ -20,8 +20,11 @@ export class TagComponent implements OnInit {
     if (this.tag.interfaceType === 'text') {
       this.recalculateHeight();
     }
-
-    this.restoreValue();
+    if (this.tag.schemaValues['default value'] !== '?') {
+      this.storedValue = this.tag.schemaValues['default value'];
+    } else {
+      this.storedValue = '';
+    }
   }
 
   recalculateHeight() {
@@ -49,10 +52,13 @@ export class TagComponent implements OnInit {
   }
 
   restoreValue(): void {
-    if (this.tag.value) {
-      this.storedValue = this.tag.value;
+    if (!this.tag.value) {
+      this.tag.value = this.storedValue;
     } else {
-      this.storedValue = this.tag.schemaValues['default value'];
+      if (this.tag.value !== this.storedValue) {
+        this.validateTag();
+      }
     }
   }
+
 }

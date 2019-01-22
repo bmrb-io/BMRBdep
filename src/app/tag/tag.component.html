@@ -28,7 +28,7 @@
            [(ngModel)]="tag.value"
            [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
            [placeholder]="storedValue"
-           (change)="validateTag()"
+           (change)="restoreValue()"
            [title]="tag.validationMessage"
            [disabled]="tag.disabled"
            (focus)="storeValue()"
