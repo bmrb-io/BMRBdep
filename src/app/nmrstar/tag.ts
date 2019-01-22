@@ -188,7 +188,6 @@ export class Tag {
           if (!this.enums.has(this.value)) {
             this.valid = false;
             this.validationMessage = 'Tag must have a value.';
-            this.value = null;
           }
         }
     } else {
@@ -213,7 +212,8 @@ export class Tag {
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
         if (this.enums.size === 0 && this.fullyQualifiedTagName !== '_Upload_data.Data_file_name') {
-          this.value = null;
+          this.valid = false;
+          this.validationMessage = 'The value you have selected is not valid, please choose a different one.';
         } else {
           this.valid = false;
           this.validationMessage = 'Tag does not match one of the allowed options.';
