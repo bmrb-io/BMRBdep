@@ -26,10 +26,12 @@
     <input [attr.list]="tag.fullyQualifiedTagName"
            [(ngModel)]="tag.value"
            [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-           [placeholder]="tag.schemaValues['default value']"
+           [placeholder]="storedValue"
            (change)="validateTag(tag)"
            [title]="tag.validationMessage"
-           [disabled]="tag.disabled"/>
+           [disabled]="tag.disabled"
+           (focus)="storeValue()"
+           (blur)="restoreValue()"/>
   </label>
   <datalist [id]="tag.fullyQualifiedTagName">
     <option *ngFor="let val of tag.enums" [value]="val">
