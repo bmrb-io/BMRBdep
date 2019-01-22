@@ -36,8 +36,8 @@ export class TagComponent implements OnInit {
     }
   }
 
-  validateTag(tag: Tag): void {
-    tag.getEntry().refresh();
+  validateTag(): void {
+    this.tag.getEntry().refresh();
     this.api.saveEntry();
   }
 
