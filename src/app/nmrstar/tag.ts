@@ -211,9 +211,9 @@ export class Tag {
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
-        if (this.enums.size === 0 && this.fullyQualifiedTagName !== '_Upload_data.Data_file_name') {
+        if (this.enums.size === 0) {
           this.valid = false;
-          this.validationMessage = 'The value you have selected is not valid, please choose a different one.';
+          this.validationMessage = 'There are currently no valid values for this tag.';
         } else {
           this.valid = false;
           this.validationMessage = 'Tag does not match one of the allowed options.';
