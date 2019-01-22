@@ -10,6 +10,8 @@ import {Tag} from '../nmrstar/tag';
 export class TagComponent implements OnInit {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
+  storedValue: string;
+
   public height: number;
 
   constructor(public api: ApiService) { }
@@ -18,6 +20,8 @@ export class TagComponent implements OnInit {
     if (this.tag.interfaceType === 'text') {
       this.recalculateHeight();
     }
+
+    this.restoreValue();
   }
 
   recalculateHeight() {
@@ -35,5 +39,20 @@ export class TagComponent implements OnInit {
   validateTag(tag: Tag): void {
     tag.getEntry().refresh();
     this.api.saveEntry();
+  }
+
+  storeValue(): void {
+    if (this.tag.value) {
+      this.storedValue = this.tag.value;
+      this.tag.value = null;
+    }
+  }
+
+  restoreValue(): void {
+    if (this.tag.value) {
+      this.storedValue = this.tag.value;
+    } else {
+      this.storedValue = this.tag.schemaValues['default value'];
+    }
   }
 }
