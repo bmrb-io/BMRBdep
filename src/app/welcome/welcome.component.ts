@@ -8,49 +8,55 @@ import {ApiService} from '../api.service';
   styleUrls: ['./welcome.component.css']
 })
 export class WelcomeComponent implements OnInit {
-  sessionID: string;
   authorEmail: string;
   depositionNickname: string;
   authorORCID: string;
   bootstrapID: string;
+  sessionType: string;
   error: string;
   validResumeID: 'valid' | 'adit' | 'invalid';
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
   constructor(private router: Router, private api: ApiService) {
-    this.sessionID = '';
     this.authorEmail = '';
     this.depositionNickname = '';
     this.authorORCID = '';
     this.bootstrapID = null;
     this.error = '';
+    this.sessionType = 'new';
   }
 
   ngOnInit() {
   }
 
-  validate(): void {
+  validate(sessionID): void {
     const regexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     const aditRegexp = /[0-9]+-[0-9]+-[0-9]+(\.[\S]+)+\.[0-9]+\.[0-9]+/i;
-    if (regexp.test(this.sessionID)) {
+    if (regexp.test(sessionID)) {
       this.validResumeID = 'valid';
-    } else if (aditRegexp.test(this.sessionID)) {
+    } else if (aditRegexp.test(sessionID)) {
       this.validResumeID = 'adit';
     } else {
       this.validResumeID = 'invalid';
     }
   }
 
-  fileChangeEvent() {
-    this.bootstrapID = null;
-  }
 
   new() {
-    this.api.newDeposition(this.authorEmail, this.depositionNickname, this.authorORCID, this.fileUploadElement.nativeElement.files[0],
-      this.bootstrapID).subscribe(response => {
-      if (response) {
-        this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
-      }
-    });
+    let bootstrapID = this.bootstrapID;
+    let fileElement = null;
+    if (this.sessionType === 'file') {
+      fileElement = this.fileUploadElement.nativeElement.files[0];
+    } else if (this.sessionType === 'bmrb_id') {
+      bootstrapID = this.bootstrapID;
+    } else {
+
+    }
+    this.api.newDeposition(this.authorEmail, this.depositionNickname, this.authorORCID, fileElement, bootstrapID).subscribe(
+      response => {
+        if (response) {
+          this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
+        }
+      });
   }
 }
