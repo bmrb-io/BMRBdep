@@ -13,6 +13,7 @@ export class WelcomeComponent implements OnInit {
   authorORCID: string;
   bootstrapID: string;
   error: string;
+  validResumeID: 'valid' | 'adit' | 'invalid';
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
   constructor(private router: Router, private api: ApiService) {
@@ -26,9 +27,16 @@ export class WelcomeComponent implements OnInit {
   ngOnInit() {
   }
 
-  validate() {
+  validate(): void {
     const regexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return regexp.test(this.sessionID);
+    const aditRegexp = /[0-9]+-[0-9]+-[0-9]+(\.[\S]+)+\.[0-9]+\.[0-9]+/i;
+    if (regexp.test(this.sessionID)) {
+      this.validResumeID = 'valid';
+    } else if (aditRegexp.test(this.sessionID)) {
+      this.validResumeID = 'adit';
+    } else {
+      this.validResumeID = 'invalid';
+    }
   }
 
   fileChangeEvent() {
