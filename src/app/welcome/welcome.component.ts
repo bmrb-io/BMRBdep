@@ -10,6 +10,7 @@ import {ApiService} from '../api.service';
 export class WelcomeComponent implements OnInit {
   sessionID: string;
   authorEmail: string;
+  depositionNickname: string;
   authorORCID: string;
   bootstrapID: string;
   error: string;
@@ -19,6 +20,7 @@ export class WelcomeComponent implements OnInit {
   constructor(private router: Router, private api: ApiService) {
     this.sessionID = '';
     this.authorEmail = '';
+    this.depositionNickname = '';
     this.authorORCID = '';
     this.bootstrapID = null;
     this.error = '';
@@ -44,7 +46,7 @@ export class WelcomeComponent implements OnInit {
   }
 
   new() {
-    this.api.newDeposition(this.authorEmail, this.authorORCID, this.fileUploadElement.nativeElement.files[0],
+    this.api.newDeposition(this.authorEmail, this.depositionNickname, this.authorORCID, this.fileUploadElement.nativeElement.files[0],
       this.bootstrapID).subscribe(response => {
       if (response) {
         this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
