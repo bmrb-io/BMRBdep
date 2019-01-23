@@ -1,5 +1,5 @@
 <mat-toolbar>
-  <div (click)="sidenav.toggle()" class="valign-center">
+  <div *ngIf="api.cachedEntry!==undefined && api.getEntryID()" (click)="sidenav.toggle()" class="valign-center">
     <mat-icon>menu</mat-icon>
     <span style="vertical-align: bottom">Menu</span>
   </div>
