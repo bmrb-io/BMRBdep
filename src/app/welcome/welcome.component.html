@@ -16,10 +16,14 @@
   </div>
   <div>
     <h2>Resume deposition</h2>
-    <input type="text" [(ngModel)]="sessionID" placeholder="Please enter your session ID.">
+    <input type="text" [(ngModel)]="sessionID" placeholder="Please enter your BMRBDep session ID.">
     <p *ngIf="validate(); else invalid">
       Click <button [routerLink]="['/entry/', sessionID, 'saveframe', 'deposited_data_files', 'category']" class="fake_button">here</button> to resume deposition {{sessionID}}.
     </p>
-    <ng-template #invalid><p>Invalid or missing session ID.</ng-template>
+    <ng-template #invalid><p>
+      <button disabled
+              title="Deposition IDs have the form: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              class="fake_button">Enter a valid BMRBDep session ID to resume deposition</button>
+    </p></ng-template>
   </div>
 </div>
