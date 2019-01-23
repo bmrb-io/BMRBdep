@@ -17,8 +17,12 @@
           (change)="validateTag()"
           [title]="tag.validationMessage"
           [disabled]="tag.disabled">
-    <option *ngIf="!tag.valid && tag.value" disabled [value]="tag.value">Current invalid value: {{tag.value}}</option>
-    <option *ngFor="let val of tag.enums" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
+    <ng-container *ngFor="let val of tag.enums">
+      <option *ngIf="!(!tag.valid && tag.value == val); else invalid_selection" [value]="val" [ngClass]="{'type_error': !tag.valid}">{{val}}</option>
+      <ng-template #invalid_selection>
+        <option *ngIf="!tag.valid && tag.value" disabled [value]="tag.value">{{tag.value}} - Error: {{tag.validationMessage}}</option>
+      </ng-template>
+    </ng-container>
   </select>
 </label>
 
