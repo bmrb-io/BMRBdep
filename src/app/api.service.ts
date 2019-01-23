@@ -136,15 +136,19 @@ export class ApiService {
     }
   }
 
-  newDeposition(author_email: string, orcid: string, file: File = null, bootstrapID: string = null): Observable<any> {
+  newDeposition(authorEmail: string,
+                depositionNickname: string,
+                orcid: string,
+                file: File = null,
+                bootstrapID: string = null): Observable<any> {
     const apiEndPoint = `${environment.serverURL}/new`;
-    // const body = {'email': author_email, 'orcid': orcid};
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
 
     const body = new FormData();
     body.append('nmrstar_file', file);
-    body.append('email', author_email);
+    body.append('email', authorEmail);
+    body.append('deposition_nickname', depositionNickname);
     body.append('orcid', orcid);
     body.append('bootstrapID', bootstrapID);
 
