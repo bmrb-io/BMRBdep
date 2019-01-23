@@ -1,62 +1,73 @@
 <div class="details_box full_margin">
   <h1>Welcome to BMRBDep!</h1>
-  <div>
-    <h2>Start new deposition</h2>
+  <h2>Start new deposition</h2>
+  <p>
+    <label>
+      <select [(ngModel)]="sessionType">
+        <option value="new">New deposition from scratch</option>
+        <option value="bmrb_id">Begin a deposition from an existing and released BMRB entry</option>
+        <option value="file">Begin a deposition from an uploaded NMR-STAR file</option>
+      </select>
+    </label>
+  </p>
+  <p>
     <input [(ngModel)]="authorEmail"
            [class.red-background]="!authorEmail"
-           placeholder="Please enter your e-mail."><br>
+           placeholder="Please enter your e-mail.">
+  </p>
+  <p>
     <input [(ngModel)]="depositionNickname"
            [class.red-background]="!depositionNickname"
-           placeholder="Please enter a brief nickname for this deposition."><br>
+           placeholder="Please enter a brief nickname for this deposition.">
+  </p>
+  <p>
     <input [(ngModel)]="authorORCID"
-           placeholder="Please enter your ORCID if you have one."><br>
-    <div class="minor_box">
-      <label for="bootstrap">To pre-fill your deposition from a released entry:</label><br>
-      <input #bmrbid [(ngModel)]="bootstrapID" [disabled]="inputFile.files[0]" id="bootstrap" placeholder="BMRB ID"
-             type="text"><br>
-      or an uploaded NMR-STAR file:
-      <p><input #inputFile (change)="fileChangeEvent()" [disabled]="bmrbid.value" placeholder="Upload file" type="file">
-      </p>
-    </div>
-    <p *ngIf="!inputFile.files[0] && !bmrbid.value">
-      Click
-      <button (click)="new()" class="fake_button"> here</button>
-      to start a new deposition from scratch.
+           placeholder="Please enter your ORCID if you have one.">
+  </p>
+
+  <div *ngIf="sessionType == 'new'">
+    <p>
+      <button (click)="new()" class="fake_button">Click here to start a new deposition from scratch.</button>
     </p>
-    <p *ngIf="!inputFile.files[0] && bmrbid.value">
-      Click
-      <button (click)="new()" class="fake_button"> here</button>
-      to start a new deposition from the existing entry {{bmrbid.value}}.
+    <br>
+  </div>
+
+  <div *ngIf="sessionType == 'bmrb_id'">
+    <label for="bootstrap"></label>
+    <p><input #bmrbid [(ngModel)]="bootstrapID" id="bootstrap" placeholder="BMRB ID"
+              [class.red-background]="!bootstrapID"
+              type="text"></p>
+
+    <p *ngIf="bootstrapID">
+      <button (click)="new()" class="fake_button">Click here to start a new deposition from the existing
+        entry {{bmrbid.value}}.
+      </button>
     </p>
-    <p *ngIf="inputFile.files[0] && !bmrbid.value">
-      Click
-      <button (click)="new()" class="fake_button"> here</button>
-      to start a new deposition from the selected file - "{{inputFile.files[0].name}}".
+    <p *ngIf="!bootstrapID">
+      <button class="fake_button" disabled>Please enter a BMRB ID for an existing entry, or change the deposition type.</button>
     </p>
   </div>
+
+  <div *ngIf="sessionType == 'file'">
+    <p>
+      <input #inputFile placeholder="Upload file" type="file">
+    </p>
+
+    <p *ngIf="inputFile.files[0]">
+      <button (click)="new()" class="fake_button">Click here to start a new deposition from the selected file -
+        "{{inputFile.files[0].name}}".
+      </button>
+    </p>
+    <button *ngIf="!inputFile.files[0]" class="fake_button" disabled>
+      Please select an NMR-STAR file to upload, or change the deposition type.
+    </button>
+  </div>
+
   <div>
-    <h2>Resume deposition</h2>
-    <input (ngModelChange)="validate()" [(ngModel)]="sessionID"
-           placeholder="Please enter your BMRBDep session ID."
-           type="text">
-    <p *ngIf="validResumeID == 'valid'">
-      Click
-      <button [routerLink]="['/entry/', sessionID, 'saveframe', 'deposited_data_files', 'category']"
-              class="fake_button">here
-      </button>
-      to resume deposition {{sessionID}}.
-    </p>
-    <p *ngIf="validResumeID == 'invalid'">
-      <button class="fake_button"
-              disabled
-              title="Deposition IDs have the form: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">Enter a valid BMRBDep session ID to resume deposition
-      </button>
-    </p>
-    <p *ngIf="validResumeID == 'adit'">
-      <button class="fake_button"
-              disabled
-              title="Deposition IDs have the form: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">The session ID you entered looks like an ADIT resume ID. Those do not work here.
-      </button>
+    <h3>Resume deposition</h3>
+    <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the deposition.</p>
+    <p>If you have lost that e-mail, please
+      <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBDep session">contact us.</a>
     </p>
   </div>
 </div>
