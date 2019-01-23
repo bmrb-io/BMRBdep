@@ -77,7 +77,10 @@ export class Saveframe {
     // Copy the tags
     for (const tag of this.tags) {
       if (clearValues) {
-        newFrame.addTag(tag.name, null);
+        const newTag = newFrame.addTag(tag.name, null);
+        if (newTag.schemaValues['default value'] !== '?') {
+          newTag.value = newTag.schemaValues['default value'];
+        }
       } else {
         newFrame.addTag(tag.name, tag.value);
       }
@@ -108,10 +111,11 @@ export class Saveframe {
     return {category: this.category, name: this.name, tag_prefix: this.tagPrefix, tags: this.tags, loops: this.loops};
   }
 
-  addTag(name: string, value: string): void {
+  addTag(name: string, value: string): SaveframeTag {
     const newTag = new SaveframeTag(name, value, this);
     this.tags.push(newTag);
     this.tagDict[newTag.fullyQualifiedTagName] = newTag;
+    return newTag;
   }
 
   addTags(tagList: string[][]): void {
