@@ -132,6 +132,9 @@ export class Tag {
         // 19 is the special case that means the enumeration tie is for a file
         if (this.schemaValues['Enumeration ties'] === '19') {
           this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
+          if (this.fullyQualifiedTagName === '_Chem_comp.Image_file_name') {
+            this.enums.add(this.schemaValues['default value']);
+          }
         } else {
           const parentEntry: Entry = this.getEntry();
           let enumerationSet = parentEntry.enumerationTies[this.schemaValues['Enumeration ties']];
@@ -207,7 +210,7 @@ export class Tag {
       // Check data type
     } else if (!this.schemaValues['Regex'].test(this.value)) {
       this.valid = false;
-      this.validationMessage = 'Tag does not match specified data type.';
+      this.validationMessage = 'Value does not match specified data type.';
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
@@ -216,7 +219,7 @@ export class Tag {
           this.validationMessage = 'There are currently no valid values for this tag.';
         } else {
           this.valid = false;
-          this.validationMessage = 'Tag does not match one of the allowed options.';
+          this.validationMessage = 'Value does not match one of the allowed options.';
         }
       }
     }
