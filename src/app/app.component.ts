@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {ApiService} from './api.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ export class AppComponent implements OnInit {
 
   sidenav_open: boolean;
 
-  constructor() {
+  constructor(public api: ApiService) {
     this.sidenav_open = false;
   }
 
