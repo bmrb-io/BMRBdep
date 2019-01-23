@@ -71,7 +71,12 @@ export class Loop {
   addRow(): Array<LoopTag> {
     const newRow = [];
     for (const tag of this.tags) {
-      newRow.push(new LoopTag(tag, null, this));
+      const newTag = new LoopTag(tag, null, this);
+      // Add the default value if the tag has one
+      if (newTag.schemaValues['default value'] !== '?') {
+        newTag.value = newTag.schemaValues['default value'];
+      }
+      newRow.push(newTag);
     }
     this.data.push(newRow);
 
@@ -86,17 +91,16 @@ export class Loop {
   duplicate(clearValues: boolean = false): Loop {
     const newLoop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
-    for (const row of this.data) {
-      const newRow = [];
-      for (const item of row) {
-        const val = clearValues ? null : item.value;
-        newRow.push(new LoopTag(item.name, val, newLoop));
+    if (!clearValues) {
+      for (const row of this.data) {
+        const newRow = [];
+        for (const item of row) {
+          newRow.push(new LoopTag(item.name, item.value, newLoop));
+        }
+        newLoop.data.push(newRow);
       }
-      newLoop.data.push(newRow);
-      // Just one row of null data if cloning
-      if (clearValues) {
-        return newLoop;
-      }
+    } else {
+      newLoop.addRow();
     }
 
     return newLoop;
