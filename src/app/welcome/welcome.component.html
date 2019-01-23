@@ -5,9 +5,9 @@
       <input [(ngModel)]="authorEmail" placeholder="Please enter your e-mail." [class.red-background]="!authorEmail"><br>
         <input [(ngModel)]="authorORCID" placeholder="Please enter your ORCID if you have one." ><br>
         <div class="minor_box">
-              <label for="bootstrap">To pre-fill your deposition from a released entry or an uploaded NMR-STAR file:</label><br>
+              <label for="bootstrap">To pre-fill your deposition from a released entry:</label><br>
               <input #bmrbid type="text" id="bootstrap" [disabled]="inputFile.files[0]" [(ngModel)]="bootstrapID" placeholder="BMRB ID"><br>
-          or
+          or an uploaded NMR-STAR file:
               <p><input type="file" [disabled]="bmrbid.value" placeholder="Upload file" #inputFile (change)="fileChangeEvent()"></p>
         </div>
         <p *ngIf="!inputFile.files[0] && !bmrbid.value">Click <button class="fake_button" (click)="new()"> here</button> to start a new deposition from scratch.</p>
