@@ -64,6 +64,18 @@ export class Saveframe {
     console.log(this);
   }
 
+  delete() {
+    this.tagDict[this.tagPrefix + '._Deleted'].value = 'yes';
+  }
+
+  restore() {
+    this.tagDict[this.tagPrefix + '._Deleted'].value = 'no';
+  }
+
+  deleted() {
+    return this.tagDict[this.tagPrefix + '._Deleted'].value === 'yes';
+  }
+
   duplicate(clearValues: boolean = false): Saveframe {
     let frameIndex = this.parent.getSaveframesByCategory(this.category).length + 1;
     let frameName = this.category + '_' + frameIndex;
@@ -218,14 +230,6 @@ export class Saveframe {
     // Get the category number for this SF
     this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
-    // Get the SF name from the Name tag
-    const nameTag: SaveframeTag = this.tagDict[this.tagPrefix + '.Name'];
-    if (nameTag && nameTag.value) {
-      const framecodeTag: SaveframeTag = this.tagDict[this.tagPrefix + '.Sf_framecode'];
-      framecodeTag.value = nameTag.value.replace(/[\s+]/g, '_');
-      this.name = framecodeTag.value;
-    }
-
     // Update the tags
     for (const tag of this.tags) {
       tag.updateTagStatus();
@@ -273,6 +277,11 @@ export class Saveframe {
           break;
         }
       }
+    }
+
+    // Now make invisible if deleted
+    if (this.deleted()) {
+      this.display = 'H';
     }
   }
 
