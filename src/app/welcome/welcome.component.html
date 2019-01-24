@@ -50,7 +50,7 @@
 
   <div *ngIf="sessionType == 'file'">
     <p>
-      <input #inputFile placeholder="Upload file" type="file">
+      <input (change)="fileChangeEvent()" #inputFile placeholder="Upload file" type="file">
     </p>
 
     <p *ngIf="inputFile.files[0]">
