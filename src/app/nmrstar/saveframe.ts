@@ -318,6 +318,11 @@ export class Saveframe {
         return '';
     }
 
+    // Skip if we are deleted
+    if (this.deleted()) {
+      return '';
+    }
+
     let width = 0;
 
     for (const tag of this.tags) {
