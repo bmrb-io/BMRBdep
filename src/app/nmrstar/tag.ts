@@ -43,6 +43,10 @@ export class Tag {
         'default value': '?', 'Example': '?', 'ADIT category view name': 'Missing',
         'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': 'N'
       };
+      // Don't show internal tags
+      if (this.name.startsWith('_')) {
+        this.schemaValues['User full view'] = 'H';
+      }
       this.enums = null;
       this.display = 'H';
     }
