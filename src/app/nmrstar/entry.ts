@@ -101,13 +101,14 @@ export class Entry {
     }
   }
 
-  removeSaveframe(saveframe: Saveframe): void {
-    const index = this.saveframes.indexOf(saveframe, 0);
-    if (index > -1) {
-      this.saveframes.splice(index, 1);
+  getDeletedSaveframes() {
+    const deletedFrames = [];
+    for (const saveframe of this.saveframes) {
+      if (!saveframe.deleted()) {
+        deletedFrames.push(saveframe);
+      }
     }
-
-    this.refresh();
+    return deletedFrames;
   }
 
   updateCategories(): void {
