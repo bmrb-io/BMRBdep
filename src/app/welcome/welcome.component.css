@@ -26,16 +26,13 @@ input[type="submit"], input[type="reset"], input[type="button"], input[type="fil
   background: #EDEDED;
 }
 
-.red {
-  color: red;
-}
-
 .red-background {
-  background-color: #FF91A4 !important;
+  background-color: #FFE4E1 !important;
 }
 
 .full_margin {
   margin: 1em;
+  font-size: larger;
 }
 
 .minor_box {
