@@ -2,7 +2,6 @@ import {Saveframe} from './saveframe';
 import {Loop} from './loop';
 import {Schema} from './schema';
 import {Entry} from './entry';
-import {environment} from '../../environments/environment';
 
 export class Tag {
   name: string;
@@ -133,6 +132,8 @@ export class Tag {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
     }
 
+    let matchedPointer = false;
+
     if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
         // 19 is the special case that means the enumeration tie is for a file
@@ -154,7 +155,10 @@ export class Tag {
           }
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
-          this.enums = new Set(function*() { yield* enumerationSet; yield* temp; }());
+          this.enums = new Set(function* () {
+            yield* enumerationSet;
+            yield* temp;
+          }());
         }
       }
 
@@ -176,37 +180,26 @@ export class Tag {
       }
 
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
-        // Check if we are a pointer, if so, enumerate the saveframes to point to
-        if (this.schemaValues['Sf pointer'] === 'Y') {
-          // Show this tag as a closed enum
-          this.interfaceType = 'sf_pointer';
-          const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
-          if (framesOfCategory.length > 0) {
-            this.frameLink = [];
-            for (const sf of framesOfCategory) {
-              const nameTag = sf.tagDict[sf.tagPrefix + '.' + 'Name'];
-              if (nameTag) {
-                this.frameLink.push(['$' + sf.name, nameTag.value]);
-              } else {
-                // This is only because a problem with the dictionary - saveframes that are pointed to but don't have a Name tag
-                this.frameLink.push(['$' + sf.name, sf.name]);
-              }
-            }
-          } else {
-            if (environment.debug) {
-              console.warn('Sf pointer set to \'Y\' but no tags!', this);
-            }
-            this.enums = new Set(['No saveframes of category ' + this.schemaValues['Foreign Table'] +
-            ' found in entry. Please create at least one.']);
-            this.valid = false;
-          }
-          if (!this.enums.has(this.value)) {
-            this.valid = false;
-            this.validationMessage = 'Tag must have a value.';
-          }
+      // Show this tag as a closed enum
+      this.interfaceType = 'sf_pointer';
+      const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+
+      this.frameLink = [];
+      for (const sf of framesOfCategory) {
+        if (sf.deleted()) {
+          continue;
         }
-    } else {
-        console.error('What is this "sf pointer" value?', this.schemaValues['Sf pointer'], this);
+        const nameTag = sf.tagDict[sf.tagPrefix + '.Name'];
+        if (nameTag) {
+          this.frameLink.push(['$' + sf.name, nameTag.value]);
+          if ('$' + sf.name === this.value) {
+            matchedPointer = true;
+          }
+        } else {
+          // This is only because a problem with the dictionary - saveframes that are pointed to but don't have a Name tag
+          this.frameLink.push(['$' + sf.name, sf.name]);
+        }
+      }
     }
 
 
@@ -232,6 +225,23 @@ export class Tag {
         } else {
           this.valid = false;
           this.validationMessage = 'Value does not match one of the allowed options.';
+        }
+      }
+    }
+    if (this.interfaceType === 'sf_pointer') {
+
+      // We have a value that doesn't exist...
+      if (!matchedPointer) {
+        this.valid = false;
+
+        if (this.frameLink.length === 0) {
+          this.validationMessage = 'No data of this category exists.';
+        } else {
+          this.validationMessage = 'Invalid selected value. Have you deleted the data it referenced?';
+        }
+
+        if (this.value) {
+          this.frameLink.push([this.value, this.value + ' - ' + this.validationMessage]);
         }
       }
     }
