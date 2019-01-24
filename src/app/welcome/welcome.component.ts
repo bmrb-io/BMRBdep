@@ -41,6 +41,8 @@ export class WelcomeComponent implements OnInit {
     }
   }
 
+  // This is needed for angular to detect the file upload
+  fileChangeEvent() {}
 
   new() {
     let bootstrapID = this.bootstrapID;
