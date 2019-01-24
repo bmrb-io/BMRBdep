@@ -17,7 +17,9 @@ export class Tag {
   display: string;
   fullyQualifiedTagName: string;
   enums: Set<string>;
-  parent?: Object;
+  frameLink: Array<[string, string]>;
+  parent: Object;
+
 
   constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
     this.name = name;
@@ -74,7 +76,7 @@ export class Tag {
           } else if (this.schemaValues['Item enumeration closed'] === 'N') {
             this.interfaceType = 'open_enum';
           } else {
-            console.log('Enum list and "Item enumerated"="Y" but no "Item enumeration closed" value: ' + this.fullyQualifiedTagName);
+            console.warn('Enum list and "Item enumerated"="Y" but no "Item enumeration closed" value: ' + this.fullyQualifiedTagName);
             this.interfaceType = 'open_enum';
           }
           // Enum list exists but not open or closed!?
@@ -173,12 +175,18 @@ export class Tag {
         // Check if we are a pointer, if so, enumerate the saveframes to point to
         if (this.schemaValues['Sf pointer'] === 'Y') {
           // Show this tag as a closed enum
-          this.interfaceType = 'closed_enum';
+          this.interfaceType = 'sf_pointer';
           const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
           if (framesOfCategory.length > 0) {
-            this.enums = new Set();
+            this.frameLink = [];
             for (const sf of framesOfCategory) {
-              this.enums.add('$' + sf.name);
+              const nameTag = sf.tagDict[sf.tagPrefix + '.' + 'Name'];
+              if (nameTag) {
+                this.frameLink.push(['$' + sf.name, nameTag.value]);
+              } else {
+                // This is only because a problem with the dictionary - saveframes that are pointed to but don't have a Name tag
+                this.frameLink.push(['$' + sf.name, sf.name]);
+              }
             }
           } else {
             if (environment.debug) {
