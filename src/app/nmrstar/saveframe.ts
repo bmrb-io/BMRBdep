@@ -334,6 +334,11 @@ export class Saveframe {
         continue;
       }
 
+      // Don't show "internal" tags
+      if (tag.name.startsWith('_')) {
+        continue;
+      }
+
       const cleanedTag = cleanValue(tag.value);
 
       if (cleanedTag.indexOf('\n') === -1) {
