@@ -79,7 +79,7 @@ export class Tag {
           }
           // Enum list exists but not open or closed!?
         } else {
-          console.log('Enum list but no "Item enumerated" value: ' + this.fullyQualifiedTagName);
+          console.warn('Enum list but no "Item enumerated" value: ' + this.fullyQualifiedTagName);
           this.interfaceType = 'open_enum';
         }
       } else {
