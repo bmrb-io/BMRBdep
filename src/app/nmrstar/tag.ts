@@ -139,8 +139,9 @@ export class Tag {
         // 19 is the special case that means the enumeration tie is for a file
         if (this.schemaValues['Enumeration ties'] === '19') {
           this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
-          if (this.fullyQualifiedTagName === '_Chem_comp.Image_file_name') {
-            this.enums.add(this.schemaValues['default value']);
+          // Add a "deselect" option for non-mandatory tags
+          if (this.display !== 'Y') {
+            this.enums.add('');
           }
         } else {
           const parentEntry: Entry = this.getEntry();
@@ -227,16 +228,13 @@ export class Tag {
           this.validationMessage = 'Value does not match one of the allowed options.';
         }
       }
-    }
-    if (this.interfaceType === 'sf_pointer') {
+    } else if (this.interfaceType === 'sf_pointer') {
 
       // We have a value that doesn't exist...
-      if (!matchedPointer) {
+      if (!matchedPointer && this.value) {
         this.valid = false;
 
-        if (this.frameLink.length === 0) {
-          this.validationMessage = 'No data of this category exists.';
-        } else {
+        if (this.frameLink.length >= 0) {
           this.validationMessage = 'Invalid selected value. Have you deleted the data it referenced?';
         }
 
