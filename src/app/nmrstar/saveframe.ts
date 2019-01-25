@@ -73,7 +73,7 @@ export class Saveframe {
   }
 
   deleted() {
-    return this.tagDict[this.tagPrefix + '._Deleted'].value === 'yes';
+    return this.tagDict[this.tagPrefix + '._Deleted'] && this.tagDict[this.tagPrefix + '._Deleted'].value === 'yes';
   }
 
   duplicate(clearValues: boolean = false): Saveframe {
