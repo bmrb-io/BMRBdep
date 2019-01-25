@@ -3,11 +3,11 @@
     <button class="real_button line right_margin"
             *ngIf="saveframes[0].previousCategory"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
-      Previous category</button>
+      Previous section</button>
     <button class="real_button line"
             *ngIf="saveframes[0].nextCategory ; else final_review_top"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
-      Next category</button>
+      Next section</button>
     <ng-template #final_review_top>
       <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
     </ng-template>
@@ -18,11 +18,11 @@
       <button class="real_button line right_margin"
               *ngIf="saveframes[0].previousCategory"
               [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
-        Previous category</button>
+        Previous section</button>
       <button class="real_button line"
               *ngIf="saveframes[0].nextCategory; else final_review_bottom"
               [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
-        Next category</button>
+        Next section</button>
       <ng-template #final_review_bottom>
         <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
       </ng-template>
@@ -31,6 +31,6 @@
   <ng-template #missing>
     <h3 class="red">No matching saveframes found in this entry. Click
       <a [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">here</a>
-       to return to a category that exists.</h3>
+       to return to a section that exists.</h3>
   </ng-template>
 </div>
