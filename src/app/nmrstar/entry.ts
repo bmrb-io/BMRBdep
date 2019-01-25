@@ -324,7 +324,7 @@ export class Entry {
                   conditionalTag.display = rule['Override view value'];
                 }
               }
-            // See if the rule applies to a child loop
+              // See if the rule applies to a child loop
             } else {
               const loopsByPrefix = {};
               for (const loop of saveframe.loops) {
@@ -333,7 +333,7 @@ export class Entry {
               // The rule applies to a loop in this saveframe
               if (loopsByPrefix[rule['Tag category']]) {
                 loopsByPrefix[rule['Tag category']].setVisibility(rule);
-              // The rule applies to a saveframe elsewhere
+                // The rule applies to a saveframe elsewhere
               } else {
                 for (const frame of this.getSaveframesByCategory(rule['Sf category'])) {
                   frame.setVisibility(rule);
@@ -408,8 +408,8 @@ export class Entry {
     dfLoop.data = [];
     for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
       for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+        let contentDescription = null;
         let sfCategory = null;
-        let sfDescription = null;
 
         // Make sure there is at least an empty record for each file
         if (n === -1) {
@@ -417,14 +417,22 @@ export class Entry {
             continue;
           }
         } else {
-          sfCategory = this.dataStore.dataFiles[i].control.value[n][0];
-          sfDescription = this.dataStore.dataFiles[i].control.value[n][1];
+          contentDescription = this.dataStore.dataFiles[i].control.value[n][0];
+          sfCategory = this.dataStore.dataFiles[i].control.value[n][1];
         }
         const newRow = dfLoop.addRow();
         newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length + 1), dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
-        newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', sfCategory, dfLoop);
-        newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfDescription, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', contentDescription, dfLoop);
+        if (sfCategory === null) {
+          newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', null, dfLoop);
+        } else {
+          if (sfCategory.length === 1) {
+            newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', sfCategory[0], dfLoop);
+          } else {
+            newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', '*', dfLoop);
+          }
+        }
         newRow[dfLoop.tags.indexOf('Data_file_syntax')] = new LoopTag('Data_file_syntax', null, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_immutable_flag')] = new LoopTag('Data_file_immutable_flag', null, dfLoop);
         newRow[dfLoop.tags.indexOf('Sf_ID')] = new LoopTag('Sf_ID', null, dfLoop);
@@ -484,7 +492,7 @@ export class Entry {
       const sel = getSelectionByDescription(dataRow[dataDescriptionRow].value);
       if (!sel) {
         console.error('Could not match saved data type "' + dataRow[dataDescriptionRow].value +
-                      '" - this is a serious problem as data associations for this file will be lost.');
+          '" - this is a serious problem as data associations for this file will be lost.');
       }
       if (!dataBuilder[dataRow[dataFileNameRow].value]) {
         dataBuilder[dataRow[dataFileNameRow].value] = [];
