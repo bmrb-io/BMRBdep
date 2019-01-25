@@ -65,15 +65,15 @@ export class Saveframe {
   }
 
   delete() {
-    this.tagDict[this.tagPrefix + '._Deleted'].value = 'yes';
+    this.getTag('_Deleted').value = 'yes';
   }
 
   restore() {
-    this.tagDict[this.tagPrefix + '._Deleted'].value = 'no';
+    this.getTag('_Deleted').value = 'no';
   }
 
   deleted() {
-    return this.tagDict[this.tagPrefix + '._Deleted'] && this.tagDict[this.tagPrefix + '._Deleted'].value === 'yes';
+    return this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
   }
 
   duplicate(clearValues: boolean = false): Saveframe {
@@ -98,11 +98,11 @@ export class Saveframe {
       }
     }
     // Set the framecode and category regardless of clearValues argument
-    newFrame.tagDict[this.tagPrefix + '.Sf_framecode'].value = frameName;
-    newFrame.tagDict[this.tagPrefix + '.Sf_category'].value = this.category;
+    newFrame.getTag('Sf_framecode').value = frameName;
+    newFrame.getTag('Sf_category').value = this.category;
     // New saveframes should always require entering the label
-    if (newFrame.tagDict[this.tagPrefix + '.Name']) {
-      newFrame.tagDict[this.tagPrefix + '.Name'].value = null;
+    if (newFrame.getTag('Name')) {
+      newFrame.getTag('Name').value = null;
     }
 
     // Copy the loops
@@ -165,9 +165,11 @@ export class Saveframe {
     }
   }
 
-  getTag(fqtn: string): SaveframeTag {
-    if (fqtn in this.tagDict) {
-      return this.tagDict[fqtn];
+  getTag(tagName: string): SaveframeTag {
+    if (tagName in this.tagDict) {
+      return this.tagDict[tagName];
+    } else if ((this.tagPrefix + '.' + tagName) in this.tagDict) {
+      return this.tagDict[this.tagPrefix + '.' + tagName];
     } else {
       return null;
     }
@@ -315,7 +317,7 @@ export class Saveframe {
 
     // Skip if we have no data
     if (this.checkEmpty() && !mandatoryDisplay) {
-        return '';
+      return '';
     }
 
     // Skip if we are deleted
@@ -382,15 +384,15 @@ export class Saveframe {
         '_Chem_shift_reference.Other_shifts_flag'
       ];
       for (const tag of tagsToCheck) {
-        if (this.tagDict[tag].value !== 'no') {
+        if (this.getTag(tag).value !== 'no') {
           allNo = false;
           break;
         }
       }
       if (allNo) {
         for (const tag of tagsToCheck) {
-          this.tagDict[tag].valid = false;
-          this.tagDict[tag].validationMessage = 'At least one chemical shift reference must be given.';
+          this.getTag(tag).valid = false;
+          this.getTag(tag).validationMessage = 'At least one chemical shift reference must be given.';
         }
       }
 
