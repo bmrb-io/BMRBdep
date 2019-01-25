@@ -13,7 +13,7 @@
         <tr>
           <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
           <a class="header_text" [title]="saveframe.schemaValues['group_view_help']">
-            {{saveframe.schemaValues['category_group_view_name']}}
+            {{saveframe.tags[0].schemaValues['ADIT category view name']}}
           </a>
           </th>
           <th>
