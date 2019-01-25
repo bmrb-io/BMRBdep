@@ -31,7 +31,7 @@
 <label *ngIf="tag.interfaceType == 'sf_pointer'">
   <select [(ngModel)]="tag.value"
           [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
-          (change)="validateTag()"
+          (ngModelChange)="validateTag()"
           [title]="tag.validationMessage"
           [disabled]="tag.disabled">
 
@@ -39,6 +39,7 @@
             [ngClass]="{'type_error': !tag.valid}">{{frameLink[1]}}</option>
     <option *ngIf="tag.frameLink.length == 0" [value]="tag.value" [ngClass]="{'type_error': !tag.valid}" disabled>No
       valid saveframes of this type present in the entry.</option>
+    <option *ngIf="tag.display != 'Y'" [ngValue]="null" [ngClass]="{'type_error': !tag.valid}"></option>
   </select>
 </label>
 
