@@ -97,8 +97,10 @@ export class DataFileStore {
     const results: Set<string> = new Set();
     for (let i = 0; i < this.dataFiles.length; i++) {
       for (let n = 0; n < this.dataFiles[i].control.value.length; n++) {
-        if (this.dataFiles[i].control.value[n][1] === category) {
-          results.add(this.dataFiles[i].fileName);
+        for (const specificCategory of this.dataFiles[i].control.value[n][1]) {
+          if (specificCategory === category) {
+            results.add(this.dataFiles[i].fileName);
+          }
         }
       }
     }
