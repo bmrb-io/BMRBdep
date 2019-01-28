@@ -14,7 +14,7 @@ export class WelcomeComponent implements OnInit {
   constructor(private router: Router, private api: ApiService) {
   }
 
-  sessionType = new FormControl('new',);
+  sessionType = new FormControl('', [Validators.required]);
   authorEmail = new FormControl('', [
     Validators.required,
     Validators.email,
@@ -62,7 +62,8 @@ export class WelcomeComponent implements OnInit {
       fileElement = this.fileUploadElement.nativeElement.files[0];
     }
 
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement, this.bootstrapID.value).subscribe(
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement,
+      this.bootstrapID.value).subscribe(
       response => {
         if (response) {
           this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
