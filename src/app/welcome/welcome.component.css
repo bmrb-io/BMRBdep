@@ -1,44 +1,16 @@
-input[type="text"], input[type="text"]:not(.combobox), input:not([type]), textarea {
-  border-radius: 3px;
-  transition: all 0.5s ease;
-  background: #EDEDED;
-  border: 1px solid #C8C8C8;
-  color: #777777;
-  margin: 7px 5px 7px 0;
-  padding: 5px 3px 5px 3px;
-  width: 350px;
-}
-
-input[type="text"]:focus, input:not([type]):focus, textarea:focus {
-  box-shadow: 0 0 2px #666666 inset;
-  background-color: #FFFFFF;
-  border: 1px solid #666666;
-  outline: none;
-}
-
-input[type="submit"], input[type="reset"], input[type="button"], input[type="file"], input[type="checkbox"], select, button {
-  text-decoration: inherit;
-  border-radius: 3px;
-  border: 1px solid #C8C8C8;
-  padding: 5px 10px 5px 10px;
-  cursor: pointer;
-  display: inline-block;
-  background: #EDEDED;
-}
-
-.red-background {
-  background-color: #FFE4E1 !important;
-}
-
-.full_margin {
+.content-box {
+  display: flex;
+  flex-direction: column;
   margin: 1em;
-  font-size: larger;
+  border: solid 1px #33527b;
+  border-radius: 5px;
+  padding: 0 1em 1em;
 }
 
-.minor_box {
-  border: solid 1px #33527b;
-  padding: .5em;
-  border-radius: 5px;
-  overflow: auto;
-  width: fit-content;
+.content-box > * {
+  width: 100%;
+}
+
+h1 {
+  margin-left: .5em;
 }
