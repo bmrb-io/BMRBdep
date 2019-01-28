@@ -177,8 +177,6 @@ export class Loop {
       }
     }
 
-    this.specialRules();
-
     // Update the per-tag visibility
     this.displayTags  = new Array(this.displayTags.length).fill('H');
     for (const row of this.data) {
@@ -215,6 +213,8 @@ export class Loop {
           }
         }
       }
+
+    this.specialRules();
   }
 
   print(): string {
@@ -340,20 +340,12 @@ export class Loop {
           }
         }
       }
+
       if (!valid) {
         this.valid = false;
         for (const tag of roleTags) {
           tag.valid = false;
           tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
-        }
-      }
-
-      // Hide the _Contact_person.Address_3 tag if nothing is present for the _Contact_person.Address_2 tag
-      const contactTwoIndex = this.tags.indexOf('Address_2');
-      const contactThreeIndex = this.tags.indexOf('Address_3');
-      for (const row of this.data) {
-        if (!row[contactTwoIndex].value) {
-          row[contactThreeIndex].display = 'H';
         }
       }
     }
