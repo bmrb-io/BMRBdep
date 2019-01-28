@@ -104,7 +104,7 @@ export class Entry {
   getDeletedSaveframes() {
     const deletedFrames = [];
     for (const saveframe of this.saveframes) {
-      if (!saveframe.deleted()) {
+      if (!saveframe.deleted) {
         deletedFrames.push(saveframe);
       }
     }

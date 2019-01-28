@@ -21,6 +21,7 @@ import {MessageComponent} from './message/message.component';
 // For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
 import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
+import {RestoreComponent} from './restore/restore.component'; // Saving/loading bar
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -53,6 +54,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Sav
     FileUploaderComponent,
     MessageComponent,
     ReviewComponent,
+    RestoreComponent,
   ],
   imports: [
     BrowserModule,

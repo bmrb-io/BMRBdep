@@ -187,7 +187,7 @@ export class Tag {
 
       this.frameLink = [];
       for (const sf of framesOfCategory) {
-        if (sf.deleted()) {
+        if (sf.deleted) {
           continue;
         }
         const nameTag = sf.tagDict[sf.tagPrefix + '.Name'];
