@@ -23,6 +23,7 @@ export class Saveframe {
   parent: Entry;
   display: string;
   valid: boolean;
+  deleted: boolean;
   tagDict: {};
   schemaValues: {};
   index: number;
@@ -39,6 +40,7 @@ export class Saveframe {
     this.tagDict = {};
     this.display = 'H';
     this.valid = true;
+    this.deleted = false;
     this.index = 0;
     this.nextCategory = null;
     this.previousCategory = null;
@@ -70,10 +72,6 @@ export class Saveframe {
 
   restore() {
     this.getTag('_Deleted').value = 'no';
-  }
-
-  deleted() {
-    return this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
   }
 
   duplicate(clearValues: boolean = false): Saveframe {
@@ -281,10 +279,8 @@ export class Saveframe {
       }
     }
 
-    // Now make invisible if deleted
-    if (this.deleted()) {
-      this.display = 'H';
-    }
+    // Determine if deleted
+    this.deleted = this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
   }
 
   checkEmpty() {
@@ -321,7 +317,7 @@ export class Saveframe {
     }
 
     // Skip if we are deleted
-    if (this.deleted()) {
+    if (this.deleted) {
       return '';
     }
 

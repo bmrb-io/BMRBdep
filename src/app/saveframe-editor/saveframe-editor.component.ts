@@ -44,7 +44,13 @@ export class SaveframeEditorComponent implements OnInit {
         this.saveframes = [];
       }
     } else if (this.loadType === 'category') {
-      this.saveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
+      const allCategorySaveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
+      this.saveframes = [];
+      for (const saveframe of allCategorySaveframes) {
+        if (!saveframe.deleted) {
+          this.saveframes.push(saveframe);
+        }
+      }
     }
     this.entry.updateCategories();
   }
