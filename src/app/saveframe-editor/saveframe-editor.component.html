@@ -1,5 +1,6 @@
 <div *ngIf="entry">
   <div class="saveframe_editor" *ngIf="saveframes.length > 0; else missing">
+    <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
     <button class="real_button line right_margin"
             *ngIf="saveframes[0].previousCategory"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
