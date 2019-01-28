@@ -5,7 +5,7 @@
       <h2>Start a new deposition</h2>
 
       <mat-form-field>
-        <mat-select [formControl]="sessionType" placeholder="Select a deposition type">
+        <mat-select [formControl]="sessionType" placeholder="Select a deposition type" required>
           <mat-option value="new">New deposition from scratch</mat-option>
           <mat-option value="bmrb_id">Begin a deposition from an existing and released BMRB entry</mat-option>
           <mat-option value="file">Begin a deposition from an uploaded NMR-STAR file</mat-option>
@@ -16,7 +16,8 @@
       <mat-form-field>
         <input matInput
                [formControl]="authorEmail"
-               placeholder="Please enter your e-mail.">
+               placeholder="Please enter your e-mail."
+               required>
         <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
       </mat-form-field>
 
@@ -40,18 +41,21 @@
       <mat-form-field *ngIf="sessionType.value == 'bmrb_id'">
         <input matInput
                [formControl]="bootstrapID"
-               placeholder="Enter the BMRB ID from which to start a new deposition.">
+               placeholder="Enter the BMRB ID from which to start a new deposition."
+               required>
         <mat-error *ngIf="bootstrapID.invalid" [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
       </mat-form-field>
 
       <div *ngIf="sessionType.value == 'file'">
         <input type="file" #inputFile (change)="fileChangeEvent()"/><br><br>
 
-        <button *ngIf="sessionType.value == 'file' && !inputFile.files[0]" mat-flat-button class="mat-flat-button mat-primary" disabled>
+        <button *ngIf="sessionType.value == 'file' && !inputFile.files[0]" mat-flat-button
+                class="mat-flat-button mat-primary" disabled>
           Please select a file to upload.
         </button>
 
-        <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-flat-button class="mat-flat-button mat-primary">
+        <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-flat-button
+                class="mat-flat-button mat-primary">
           Click here to start a new deposition from {{inputFile.files[0]?.name}}.
         </button>
       </div>
