@@ -26,6 +26,7 @@ import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.compo
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatIconModule,
+  MatInputModule,
   MatListModule,
   MatProgressBarModule,
   MatSelectModule,
@@ -64,6 +65,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Sav
     MatSelectModule,
     MatSlideToggleModule,
     MatSidenavModule,
+    MatInputModule,
     MatListModule,
     MatToolbarModule,
     MatIconModule,

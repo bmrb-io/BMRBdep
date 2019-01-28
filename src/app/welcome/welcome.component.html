@@ -1,69 +1,73 @@
-<div class="details_box full_margin">
+<div>
   <h1>Welcome to BMRBDep!</h1>
-  <h2>Start new deposition</h2>
-  <p>
-    <label>
-      <select [(ngModel)]="sessionType">
-        <option value="new">New deposition from scratch</option>
-        <option value="bmrb_id">Begin a deposition from an existing and released BMRB entry</option>
-        <option value="file">Begin a deposition from an uploaded NMR-STAR file</option>
-      </select>
-    </label>
-  </p>
-  <p>
-    <input [(ngModel)]="authorEmail"
-           [class.red-background]="!authorEmail"
-           placeholder="Please enter your e-mail.">
-  </p>
-  <p>
-    <input [(ngModel)]="depositionNickname"
-           [class.red-background]="!depositionNickname"
-           placeholder="Please enter a brief nickname for this deposition.">
-  </p>
-  <p>
-    <input [(ngModel)]="authorORCID"
-           placeholder="Please enter your ORCID if you have one.">
-  </p>
+  <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
+    <div class="content-box">
+      <h2>Start a new deposition</h2>
 
-  <div *ngIf="sessionType == 'new'">
-    <p>
-      <button (click)="new()" class="fake_button">Click here to start a new deposition from scratch.</button>
-    </p>
-    <br>
-  </div>
+      <mat-form-field>
+        <mat-select [formControl]="sessionType" required>
+          <mat-option value="new">New deposition from scratch</mat-option>
+          <mat-option value="bmrb_id">Begin a deposition from an existing and released BMRB entry</mat-option>
+          <mat-option value="file">Begin a deposition from an uploaded NMR-STAR file</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-  <div *ngIf="sessionType == 'bmrb_id'">
-    <label for="bootstrap"></label>
-    <p><input #bmrbid [(ngModel)]="bootstrapID" id="bootstrap" placeholder="BMRB ID"
-              [class.red-background]="!bootstrapID"
-              type="text"></p>
+      <mat-form-field>
+        <input matInput
+               [formControl]="authorEmail"
+               placeholder="Please enter your e-mail." required>
+        <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
+      </mat-form-field>
 
-    <p *ngIf="bootstrapID">
-      <button (click)="new()" class="fake_button">Click here to start a new deposition from the existing
-        entry {{bmrbid.value}}.
+      <mat-form-field>
+        <input matInput
+               [formControl]="depositionNickname"
+               placeholder="Please enter a brief nickname for this deposition."
+               required>
+        <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the deposition.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <input matInput
+               [formControl]="authorORCID"
+               placeholder="Please enter your ORCID if you have one.">
+        <mat-error *ngIf="authorORCID.invalid">Invalid ORCID value. Valid ORCID IDs look like: 0000-0002-1825-0097
+        </mat-error>
+      </mat-form-field>
+
+
+      <mat-form-field *ngIf="sessionType.value == 'bmrb_id'">
+        <input matInput
+               [formControl]="bootstrapID"
+               placeholder="Enter the BMRB ID from which to start a new deposition.">
+        <mat-error *ngIf="bootstrapID.invalid" [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
+      </mat-form-field>
+
+      <div *ngIf="sessionType.value == 'file'">
+        <input type="file" #inputFile (change)="fileChangeEvent()"/><br><br>
+
+        <button *ngIf="sessionType.value == 'file' && !inputFile.files[0]" mat-flat-button class="mat-flat-button mat-primary" disabled>
+          Please select a file to upload.
+        </button>
+
+        <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-flat-button class="mat-flat-button mat-primary">
+          Click here to start a new deposition from {{inputFile.files[0]?.name}}.
+        </button>
+      </div>
+
+      <br>
+      <button *ngIf="sessionType.value == 'bmrb_id'" mat-flat-button class="mat-flat-button mat-primary">
+        Click here to start a new deposition from an existing entry.
       </button>
-    </p>
-    <p *ngIf="!bootstrapID">
-      <button class="fake_button" disabled>Please enter a BMRB ID for an existing entry, or change the deposition type.</button>
-    </p>
-  </div>
 
-  <div *ngIf="sessionType == 'file'">
-    <p>
-      <input (change)="fileChangeEvent()" #inputFile placeholder="Upload file" type="file">
-    </p>
-
-    <p *ngIf="inputFile.files[0]">
-      <button (click)="new()" class="fake_button">Click here to start a new deposition from the selected file -
-        "{{inputFile.files[0].name}}".
+      <button *ngIf="sessionType.value == 'new'" mat-flat-button class="mat-flat-button mat-primary">
+        Click here to start a new deposition from scratch.
       </button>
-    </p>
-    <button *ngIf="!inputFile.files[0]" class="fake_button" disabled>
-      Please select an NMR-STAR file to upload, or change the deposition type.
-    </button>
-  </div>
 
-  <div>
+    </div>
+  </form>
+
+  <div class="content-box">
     <h3>Resume deposition</h3>
     <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the deposition.</p>
     <p>If you have lost that e-mail, please

@@ -138,7 +138,7 @@ export class ApiService {
 
   newDeposition(authorEmail: string,
                 depositionNickname: string,
-                orcid: string,
+                orcid: string = null,
                 file: File = null,
                 bootstrapID: string = null): Observable<any> {
     const apiEndPoint = `${environment.serverURL}/new`;
@@ -146,11 +146,17 @@ export class ApiService {
       MessageType.NotificationMessage, 0));
 
     const body = new FormData();
-    body.append('nmrstar_file', file);
     body.append('email', authorEmail);
     body.append('deposition_nickname', depositionNickname);
-    body.append('orcid', orcid);
-    body.append('bootstrapID', bootstrapID);
+    if (orcid) {
+      body.append('orcid', orcid);
+    }
+    if (file) {
+      body.append('nmrstar_file', file);
+    }
+    if (bootstrapID) {
+      body.append('bootstrapID', bootstrapID);
+    }
 
     const options = {
       params: new HttpParams(),
