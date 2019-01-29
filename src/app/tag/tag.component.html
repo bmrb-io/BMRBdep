@@ -53,7 +53,8 @@
            [title]="tag.validationMessage"
            [disabled]="tag.disabled"
            (focus)="storeValue()"
-           (blur)="restoreValue()"/>
+           (blur)="restoreValue()"
+           (keydown)="checkDelete($event.key)"/>
   </label>
   <datalist [id]="tag.fullyQualifiedTagName">
     <option *ngFor="let val of tag.enums" [value]="val">

@@ -62,4 +62,11 @@ export class TagComponent implements OnInit {
     }
   }
 
+  checkDelete(key): void {
+    // This checks if they have pressed the delete/backspace key on an open enum - if so we must clear the stored value
+    if (['Backspace', 'Delete'].indexOf(key) >= 0) {
+      this.storedValue = '';
+    }
+  }
+
 }
