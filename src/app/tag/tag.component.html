@@ -1,3 +1,31 @@
+<label *ngIf="tag.interfaceType == 'country'">
+  <select
+    [(ngModel)]="tag.value"
+    [ngClass]="{'type_error': !tag.valid, 'sf_input': true, 'crs-country': true}"
+    (change)="validateTag()"
+    [title]="tag.validationMessage"
+    [attr.data-region-id]="'state'+getRow()"
+    data-default-option="Select Country"
+>
+    <option [ngValue]="null">Select Country</option>
+  </select>
+</label>
+
+<label *ngIf="tag.interfaceType == 'state'">
+  <select
+    [(ngModel)]="tag.value"
+    [ngClass]="{'type_error': !tag.valid, 'sf_input': true}"
+    (change)="validateTag()"
+    [title]="tag.validationMessage"
+    [id]="'state'+getRow()"
+    data-default-option="Select State or Province"
+>
+    <option [ngValue]="null">Select State</option>
+  </select>
+</label>
+
+
+
 <label *ngIf="tag.interfaceType == 'standard'">
   <input
     [(ngModel)]="tag.value"
@@ -99,3 +127,4 @@
   </label>
 
 </ng-container>
+
