@@ -57,6 +57,7 @@ export class TagComponent implements OnInit {
     } else {
       if (this.tag.value !== this.storedValue) {
         this.validateTag();
+        this.storedValue = this.tag.value;
       }
     }
   }
