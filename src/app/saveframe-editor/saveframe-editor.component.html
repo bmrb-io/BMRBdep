@@ -30,8 +30,9 @@
     </div>
   </div>
   <ng-template #missing>
-    <h3 class="red">No matching saveframes found in this entry. Click
-      <a [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">here</a>
+    <h3 class="error_message">No matching data sections found of this type. Click
+      <a class="fake_button" (click)="restoreCategory(saveframeDescription)">here</a> to restore all of them or
+      click <a class="fake_button" [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">here</a>
        to return to a section that exists.</h3>
   </ng-template>
 </div>

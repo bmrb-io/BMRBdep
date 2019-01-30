@@ -54,4 +54,11 @@ export class SaveframeEditorComponent implements OnInit {
     }
     this.entry.updateCategories();
   }
+
+  restoreCategory(category: string): void {
+    this.entry.restoreByCategory(category);
+    this.entry.refresh();
+    this.api.saveEntry();
+    this.reloadSaveframes();
+  }
 }

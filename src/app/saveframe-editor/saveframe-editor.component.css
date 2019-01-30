@@ -8,8 +8,9 @@
   margin-right: .5em;
 }
 
-.red {
+.error_message {
   color: red;
+  padding-left: 1em;
 }
 
 h2 {
