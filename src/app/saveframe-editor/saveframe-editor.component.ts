@@ -1,7 +1,7 @@
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 
 @Component({
@@ -16,6 +16,7 @@ export class SaveframeEditorComponent implements OnInit {
   loadType: string;
 
   constructor(private route: ActivatedRoute,
+              private router: Router,
               private api: ApiService) {
     this.saveframes = [];
   }
@@ -35,7 +36,7 @@ export class SaveframeEditorComponent implements OnInit {
     });
   }
 
-  reloadSaveframes(): void {
+  reloadSaveframes(nextCategory: string = null): void {
     if (this.loadType === 'name') {
       const theSaveframe = this.entry.getSaveframeByName(this.saveframeDescription);
       if (theSaveframe !== null) {
@@ -52,6 +53,12 @@ export class SaveframeEditorComponent implements OnInit {
         }
       }
     }
+
+    // If there are no saveframes of the category we are trying to display, reroute
+    if (nextCategory && this.saveframes.length === 0) {
+      this.router.navigate(['/entry', this.entry.entryID, 'saveframe', nextCategory, 'category']);
+    }
+
     this.entry.updateCategories();
   }
 
