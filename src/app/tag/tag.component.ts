@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
 
@@ -25,6 +25,11 @@ export class TagComponent implements OnInit {
     } else {
       this.storedValue = '';
     }
+  }
+
+  getRow() {
+    const split = this.unique_identifier.split('_');
+    return split[split.length - 2];
   }
 
   recalculateHeight() {
