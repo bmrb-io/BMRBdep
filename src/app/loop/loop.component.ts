@@ -1,23 +1,39 @@
 import {ApiService} from '../api.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {Component, Input, OnInit} from '@angular/core';
+import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+
+/* Import country updater code */
+import * as crs from '../javascript/crs.min';
 
 @Component({
   selector: 'app-loop',
   templateUrl: './loop.component.html',
   styleUrls: ['./loop.component.css']
 })
-export class LoopComponent implements OnInit {
+export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;
   @Input() showInvalidOnly: false;
   activeTag: LoopTag;
+  crsInit: boolean;
 
-  constructor(public api: ApiService) {
+  constructor(public api: ApiService,
+              private changeDetector: ChangeDetectorRef) {
     this.activeTag = null;
+    this.crsInit = false;
   }
 
   ngOnInit() {
+  }
+
+  // Load the country autofill code
+  ngAfterViewChecked() {
+    // Note that we use ngAfterViewChecked with a custom run-once check rather than AfterViewInit due to the issues discussed here:
+    // https://stackoverflow.com/questions/31171084/how-to-call-function-after-dom-renders-in-angular2
+    if (!this.crsInit && this.loop.category === '_Contact_person') {
+      crs.init();
+      this.crsInit = true;
+    }
   }
 
   // Add another row of data
@@ -25,6 +41,11 @@ export class LoopComponent implements OnInit {
     this.loop.addRow();
     this.loop.parent.parent.refresh();
     this.api.saveEntry();
+    // Reload the country-autofill code
+    if (this.loop.category === '_Contact_person') {
+      this.changeDetector.detectChanges();
+      crs.init();
+    }
   }
 
   // Delete a row of data
