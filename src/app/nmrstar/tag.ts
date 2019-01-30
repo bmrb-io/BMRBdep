@@ -23,7 +23,7 @@ export class Tag {
   constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
-      this.value = null;
+      this.value = '';
     } else {
       this.value = value;
     }
@@ -59,7 +59,14 @@ export class Tag {
     // Determine the interface type and data type
     const dt = this.schemaValues['BMRB data type'];
 
-    if ((this.schemaValues['Enumeration ties']) && (this.schemaValues['Sf pointer'] !== 'Y')) {
+    if (this.fullyQualifiedTagName === '_Contact_person.Country') {
+      this.interfaceType = 'country';
+    } else if (this.fullyQualifiedTagName === '_Contact_person.State_province') {
+      this.interfaceType = 'state';
+    } else if (this.schemaValues['Sf pointer'] === 'Y') {
+      // Show this tag as a closed enum
+      this.interfaceType = 'sf_pointer';
+    } else  if (this.schemaValues['Enumeration ties']) {
       // 19 is the enumeration tie value of the files
       if (this.schemaValues['Enumeration ties'] === '19') {
         this.interfaceType = 'closed_enum';
@@ -182,7 +189,6 @@ export class Tag {
 
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
-      this.interfaceType = 'sf_pointer';
       const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
 
       this.frameLink = [];
