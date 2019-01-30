@@ -23,7 +23,7 @@ export class Tag {
   constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
     this.name = name;
     if (['.', '?', '', null].indexOf(value) >= 0) {
-      this.value = null;
+      this.value = '';
     } else {
       this.value = value;
     }
