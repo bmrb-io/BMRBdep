@@ -2,6 +2,10 @@
   color: red;
 }
 
+.left_margin {
+  margin-left: .25em;
+}
+
 .tag_description {
   font-weight: bold;
   cursor: help;
