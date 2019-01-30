@@ -12,7 +12,7 @@
     <ng-template #final_review_top>
       <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
     </ng-template>
-    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes()"></app-saveframe>
+    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes($event)"></app-saveframe>
     <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have chosen to hide non-mandatory tags. To view these tags, please
       click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
     <div *ngIf="this.saveframes.length">

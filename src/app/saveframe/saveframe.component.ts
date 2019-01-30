@@ -33,8 +33,9 @@ export class SaveframeComponent implements OnInit {
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
   processChange(): void {
+    const nextCategory = this.saveframe.nextCategory;
     this.saveframe.parent.refresh();
-    this.sfReload.emit('reload');
+    this.sfReload.emit(nextCategory);
     this.api.saveEntry();
   }
 
