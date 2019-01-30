@@ -111,6 +111,12 @@ export class Entry {
     return deletedFrames;
   }
 
+  restoreByCategory(category: string): void {
+    for (const sf of this.getSaveframesByCategory(category)){
+      sf.restore();
+    }
+  }
+
   updateCategories(): void {
 
     if (!this.schema) {
