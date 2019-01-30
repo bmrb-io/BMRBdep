@@ -120,7 +120,9 @@ export class Entry {
     // First get the categories, and their order
     const categories = new Set();
     for (const sf of this.saveframes) {
-      categories.add(sf.category);
+      if (!sf.deleted) {
+        categories.add(sf.category);
+      }
     }
     const categoryStatusDict = {};
 
