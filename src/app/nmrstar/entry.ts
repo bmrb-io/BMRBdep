@@ -353,7 +353,7 @@ export class Entry {
                   if (rule['Tag category'] === loop.category) {
                     row[applyCol].display = rule['Override view value'];
                   } else {
-                    console.error('Rule applies to another loop/saveframe: not implemented');
+                    console.error('Rule applies to another loop/saveframe: not implemented', rule);
                   }
                 }
               }
