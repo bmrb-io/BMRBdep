@@ -2,15 +2,12 @@ import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
 
-/* Import country updater code */
-import * as crs from '../javascript/crs.min';
-
 @Component({
   selector: 'app-tag',
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.css']
 })
-export class TagComponent implements OnInit, AfterViewInit {
+export class TagComponent implements OnInit {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
   storedValue: string;
@@ -33,12 +30,6 @@ export class TagComponent implements OnInit, AfterViewInit {
   getRow() {
     const split = this.unique_identifier.split('_');
     return split[split.length - 2];
-  }
-
-  ngAfterViewInit() {
-    if (this.tag.fullyQualifiedTagName === '_Contact_person.Country') {
-      crs.init();
-    }
   }
 
   recalculateHeight() {
