@@ -1,20 +1,20 @@
 <div *ngIf="(showInvalidOnly && !loop.valid) || !showInvalidOnly">
 	<table class="loop">
    		<colgroup>
-	      <col span="1" class="button_column">
+	      <col span="1" class="button-column">
 	   </colgroup>
 		<thead>
 			<tr (contextmenu)="log()">
 			  <th colspan=999>
           {{loop.data[0][0].schemaValues['ADIT category view name']}}
-          <a *ngIf="loop.category == '_Citation_author' && loop.empty" class="fake_button line" (click)="copyAuthors()">Copy authors from 'Entry information'</a>
+          <a *ngIf="loop.category == '_Citation_author' && loop.empty" class="fake-button line" (click)="copyAuthors()">Copy authors from 'Entry information'</a>
         </th>
 			</tr>
 			<tr>
         <th></th>
         <ng-container *ngFor='let sampleTag of loop.data[0]; let col = index'>
           <th *ngIf="loop.displayTags[col] == 'Y' || (loop.displayTags[col] == 'N' && loop.parent.parent.showAll)"
-              class="tag_header"
+              class="tag-header"
                 (click)="activeTag = (activeTag != sampleTag ? sampleTag : null)"
                 [title]="sampleTag.schemaValues['Interface']"
                 >{{sampleTag.schemaValues['Prompt']}}
@@ -27,13 +27,13 @@
 			<tr *ngFor="let row of loop.data; let r = index">
         <td>
           <button *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 1)"
-                  class="real_button" (click)='deleteRow(r)'>-</button>
+                  class="real-button" (click)='deleteRow(r)'>-</button>
         </td>
 			<ng-container *ngFor="let col of row; let c = index">
 			  <td *ngIf="loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)"
 	      		  [ngClass]="{'invisible': true,
 	      		              'invalid': !col.valid && (col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)),
-	      		              'greyed_out': (!(col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)))}">
+	      		              'greyed-out': (!(col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)))}">
 			    <app-tag *ngIf="col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)"
                    [tag]='col'
                    [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
@@ -43,7 +43,7 @@
 			</tr>
 			<tr>
 				<td colspan=999>
-				  <button class="real_button" (click)='addRow()'>+</button>
+				  <button class="real-button" (click)='addRow()'>+</button>
 				</td>
 			</tr>
 
@@ -51,7 +51,7 @@
 	</table>
 
 
-	<div *ngIf='activeTag' class='tag_info_box'>
+	<div *ngIf='activeTag' class='tag-info-box'>
       <b>{{activeTag.schemaValues['Prompt']}}</b>
       <p>{{activeTag.schemaValues['Interface']}}</p>
       <p *ngIf="activeTag.schemaValues['Example'] != '?'"><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>

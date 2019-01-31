@@ -2,14 +2,6 @@
 	color: red;
 }
 
-.tag_info_box{
-	margin: 1em;
-	padding: 1em;
-  border: 2px solid #33527b;
-  border-radius: 5px;
-  word-wrap: break-word;
-}
-
 .invisible {
 	background-color: white;
 	padding: 1px;
@@ -24,18 +16,18 @@
   background-color: #E5E6Ef;
 }
 
-.tag_header {
+.tag-header {
 	cursor: help;
   background-color: #E5E6Ef;
 }
 
-.header_text {
+.header-text {
 	vertical-align: middle;
 	font-size: larger;
   font-weight: bold;
 }
 
-.button_column {
+.button-column {
   width: 2.5em;
 }
 

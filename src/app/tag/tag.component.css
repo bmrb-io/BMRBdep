@@ -1,8 +1,8 @@
-.type_error {
+.type-error {
   background-color: #ffe4e1 !important;
 }
 
-.sf_input {
+.saveframe-input {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
@@ -12,7 +12,7 @@
   background-color: white;
 }
 
-.sf_input:hover {
+.saveframe-input:hover {
   outline: #33527b solid 1px;
 }
 

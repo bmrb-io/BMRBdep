@@ -2,11 +2,11 @@
   color: red;
 }
 
-.left_margin {
+.left-margin {
   margin-left: .25em;
 }
 
-.tag_description {
+.tag-description {
   font-weight: bold;
   cursor: help;
 }
@@ -21,7 +21,7 @@
   background-color: #ffe4e1;
 }
 
-.tag_info_box {
+.tag-info-box {
   margin: 1em;
   padding: 1em 1em 0 1em;
   border: 2px solid #33527b;
@@ -29,17 +29,17 @@
   word-wrap: break-word;
 }
 
-.header_text {
+.header-text {
   vertical-align: middle;
   font-size: larger;
   font-weight: bold;
 }
 
-.tag_column {
+.tag-column {
   width: 25%;
 }
 
-.value_column {
+.value-column {
   width: 75%;
 }
 

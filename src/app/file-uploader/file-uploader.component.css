@@ -1,4 +1,4 @@
-.header_text {
+.header-text {
   vertical-align: middle;
   font-size: larger;
   font-weight: bold;
@@ -40,11 +40,11 @@ td {
   margin: 0;
 }
 
-.dragTD {
+.drag-td {
   background-color: white;
 }
 
-.dragBox {
+.drag-box {
   height: 4em;
   margin: .5em;
   border: 2px solid #33527b;
@@ -53,7 +53,7 @@ td {
   position: relative;
 }
 
-.dragText {
+.drag-text {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -72,14 +72,14 @@ td {
   background-color: #ffe4e1;
 }
 
-.index_column {
+.index-column {
   width: 2%;
 }
 
-.file_status_column {
+.file-status-column {
   width: 20%;
 }
 
-.file_type_column {
+.file-type-column {
   width: 68%;
 }

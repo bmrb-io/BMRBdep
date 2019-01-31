@@ -5,32 +5,32 @@
 
     <table>
       <colgroup>
-           <col class="tag_column">
-           <col class="value_column">
+           <col class="tag-column">
+           <col class="value-column">
         </colgroup>
 
       <thead>
         <tr>
           <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
-          <a class="header_text" [title]="saveframe.schemaValues['group_view_help']">
+          <a class="header-text" [title]="saveframe.schemaValues['group_view_help']">
             {{saveframe.tags[0].schemaValues['ADIT category view name']}}
           </a>
           </th>
           <th>
-            <div class="right_float">
-              <a class="fake_button line left_margin"
+            <div class="right-float">
+              <a class="fake-button line left-margin"
                 *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
                 (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
-            <a class="fake_button line left_margin"
+            <a class="fake-button line left-margin"
               *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
               (click)='saveframe.duplicate(true); processChange()'>Create new</a>
-            <a class="fake_button line left_margin"
+            <a class="fake-button line left-margin"
               *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
               (click)='saveframe.delete(); processChange()'>Delete</a>
-              <a class="fake_button line left_margin"
+              <a class="fake-button line left-margin"
                  *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
                  (click)='saveframe.restore(); processChange()'>Restore</a>
-            <a class="fake_button line"
+            <a class="fake-button line"
               *ngIf="showCategoryLink"
               [routerLink]="['/entry', saveframe.parent.entryID, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
             </div>
@@ -41,13 +41,13 @@
       <ng-container *ngFor="let saveframeTag of saveframe.tags">
         <tr *ngIf="saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')"
               (contextmenu)="saveframeTag.log()">
-          <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag_description"
+          <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag-description"
                 [title]="saveframeTag.schemaValues['Interface']"
                 [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
                 (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
           </td>
           <ng-template #non_mandatory>
-            <td class="tag_description"
+            <td class="tag-description"
                 [title]="saveframeTag.schemaValues['Interface']"
                 [innerHTML]="saveframeTag.schemaValues['Prompt']"
                 (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
@@ -61,7 +61,7 @@
       </tbody>
     </table>
 
-    <div *ngIf='activeTag' class='tag_info_box'>
+    <div *ngIf='activeTag' class='tag-info-box'>
       <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
       <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
       <p *ngIf="activeTag.schemaValues['Example'] != '?'" [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>

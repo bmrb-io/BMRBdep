@@ -1,18 +1,18 @@
 <table class="full_width">
   <colgroup>
-    <col class="index_column">
-    <col class="file_status_column">
-    <col class="file_type_column">
+    <col class="index-column">
+    <col class="file-status-column">
+    <col class="file-type-column">
   </colgroup>
 
   <thead>
   <tr>
     <th colspan="2" (contextmenu)="logFileUploadSaveframe()">
-      <a class="header_text">Deposit data files</a>
+      <a class="header-text">Deposit data files</a>
     </th>
     <th>
-      <div class="right_float">
-        <a class="fake_button line"
+      <div class="right-float">
+        <a class="fake-button line"
            *ngIf="showCategoryLink"
            [routerLink]="['/entry', api.getEntryID(), 'saveframe', 'deposited_data_files', 'category']">
           View sections of this category
@@ -24,11 +24,11 @@
   <tbody>
   <ng-container *ngIf="entry">
     <tr *ngFor="let file of entry.dataStore.dataFiles; let i = index">
-      <td><p class="center_text">{{i + 1}}</p></td>
+      <td><p class="center-text">{{i + 1}}</p></td>
       <td>
         <div class="file-upload">
           <div *ngIf="file.fileName">
-            <button class="fake_button" (click)="deleteFile(file.fileName)">-</button>&nbsp;
+            <button class="fake-button" (click)="deleteFile(file.fileName)">-</button>&nbsp;
             <a download *ngIf="file.percent == 100; else uploading"
                [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName">{{file.fileName}}</a>
             <ng-template #uploading>{{file.fileName}}</ng-template>
@@ -61,9 +61,9 @@
         <input type="file" (change)="selectFile($event)" placeholder="Upload file" multiple #inputFile>
       </div>
     </td>
-    <td class="dragTD" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
-      <div class="dragBox">
-        <div class="dragText">Or drag and drop files here</div>
+    <td class="drag-td" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
+      <div class="drag-box">
+        <div class="drag-text">Or drag and drop files here</div>
       </div>
     </td>
   </tr>

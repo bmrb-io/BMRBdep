@@ -9,7 +9,7 @@
   text-align: center;
 }
 
-.real_button {
+.real-button {
   color: #333333;
   text-decoration: none;
   font-weight: bold;
@@ -21,14 +21,14 @@
   font-size: 1em;
 }
 
-.real_button:hover, .real_button:focus {
+.real-button:hover, .real-button:focus {
   box-shadow: 0 0 2px #666666 inset;
   border: 1px solid #666666;
   outline: none;
 }
 
 
-.fake_button, .fake_button:visited {
+.fake-button, .fake-button:visited {
   color: #333333;
   text-decoration: none;
   font-weight: bold;
@@ -40,13 +40,13 @@
   background-color: #ededed;
 }
 
-.fake_button:hover {
+.fake-button:hover {
   box-shadow: 0 0 2px #666666 inset;
   border: 1px solid #666666;
   outline: none;
 }
 
-.fake_button:disabled {
+.fake-button:disabled {
   color: #c3c3bc;
   box-shadow: none;
   border: 1px solid #C8C8C8;
@@ -61,26 +61,16 @@
   background-color: #ededed !important;
 }
 
-.details_box {
-  border: solid 2px #33527b;
-  padding: 1em 1em 1em 1em;
-  margin-top: 1em;
-  margin-right: 1em;
-  background-color: #fdfdfe;
-  border-radius: 5px;
-  overflow: auto;
-}
-
 .full_width {
   width: 100% !important;
 }
 
-.right_float {
+.right-float {
   text-align: right;
   float: right
 }
 
-.center_text {
+.center-text {
   text-align: center;
 }
 
