@@ -30,9 +30,22 @@
     </div>
   </div>
   <ng-template #missing>
-    <h3 class="error_message">No matching data sections found of this type. Click
-      <a class="fake_button" (click)="restoreCategory(saveframeDescription)">here</a> to restore all of them or
-      click <a class="fake_button" [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">here</a>
-       to return to a section that exists.</h3>
+    <div class="main-content">
+      <mat-card>
+        <mat-card-title>Invalid data category</mat-card-title>
+        <mat-card-content>
+          There are no sections of this type remaining.
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button class="mat-raised-button" (click)="restoreCategory(saveframeDescription)">Restore all
+            sections of this type
+          </button>
+          <button mat-button class="mat-raised-button"
+                  [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">
+            Return to a section that exists.
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
   </ng-template>
 </div>
