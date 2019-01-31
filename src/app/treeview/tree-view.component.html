@@ -1,33 +1,53 @@
 <ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID()">
-  <p (click)="logEntry()">Display non-mandatory tags:
-    <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
-                      color="#CBDBFF"></mat-slide-toggle>
-  </p>
-  <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-    <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
-      <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
+
+  <mat-card>
+    <mat-card-title (dblclick)="developerMode=true">Deposition Menu</mat-card-title>
+    <mat-card-actions>
+      <button mat-menu-item [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Deposit Entry</button>
+      <button mat-menu-item [matMenuTriggerFor]="depositorMenu">Deposition Options</button>
+      <button mat-menu-item [matMenuTriggerFor]="developerMenu" *ngIf="developerMode">Developer Menu</button>
+
+      <mat-menu #depositorMenu="matMenu">
+        <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
+                          color="#CBDBFF">Display non-mandatory tags
+        </mat-slide-toggle>
+        <button mat-menu-item [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes</button>
+        <button mat-menu-item class="one">Email deposition (not yet implemented)</button>
+      </mat-menu>
+
+      <mat-menu #developerMenu="matMenu">
+        <button mat-menu-item (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry</button>
+        <button mat-menu-item (click)='refresh()'>Refresh cache/page</button>
+      </mat-menu>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>Deposition Contents</mat-card-title>
+    <mat-card-content>
+      <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+        <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
+          <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
-        <p [title]="superGroupCat.displayHelp"><b>{{superGroupCat.displayName}}</b></p>
-        <ng-container *ngFor="let category of superGroupCat.children">
-          <p><a
-            *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
-            [ngClass]="{'active': active==category.category,
+
+
+            <p [title]="superGroupCat.displayHelp"><b>{{superGroupCat.displayName}}</b></p>
+            <ng-container *ngFor="let category of superGroupCat.children">
+              <p><a
+                *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
+                [ngClass]="{'active': active==category.category,
                        'nav_link':true,
                        'complete':category.valid,
                        'incomplete':!category.valid}"
-            [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
-            [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a>
-          </p>
-        </ng-container>
-      </ng-container>
-    </div>
-    <br>
-    <p><a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes</a></p>
-    <p><a class="nav_link" [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Review deposition</a></p>
-    <h4>Development features:</h4>
-    <p><a class="nav_link" (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry</a></p>
-    <p><a class="nav_link" (click)='refresh()'>Refresh cache/page</a></p>
+                [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
+                [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a>
+              </p>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  </div>
 </ng-container>
