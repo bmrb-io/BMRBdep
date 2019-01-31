@@ -43,7 +43,7 @@
                         [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}
                   <mat-icon *ngIf="category.valid">done</mat-icon>
                   <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
-                  <mat-icon *ngIf="!category.valid">error</mat-icon>
+                  <mat-icon *ngIf="!category.valid">error_outline</mat-icon>
                   <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
                 </button>
               </div>
