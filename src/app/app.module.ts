@@ -39,6 +39,9 @@ import {
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Saving/loading bar
 
+// Compression
+import { LZStringModule, LZStringService } from 'ng-lz-string';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -72,8 +75,10 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Sav
     MatToolbarModule,
     MatIconModule,
     LoadingPageModule,
-    SlidingBarModule
+    SlidingBarModule,
+    LZStringModule
   ],
+  providers: [LZStringService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
