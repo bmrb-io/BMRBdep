@@ -1,7 +1,4 @@
-<div>
-  <div class="entry">
-	<ng-container *ngFor='let sf of entry.saveframes'>
-	  <app-saveframe [saveframe]='sf'></app-saveframe>
-	</ng-container>
-  </div>
+<div class="main-content">
+  <h2>Deposition: {{entry.entryID}}</h2>
+  <app-saveframe *ngFor='let sf of entry.saveframes' [saveframe]='sf'></app-saveframe>
 </div>

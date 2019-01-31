@@ -1,7 +1,7 @@
 <ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID()">
 
   <mat-card>
-    <mat-card-title (dblclick)="developerMode=true">Deposition Menu</mat-card-title>
+    <mat-card-title (dblclick)="developerMode=true;logEntry()">Deposition Menu</mat-card-title>
     <mat-card-actions>
       <button mat-menu-item [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Deposit Entry</button>
       <button mat-menu-item [matMenuTriggerFor]="depositorMenu">Deposition Options</button>

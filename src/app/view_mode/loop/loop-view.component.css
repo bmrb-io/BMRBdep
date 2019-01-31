@@ -10,3 +10,7 @@ table.alternating_color tr:nth-child(even) .datum {
   border: none;
   font-weight: normal;
 }
+
+.uneditable {
+  font-weight: bold;
+}
