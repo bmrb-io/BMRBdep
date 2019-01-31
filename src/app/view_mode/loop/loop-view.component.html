@@ -3,10 +3,10 @@
 </div>
 <ng-container *ngFor='let col of loop.tags'>
 	<div class="line highlight">
-	  <span class="uneditable two_indent" >{{loop.category + '.' + col}}</span>
+	  <span class="uneditable" >{{loop.category + '.' + col}}</span>
 	</div>
 </ng-container>
-<table class="two_indent alternating_color">
+<table class="alternating_color">
   <tbody>
     <tr *ngFor='let row of loop.data'>
       <ng-container *ngFor='let datum of row'>

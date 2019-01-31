@@ -27,3 +27,7 @@
 .value_column {
   width: 70%
 }
+
+.uneditable {
+  font-weight: bold;
+}

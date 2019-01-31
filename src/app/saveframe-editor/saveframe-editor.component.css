@@ -1,18 +1,3 @@
-.saveframe_editor {
-  padding: 1em;
-  width: calc(100% - 2em);
-  display: block;
-}
-
-.right_margin {
+.margin-right {
   margin-right: .5em;
-}
-
-.error_message {
-  color: red;
-  padding-left: 1em;
-}
-
-h2 {
-  text-align: center;
 }
