@@ -29,6 +29,8 @@ import {
   MatIconModule,
   MatInputModule,
   MatListModule,
+  MatMenuModule,
+  MatCardModule,
   MatProgressBarModule,
   MatSelectModule,
   MatSidenavModule,
@@ -71,6 +73,8 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Sav
     MatListModule,
     MatToolbarModule,
     MatIconModule,
+    MatMenuModule,
+    MatCardModule,
     LoadingPageModule,
     SlidingBarModule
   ],
