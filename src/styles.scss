@@ -1,20 +1,12 @@
 /* @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';*/
 @import './custom-theme.scss';
 
-/* You can add global styles to this file, and also import other style files */
-.one_indent {
-  position: relative;
-  left: 30px;
-  width: 100%;
+.main-content {
+  margin: 1em;
 }
 
-.two_indent {
-  position: relative;
-  left: 60px;
-}
-
-.uneditable {
-  font-weight: bold;
+.main-content > h2 {
+  text-align: center;
 }
 
 .real_button {
