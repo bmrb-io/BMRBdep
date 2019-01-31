@@ -1,10 +1,10 @@
 <div class="saveframe">
   <span class="uneditable line">save_</span>
-  <input class="sf_name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
+  <input class="saveframe-name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
   <table>
     <tr>
-      <th class="tag_column"></th>
-      <th class="value_column"></th>
+      <th class="tag-column"></th>
+      <th class="value-column"></th>
     </tr>
     <ng-container *ngFor="let saveframeTag of saveframe.tags">
       <tr class="highlight" *ngIf="saveframeTag.value || saveframe.parent.showAll">

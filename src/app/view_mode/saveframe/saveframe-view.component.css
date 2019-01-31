@@ -8,7 +8,7 @@
   max-width: 90%;
 }
 
-.sf_name {
+.saveframe-name {
   border: none;
   font-weight: normal;
   width: 90%;
@@ -20,11 +20,11 @@
   width: 100%;
 }
 
-.tag_column {
+.tag-column {
   width: 30%;
 }
 
-.value_column {
+.value-column {
   width: 70%
 }
 

@@ -1,31 +1,31 @@
 <div *ngIf="entry">
   <div class="main-content" *ngIf="saveframes.length > 0; else missing">
     <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
-    <button class="real_button line margin-right"
+    <button class="real-button line margin-right"
             *ngIf="saveframes[0].previousCategory"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
       Previous section</button>
-    <button class="real_button line"
+    <button class="real-button line"
             *ngIf="saveframes[0].nextCategory ; else final_review_top"
             [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
       Next section</button>
     <ng-template #final_review_top>
-      <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+      <button class="real-button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
     </ng-template>
     <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes($event)"></app-saveframe>
     <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have chosen to hide non-mandatory tags. To view these tags, please
       click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
     <div *ngIf="this.saveframes.length">
-      <button class="real_button line margin-right"
+      <button class="real-button line margin-right"
               *ngIf="saveframes[0].previousCategory"
               [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
         Previous section</button>
-      <button class="real_button line"
+      <button class="real-button line"
               *ngIf="saveframes[0].nextCategory; else final_review_bottom"
               [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
         Next section</button>
       <ng-template #final_review_bottom>
-        <button class="real_button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+        <button class="real-button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
       </ng-template>
     </div>
   </div>
