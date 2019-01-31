@@ -67,6 +67,7 @@ export class Entry {
   dataStore: DataFileStore;
   valid: boolean;
   showAll: boolean;
+  hasDeleted: boolean;
 
   constructor(dataName: string) {
     this.entryID = dataName;
@@ -74,6 +75,7 @@ export class Entry {
     this.enumerationTies = {};
     this.valid = true;
     this.showAll = true;
+    this.hasDeleted = false;
 
     this.updateCategories();
   }
@@ -374,9 +376,13 @@ export class Entry {
       }
     }
 
-    // Refresh each saveframe
+    // Refresh each saveframe and update the deletion tracker
+    this.hasDeleted = false;
     for (const sf of this.saveframes) {
       sf.refresh();
+      if (sf.deleted) {
+        this.hasDeleted = true;
+      }
     }
 
     // Applies special non-dictionary based behavior to specific saveframes.
