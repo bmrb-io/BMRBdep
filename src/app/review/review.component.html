@@ -13,7 +13,7 @@
             (click)="submitEntry()">Submit deposition to BMRB
     </button>
     <button class="mat-raised-button left-pad"
-            [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', 'deposited_data_files', 'category']">
-      Return to full overview</button>
+            (click)="goBack()">
+      Return to previous page</button>
   </div>
 </div>
