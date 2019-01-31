@@ -25,28 +25,27 @@
   <mat-card>
     <mat-card-title>Deposition Contents</mat-card-title>
     <mat-card-content>
-      <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-        <div *ngFor="let superGroupCat of api.cachedEntry.superGroups">
+      <mat-list *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+        <ng-container *ngFor="let superGroupCat of api.cachedEntry.superGroups">
           <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
-
-
-            <p [title]="superGroupCat.displayHelp"><b>{{superGroupCat.displayName}}</b></p>
+            <h3 matSubheader [title]="superGroupCat.displayHelp" [innerHTML]="superGroupCat.displayName">Folders</h3>
             <ng-container *ngFor="let category of superGroupCat.children">
-              <p><a
-                *ngIf="(showInvalidOnly && !category.valid) || (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')"
-                [ngClass]="{'active': active==category.category,
-                       'nav_link':true,
-                       'complete':category.valid,
-                       'incomplete':!category.valid}"
-                [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
-                [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</a>
-              </p>
+              <mat-list-item *ngIf="(showInvalidOnly && !category.valid) ||
+                                    (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')">
+                <h4 matLine
+                  [ngClass]="{'active': active==category.category, 'nav_link': true}"
+                  [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
+                  [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</h4>
+                <mat-icon *ngIf="category.valid">done</mat-icon>
+                <span *ngIf="category.valid" class="cdk-visually-hidden">Completed.</span>
+              </mat-list-item>
             </ng-container>
+            <mat-divider></mat-divider>
           </ng-container>
-        </div>
-      </div>
+        </ng-container>
+      </mat-list>
     </mat-card-content>
   </mat-card>
 

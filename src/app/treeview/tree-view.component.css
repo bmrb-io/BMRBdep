@@ -2,35 +2,18 @@
   padding-left: .5em;
 }
 
-.nav_link {
-  color: #333333;
-  text-decoration: none;
-  display: inline-block;
-  border-radius: 3px;
-  border: 1px solid #C8C8C8;
-  padding: .1em;
-  margin: .1em;
-  background-color: #ededed;
-}
-
 .nav_link:hover {
-  box-shadow: 0 0 2px #666666 inset;
-  border: 1px solid #666666;
-  outline: none;
+  background: rgba(0,0,0,.04);
 }
 
 .active {
-  font-weight: bold;
+  font-weight: bolder !important;
 }
 
-.complete {
-  background-color: rgba(74, 242, 75, 0.7);
+h4 {
+  padding-left: .5em !important;
+  cursor: pointer;
 }
-
-.incomplete {
-  background-color: rgba(255, 84, 77, 0.7);
-}
-
 mat-slide-toggle {
   padding: .75em;
   font-size: 14px;
