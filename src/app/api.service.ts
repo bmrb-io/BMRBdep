@@ -175,6 +175,13 @@ export class ApiService {
   }
 
   submitEntry(): Observable<any> {
+
+    if (!this.cachedEntry.valid) {
+      this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
+        MessageType.WarningMessage, 15000));
+      return;
+    }
+
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
 
     this.messagesService.sendMessage(new Message('Submitting deposition...',
