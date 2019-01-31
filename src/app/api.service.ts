@@ -7,6 +7,8 @@ import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {Router} from '@angular/router';
 
+import {LZStringService} from 'ng-lz-string';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,7 +25,8 @@ export class ApiService {
 
   constructor(private http: HttpClient,
               private messagesService: MessagesService,
-              private router: Router) {
+              private router: Router,
+              private lz: LZStringService) {
     this.cachedEntry = new Entry('');
   }
 
@@ -68,11 +71,11 @@ export class ApiService {
     } else if ((entry_id === localStorage.getItem('entry_key')) && (!skip_cache)) {
 
       // Make sure both the entry and schema are saved locally - if not, getEntry() but force load from server
-      const raw_json = JSON.parse(localStorage.getItem('entry'));
+      const raw_json = JSON.parse(this.lz.decompress(localStorage.getItem('entry')));
       if (raw_json === null) {
         return this.getEntry(entry_id, true);
       }
-      raw_json['schema'] = JSON.parse(localStorage.getItem('schema'));
+      raw_json['schema'] = JSON.parse(this.lz.decompress(localStorage.getItem('schema')));
       if (raw_json['schema'] === null) {
         return this.getEntry(entry_id, true);
       }
@@ -115,9 +118,10 @@ export class ApiService {
     }
 
     if (initial_save) {
-      localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
+      console.log(JSON.stringify(this.cachedEntry.schema).length, this.lz.compress(JSON.stringify(this.cachedEntry.schema)).length);
+      localStorage.setItem('schema', this.lz.compress(JSON.stringify(this.cachedEntry.schema)));
     }
-    localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
+    localStorage.setItem('entry', this.lz.compress(JSON.stringify(this.cachedEntry)));
     localStorage.setItem('entry_key', this.cachedEntry.entryID);
 
     // Save to remote server if we haven't just loaded the entry
