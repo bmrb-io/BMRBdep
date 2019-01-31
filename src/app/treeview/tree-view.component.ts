@@ -11,12 +11,14 @@ import {download} from '../nmrstar/nmrstar';
 export class TreeViewComponent implements OnInit {
   active: string;
   developerMode: boolean;
+  page: string;
   @Input() showInvalidOnly: boolean;
 
   constructor(public api: ApiService,
               private router: Router,
               private route: ActivatedRoute) {
     this.developerMode = false;
+    this.page = '?';
   }
 
   ngOnInit() {
@@ -32,6 +34,8 @@ export class TreeViewComponent implements OnInit {
           parent.active = params['saveframe_description'];
         }
         parent.showInvalidOnly = this.router.url.endsWith('/review');
+        const urlSegments = this.router.url.split('/');
+        parent.page = urlSegments[urlSegments.length - 1];
       });
     });
   }

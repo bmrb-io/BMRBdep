@@ -1,9 +1,10 @@
 <ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID()">
 
   <mat-card>
-    <mat-card-title (dblclick)="developerMode=true;logEntry()">Deposition Menu</mat-card-title>
-    <mat-card-actions>
-      <button mat-menu-item [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Deposit Entry</button>
+    <mat-card-title (dblclick)="developerMode=true;logEntry()">Menu</mat-card-title>
+    <mat-card-content>
+      <button mat-menu-item [ngClass]="{'active': page=='review', 'special': true}"
+              [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Deposit Entry</button>
       <button mat-menu-item [matMenuTriggerFor]="depositorMenu">Deposition Options</button>
       <button mat-menu-item [matMenuTriggerFor]="developerMenu" *ngIf="developerMode">Developer Menu</button>
 
@@ -12,42 +13,45 @@
                           color="#CBDBFF">Display non-mandatory tags
         </mat-slide-toggle>
         <button mat-menu-item *ngIf="api.cachedEntry.hasDeleted"
-                [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes</button>
+                [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes
+        </button>
         <button mat-menu-item class="one">Email deposition (not yet implemented)</button>
       </mat-menu>
 
       <mat-menu #developerMenu="matMenu">
-        <button mat-menu-item (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry</button>
+        <button mat-menu-item (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry
+        </button>
         <button mat-menu-item (click)='refresh()'>Refresh cache/page</button>
       </mat-menu>
-    </mat-card-actions>
-  </mat-card>
 
-  <mat-card>
-    <mat-card-title>Deposition Contents</mat-card-title>
-    <mat-card-content>
-      <mat-list *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+
+      <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+        <h2>Deposition Navigation</h2>
+        <mat-divider></mat-divider>
+        <br>
         <ng-container *ngFor="let superGroupCat of api.cachedEntry.superGroups">
           <ng-container *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
             <h3 matSubheader [title]="superGroupCat.displayHelp" [innerHTML]="superGroupCat.displayName">Folders</h3>
             <ng-container *ngFor="let category of superGroupCat.children">
-              <mat-list-item *ngIf="(showInvalidOnly && !category.valid) ||
+              <div *ngIf="(showInvalidOnly && !category.valid) ||
                                     (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')">
-                <h4 matLine
-                  [ngClass]="{'active': active==category.category, 'nav_link': true}"
-                  [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
-                  [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}</h4>
-                <mat-icon *ngIf="category.valid">done</mat-icon>
-                <span *ngIf="category.valid" class="cdk-visually-hidden">Completed.</span>
-              </mat-list-item>
+                <button mat-menu-item
+                        [ngClass]="{'active': active==category.category}"
+                        [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
+                        [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']">{{category.displayName}}
+                  <mat-icon *ngIf="category.valid">done</mat-icon>
+                  <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
+                  <mat-icon *ngIf="!category.valid">error</mat-icon>
+                  <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
+                </button>
+              </div>
             </ng-container>
             <mat-divider></mat-divider>
           </ng-container>
         </ng-container>
-      </mat-list>
+      </div>
     </mat-card-content>
   </mat-card>
-
 </ng-container>
