@@ -10,11 +10,13 @@ import {download} from '../nmrstar/nmrstar';
 })
 export class TreeViewComponent implements OnInit {
   active: string;
+  developerMode: boolean;
   @Input() showInvalidOnly: boolean;
 
   constructor(public api: ApiService,
               private router: Router,
               private route: ActivatedRoute) {
+    this.developerMode = false;
   }
 
   ngOnInit() {
