@@ -11,7 +11,8 @@
         <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
                           color="#CBDBFF">Display non-mandatory tags
         </mat-slide-toggle>
-        <button mat-menu-item [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes</button>
+        <button mat-menu-item *ngIf="api.cachedEntry.hasDeleted"
+                [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes</button>
         <button mat-menu-item class="one">Email deposition (not yet implemented)</button>
       </mat-menu>
 
