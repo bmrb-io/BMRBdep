@@ -55,4 +55,9 @@ export class TreeViewComponent implements OnInit {
     window.location.reload();
   }
 
+  scrollSideNav(): void {
+    window.setTimeout(() => {
+      document.getElementById(this.active).parentElement.scrollIntoView();
+      }, 500);
+  }
 }
