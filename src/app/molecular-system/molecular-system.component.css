@@ -1,0 +1,14 @@
+.image-panel {
+  padding-left:1em;
+  float: right;
+  width:250px;
+}
+
+.main-panel {
+  margin-left:2em;
+  margin-right:2em;
+}
+
+li {
+  padding-bottom: .5em;
+}

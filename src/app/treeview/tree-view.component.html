@@ -33,7 +33,12 @@
           <div *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
-            <h3 matSubheader [title]="superGroupCat.displayHelp" [innerHTML]="superGroupCat.displayName">Folders</h3>
+            <h3 matSubheader [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+              <mat-icon routerLink="help/molecular_assembly"
+                        *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
+                        class="pointer">help_outline</mat-icon>
+            </h3>
+
             <ng-container *ngFor="let category of superGroupCat.children">
               <ng-container *ngIf="(showInvalidOnly && !category.valid) ||
                                     (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')">
