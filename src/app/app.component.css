@@ -3,8 +3,9 @@
   cursor: pointer;
 }
 
-.loading_bar_holder {
-  min-height: 4px;
+.loading-bar-holder {
+  height: 4px;
+  display: block;
 }
 
 mat-sidenav-container {
