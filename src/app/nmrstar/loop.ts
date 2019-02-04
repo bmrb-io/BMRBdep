@@ -1,4 +1,4 @@
-import {checkTagIsNull, cleanValue} from './nmrstar';
+import {checkValueIsNull, cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
 import {LoopTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
@@ -46,7 +46,7 @@ export class Loop {
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {
       for (let n = 0; n < data[m].length; n++) {
-        if (data[m][n] === '.' || data[m][n] === '?') {
+        if (checkValueIsNull(data[m][n])) {
           data[m][n] = null;
         }
       }
@@ -159,7 +159,7 @@ export class Loop {
       return this.empty;
     }
     for (const col of this.data[0]) {
-      if (!checkTagIsNull(col)) {
+      if (!checkValueIsNull(col.value)) {
         this.empty = false;
         return this.empty;
       }

@@ -1,4 +1,5 @@
 import {sprintf} from 'sprintf-js';
+import {nullTags} from './definitions';
 
 
 /* Automatically quotes the value in the appropriate way. Don't quote
@@ -66,8 +67,8 @@ export function cleanValue(value): string {
   return value;
 }
 
-export function checkTagIsNull(tag) {
-  return [null, undefined, '', '.', '?'].indexOf(tag.value) >= 0;
+export function checkValueIsNull(value) {
+  return nullTags.indexOf(value) >= 0;
 }
 
 export function checkTagIsRequired(tag) {
