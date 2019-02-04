@@ -2,6 +2,7 @@ import {Saveframe} from './saveframe';
 import {Loop} from './loop';
 import {Schema} from './schema';
 import {Entry} from './entry';
+import {checkValueIsNull} from './nmrstar';
 
 export class Tag {
   name: string;
@@ -22,7 +23,7 @@ export class Tag {
 
   constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
     this.name = name;
-    if (['.', '?', '', null].indexOf(value) >= 0) {
+    if (checkValueIsNull(value)) {
       this.value = '';
     } else {
       this.value = value;
@@ -118,7 +119,7 @@ export class Tag {
   toJSON(): {} {
     // Clone object to prevent accidentally performing modification on the original object
 
-    if (this.value !== null && this.value !== '') {
+    if (!checkValueIsNull(this.value)) {
       return [this.name, this.value];
     } else {
       return [this.name, '.'];
@@ -135,7 +136,7 @@ export class Tag {
     */
 
     // Remove unicode
-    if (this.value) {
+    if (!checkValueIsNull(this.value)) {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
     }
 
@@ -158,7 +159,7 @@ export class Tag {
             parentEntry.enumerationTies[this.schemaValues['Enumeration ties']] = enumerationSet;
           }
           // Only add our value to the enumeration set if we have a value
-          if (this.value) {
+          if (!checkValueIsNull(this.value)) {
             enumerationSet.add(this.value);
           }
 
