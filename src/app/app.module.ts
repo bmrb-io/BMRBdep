@@ -39,7 +39,8 @@ import {
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page
-import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Saving/loading bar
+import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+import {MolecularSystemComponent} from './molecular-system/molecular-system.component'; // Saving/loading bar
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page'; // Sav
     MessageComponent,
     ReviewComponent,
     RestoreComponent,
+    MolecularSystemComponent,
   ],
   imports: [
     BrowserModule,

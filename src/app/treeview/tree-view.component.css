@@ -12,3 +12,7 @@ mat-slide-toggle {
 .special:not(:hover) {
   background: rgba(0,0,0,0) !important;
 }
+
+.pointer {
+  cursor: pointer;
+}
