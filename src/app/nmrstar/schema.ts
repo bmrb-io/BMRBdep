@@ -1,9 +1,11 @@
+import {checkValueIsNull} from './nmrstar';
+
 class NotNullChecker {
   constructor() {
   }
 
   static test(value: string) {
-    return value !== null;
+    return !checkValueIsNull(value);
   }
 }
 
@@ -141,6 +143,10 @@ export class Schema {
             tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
           }
         }
+      }
+      // Don't show a default value of "?"
+      if (checkValueIsNull(tagSchemaDictionary['default value'])) {
+        tagSchemaDictionary['default value'] = '';
       }
       this.schema[this.tags['values'][schemaTag][tagCol]] = tagSchemaDictionary;
     }

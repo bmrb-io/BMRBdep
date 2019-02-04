@@ -1,6 +1,6 @@
 import {Entry} from './entry';
 import {Loop} from './loop';
-import {checkTagIsNull, checkTagIsRequired, cleanValue} from './nmrstar';
+import {checkTagIsRequired, checkValueIsNull, cleanValue} from './nmrstar';
 import {LoopTag, SaveframeTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
 
@@ -287,7 +287,7 @@ export class Saveframe {
 
     // Check the tags
     for (const tag of this.tags) {
-      if (!checkTagIsNull(tag)) {
+      if (!checkValueIsNull(tag.value)) {
         if (!checkTagIsRequired(tag)) {
           if (tag.display !== 'H') {
             return false;
@@ -337,7 +337,7 @@ export class Saveframe {
 
     for (const tag of this.tags) {
       // Don't show null tags
-      if (checkTagIsNull(tag)) {
+      if (checkValueIsNull(tag.value)) {
         continue;
       }
 
@@ -438,7 +438,7 @@ export class Saveframe {
           const checkNullRow = (row: LoopTag[]): boolean => {
             let empty = true;
             for (const rowTag of row) {
-              if (!(rowTag.value === '.' || rowTag.value === '' || rowTag.value === null)) {
+              if (!(checkValueIsNull(rowTag.value))) {
                 empty = false;
               }
             }
