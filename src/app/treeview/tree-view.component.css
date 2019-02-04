@@ -1,5 +1,6 @@
 .active {
   font-weight: bolder !important;
+  background: rgba(0,0,0,.1) !important;
 }
 
 mat-slide-toggle {
