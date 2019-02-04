@@ -1,31 +1,11 @@
 import {sprintf} from 'sprintf-js';
 import {nullTags} from './definitions';
 
-
-/* Automatically quotes the value in the appropriate way. Don't quote
-   values you send to this method or they will show up in another set
-   of quotes as part of the actual data. E.g.:
-
-cleanValue('"e. coli"') returns '\'"e. coli"\''
-
-while
-
-cleanValue("e. coli") returns "'e. coli'"
-
-This will automatically be called on all values when you use a str()
-method (so don't call it before inserting values into tags or loops).
-
-Be mindful of the value of str_conversion_dict as it will effect the
-way the value is converted to a string.*/
 export function cleanValue(value): string {
 
-  if (value == null) {
+  if (checkValueIsNull(value)) {
     return '.';
   }
-
-  // If the user inserts a newline in the web editor replace it with a newline
-  value = value.replace(/<br>/g, '\n');
-  value = value.replace(/⏎/g, '\n');
 
   // Values that go on their own line don't need to be touched
   if (value.indexOf('\n') !== -1) {
@@ -34,16 +14,6 @@ export function cleanValue(value): string {
     } else {
       return value;
     }
-  }
-
-  // No empty values
-  if (value === undefined) {
-    throw new Error('Empty strings are not allowed as values. Use a \'.\' or a \'?\' if needed.');
-  }
-
-  // Normally we wouldn't auto-convert null values for them but it may be appropriate here
-  if (value === '') {
-    value = '.';
   }
 
   if ((value.indexOf('"') !== -1) && (value.indexOf('\'') !== -1)) {
