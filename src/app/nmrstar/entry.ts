@@ -114,7 +114,7 @@ export class Entry {
   }
 
   restoreByCategory(category: string): void {
-    for (const sf of this.getSaveframesByCategory(category)){
+    for (const sf of this.getSaveframesByCategory(category)) {
       sf.restore();
     }
   }
@@ -147,7 +147,7 @@ export class Entry {
       // Determine category validity
       let valid = true;
       for (const saveframe of matchingSaveframes) {
-        if (!saveframe.valid) {
+        if (!saveframe.valid && !saveframe.deleted) {
           valid = false;
         }
       }
