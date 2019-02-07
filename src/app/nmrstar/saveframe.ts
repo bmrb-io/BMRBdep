@@ -230,6 +230,9 @@ export class Saveframe {
     // Get the category number for this SF
     this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
+    // Determine if deleted
+    this.deleted = this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
+
     // Update the tags
     for (const tag of this.tags) {
       tag.updateTagStatus();
@@ -278,9 +281,6 @@ export class Saveframe {
         }
       }
     }
-
-    // Determine if deleted
-    this.deleted = this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
   }
 
   checkEmpty() {
