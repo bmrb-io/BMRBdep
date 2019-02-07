@@ -63,9 +63,6 @@
 
     <option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
             [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</option>
-    <option *ngIf="tag.frameLink.length == 0" [value]="tag.value" [ngClass]="{'type-error': !tag.valid}" disabled>No
-      valid saveframes of this type present in the entry.</option>
-    <option *ngIf="tag.display != 'Y'" [ngValue]="null" [ngClass]="{'type-error': !tag.valid}"></option>
   </select>
 </label>
 

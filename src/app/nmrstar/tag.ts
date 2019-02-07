@@ -67,7 +67,7 @@ export class Tag {
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       this.interfaceType = 'sf_pointer';
-    } else  if (this.schemaValues['Enumeration ties']) {
+    } else if (this.schemaValues['Enumeration ties']) {
       // 19 is the enumeration tie value of the files
       if (this.schemaValues['Enumeration ties'] === '19') {
         this.interfaceType = 'closed_enum';
@@ -198,24 +198,40 @@ export class Tag {
           continue;
         }
         const nameTag = sf.tagDict[sf.tagPrefix + '.Name'];
+        let displayName = null;
         if (nameTag) {
-          this.frameLink.push(['$' + sf.name, nameTag.value]);
-          if ('$' + sf.name === this.value) {
-            matchedPointer = true;
-          }
-        } else {
-          // This is only because a problem with the dictionary - saveframes that are pointed to but don't have a Name tag
-          this.frameLink.push(['$' + sf.name, sf.name]);
+          displayName = nameTag.value;
+        }
+        if (checkValueIsNull(displayName)) {
+          displayName = 'Section not yet named: ' + sf.name;
+        }
+
+        this.frameLink.push(['$' + sf.name, displayName]);
+        if ('$' + sf.name === this.value) {
+          matchedPointer = true;
         }
       }
-    }
 
+      // Always add a "deselect" option
+      if (checkValueIsNull(this.value)) {
+        // If null, the deselect needs to match our actual value
+        this.frameLink.push([this.value, '']);
+        // If non-mandatory, just use empty string
+      } else if (this.display === 'N') {
+        this.frameLink.push(['', 'deselect option']);
+      }
+
+      if (!matchedPointer && !checkValueIsNull(this.value)) {
+        // Add an option for a value that became invalid
+        this.frameLink.push([this.value, 'Invalid value selected: ' + this.value]);
+      }
+    }
 
     this.valid = true;
     this.validationMessage = '';
 
     // If null, make sure that null is allowed - no need to check regex.
-    if (!this.value) {
+    if (checkValueIsNull(this.value)) {
       if (this.display === 'Y') {
         this.valid = false;
         this.validationMessage = 'Tag must have a value.';
@@ -236,21 +252,15 @@ export class Tag {
         }
       }
     } else if (this.interfaceType === 'sf_pointer') {
-
       // We have a value that doesn't exist...
-      if (!matchedPointer && this.value) {
-        this.valid = false;
-
-        if (this.frameLink.length >= 0) {
+      if (!matchedPointer) {
+        // A non-null invalid value exists
+        if (!checkValueIsNull(this.value)) {
           this.validationMessage = 'Invalid selected value. Have you deleted the data it referenced?';
-        }
-
-        if (this.value) {
-          this.frameLink.push([this.value, this.value + ' - ' + this.validationMessage]);
+          this.valid = false;
         }
       }
     }
-
   }
 
   getEntry(): Entry {
