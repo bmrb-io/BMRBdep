@@ -73,7 +73,7 @@ export class Loop {
     for (const tag of this.tags) {
       const newTag = new LoopTag(tag, null, this);
       // Add the default value if the tag has one
-      if (newTag.schemaValues['default value'] !== '?') {
+      if (!checkValueIsNull(newTag.schemaValues['default value'])) {
         newTag.value = newTag.schemaValues['default value'];
       }
       newRow.push(newTag);
