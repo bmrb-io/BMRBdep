@@ -5,7 +5,8 @@
     (change)="validateTag()"
     [title]="tag.validationMessage"
     [attr.data-region-id]="'state'+getRow()"
-    data-default-option="Select Country">
+    [attr.data-default-value]="tag.value"
+    data-preferred="US,GB,CN,JP,AU,MX">
   </select>
 </label>
 
@@ -16,9 +17,8 @@
     (change)="validateTag()"
     [title]="tag.validationMessage"
     [id]="'state'+getRow()"
-    data-default-option="Select State or Province"
->
-    <option [ngValue]="null">Select State</option>
+    [attr.data-default-value]="tag.value"
+    data-default-option="Select State or Province">
   </select>
 </label>
 
