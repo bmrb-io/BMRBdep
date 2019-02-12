@@ -135,10 +135,10 @@ export class Tag {
     * 3) Is from the enum list if it a mandatory enum
     */
 
-    // Remove unicode
+    /* Remove unicode
     if (!checkValueIsNull(this.value)) {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
-    }
+    } */
 
     let matchedPointer = false;
 
