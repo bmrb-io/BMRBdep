@@ -15,7 +15,7 @@ from common import root_dir
 
 dictionary_dir = tempfile.mkdtemp()
 Git(dictionary_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
-repo = Repo(dictionary_dir)
+repo = Repo(os.path.join(dictionary_dir, 'nmr-star-dictionary'))
 
 # Load the data types
 dt_path = os.path.join(root_dir, "data_types.csv")
@@ -75,11 +75,6 @@ def schema_emitter():
 
     last_schema_version = None
 
-    if os.path.exists('/zfs/git/nmr-star-dictionary'):
-        next_schema = load_schemas('development')
-        last_schema_version = next_schema[0]
-        yield next_schema
-
     for commit in repo.iter_commits('master'):
         next_schema = load_schemas(commit)
         if next_schema is None:
@@ -93,13 +88,7 @@ def schema_emitter():
 def get_file(file_name, commit):
     """ Returns a file-like object. """
 
-    # Handle old schema location
-    if commit == "development":
-        file_ = open('/zfs/git/nmr-star-dictionary/%s' % file_name, 'r').read().splitlines()
-    else:
-        file_ = repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()
-
-    return StringIO('\n'.join(file_))
+    return StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
 
 
 def get_main_schema(commit):
@@ -167,7 +156,8 @@ def get_data_file_types(rev):
             else:
                 data_mapping[interview_tag][1].append(sf_category)
         except Exception as e:
-            print('Something went wrong when loading the data types mapping.', repr(e))
+            if validate_mode:
+                print('Something went wrong when loading the data types mapping.', repr(e))
             continue
 
     return [data_mapping[x] for x in interview_list]
@@ -273,10 +263,12 @@ def load_schemas(rev):
 
 
 if __name__ == "__main__":
-    for schema in schema_emitter():
-        with open(os.path.join(root_dir, 'schemas', schema[0]), 'wb') as schema_file:
-            j = json.dumps(schema[1])
-            schema_file.write(zlib.compress(j.encode('utf-8')))
-        highest_schema = schema[0]
-        print("Set schema: %s" % schema[0])
-    rmtree(dictionary_dir)
+    try:
+        for schema in schema_emitter():
+            with open(os.path.join(root_dir, 'schemas', schema[0]), 'wb') as schema_file:
+                j = json.dumps(schema[1])
+                schema_file.write(zlib.compress(j.encode('utf-8')))
+            highest_schema = schema[0]
+            print("Set schema: %s" % schema[0])
+    finally:
+        rmtree(dictionary_dir)
