@@ -19,5 +19,6 @@
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
     "secret_key": "CHANGE_ME",
-    "server_http_root": "https://dev-bmrbdep.bmrb.wisc.edu"
+    "server_http_root": "https://dev-bmrbdep.bmrb.wisc.edu",
+    "repo_path": "/tmp/depositions"
 }
