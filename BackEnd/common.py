@@ -13,7 +13,7 @@ def get_schema(version):
     """ Return the schema from Redis. """
 
     try:
-        with open(os.path.join(root_dir, 'schemas', version), 'rb') as schema_file:
+        with open(os.path.join(root_dir, 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
             schema = json.loads(zlib.decompress(schema_file.read()))
     except IOError:
         raise RequestError("Invalid schema version.")

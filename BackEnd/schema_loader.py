@@ -18,7 +18,7 @@ Git(dictionary_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
 repo = Repo(os.path.join(dictionary_dir, 'nmr-star-dictionary'))
 
 # Load the data types
-dt_path = os.path.join(root_dir, "data_types.csv")
+dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
 data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "rU"))}
 
 validate_mode = False
@@ -265,7 +265,7 @@ def load_schemas(rev):
 if __name__ == "__main__":
     try:
         for schema in schema_emitter():
-            with open(os.path.join(root_dir, 'schemas', schema[0]), 'wb') as schema_file:
+            with open(os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib'), 'wb') as schema_file:
                 j = json.dumps(schema[1])
                 schema_file.write(zlib.compress(j.encode('utf-8')))
             highest_schema = schema[0]
