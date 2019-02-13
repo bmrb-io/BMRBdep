@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+
+import os
+import simplejson as json
+
+# Load the configuration file
+root_dir = os.path.dirname(os.path.realpath(__file__))
+configuration = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
+
+
 class ServerError(Exception):
     """ Something is wrong with the server. """
     status_code = 500
@@ -8,6 +18,12 @@ class ServerError(Exception):
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+
+    def __repr__(self):
+        return 'ServerError("%s")' % self.message
+
+    def __str__(self):
+        return self.message
 
     def to_dict(self):
         """ Converts the payload to a dictionary."""
@@ -26,6 +42,12 @@ class RequestError(Exception):
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+
+    def __repr__(self):
+        return 'RequestError("%s")' % self.message
+
+    def __str__(self):
+        return self.message
 
     def to_dict(self):
         """ Converts the payload to a dictionary."""
