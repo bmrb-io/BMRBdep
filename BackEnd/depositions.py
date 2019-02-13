@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-
 import os
 import json
 import time
 import random
 
+# Pip module imports
 from git import Repo, NoSuchPathError
-import querymod
-
 import werkzeug.utils
 import flask
+import pynmrstar
+
+# Local imports
+from common import ServerError, RequestError, configuration
 
 
 def secure_filename(filename):
@@ -19,7 +20,7 @@ def secure_filename(filename):
 
     filename = werkzeug.utils.secure_filename(filename)
     if not filename:
-        raise querymod.RequestError('Invalid upload file name. Please rename the file and try again.')
+        raise RequestError('Invalid upload file name. Please rename the file and try again.')
     return filename
 
 
@@ -37,14 +38,14 @@ class DepositionRepo:
         self._modified_files = False
         self._live_metadata = None
         self._original_metadata = None
-        self._lock_path = os.path.join(querymod.configuration['repo_path'], str(uuid), '.git', 'api.lock')
+        self._lock_path = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
 
     def __enter__(self):
         """ Get a session cookie to use for future requests. """
 
-        self._entry_dir = os.path.join(querymod.configuration['repo_path'], str(self._uuid))
+        self._entry_dir = os.path.join(configuration['repo_path'], str(self._uuid))
         if not os.path.exists(self._entry_dir) and not self._initialize:
-            raise querymod.RequestError('No deposition with that ID exists!')
+            raise RequestError('No deposition with that ID exists!')
         try:
             if self._initialize:
                 self._repo = Repo.init(self._entry_dir)
@@ -59,13 +60,13 @@ class DepositionRepo:
                     counter -= 1
                     time.sleep(random.random())
                     if counter <= 0:
-                        raise querymod.ServerError('Could not acquire entry directory lock.')
+                        raise ServerError('Could not acquire entry directory lock.')
                 with open(self._lock_path, "w") as f:
                     f.write(str(os.getpid()))
                 self._repo = Repo(self._entry_dir)
         except NoSuchPathError:
-            raise querymod.RequestError("'%s' is not a valid deposition ID." % self._uuid,
-                                        status_code=404)
+            raise RequestError("'%s' is not a valid deposition ID." % self._uuid,
+                               status_code=404)
 
         return self
 
@@ -79,7 +80,7 @@ class DepositionRepo:
         try:
             os.unlink(self._lock_path)
         except OSError:
-            raise querymod.ServerError('Could not remove entry lock file.')
+            raise ServerError('Could not remove entry lock file.')
 
     @property
     def metadata(self):
@@ -96,10 +97,9 @@ class DepositionRepo:
         entry_location = os.path.join(self._entry_dir, 'entry.str')
 
         try:
-            return querymod.pynmrstar.Entry.from_file(entry_location)
+            return pynmrstar.Entry.from_file(entry_location)
         except Exception as e:
-            raise querymod.ServerError('Error loading an entry!\nError: %s\nEntry location:%s\nEntry text:\n%s' %
-                                       (e.message, entry_location, open(entry_location, "r").read()))
+            raise ServerError('Error loading an entry!\nError: %s\nEntry location:%s' % (repr(e), entry_location))
 
     def write_entry(self, entry):
         """ Save an entry in the standard place. """
@@ -123,7 +123,7 @@ class DepositionRepo:
             else:
                 return file_obj.read()
         except IOError:
-            raise querymod.RequestError('No file with that name saved for this entry.')
+            raise RequestError('No file with that name saved for this entry.')
 
     def get_data_file_list(self):
         """ Returns the list of data files associated with this deposition. """
@@ -137,7 +137,7 @@ class DepositionRepo:
         os.unlink(os.path.join(self._entry_dir, 'data_files', filename))
         self._modified_files = True
 
-    def write_file(self, filename, data, root=False):
+    def write_file(self, file_name, data, root=False):
         """ Adds (or overwrites) a file to the repo. """
 
         try:
@@ -145,16 +145,16 @@ class DepositionRepo:
         except RuntimeError:
             pass
 
-        filename = secure_filename(filename)
-        filepath = filename
+        file_name = secure_filename(file_name)
+        file_path = file_name
         if not root:
-            filepath = os.path.join('data_files', filename)
+            file_path = os.path.join('data_files', file_name)
 
-        with open(os.path.join(self._entry_dir, filepath), "wb") as fo:
+        with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
             fo.write(data)
         self._modified_files = True
 
-        return filename
+        return file_name
 
     def commit(self, message):
         """ Commits the changes to the repository with a message. """

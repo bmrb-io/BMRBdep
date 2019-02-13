@@ -26,13 +26,9 @@ os.chdir(local_dir)
 sys.path.append(local_dir)
 
 # Import the functions needed to service requests - must be after path updates
-from error_types import ServerError, RequestError
+from common import ServerError, RequestError, configuration
 import depositions
 from validate_email import validate_email
-
-# Load the configuration file
-root_dir = os.path.dirname(os.path.realpath(__file__))
-configuration = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
 
 # Set up the flask application
 application = Flask(__name__)
@@ -120,20 +116,20 @@ def send_validation_email(uuid):
                                   recipients=[repo.metadata['author_email']])
         token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
-        confirm_message.html = \
-            """Thank you for your deposition '%s' created %s (UTC).
-            <br><br>
-            Please click <a href="%s">here</a> to validate your e-mail for this session. This is required to proceed.
-            <br><br>
-            You can use <a href="%s">this link</a> to return to your deposition later if you close the page before it is complete.
-            <br><br>
-            If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
-            share this e-mail with will have access to the full contents of your in-progress deposition and can make
-            changes to it.
-            <br><br>
-            Thank you,
-            <br>
-            BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
+        confirm_message.html = """
+Thank you for your deposition '%s' created %s (UTC).
+<br><br>
+Please click <a href="%s">here</a> to validate your e-mail for this session. This is required to proceed.
+<br><br>
+You can use <a href="%s">this link</a> to return to your deposition later if you close the page before it is complete.
+<br><br>
+If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
+share this e-mail with will have access to the full contents of your in-progress deposition and can make
+changes to it.
+<br><br>
+Thank you,
+<br>
+BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                      url_for('validate_user', token=token, _external=True),
                      # TODO: Make this URL configurable
                      'http://dev-bmrbdep.bmrb.wisc.edu/entry/%s/saveframe/deposited_data_files/category' % uuid)
@@ -181,7 +177,7 @@ def new_deposition():
         try:
             uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read())
         except (ValueError, TypeError) as e:
-            raise RequestError("Invalid NMR-STAR file. Parse error: %s" % e.message)
+            raise RequestError("Invalid NMR-STAR file. Parse error: %s" % repr(e))
     # Check if they are bootstrapping from an existing entry - if so, make sure they didn't also upload a file
     if 'bootstrapID' in request_info and request_info['bootstrapID'] != 'null':
         if uploaded_entry:
@@ -501,7 +497,7 @@ def fetch_or_store_deposition(uuid):
                 if existing_entry == entry:
                     return jsonify({'changed': False})
             except ValueError as err:
-                raise RequestError(str(err))
+                raise RequestError(repr(err))
 
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
