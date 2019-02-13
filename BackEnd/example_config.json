@@ -1,0 +1,22 @@
+{
+    "ets": {
+        "user": "CHANGE_ME",
+        "database": "CHANGE_ME",
+        "host": "CHANGE_ME"
+    },
+    "smtp": {
+        "admins": ["wedell@bmrb.wisc.edu"],
+        "server": "cowfish",
+        "from_addr": "apierror@webapi.bmrb.wisc.edu"
+    },
+    "orcid": {
+      "url": "https://pub.orcid.org/v2.1/%s/record",
+      "bearer": "CHANGE_ME",
+      "refresh_token": "CHANGE_ME",
+      "client_secret": "CHANGE_ME",
+      "client_id": "CHANGE_ME"
+    },
+    "debug": true,
+    "local-ips": ["127.0.0.1", "144.92.167", "::1"],
+    "secret_key": "CHANGE_ME"
+}
