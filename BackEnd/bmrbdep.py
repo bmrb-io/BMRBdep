@@ -4,7 +4,7 @@ import os
 import sys
 import datetime
 import logging
-from logging.handlers import RotatingFileHandler, SMTPHandler
+from logging.handlers import SMTPHandler
 from uuid import uuid4
 
 import requests
@@ -56,8 +56,7 @@ if (configuration.get('smtp')
     # Set up the mail interface
     application.config.update(
         MAIL_SERVER=configuration['smtp']['server'],
-        # TODO: Make this configurable
-        MAIL_DEFAULT_SENDER='noreply@bmrb.wisc.edu'
+        MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
     )
     mail = Mail(application)
 else:
@@ -96,8 +95,7 @@ Thank you,
 <br>
 BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                      url_for('validate_user', token=token, _external=True),
-                     # TODO: Make this URL configurable
-                     'http://dev-bmrbdep.bmrb.wisc.edu/entry/%s/saveframe/deposited_data_files/category' % uuid)
+                     configuration['server_http_root'] + '/entry/%s/saveframe/deposited_data_files/category' % uuid)
 
         mail.send(confirm_message)
 
@@ -120,7 +118,8 @@ def validate_user(token):
             repo.metadata['email_validated'] = True
             repo.commit("E-mail validated.")
 
-    return redirect('http://dev-bmrbdep.bmrb.wisc.edu/entry/%s/saveframe/deposited_data_files/category' % deposition_id,
+    return redirect('%s/entry/%s/saveframe/deposited_data_files/category' %
+                    (configuration['server_http_root'], deposition_id),
                     code=302)
 
 
@@ -174,7 +173,6 @@ def new_deposition():
     deposition_id = str(uuid4())
     schema = pynmrstar.Schema()
     json_schema = get_schema(schema.version)
-    # json_schema = requests.get('http://webapi.bmrb.wisc.edu/devel/schema/%s' % schema.version).json()
     entry_template = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True, default_values=True,
                                                    schema=schema)
 
@@ -247,17 +245,20 @@ def new_deposition():
 
     # Look up information based on the ORCID
     if author_orcid:
-        r = requests.get(configuration['orcid']['url'] % author_orcid,
-                         headers={"Accept": "application/json",
-                                  'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
-        if not r.ok:
-            if r.status_code == 404:
-                raise RequestError('Invalid ORCID!')
-            else:
-                application.logger.exception('An error occurred while contacting the ORCID server.')
-        orcid_json = r.json()
-        author_given = orcid_json['person']['name']['given-names']['value']
-        author_family = orcid_json['person']['name']['family-name']['value']
+        if 'orcid' not in configuration:
+            logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
+        else:
+            r = requests.get(configuration['orcid']['url'] % author_orcid,
+                             headers={"Accept": "application/json",
+                                      'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            if not r.ok:
+                if r.status_code == 404:
+                    raise RequestError('Invalid ORCID!')
+                else:
+                    application.logger.exception('An error occurred while contacting the ORCID server.')
+            orcid_json = r.json()
+            author_given = orcid_json['person']['name']['given-names']['value']
+            author_family = orcid_json['person']['name']['family-name']['value']
 
     entry_saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
     entry_saveframe['UUID'] = deposition_id
