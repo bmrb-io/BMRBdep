@@ -7,7 +7,7 @@
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],
         "server": "cowfish",
-        "from_addr": "apierror@webapi.bmrb.wisc.edu"
+        "from_addr": "noreply@bmrb.wisc.edu"
     },
     "orcid": {
       "url": "https://pub.orcid.org/v2.1/%s/record",
@@ -18,5 +18,6 @@
     },
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
-    "secret_key": "CHANGE_ME"
+    "secret_key": "CHANGE_ME",
+    "server_http_root": "https://dev-bmrbdep.bmrb.wisc.edu"
 }
