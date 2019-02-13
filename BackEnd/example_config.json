@@ -7,7 +7,7 @@
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],
         "server": "cowfish",
-        "from_addr": "noreply@bmrb.wisc.edu"
+        "from_address": "noreply@bmrb.wisc.edu"
     },
     "orcid": {
       "url": "https://pub.orcid.org/v2.1/%s/record",
