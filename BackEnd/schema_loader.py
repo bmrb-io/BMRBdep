@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-
 import os
-import re
 import csv
+import zlib
+import tempfile
+from shutil import rmtree
 
-from git import Repo, GitCommandError
+import simplejson as json
+import pynmrstar
+from io import StringIO
+from git import Git, Repo, GitCommandError
 
-from querymod import _QUERYMOD_DIR, pynmrstar
+from common import root_dir
 
-try:
-    # for Python 2.x
-    from StringIO import StringIO
-except ImportError:
-    # for Python 3.x
-    from io import StringIO
-
-repo = Repo('/zfs/git/nmr-star-dictionary')
+dictionary_dir = tempfile.mkdtemp()
+Git(dictionary_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
+repo = Repo(dictionary_dir)
 
 # Load the data types
-dt_path = os.path.join(_QUERYMOD_DIR, "../submodules/PyNMRSTAR/reference_files/data_types.csv")
+dt_path = os.path.join(root_dir, "data_types.csv")
 data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "rU"))}
 
 validate_mode = False
@@ -107,13 +105,13 @@ def get_file(file_name, commit):
 def get_main_schema(commit):
 
     try:
-        schema = csv.reader(get_file("xlschem_ann.csv", commit))
+        xmlschem_ann = csv.reader(get_file("xlschem_ann.csv", commit))
     except GitCommandError:
         return
-    all_headers = schema.next()
-    schema.next()
-    schema.next()
-    version = schema.next()[3]
+    all_headers = next(xmlschem_ann)
+    next(xmlschem_ann)
+    next(xmlschem_ann)
+    version = next(xmlschem_ann)[3]
 
     cc = ['Tag', 'Tag category', 'SFCategory', 'BMRB data type', 'Prompt', 'Interface',
           'default value', 'Example', 'User full view',
@@ -128,7 +126,7 @@ def get_main_schema(commit):
            'tags': {'headers': cc + ['enumerations'], 'values': {}},
            }
 
-    for row in schema:
+    for row in xmlschem_ann:
         res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
 
     return res
@@ -143,7 +141,7 @@ def get_data_file_types(rev):
         return
 
     pynmrstar.ALLOW_V2_ENTRIES = True
-    types_description = pynmrstar.Entry.from_file(get_file('adit_interface_dict.txt', rev))
+    types_description = pynmrstar.Entry.from_string(get_file('adit_interface_dict.txt', rev).read())
 
     interview_list = []
     data_mapping = {}
@@ -180,9 +178,9 @@ def get_dict(fob, headers, number_fields, skip):
     headers and the values."""
 
     csv_reader = csv.reader(fob)
-    all_headers = csv_reader.next()
+    all_headers = next(csv_reader)
     for x in range(0, skip):
-        csv_reader.next()
+        next(csv_reader)
 
     def skip_end():
         for csv_row in csv_reader:
@@ -251,10 +249,10 @@ def load_schemas(rev):
     # Load the enumerations
     try:
         enumerations = get_file('enumerations.txt', rev).read()
-        enumerations = enumerations.encode().replace('\x00', '').replace('\xd5', '')
-        enumerations = re.sub('_Revision_date.*', '', enumerations)
+        enumerations = enumerations.encode().replace(b'\x00', b'').replace(b'\xd5', b'')
+        # enumerations = re.sub('_Revision_date.*', '', enumerations)
         pynmrstar.ALLOW_V2_ENTRIES = True
-        enum_entry = pynmrstar.Entry.from_string(enumerations)
+        enum_entry = pynmrstar.Entry.from_string(str(enumerations))
         for saveframe in enum_entry:
             enums = [x.replace("$", ",") for x in saveframe[0].get_data_by_tag('_item_enumeration_value')[0]]
             try:
@@ -274,16 +272,11 @@ def load_schemas(rev):
     return res['version'], res
 
 
-def load_schemas(redis_conn):
-    import schema_loader
-
-    highest_schema = ""
-    for schema in schema_loader.schema_emitter():
-        redis_conn.set("schema:%s" % schema[0], zlib.compress(json.dumps(schema[1])))
+if __name__ == "__main__":
+    for schema in schema_emitter():
+        with open(os.path.join(root_dir, 'schemas', schema[0]), 'wb') as schema_file:
+            j = json.dumps(schema[1])
+            schema_file.write(zlib.compress(j.encode('utf-8')))
         highest_schema = schema[0]
         print("Set schema: %s" % schema[0])
-    redis_conn.set("schema_version", highest_schema)
-
-
-if __name__ == "__main__":
-    load_schemas()
+    rmtree(dictionary_dir)
