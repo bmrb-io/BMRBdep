@@ -2,7 +2,6 @@
 
 import os
 import sys
-import zlib
 import datetime
 import logging
 from logging.handlers import RotatingFileHandler, SMTPHandler
@@ -11,8 +10,6 @@ from uuid import uuid4
 import requests
 import pynmrstar
 from itsdangerous import URLSafeSerializer, BadSignature
-import redis
-from redis.sentinel import Sentinel
 import simplejson as json
 
 # Import flask
@@ -26,7 +23,7 @@ os.chdir(local_dir)
 sys.path.append(local_dir)
 
 # Import the functions needed to service requests - must be after path updates
-from common import ServerError, RequestError, configuration
+from common import ServerError, RequestError, configuration, get_schema
 import depositions
 from validate_email import validate_email
 
@@ -42,38 +39,6 @@ if application.debug:
 
 application.secret_key = configuration['secret_key']
 
-# Set up the logging
-
-# First figure out where to log
-request_log_file = os.path.join(local_dir, "logs", "requests.log")
-application_log_file = os.path.join(local_dir, "logs", "application.log")
-request_json_file = os.path.join(local_dir, "logs", "json_requests.log")
-if configuration.get('log'):
-    if configuration['log'].get('json'):
-        request_json_file = configuration['log']['json']
-    if configuration['log'].get('request'):
-        request_log_file = configuration['log']['request']
-    if configuration['log'].get('application'):
-        application_log_file = configuration['log']['application']
-
-# Set up the standard logger
-app_formatter = logging.Formatter('[%(asctime)s]:%(levelname)s:%(funcName)s: %(message)s')
-application_log = RotatingFileHandler(application_log_file, maxBytes=1048576, backupCount=100)
-application_log.setFormatter(app_formatter)
-application.logger.addHandler(application_log)
-application.logger.setLevel(logging.WARNING)
-
-# Set up the request loggers
-
-# Plain text logger
-request_formatter = logging.Formatter('[%(asctime)s]: %(message)s')
-request_log = RotatingFileHandler(request_log_file, maxBytes=1048576, backupCount=100)
-request_log.setFormatter(request_formatter)
-rlogger = logging.getLogger("rlogger")
-rlogger.setLevel(logging.INFO)
-rlogger.addHandler(request_log)
-rlogger.propagate = False
-
 # Set up the SMTP handler
 if (configuration.get('smtp')
         and configuration['smtp'].get('server')
@@ -82,7 +47,7 @@ if (configuration.get('smtp')
     # Don't send error e-mails in debugging mode
     if not configuration['debug']:
         mail_handler = SMTPHandler(mailhost=configuration['smtp']['server'],
-                                   fromaddr='apierror@webapi.bmrb.wisc.edu',
+                                   fromaddr=configuration['smtp']['from_address'],
                                    toaddrs=configuration['smtp']['admins'],
                                    subject='BMRB API Error occurred')
         mail_handler.setLevel(logging.WARNING)
@@ -526,49 +491,4 @@ def fetch_or_store_deposition(uuid):
         return jsonify(entry)
 
 
-def get_redis_connection(db=None):
-    """ Figures out where the master redis instance is (and other parameters
-    needed to connect like which database to use), and opens a connection
-    to it. It passes back that connection object."""
 
-    # Connect to redis
-    try:
-        # Figure out where we should connect
-        sentinel = Sentinel(configuration['redis']['sentinels'],
-                            socket_timeout=0.5)
-        redis_host, redis_port = sentinel.discover_master(configuration['redis']['master_name'])
-
-        # If they didn't specify a DB then use the configuration default
-        if db is None:
-            # If in debug, use debug database
-            if configuration['debug']:
-                db = 1
-            else:
-                db = configuration['redis']['db']
-
-        # Get the redis instance
-        r = redis.StrictRedis(host=redis_host,
-                              port=redis_port,
-                              password=configuration['redis']['password'],
-                              db=db)
-
-    # Raise an exception if we cannot connect to the database server
-    except (redis.exceptions.ConnectionError,
-            redis.sentinel.MasterNotFoundError):
-        raise ServerError('Could not connect to database server.')
-
-    return r
-
-
-def get_schema(version=None):
-    """ Return the schema from Redis. """
-
-    r = get_redis_connection()
-    if not version:
-        version = r.get('schema_version')
-    try:
-        schema = json.loads(zlib.decompress(r.get("schema:%s" % version)))
-    except TypeError:
-        raise RequestError("Invalid schema version.")
-
-    return schema
