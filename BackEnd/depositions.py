@@ -150,8 +150,12 @@ class DepositionRepo:
         if not root:
             file_path = os.path.join('data_files', file_name)
 
-        with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
-            fo.write(data)
+        try:
+            with open(os.path.join(self._entry_dir, file_path), "w") as fo:
+                fo.write(data)
+        except TypeError:
+            with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
+                fo.write(data)
         self._modified_files = True
 
         return file_name
