@@ -13,7 +13,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 import simplejson as json
 
 # Import flask
-from flask import Flask, request, jsonify, url_for, redirect, send_file
+from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 
@@ -23,7 +23,7 @@ os.chdir(local_dir)
 sys.path.append(local_dir)
 
 # Import the functions needed to service requests - must be after path updates
-from common import ServerError, RequestError, configuration, get_schema
+from common import ServerError, RequestError, configuration, get_schema, root_dir
 import depositions
 from validate_email import validate_email
 
@@ -62,6 +62,14 @@ if (configuration.get('smtp')
 else:
     logging.warning("Could not set up SMTP logger because the configuration"
                     " was not specified.")
+
+
+@application.route('/')
+@application.route('/<file_name>')
+def send_file(file_name=None):
+    if file_name is None:
+        file_name = "index.html"
+    return send_from_directory(os.path.join(root_dir, '..', 'FrontEnd', 'release'), file_name)
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
