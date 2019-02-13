@@ -11,7 +11,7 @@ node_modules
 node_env
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
@@ -43,7 +43,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
-
+__pycache__
 package-lock.json
 /BackEnd/depositions/
 configuration.json
+env/
+schemas/*.json.zlib
