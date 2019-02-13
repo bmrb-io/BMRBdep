@@ -48,4 +48,4 @@ package-lock.json
 /BackEnd/depositions/
 configuration.json
 env/
-schemas/*.json.zlib
+/BackEnd/schema_data/*.json.zlib
