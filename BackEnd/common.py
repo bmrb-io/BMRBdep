@@ -1,11 +1,24 @@
 #!/usr/bin/env python3
 
 import os
+import zlib
 import simplejson as json
 
 # Load the configuration file
 root_dir = os.path.dirname(os.path.realpath(__file__))
 configuration = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
+
+
+def get_schema(version):
+    """ Return the schema from Redis. """
+
+    try:
+        with open(os.path.join(root_dir, 'schemas', version), 'rb') as schema_file:
+            schema = json.loads(zlib.decompress(schema_file.read()))
+    except IOError:
+        raise RequestError("Invalid schema version.")
+
+    return schema
 
 
 class ServerError(Exception):
