@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import os
 import csv
 import zlib
@@ -239,10 +240,10 @@ def load_schemas(rev):
     # Load the enumerations
     try:
         enumerations = get_file('enumerations.txt', rev).read()
-        enumerations = enumerations.encode().replace(b'\x00', b'').replace(b'\xd5', b'')
-        # enumerations = re.sub('_Revision_date.*', '', enumerations)
+        enumerations = enumerations.replace('\x00', '').replace('\xd5', '')
+        enumerations = re.sub('_Revision_date.*', '', enumerations)
         pynmrstar.ALLOW_V2_ENTRIES = True
-        enum_entry = pynmrstar.Entry.from_string(str(enumerations))
+        enum_entry = pynmrstar.Entry.from_string(enumerations)
         for saveframe in enum_entry:
             enums = [x.replace("$", ",") for x in saveframe[0].get_data_by_tag('_item_enumeration_value')[0]]
             try:
