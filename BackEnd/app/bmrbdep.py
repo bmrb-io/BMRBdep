@@ -69,7 +69,15 @@ else:
 def send_file(file_name=None):
     if file_name is None:
         file_name = "index.html"
-    return send_from_directory(os.path.join(root_dir, '..', 'FrontEnd', 'release'), file_name)
+
+    no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'release')
+    container_path = os.path.join(root_dir, 'html')
+    if os.path.exists(no_container_path):
+        return send_from_directory(no_container_path, file_name)
+    elif os.path.exists(container_path):
+        return send_from_directory(container_path, file_name)
+    else:
+        return 'Broken installation'
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
