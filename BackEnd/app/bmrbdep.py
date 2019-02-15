@@ -39,10 +39,16 @@ if application.debug:
 
 application.secret_key = configuration['secret_key']
 
-# Set up the SMTP handler
-if (configuration.get('smtp')
-        and configuration['smtp'].get('server')
-        and configuration['smtp'].get('admins')):
+
+# Set up the mail interface
+application.config.update(
+    MAIL_SERVER=configuration['smtp']['server'],
+    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
+)
+mail = Mail(application)
+
+# Set up the SMTP error handler
+if configuration['smtp'].get('server') != 'CHANGE_ME':
 
     # Don't send error e-mails in debugging mode
     if not configuration['debug']:
@@ -53,15 +59,20 @@ if (configuration.get('smtp')
         mail_handler.setLevel(logging.WARNING)
         application.logger.addHandler(mail_handler)
 
-    # Set up the mail interface
-    application.config.update(
-        MAIL_SERVER=configuration['smtp']['server'],
-        MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
-    )
-    mail = Mail(application)
 else:
     logging.warning("Could not set up SMTP logger because the configuration"
                     " was not specified.")
+
+    class MockMail:
+        def send(self, message):
+            logging.info('Would have sent e-mail:\n%s', message.html)
+    mail = MockMail()
+
+# Set up the logger
+if configuration['debug']:
+    logging.getLogger().setLevel('INFO')
+else:
+    logging.getLogger().setLevel('WARNING')
 
 
 @application.route('/')
