@@ -64,7 +64,8 @@ else:
                     " was not specified.")
 
     class MockMail:
-        def send(self, message):
+        @staticmethod
+        def send(message):
             logging.info('Would have sent e-mail:\n%s', message.html)
     mail = MockMail()
 
