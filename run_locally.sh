@@ -5,6 +5,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # Kill everything on script exit
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
+# Check if the initial setups need to happen
+${SCRIPT_DIR}/install.sh
+
 # Run flask
 ${SCRIPT_DIR}/BackEnd/run.sh &
 
