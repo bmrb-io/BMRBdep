@@ -8,4 +8,6 @@ gitpython==2.1.11
 Flask-Mail==0.9.1
 pynmrstar==2.6.3
 dnspython==1.16.0
+# This makes the local flask server faster to reload during development
+watchdog==0.9.0
 git+git://github.com/uwbmrb/validate_email.git@4f3c8544af83d9e8ef56c44ba0a5a5ea12e7182d
