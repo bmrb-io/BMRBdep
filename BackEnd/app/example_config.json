@@ -6,7 +6,7 @@
     },
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],
-        "server": "cowfish",
+        "server": "CHANGE_ME",
         "from_address": "noreply@bmrb.wisc.edu"
     },
     "orcid": {
@@ -19,6 +19,6 @@
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
     "secret_key": "CHANGE_ME",
-    "server_http_root": "https://dev-bmrbdep.bmrb.wisc.edu",
+    "server_http_root": "http://localhost:4200",
     "repo_path": "/tmp/depositions"
 }

@@ -14,4 +14,5 @@ ${SCRIPT_DIR}/BackEnd/run.sh &
 # Run angular
 source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
 cd ${SCRIPT_DIR}/FrontEnd/
+echo "Please open http://localhost:4200 in your browser when Angular is done compiling."
 ng serve
