@@ -50,3 +50,4 @@ configuration.json
 env/
 /BackEnd/app/schema_data/*.json.zlib
 /installation.log
+/FrontEnd/release
