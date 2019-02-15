@@ -3,7 +3,9 @@
 import re
 import os
 import csv
+import sys
 import zlib
+import optparse
 import tempfile
 from shutil import rmtree
 
@@ -264,6 +266,14 @@ def load_schemas(rev):
 
 
 if __name__ == "__main__":
+
+    # Specify some basic information about our command
+    optparser = optparse.OptionParser(description="Create local cache of NMR-STAR schemas.")
+    optparser.add_option("--full", action="store_true", dest="full", default=False,
+                         help="Create all schemas, not just the most recent one.")
+    # Options, parse 'em
+    (options, cmd_input) = optparser.parse_args()
+
     try:
         for schema in schema_emitter():
             with open(os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib'), 'wb') as schema_file:
@@ -271,5 +281,9 @@ if __name__ == "__main__":
                 schema_file.write(zlib.compress(j.encode('utf-8')))
             highest_schema = schema[0]
             print("Set schema: %s" % schema[0])
+            if not options.full:
+                # Make schemas at least up to the one specified in the install script
+                if schema[0] == "3.2.1.21":
+                    sys.exit(0)
     finally:
         rmtree(dictionary_dir)
