@@ -2,6 +2,9 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# Check if the initial setups need to happen
+${SCRIPT_DIR}/install.sh
+
 sudo docker stop bmrbdep
 sudo docker rm bmrbdep
 
@@ -23,5 +26,3 @@ fi
 
 
 sudo docker run -d --name bmrbdep  -p 9000:9000 --restart=always bmrbdep
-
-#-v /zfs/git/bayesexplorer/app/uploads:/opt/wsgi/uploads
