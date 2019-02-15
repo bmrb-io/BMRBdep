@@ -267,17 +267,20 @@ export class Saveframe {
 
     // Update the validity value
     this.valid = true;
-    for (const tag of this.tags) {
-      if (tag.display === 'Y' && !tag.valid) {
-        this.valid = false;
-        break;
-      }
-    }
-    if (this.valid) {
-      for (const loop of this.loops) {
-        if (loop.display === 'Y' && !loop.valid) {
+    // Deleted saveframes are always "valid"
+    if (!this.deleted) {
+      for (const tag of this.tags) {
+        if (tag.display === 'Y' && !tag.valid) {
           this.valid = false;
           break;
+        }
+      }
+      if (this.valid) {
+        for (const loop of this.loops) {
+          if (loop.display === 'Y' && !loop.valid) {
+            this.valid = false;
+            break;
+          }
         }
       }
     }

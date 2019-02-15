@@ -2,8 +2,10 @@
   <h2 *ngIf="!api.cachedEntry.valid">You are viewing all sections of your deposition that still need to be completed.</h2>
   <h2 *ngIf="api.cachedEntry.valid">Your deposition is ready to submit.</h2>
 
-  <div class="eighty_five" *ngIf="!api.cachedEntry.valid">
-    <app-saveframe *ngFor='let saveframe of api.cachedEntry.saveframes' [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
+  <div *ngIf="!api.cachedEntry.valid">
+    <ng-container *ngFor='let saveframe of api.cachedEntry.saveframes'>
+      <app-saveframe *ngIf="!saveframe.deleted" [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
+    </ng-container>
   </div>
   <br>
   <div class="button-div">
@@ -11,8 +13,6 @@
             [disabled]="!api.cachedEntry.valid"
             (click)="submitEntry()">Submit deposition to BMRB
     </button>
-    <button class="mat-raised-button left-pad"
-            (click)="goBack()">
-      Return to previous page</button>
+    <button class="mat-raised-button left-pad" (click)="goBack()">Return to previous page</button>
   </div>
 </div>
