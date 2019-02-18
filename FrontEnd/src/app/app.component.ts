@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from './api.service';
+import {versions} from 'environments/versions';
 
 @Component({
   selector: 'app-root',
@@ -14,5 +15,8 @@ export class AppComponent implements OnInit {
     this.sidenav_open = false;
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    console.log('Running git commit: ' + versions.branch + ':' + versions.revision +
+        '. View commit on GitHub: https://github.com/uwbmrb/BsMRBDep/commit/' + versions.revision);
+  }
 }
