@@ -2,14 +2,13 @@
 
 import os
 import json
-import time
-import random
 
 # Pip module imports
-from git import Repo, NoSuchPathError
+from git import Repo, CacheError
 import werkzeug.utils
 import flask
 import pynmrstar
+from filelock import Timeout, FileLock
 
 # Local imports
 from common import ServerError, RequestError, configuration
@@ -34,39 +33,42 @@ class DepositionRepo:
         self._repo = None
         self._uuid = uuid
         self._initialize = initialize
-        self._entry_dir = None
+        self._entry_dir = os.path.join(configuration['repo_path'], str(self._uuid))
         self._modified_files = False
         self._live_metadata = None
         self._original_metadata = None
         self._lock_path = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
+        self._lock_object = None
+
+        # Make sure the entry ID is valid, or throw an exception
+        if not os.path.exists(self._entry_dir):
+            if not self._initialize:
+                raise RequestError('No deposition with that ID exists!', status_code=404)
+            else:
+                # Create the entry directory
+                os.mkdir(self._entry_dir)
+                os.mkdir(os.path.join(self._entry_dir, 'git'))
+                os.mkdir(os.path.join(self._entry_dir, 'data_files'))
 
     def __enter__(self):
         """ Get a session cookie to use for future requests. """
 
-        self._entry_dir = os.path.join(configuration['repo_path'], str(self._uuid))
-        if not os.path.exists(self._entry_dir) and not self._initialize:
-            raise RequestError('No deposition with that ID exists!')
+        # Get the lock before doing anything in the directory
+        self._lock_object = FileLock(self._lock_path, timeout=10)
         try:
-            if self._initialize:
-                self._repo = Repo.init(self._entry_dir)
-                with open(self._lock_path, "w") as f:
-                    f.write(str(os.getpid()))
-                self._repo.config_writer().set_value("user", "name", "BMRBDep").release()
-                self._repo.config_writer().set_value("user", "email", "bmrbhelp@bmrb.wisc.edu").release()
-                os.mkdir(os.path.join(self._entry_dir, 'data_files'))
-            else:
-                counter = 100
-                while os.path.exists(self._lock_path):
-                    counter -= 1
-                    time.sleep(random.random())
-                    if counter <= 0:
-                        raise ServerError('Could not acquire entry directory lock.')
-                with open(self._lock_path, "w") as f:
-                    f.write(str(os.getpid()))
-                self._repo = Repo(self._entry_dir)
-        except NoSuchPathError:
-            raise RequestError("'%s' is not a valid deposition ID." % self._uuid,
-                               status_code=404)
+            self._lock_object.acquire()
+        except Timeout:
+            raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
+                              ' request is already in progress.')
+
+        if self._initialize:
+            self._repo = Repo.init(self._entry_dir)
+            self._repo.config_writer().set_value("user", "name", "BMRBDep").release()
+            self._repo.config_writer().set_value("user", "email", "bmrbhelp@bmrb.wisc.edu").release()
+        else:
+            self._lock_object = FileLock(self._lock_path, timeout=10)
+            self._lock_object.acquire()
+            self._repo = Repo(self._entry_dir)
 
         return self
 
@@ -74,13 +76,15 @@ class DepositionRepo:
         """ End the current session."""
 
         # If nothing changed the commit won't do anything
-        self.commit("Repo closed with changed but without a manual commit... Potential software bug.")
-        self._repo.close()
-        self._repo.__del__()
         try:
-            os.unlink(self._lock_path)
-        except OSError:
-            raise ServerError('Could not remove entry lock file.')
+            self.commit("Repo closed with changed but without a manual commit... Potential software bug.")
+            self._repo.close()
+            self._repo.__del__()
+        # Catches all git-related errors
+        except CacheError as err:
+            raise ServerError("An exception happened while closing the entry repository: %s" % err)
+        finally:
+            self._lock_object.release()
 
     @property
     def metadata(self):
