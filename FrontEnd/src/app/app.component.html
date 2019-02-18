@@ -1,6 +1,7 @@
 <mat-toolbar>
   <mat-toolbar-row>
-    <div *ngIf="api.cachedEntry!==undefined && api.getEntryID()" (click)="sidenav.toggle(); treeView.scrollSideNav()"
+    <div *ngIf="api.cachedEntry!==undefined && api.getEntryID() && api.cachedEntry.emailValidated"
+         (click)="sidenav.toggle(); treeView.scrollSideNav()"
          class="valign-center">
       <mat-icon>menu</mat-icon>
       <span style="vertical-align: bottom">Menu</span>

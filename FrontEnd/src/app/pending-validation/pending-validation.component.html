@@ -1,0 +1,9 @@
+<div *ngIf="api.cachedEntry" class="main-content">
+  <h2>Pending e-mail verification.</h2>
+  <p>In order to proceed with your deposition, you must click on the verification link you were sent when you created
+  your deposition. If you have not received that e-mail, we will re-send it if you click
+    <button class="fake-button" (click)="resendValidationEmail()">here</button>.</p>
+
+  <p><strong>Why do I need to do this?</strong> Verifying your email before you begin your deposition ensures
+  that we have a working e-mail associated with you deposition. It also allows us to verify ownership of the deposition.</p>
+</div>
