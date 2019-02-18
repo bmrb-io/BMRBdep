@@ -2,8 +2,9 @@
 
 import os
 import sys
-import datetime
 import logging
+import datetime
+import traceback
 from logging.handlers import SMTPHandler
 from uuid import uuid4
 
@@ -13,7 +14,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 import simplejson as json
 
 # Import flask
-from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory
+from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 
@@ -74,6 +75,42 @@ if configuration['debug']:
     logging.getLogger().setLevel('INFO')
 else:
     logging.getLogger().setLevel('WARNING')
+
+
+# Set up error handling
+@application.errorhandler(ServerError)
+@application.errorhandler(RequestError)
+def handle_our_errors(error):
+    """ Handles exceptions we raised ourselves. """
+
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+
+@application.errorhandler(Exception)
+def handle_other_errors():
+    """ Catches any other exceptions and formats them. Only
+    displays the actual error to local clients (to prevent disclosing
+    issues that could be security vulnerabilities)."""
+
+    def check_local_ip():
+        """ Checks if the given IP is a local user."""
+
+        for local_address in configuration['local-ips']:
+            if request.remote_addr.startswith(local_address):
+                return True
+
+        return False
+
+    if check_local_ip():
+        return Response("NOTE: You are seeing this error because your IP was "
+                        "recognized as a local IP:\n%s" %
+                        traceback.format_exc(), mimetype="text/plain")
+    else:
+        response = jsonify({"error": "Server error. Contact webmaster@bmrb.wisc.edu."})
+        response.status_code = 500
+        return response
 
 
 @application.route('/')
