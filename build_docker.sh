@@ -11,7 +11,7 @@ sudo docker rm bmrbdep
 # Build the HTML
 source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
 cd ${SCRIPT_DIR}/FrontEnd/
-ng build --prod --configuration=production --output-path=release
+npm run build.prod
 deactivate_node
 cd ${SCRIPT_DIR}
 

@@ -82,7 +82,7 @@ def send_file(file_name=None):
     if file_name is None:
         file_name = "index.html"
 
-    no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'release')
+    no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'dist')
     container_path = os.path.join(root_dir, 'html')
     if os.path.exists(no_container_path):
         return send_from_directory(no_container_path, file_name)
