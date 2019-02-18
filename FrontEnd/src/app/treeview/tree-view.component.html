@@ -26,7 +26,7 @@
 
 
       <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-        <h2>Deposition Navigation</h2>
+        <h2>Deposition "{{api.cachedEntry.depositionNickname}}" Navigation</h2>
         <mat-divider></mat-divider>
         <br>
         <ng-container *ngFor="let superGroupCat of api.cachedEntry.superGroups">
