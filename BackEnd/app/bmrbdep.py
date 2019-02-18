@@ -89,7 +89,7 @@ def handle_our_errors(error):
 
 
 @application.errorhandler(Exception)
-def handle_other_errors():
+def handle_other_errors(exception):
     """ Catches any other exceptions and formats them. Only
     displays the actual error to local clients (to prevent disclosing
     issues that could be security vulnerabilities)."""
