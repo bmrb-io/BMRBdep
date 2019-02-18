@@ -47,7 +47,7 @@ class DepositionRepo:
             else:
                 # Create the entry directory
                 os.mkdir(self._entry_dir)
-                os.mkdir(os.path.join(self._entry_dir, 'git'))
+                os.mkdir(os.path.join(self._entry_dir, '.git'))
                 os.mkdir(os.path.join(self._entry_dir, 'data_files'))
 
     def __enter__(self):
