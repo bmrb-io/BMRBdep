@@ -197,6 +197,23 @@ export class ApiService {
       );
   }
 
+  resendValidationEmail(): Observable<any> {
+
+    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/resend-validation-email`;
+
+    this.messagesService.sendMessage(new Message('Requesting new validation e-mail...',
+        MessageType.NotificationMessage, 0));
+    return this.http.get(apiEndPoint)
+        .pipe(
+            map(json_data => {
+              this.messagesService.clearMessage();
+              return json_data;
+            }),
+            // Convert the error into something we can handle
+            catchError((error: HttpErrorResponse) => this.handleError(error))
+        );
+  }
+
   getEntryID(): string {
     return this.cachedEntry.entryID;
   }

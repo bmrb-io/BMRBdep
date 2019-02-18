@@ -17,6 +17,8 @@ import {ReviewComponent} from './review/review.component';
 import {TreeViewComponent} from './treeview/tree-view.component';
 import {FileUploaderComponent} from './file-uploader/file-uploader.component';
 import {MessageComponent} from './message/message.component';
+import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
+import {PendingValidationComponent} from './pending-validation/pending-validation.component'; // Saving/loading bar
 
 // For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
@@ -40,7 +42,6 @@ import {
 
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
-import {MolecularSystemComponent} from './molecular-system/molecular-system.component'; // Saving/loading bar
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import {MolecularSystemComponent} from './molecular-system/molecular-system.comp
     ReviewComponent,
     RestoreComponent,
     MolecularSystemComponent,
+    PendingValidationComponent,
   ],
   imports: [
     BrowserModule,

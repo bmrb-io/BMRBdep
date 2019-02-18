@@ -160,7 +160,7 @@ Thank you,
 <br>
 BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                      url_for('validate_user', token=token, _external=True),
-                     configuration['server_http_root'] + '/entry/%s/saveframe/deposited_data_files/category' % uuid)
+                     request.url_root + 'entry/%s/saveframe/deposited_data_files/category' % uuid)
 
         mail.send(confirm_message)
 
@@ -183,9 +183,8 @@ def validate_user(token):
             repo.metadata['email_validated'] = True
             repo.commit("E-mail validated.")
 
-    return redirect('%s/entry/%s/saveframe/deposited_data_files/category' %
-                    (configuration['server_http_root'], deposition_id),
-                    code=302)
+    return redirect('/entry/%s/pending-verification' %
+                    deposition_id, code=302)
 
 
 @application.route('/deposition/new', methods=('POST',))
@@ -446,7 +445,7 @@ def new_deposition():
 
 @application.route('/deposition/<uuid:uuid>/deposit', methods=('POST',))
 def deposit_entry(uuid):
-    """ Complete the deposition! """
+    """ Complete the deposition. """
 
     with depositions.DepositionRepo(uuid) as repo:
         if repo.metadata['entry_deposited']:
@@ -518,6 +517,10 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
+            if not repo.metadata['email_validated']:
+                raise RequestError(
+                    'Please click confirm on the e-mail validation link you were sent when you created your '
+                    'deposition. Changes cannot be saved until you have validated your entry.')
             if repo.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
 

@@ -1,4 +1,4 @@
-<ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID()">
+<ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID() && api.cachedEntry.emailValidated">
 
   <mat-card>
     <mat-card-title (dblclick)="developerMode=true;logEntry()">Menu</mat-card-title>
@@ -34,7 +34,7 @@
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
             <h3 matSubheader [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
-              <mat-icon routerLink="help/molecular_assembly"
+              <mat-icon routerLink="help/molecular-assembly"
                         *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
                         class="pointer">help_outline</mat-icon>
             </h3>

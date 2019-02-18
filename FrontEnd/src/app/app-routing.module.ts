@@ -7,6 +7,7 @@ import {WelcomeComponent} from './welcome/welcome.component';
 import {ReviewComponent} from './review/review.component';
 import {RestoreComponent} from './restore/restore.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
+import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
@@ -14,7 +15,8 @@ const routes: Routes = [
   {path: 'entry/:entry/saveframe/:saveframe_description/:load_type', component: SaveframeEditorComponent},
   {path: 'entry/:entry/review', component: ReviewComponent},
   {path: 'entry/:entry/restore', component: RestoreComponent},
-  {path: 'help/molecular_assembly', component: MolecularSystemComponent}
+  {path: 'entry/:entry/pending-verification', component: PendingValidationComponent},
+  {path: 'help/molecular-assembly', component: MolecularSystemComponent}
 ];
 
 @NgModule({
