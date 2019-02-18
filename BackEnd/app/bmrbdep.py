@@ -509,6 +509,8 @@ def fetch_or_store_deposition(uuid):
             entry = repo.get_entry()
             schema_version = entry.get_tag('_Entry.NMR_STAR_version')[0]
             data_files = repo.get_data_file_list()
+            email_validated = repo.metadata['email_validated']
+            deposition_nickname = repo.metadata['deposition_nickname']
         try:
             schema = get_schema(schema_version)
         except RequestError:
@@ -517,6 +519,9 @@ def fetch_or_store_deposition(uuid):
         entry = entry.get_json(serialize=False)
         entry['schema'] = schema
         entry['data_files'] = data_files
+        entry['email_validated'] = email_validated
+        entry['deposition_nickname'] = deposition_nickname
+
         return jsonify(entry)
 
 
