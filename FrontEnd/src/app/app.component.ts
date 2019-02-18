@@ -17,6 +17,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     console.log('Running git commit: ' + versions.branch + ':' + versions.revision +
-        '. View commit on GitHub: https://github.com/uwbmrb/BsMRBDep/commit/' + versions.revision);
+        '. View commit on GitHub: https://github.com/uwbmrb/BMRBDep/commit/' + versions.revision);
   }
 }
