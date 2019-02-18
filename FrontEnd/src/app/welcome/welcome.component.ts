@@ -66,7 +66,7 @@ export class WelcomeComponent implements OnInit {
       this.bootstrapID.value).subscribe(
       response => {
         if (response) {
-          this.router.navigate(['/entry/', response['deposition_id'], 'saveframe', 'deposited_data_files', 'category']);
+          this.router.navigate(['/entry/', response['deposition_id'], 'pending-verification']);
         }
       });
 
