@@ -17,7 +17,7 @@ RUN apk update && \
     rm -r /root/.cache
 
 COPY ./BackEnd/app /opt/wsgi
-COPY ./FrontEnd/release /opt/wsgi/html
+COPY ./FrontEnd/dist /opt/wsgi/html
 
 RUN cd /opt/wsgi && chown -R uwsgi:uwsgi .
 RUN pip3 install -r /opt/wsgi/requirements.txt
