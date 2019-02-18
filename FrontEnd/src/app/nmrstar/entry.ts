@@ -84,11 +84,6 @@ export class Entry {
     return {entry_id: this.entryID, saveframes: this.saveframes};
   }
 
-  /* Return the position of a given saveframe in the saveframe list. */
-  sfIndex(saveframe: Saveframe): number {
-    return this.saveframes.indexOf(saveframe);
-  }
-
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
   addSaveframe(saveframe: Saveframe, position: number = -1, refresh: boolean = true): void {
@@ -101,16 +96,6 @@ export class Entry {
     if (refresh) {
       this.refresh();
     }
-  }
-
-  getDeletedSaveframes() {
-    const deletedFrames = [];
-    for (const saveframe of this.saveframes) {
-      if (!saveframe.deleted) {
-        deletedFrames.push(saveframe);
-      }
-    }
-    return deletedFrames;
   }
 
   restoreByCategory(category: string): void {
