@@ -5,11 +5,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod",
+    "prebuild.prod": "ts-node -O '{\"module\": \"commonjs\"}' git.version.ts",
+    "build.prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "release": "ng build --prod --configuration --output-path=release/"
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
