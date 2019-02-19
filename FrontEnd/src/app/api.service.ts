@@ -27,6 +27,13 @@ export class ApiService {
     this.cachedEntry = new Entry('');
   }
 
+  clearDeposition(): void {
+      localStorage.removeItem('entry_key');
+      localStorage.removeItem('entry');
+      localStorage.removeItem('schema');
+      this.cachedEntry = new Entry('');
+  }
+
   // file from event.target.files[0]
   uploadFile(file: File): Observable<HttpEvent<any>> {
 
