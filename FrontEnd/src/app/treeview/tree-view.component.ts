@@ -56,10 +56,10 @@ export class TreeViewComponent implements OnInit {
   }
 
   scrollSideNav(): void {
-    window.setTimeout(() => {
-      if (this.page === 'category') {
-        document.getElementById(this.active).parentElement.scrollIntoView();
-      }
-    }, 500);
+    if (this.page === 'category') {
+      document.getElementById(this.active).parentElement.scrollIntoView({behavior: 'smooth'});
+    } else {
+      document.getElementById(this.page).parentElement.scrollIntoView({behavior: 'smooth'});
+    }
   }
 }
