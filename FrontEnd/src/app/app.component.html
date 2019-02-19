@@ -6,7 +6,7 @@
       <mat-icon>menu</mat-icon>
       <span style="vertical-align: bottom">Menu</span>
     </div>
-    <span class="title-center" routerLink="/">BMRBDep</span>
+    <span class="title-center" routerLink="/" (click)="api.clearDeposition()">BMRBDep</span>
   </mat-toolbar-row>
   <mat-toolbar-row class="loading-bar-holder">
     <div *mkLoadingPage="{checkPendingHttp: true}">
