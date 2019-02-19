@@ -24,9 +24,7 @@ export class PendingValidationComponent implements OnInit {
             });
         });
         setTimeout(() => {
-            localStorage.removeItem('entry_key');
-            localStorage.removeItem('entry');
-            localStorage.removeItem('schema');
+            this.api.clearDeposition();
             window.location.reload();
         }, 30000);
     }
