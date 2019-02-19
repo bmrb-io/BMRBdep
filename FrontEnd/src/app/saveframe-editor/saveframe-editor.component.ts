@@ -19,20 +19,22 @@ export class SaveframeEditorComponent implements OnInit {
               private router: Router,
               private api: ApiService) {
     this.saveframes = [];
+    this.entry = null;
   }
 
   ngOnInit() {
+
+    this.api.entrySubject.subscribe(entry => {
+      this.entry = entry;
+      this.reloadSaveframes();
+    });
+
     // Listen for the changing of the params string
     const parent = this;
     this.route.params.subscribe(function (params) {
       parent.loadType = params['load_type'];
       parent.saveframeDescription = params['saveframe_description'];
-
-      parent.api.getEntry(params['entry'])
-        .subscribe(ret_entry => {
-          parent.entry = ret_entry;
-          parent.reloadSaveframes();
-        });
+      parent.api.getEntry(params['entry']).subscribe();
     });
   }
 
