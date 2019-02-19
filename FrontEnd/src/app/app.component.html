@@ -16,7 +16,7 @@
 </mat-toolbar>
 
 <mat-sidenav-container>
-  <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav>
+  <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false">
     <app-tree-view #treeView></app-tree-view>
   </mat-sidenav>
 
