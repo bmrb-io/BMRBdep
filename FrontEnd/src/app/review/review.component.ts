@@ -3,6 +3,7 @@ import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Location} from '@angular/common';
+import {Entry} from '../nmrstar/entry';
 
 @Component({
   selector: 'app-review',
@@ -11,7 +12,9 @@ import {Location} from '@angular/common';
 })
 export class ReviewComponent implements OnInit {
 
-  constructor(public api: ApiService,
+  entry: Entry;
+
+  constructor(private api: ApiService,
               private route: ActivatedRoute,
               private messagesService: MessagesService,
               private router: Router,
@@ -19,6 +22,10 @@ export class ReviewComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    this.api.entrySubject.subscribe(entry => {
+      this.entry = entry;
+    });
 
     const parent = this;
     this.route.params.subscribe(function (params) {
@@ -31,8 +38,7 @@ export class ReviewComponent implements OnInit {
   }
 
   submitEntry(): void {
-    this.api.submitEntry().subscribe(json_data => {
-      console.log(json_data);
+    this.api.submitEntry().subscribe(() => {
       this.messagesService.sendMessage(new Message('Submission accepted! Redirecting to home page.',
         MessageType.NotificationMessage, 10000));
       setTimeout(() => {
