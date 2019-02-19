@@ -1,63 +1,78 @@
 <ng-container *ngIf="api.cachedEntry!==undefined && api.getEntryID() && api.cachedEntry.emailValidated">
 
-  <mat-card>
-    <mat-card-title (dblclick)="developerMode=true;logEntry()">Menu</mat-card-title>
-    <mat-card-content>
-      <button mat-menu-item [ngClass]="{'active': page=='review', 'special': true}"
-              [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">Deposit Entry</button>
-      <button mat-menu-item [matMenuTriggerFor]="depositorMenu">Deposition Options</button>
-      <button mat-menu-item [matMenuTriggerFor]="developerMenu" *ngIf="developerMode">Developer Menu</button>
+    <mat-card>
+        <mat-card-title (dblclick)="developerMode=true;logEntry()">
+            Deposition "{{api.cachedEntry.depositionNickname}}" Navigation</mat-card-title>
+        <mat-card-content>
 
-      <mat-menu #depositorMenu="matMenu">
-        <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll" (ngModelChange)="api.cachedEntry.updateCategories()"
-                          color="#CBDBFF">Display non-mandatory tags
-        </mat-slide-toggle>
-        <button mat-menu-item *ngIf="api.cachedEntry.hasDeleted"
-                [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']">Restore deleted saveframes
-        </button>
-        <button mat-menu-item class="one">Email deposition (not yet implemented)</button>
-      </mat-menu>
-
-      <mat-menu #developerMenu="matMenu">
-        <button mat-menu-item (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry
-        </button>
-        <button mat-menu-item (click)='refresh()'>Refresh cache/page</button>
-      </mat-menu>
-
-
-      <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
-        <h2>Deposition "{{api.cachedEntry.depositionNickname}}" Navigation</h2>
-        <mat-divider></mat-divider>
-        <br>
-        <ng-container *ngFor="let superGroupCat of api.cachedEntry.superGroups">
-          <div *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
+            <mat-nav-list>
+                <div *ngIf="(showInvalidOnly && !api.cachedEntry.valid) || !showInvalidOnly">
+                    <ng-container *ngFor="let superGroupCat of api.cachedEntry.superGroups">
+                        <div *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
                          (!showInvalidOnly && (superGroupCat.display == 'Y' ||
                               (api.cachedEntry.showAll && superGroupCat.display != 'H')))">
-            <h3 matSubheader [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
-              <mat-icon routerLink="help/molecular-assembly"
-                        *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
-                        class="pointer">help_outline</mat-icon>
-            </h3>
 
-            <ng-container *ngFor="let category of superGroupCat.children">
-              <ng-container *ngIf="(showInvalidOnly && !category.valid) ||
+
+                            <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+                                <mat-icon routerLink="help/molecular-assembly"
+                                          *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
+                                          class="pointer">help_outline
+                                </mat-icon>
+                            </h3>
+
+                            <mat-divider></mat-divider>
+
+                            <ng-container *ngFor="let category of superGroupCat.children">
+                                <ng-container *ngIf="(showInvalidOnly && !category.valid) ||
                                     (!showInvalidOnly && (api.cachedEntry.showAll || category.display == 'Y') && category.display != 'H')">
-                <button mat-menu-item
-                        [ngClass]="{'active': active==category.category}"
-                        [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
-                        [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']"
-                        [id]="category.category">{{category.displayName}}
-                  <mat-icon *ngIf="category.valid">done</mat-icon>
-                  <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
-                  <mat-icon *ngIf="!category.valid">error_outline</mat-icon>
-                  <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
-                </button>
-              </ng-container>
-            </ng-container>
-            <mat-divider></mat-divider>
-          </div>
-        </ng-container>
-      </div>
-    </mat-card-content>
-  </mat-card>
+                                    <a mat-list-item [ngClass]="{'active': active==category.category && page=='category'}"
+                                       [title]="api.cachedEntry.schema.saveframeSchema[category.category]['group_view_help']"
+                                       [routerLink]="['/entry', api.cachedEntry.entryID, 'saveframe', category.category, 'category']"
+                                       [id]="category.category">
+                                        <mat-icon *ngIf="category.valid">done</mat-icon>
+                                        <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
+                                        <mat-icon *ngIf="!category.valid">error_outline</mat-icon>
+                                        <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
+                                        <h2 matLine> {{category.displayName}} </h2>
+                                    </a>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <mat-divider></mat-divider>
+                <div>
+                    <h3 matLine>Deposition Options</h3>
+
+                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="api.cachedEntry.hasDeleted"
+                       [routerLink]="['/entry', api.cachedEntry.entryID, 'restore']" id="restore">
+                        <h2 matLine>Restore deleted saveframes</h2>
+                    </a>
+
+                    <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
+                       [routerLink]="['/entry', api.cachedEntry.entryID, 'review']">
+                        <mat-icon *ngIf="api.cachedEntry.valid">done</mat-icon>
+                        <span *ngIf="!api.cachedEntry.valid" class="cdk-visually-hidden">Incomplete</span>
+                        <mat-icon *ngIf="!api.cachedEntry.valid">error_outline</mat-icon>
+                        <span *ngIf="api.cachedEntry.valid" class="cdk-visually-hidden">Completed</span>
+                        <h2 matLine>Deposit entry</h2>
+                    </a>
+
+                    <div *ngIf="developerMode">
+                        <mat-list-item
+                                (click)='download(api.cachedEntry.entryID + ".str", api.cachedEntry)'>Download entry
+                        </mat-list-item>
+                        <mat-list-item (click)='refresh()'>Refresh cache/page</mat-list-item>
+                        <mat-list-item>
+                            <mat-slide-toggle [(ngModel)]="api.cachedEntry.showAll"
+                                              (ngModelChange)="api.cachedEntry.updateCategories()"
+                                              color="#CBDBFF">Display non-mandatory tags
+                            </mat-slide-toggle>
+                        </mat-list-item>
+                    </div>
+                </div>
+            </mat-nav-list>
+        </mat-card-content>
+    </mat-card>
 </ng-container>
