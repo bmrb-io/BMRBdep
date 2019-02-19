@@ -1,4 +1,4 @@
-import {Observable, of, Subscription} from 'rxjs';
+import {Observable, of, Subject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
@@ -12,7 +12,8 @@ import {Router} from '@angular/router';
 })
 export class ApiService {
 
-    cachedEntry: Entry;
+    private cachedEntry: Entry;
+    entrySubject: Subject<Entry>;
     activeSaveRequest: Subscription;
 
     JSONOptions = {
@@ -24,14 +25,18 @@ export class ApiService {
     constructor(private http: HttpClient,
                 private messagesService: MessagesService,
                 private router: Router) {
-        this.cachedEntry = new Entry('');
+        this.entrySubject = new Subject<Entry>();
+        this.entrySubject.subscribe(entry => {
+            this.cachedEntry = entry;
+        });
+        this.entrySubject.next(null);
     }
 
     clearDeposition(): void {
         localStorage.removeItem('entry_key');
         localStorage.removeItem('entry');
         localStorage.removeItem('schema');
-        this.cachedEntry = new Entry('');
+        this.entrySubject.next(null);
     }
 
     // file from event.target.files[0]
@@ -69,7 +74,7 @@ export class ApiService {
 
     getEntry(entryID: string, skipCache: boolean = false): Observable<Entry> {
         // If all we did was reroute, we still have the entry
-        if ((entryID === this.cachedEntry.entryID) && (!skipCache)) {
+        if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
             this.cachedEntry['source'] = 'session memory';
             // The page is being reloaded, but we can get the entry from the browser cache
         } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
@@ -84,15 +89,17 @@ export class ApiService {
                 return this.getEntry(entryID, true);
             }
 
-            this.cachedEntry = entryFromJSON(rawJSON);
-            this.cachedEntry['source'] = 'browser cache';
+            const newEntry = entryFromJSON(rawJSON);
+            newEntry['source'] = 'browser cache';
+            this.entrySubject.next(newEntry);
             // We either don't have the entry or have a different one, so fetch from the API
         } else {
             const entryURL = `${environment.serverURL}/${entryID}`;
             return this.http.get(entryURL).pipe(
                 map(jsonData => {
-                    this.cachedEntry = entryFromJSON(jsonData);
-                    this.cachedEntry['source'] = 'API server';
+                    const newEntry = entryFromJSON(jsonData);
+                    newEntry['source'] = 'API server';
+                    this.entrySubject.next(newEntry);
                     this.saveEntry(true);
                     return this.cachedEntry;
                 }),
@@ -222,6 +229,9 @@ export class ApiService {
     }
 
     getEntryID(): string {
+        if (this.cachedEntry === null) {
+            return null;
+        }
         return this.cachedEntry.entryID;
     }
 
