@@ -27,7 +27,7 @@ export class ReviewComponent implements OnInit {
 
     const parent: ReviewComponent = this;
     this.route.params.subscribe(function (params) {
-      parent.api.getEntry(params['entry']).subscribe();
+      parent.api.loadEntry(params['entry']);
     });
   }
 

@@ -20,7 +20,7 @@ export class RestoreComponent implements OnInit {
 
     const parent = this;
     this.route.params.subscribe(function (params) {
-      parent.api.getEntry(params['entry']).subscribe();
+      parent.api.loadEntry(params['entry']);
     });
   }
 

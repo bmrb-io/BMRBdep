@@ -22,7 +22,7 @@ export class EntryComponent implements OnInit {
     this.api.entrySubject.subscribe(entry => this.entry = entry);
 
     this.route.params.subscribe(function (params) {
-      parent.api.getEntry(params['entry']).subscribe();
+      parent.api.loadEntry(params['entry']);
     });
   }
 

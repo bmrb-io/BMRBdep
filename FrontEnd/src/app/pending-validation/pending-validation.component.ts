@@ -26,7 +26,7 @@ export class PendingValidationComponent implements OnInit {
         });
 
         this.route.params.subscribe(function (params) {
-            parent.api.getEntry(params['entry'], true).subscribe();
+            parent.api.loadEntry(params['entry'], true);
         });
     }
 
