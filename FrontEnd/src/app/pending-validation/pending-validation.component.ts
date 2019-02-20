@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
@@ -8,9 +8,10 @@ import {Entry} from '../nmrstar/entry';
     templateUrl: './pending-validation.component.html',
     styleUrls: ['./pending-validation.component.css']
 })
-export class PendingValidationComponent implements OnInit {
+export class PendingValidationComponent implements OnInit, OnDestroy {
 
     entry: Entry;
+    timer;
     constructor(private api: ApiService,
                 private router: Router) {
     }
@@ -26,16 +27,20 @@ export class PendingValidationComponent implements OnInit {
         });
 
         // Check the validation status every 5 seconds
-        const timer = setInterval(() => {
+        this.timer = setInterval(() => {
             parent.api.checkValid().subscribe(valid => {
                 if (valid) {
-                    clearInterval(timer);
+                    clearInterval(parent.timer);
                     parent.entry.emailValidated = true;
                     parent.api.saveEntry(true, true);
                     parent.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
                 }
             });
         }, 2500);
+    }
+
+    ngOnDestroy() {
+        clearInterval(this.timer);
     }
 
     resendValidationEmail(): void {
