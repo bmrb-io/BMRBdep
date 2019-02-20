@@ -23,4 +23,8 @@ export class AppComponent implements OnInit {
 
     this.api.entrySubject.subscribe(entry => this.entry = entry);
   }
+
+  clearEntry(): void {
+    this.api.clearDeposition();
+  }
 }
