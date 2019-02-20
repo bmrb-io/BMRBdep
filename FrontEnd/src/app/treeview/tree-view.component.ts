@@ -15,7 +15,7 @@ export class TreeViewComponent implements OnInit {
   entry: Entry;
   page: string;
   @Input() showInvalidOnly: boolean;
-  @Output() sessionEnd = new EventEmitter<>();
+  @Output() sessionEnd = new EventEmitter<boolean>();
 
   constructor(private api: ApiService,
               private router: Router,
@@ -55,7 +55,7 @@ export class TreeViewComponent implements OnInit {
 
   endSession(): void {
     this.api.clearDeposition();
-    this.sessionEnd.emit();
+    this.sessionEnd.emit(true);
   }
 
   refresh(): void {
