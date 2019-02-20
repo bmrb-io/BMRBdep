@@ -1,0 +1,20 @@
+.title-center {
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.loading-bar-holder {
+  height: 4px;
+  display: block;
+}
+
+mat-sidenav-container {
+  height: calc(100% - 64px);
+}
+
+.valign-center {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  cursor: pointer;
+}

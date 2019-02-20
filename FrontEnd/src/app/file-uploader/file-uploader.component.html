@@ -1,0 +1,69 @@
+<table class="full_width" *ngIf="entry">
+    <colgroup>
+        <col class="index-column">
+        <col class="file-status-column">
+        <col class="file-type-column">
+    </colgroup>
+
+    <thead>
+    <tr>
+        <th colspan="2" (contextmenu)="logFileUploadSaveframe()">
+            <a class="header-text">Deposit data files</a>
+        </th>
+        <th>
+            <div class="right-float">
+                <a class="fake-button line"
+                   *ngIf="showCategoryLink"
+                   [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">
+                    View sections of this category
+                </a>
+            </div>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr *ngFor="let file of entry.dataStore.dataFiles; let i = index">
+        <td><p class="center-text">{{i + 1}}</p></td>
+        <td>
+            <div class="file-upload">
+                <div *ngIf="file.fileName">
+                    <button class="fake-button" (click)="deleteFile(file.fileName)">-</button>&nbsp;
+                    <a download *ngIf="file.percent == 100; else uploading"
+                       [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName">{{file.fileName}}</a>
+                    <ng-template #uploading>{{file.fileName}}</ng-template>
+                </div>
+                <mat-progress-bar *ngIf="file.fileName && file.percent != 100" mode="determinate"
+                                  [value]="file.percent" color="#33527b">Uploading file:
+                </mat-progress-bar>
+            </div>
+        </td>
+        <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
+            <div class="file-upload">
+                <mat-form-field>
+                    <mat-select (selectionChange)="updateAndSaveDataFiles()"
+                                [formControl]="file.control"
+                                placeholder="Please select the data type(s) for this file."
+                                multiple required>
+                        <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType"
+                                    title="{{dataType[3]}}">{{dataType[0]}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <div class="file-upload">
+                <input type="file" (change)="selectFile($event)" placeholder="Upload file" multiple #inputFile>
+            </div>
+        </td>
+        <td class="drag-td" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
+            <div class="drag-box">
+                <div class="drag-text">Or drag and drop files here</div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>

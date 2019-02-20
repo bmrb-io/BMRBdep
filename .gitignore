@@ -7,10 +7,11 @@
 /out-tsc
 
 # dependencies
-/node_modules
+node_modules
+node_env
 
 # IDEs and editors
-/.idea
+.idea
 .project
 .classpath
 .c9/
@@ -41,3 +42,13 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+__pycache__
+package-lock.json
+/BackEnd/depositions/
+configuration.json
+env/
+/BackEnd/app/schema_data/*.json.zlib
+/installation.log
+/FrontEnd/dist
+/FrontEnd/src/environments/versions.ts 

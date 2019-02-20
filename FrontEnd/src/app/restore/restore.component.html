@@ -1,0 +1,9 @@
+<div *ngIf="entry" class="main-content">
+  <h2>Restore Data</h2>
+  <p>The following saveframes have been deleted during the deposition process. If you would like to restore any
+    of them, simply click the "restore" button in the upper right corner of a saveframe. When finished, return to
+    the normal deposition view by using the side menu.</p>
+  <ng-container *ngFor="let saveframe of entry.saveframes">
+    <app-saveframe *ngIf="saveframe.deleted" [saveframe]="saveframe"></app-saveframe>
+  </ng-container>
+</div>
