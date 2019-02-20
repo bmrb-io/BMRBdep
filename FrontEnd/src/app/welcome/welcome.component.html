@@ -61,15 +61,18 @@
       </div>
 
       <br>
-      <button *ngIf="sessionType.value == 'bmrb_id'" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="sessionType.value == 'bmrb_id'" mat-flat-button class="mat-flat-button mat-primary"
+              [disabled]="!createDepositionForm.valid">
         Click here to start a new deposition from an existing entry.
       </button>
 
-      <button *ngIf="sessionType.value == 'new'" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="sessionType.value == 'new'" mat-flat-button class="mat-flat-button mat-primary"
+              [disabled]="!createDepositionForm.valid">
         Click here to start a new deposition from scratch.
       </button>
 
-      <button *ngIf="!sessionType.value" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="!sessionType.value" mat-flat-button class="mat-flat-button mat-primary"
+              [disabled]="!createDepositionForm.valid">
         Click here to start a new deposition.
       </button>
 
