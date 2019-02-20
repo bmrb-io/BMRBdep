@@ -14,7 +14,7 @@
 
 
                             <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
-                                <mat-icon routerLink="help/molecular-assembly"
+                                <mat-icon [routerLink]="['/entry', entry.entryID, 'help', 'molecular-assembly']"
                                           *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
                                           class="pointer">help_outline
                                 </mat-icon>
