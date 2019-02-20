@@ -16,9 +16,7 @@ export class RestoreComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-    });
+    this.api.entrySubject.subscribe(entry => this.entry = entry);
 
     const parent = this;
     this.route.params.subscribe(function (params) {

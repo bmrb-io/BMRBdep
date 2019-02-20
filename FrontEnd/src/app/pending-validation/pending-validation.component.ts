@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Entry} from '../nmrstar/entry';
 
 @Component({
     selector: 'app-pending-validation',
@@ -9,24 +10,24 @@ import {ActivatedRoute, Router} from '@angular/router';
 })
 export class PendingValidationComponent implements OnInit {
 
-    constructor(public api: ApiService,
+    entry: Entry;
+    constructor(private api: ApiService,
                 private route: ActivatedRoute,
                 private router: Router) {
     }
 
     ngOnInit() {
-        const parent = this;
-        this.route.params.subscribe(function (params) {
-            parent.api.getEntry(params['entry'], true).subscribe(() => {
-                if (parent.api.cachedEntry.emailValidated) {
-                    parent.router.navigate(['/entry/', parent.api.cachedEntry.entryID, 'saveframe', 'deposited_data_files', 'category']);
-                }
-            });
+        const parent: PendingValidationComponent = this;
+        this.api.entrySubject.subscribe(entry => {
+            this.entry = entry;
+            if (entry.emailValidated) {
+                parent.router.navigate(['/entry/', parent.entry.entryID, 'saveframe', 'deposited_data_files', 'category']);
+            }
         });
-        setTimeout(() => {
-            this.api.clearDeposition();
-            window.location.reload();
-        }, 30000);
+
+        this.route.params.subscribe(function (params) {
+            parent.api.getEntry(params['entry'], true).subscribe();
+        });
     }
 
     resendValidationEmail(): void {

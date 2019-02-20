@@ -23,11 +23,9 @@ export class ReviewComponent implements OnInit {
 
   ngOnInit() {
 
-    this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-    });
+    this.api.entrySubject.subscribe(entry => this.entry = entry);
 
-    const parent = this;
+    const parent: ReviewComponent = this;
     this.route.params.subscribe(function (params) {
       parent.api.getEntry(params['entry']).subscribe();
     });
