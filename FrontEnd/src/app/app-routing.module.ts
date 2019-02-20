@@ -16,7 +16,7 @@ const routes: Routes = [
   {path: 'entry/:entry/review', component: ReviewComponent},
   {path: 'entry/:entry/restore', component: RestoreComponent},
   {path: 'entry/:entry/pending-verification', component: PendingValidationComponent},
-  {path: 'help/molecular-assembly', component: MolecularSystemComponent}
+  {path: 'entry/:entry/help/molecular-assembly', component: MolecularSystemComponent}
 ];
 
 @NgModule({
