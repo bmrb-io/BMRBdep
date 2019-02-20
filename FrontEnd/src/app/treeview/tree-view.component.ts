@@ -41,9 +41,7 @@ export class TreeViewComponent implements OnInit {
       });
     });
 
-    this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-    });
+    this.api.entrySubject.subscribe(entry => this.entry = entry);
   }
 
   download(name: string, printable_object): void {

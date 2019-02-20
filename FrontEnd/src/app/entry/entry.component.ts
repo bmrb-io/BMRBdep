@@ -13,26 +13,17 @@ export class EntryComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               private api: ApiService) {
-    this.entry = new Entry('');
   }
 
   ngOnInit() {
     // Listen for the changing of the params string
-    const parent = this;
+    const parent: EntryComponent = this;
+
+    this.api.entrySubject.subscribe(entry => this.entry = entry);
+
     this.route.params.subscribe(function (params) {
-      parent.loadEntry(params['entry']);
+      parent.api.getEntry(params['entry']).subscribe();
     });
-  }
-
-  loadEntry(entry: string): void {
-
-    const parent = this;
-    parent.api.getEntry(entry)
-      .subscribe(
-        fetched_entry => {
-          parent.entry = fetched_entry;
-        }
-      );
   }
 
 }

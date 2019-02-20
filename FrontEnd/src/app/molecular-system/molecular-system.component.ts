@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Location} from '@angular/common';
+import {ApiService} from '../api.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-molecular-system',
@@ -10,11 +12,18 @@ import {Location} from '@angular/common';
 export class MolecularSystemComponent implements OnInit {
 
   constructor(private titleService: Title,
-              private location: Location) {
+              private location: Location,
+              private api: ApiService,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit() {
     this.titleService.setTitle('Help: Chemical component, Molecular Entity, and Molecular assembly');
+
+    const parent: MolecularSystemComponent = this;
+    this.route.params.subscribe(function (params) {
+      parent.api.getEntry(params['entry']).subscribe();
+    });
   }
 
   goBack(): void {

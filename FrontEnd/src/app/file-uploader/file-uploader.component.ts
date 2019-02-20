@@ -18,7 +18,7 @@ export class FileUploaderComponent implements OnInit {
   serverURL: String = null;
   showCategoryLink: boolean;
 
-  constructor(public api: ApiService,
+  constructor(private api: ApiService,
               private messagesService: MessagesService,
               private route: ActivatedRoute) {
     this.showCategoryLink = true;
