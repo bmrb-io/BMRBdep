@@ -20,7 +20,7 @@ export class PendingValidationComponent implements OnInit {
         const parent: PendingValidationComponent = this;
         this.api.entrySubject.subscribe(entry => {
             this.entry = entry;
-            if (entry.emailValidated) {
+            if (entry && entry.emailValidated) {
                 parent.router.navigate(['/entry/', parent.entry.entryID, 'saveframe', 'deposited_data_files', 'category']);
             }
         });
