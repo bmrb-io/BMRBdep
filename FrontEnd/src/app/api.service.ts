@@ -1,4 +1,4 @@
-import {Observable, of, Subject, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
@@ -13,7 +13,7 @@ import {Router} from '@angular/router';
 export class ApiService {
 
     private cachedEntry: Entry;
-    entrySubject: Subject<Entry>;
+    entrySubject: BehaviorSubject<Entry>;
     activeSaveRequest: Subscription;
 
     JSONOptions = {
@@ -25,11 +25,10 @@ export class ApiService {
     constructor(private http: HttpClient,
                 private messagesService: MessagesService,
                 private router: Router) {
-        this.entrySubject = new Subject<Entry>();
+        this.entrySubject = new BehaviorSubject<Entry>(null);
         this.entrySubject.subscribe(entry => {
             this.cachedEntry = entry;
         });
-        this.entrySubject.next(null);
     }
 
     clearDeposition(): void {
