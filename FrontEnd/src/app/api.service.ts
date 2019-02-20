@@ -12,10 +12,10 @@ import {Message, MessagesService, MessageType} from './messages.service';
 export class ApiService {
 
     private cachedEntry: Entry;
+    private activeSaveRequest: Subscription;
     entrySubject: BehaviorSubject<Entry>;
-    activeSaveRequest: Subscription;
 
-    JSONOptions = {
+    private JSONOptions = {
         headers: new HttpHeaders({
             'Content-Type': 'application/json'
         })
@@ -72,7 +72,7 @@ export class ApiService {
     loadEntry(entryID: string, skipCache: boolean = false): void {
         // If all we did was reroute, we still have the entry
         if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
-            this.entrySubject.next(this.cachedEntry);
+            return;
             // The page is being reloaded, but we can get the entry from the browser cache
         } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
 
