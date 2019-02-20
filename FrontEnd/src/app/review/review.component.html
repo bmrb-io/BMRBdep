@@ -1,0 +1,18 @@
+<div class="main-content" *ngIf="entry">
+  <h2 *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be completed.</h2>
+  <h2 *ngIf="entry.valid">Your deposition is ready to submit.</h2>
+
+  <div *ngIf="!entry.valid">
+    <ng-container *ngFor='let saveframe of entry.saveframes'>
+      <app-saveframe *ngIf="!saveframe.deleted" [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
+    </ng-container>
+  </div>
+  <br>
+  <div class="button-div">
+    <button class="mat-raised-button"
+            [disabled]="!entry.valid"
+            (click)="submitEntry()">Submit deposition to BMRB
+    </button>
+    <button class="mat-raised-button left-pad" (click)="goBack()">Return to previous page</button>
+  </div>
+</div>

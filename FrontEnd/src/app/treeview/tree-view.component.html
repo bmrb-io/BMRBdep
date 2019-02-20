@@ -1,0 +1,78 @@
+<ng-container *ngIf="entry">
+
+    <mat-card>
+        <mat-card-title (dblclick)="developerMode=true;logEntry()">
+            Deposition "{{entry.depositionNickname}}" Navigation</mat-card-title>
+        <mat-card-content>
+
+            <mat-nav-list>
+                <div *ngIf="(showInvalidOnly && !entry.valid) || !showInvalidOnly">
+                    <ng-container *ngFor="let superGroupCat of entry.superGroups">
+                        <div *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
+                         (!showInvalidOnly && (superGroupCat.display == 'Y' ||
+                              (entry.showAll && superGroupCat.display != 'H')))">
+
+
+                            <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+                                <mat-icon [routerLink]="['/entry', entry.entryID, 'help', 'molecular-assembly']"
+                                          *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
+                                          class="pointer">help_outline
+                                </mat-icon>
+                            </h3>
+
+                            <mat-divider></mat-divider>
+
+                            <ng-container *ngFor="let category of superGroupCat.children">
+                                <ng-container *ngIf="(showInvalidOnly && !category.valid) ||
+                                    (!showInvalidOnly && (entry.showAll || category.display == 'Y') && category.display != 'H')">
+                                    <a mat-list-item [ngClass]="{'active': active==category.category && page=='category'}"
+                                       [title]="entry.schema.saveframeSchema[category.category]['group_view_help']"
+                                       [routerLink]="['/entry', entry.entryID, 'saveframe', category.category, 'category']"
+                                       [id]="category.category">
+                                        <mat-icon *ngIf="category.valid">done</mat-icon>
+                                        <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
+                                        <mat-icon *ngIf="!category.valid">error_outline</mat-icon>
+                                        <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
+                                        <h2 matLine> {{category.displayName}} </h2>
+                                    </a>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <mat-divider></mat-divider>
+                <div>
+                    <h3 matLine>Deposition Options</h3>
+
+                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted"
+                       [routerLink]="['/entry', entry.entryID, 'restore']" id="restore">
+                        <h2 matLine>Restore deleted saveframes</h2>
+                    </a>
+
+                    <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
+                       [routerLink]="['/entry', entry.entryID, 'review']">
+                        <mat-icon *ngIf="entry.valid">done</mat-icon>
+                        <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
+                        <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
+                        <span *ngIf="entry.valid" class="cdk-visually-hidden">Completed</span>
+                        <h2 matLine>Deposit entry</h2>
+                    </a>
+
+                    <div *ngIf="developerMode">
+                        <mat-list-item
+                                (click)='download(entry.entryID + ".str", entry)'>Download entry
+                        </mat-list-item>
+                        <mat-list-item (click)='refresh()'>Refresh cache/page</mat-list-item>
+                        <mat-list-item>
+                            <mat-slide-toggle [(ngModel)]="entry.showAll"
+                                              (ngModelChange)="entry.updateCategories()"
+                                              color="#CBDBFF">Display non-mandatory tags
+                            </mat-slide-toggle>
+                        </mat-list-item>
+                    </div>
+                </div>
+            </mat-nav-list>
+        </mat-card-content>
+    </mat-card>
+</ng-container>
