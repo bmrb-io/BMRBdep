@@ -34,7 +34,7 @@ export class SaveframeEditorComponent implements OnInit {
       parent.loadType = params['load_type'];
       parent.saveframeDescription = params['saveframe_description'];
       if (parent.entry === null || parent.entry.entryID !== params['entry']) {
-        parent.api.getEntry(params['entry']).subscribe();
+        parent.api.loadEntry(params['entry']);
       }
       parent.reloadSaveframes();
     });
