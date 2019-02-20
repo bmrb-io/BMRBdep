@@ -19,7 +19,6 @@ export class SaveframeEditorComponent implements OnInit {
               private router: Router,
               private api: ApiService) {
     this.saveframes = [];
-    this.entry = null;
   }
 
   ngOnInit() {
@@ -34,11 +33,19 @@ export class SaveframeEditorComponent implements OnInit {
     this.route.params.subscribe(function (params) {
       parent.loadType = params['load_type'];
       parent.saveframeDescription = params['saveframe_description'];
-      parent.api.getEntry(params['entry']).subscribe();
+      if (parent.entry === null || parent.entry.entryID !== params['entry']) {
+        parent.api.getEntry(params['entry']).subscribe();
+      }
+      parent.reloadSaveframes();
     });
   }
 
   reloadSaveframes(nextCategory: string = null): void {
+
+    if (this.entry === null) {
+      this.saveframes = [];
+      return;
+    }
     if (this.loadType === 'name') {
       const theSaveframe = this.entry.getSaveframeByName(this.saveframeDescription);
       if (theSaveframe !== null) {
