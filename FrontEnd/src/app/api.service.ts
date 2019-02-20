@@ -5,7 +5,6 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
-import {Router} from '@angular/router';
 
 @Injectable({
     providedIn: 'root'
@@ -23,8 +22,7 @@ export class ApiService {
     };
 
     constructor(private http: HttpClient,
-                private messagesService: MessagesService,
-                private router: Router) {
+                private messagesService: MessagesService) {
         this.entrySubject = new BehaviorSubject<Entry>(null);
         this.entrySubject.subscribe(entry => {
             this.cachedEntry = entry;
@@ -71,53 +69,35 @@ export class ApiService {
         return of(false);
     }
 
-    getEntry(entryID: string, skipCache: boolean = false): Observable<Entry> {
+    loadEntry(entryID: string, skipCache: boolean = false): void {
         // If all we did was reroute, we still have the entry
         if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
-            this.cachedEntry['source'] = 'session memory';
+            return;
             // The page is being reloaded, but we can get the entry from the browser cache
         } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
 
-            // Make sure both the entry and schema are saved locally - if not, getEntry() but force load from server
+            // Make sure both the entry and schema are saved locally - if not, loadEntry() but force load from server
             const rawJSON = JSON.parse(localStorage.getItem('entry'));
             if (rawJSON === null) {
-                return this.getEntry(entryID, true);
+                this.loadEntry(entryID, true);
             }
             rawJSON['schema'] = JSON.parse(localStorage.getItem('schema'));
             if (rawJSON['schema'] === null) {
-                return this.getEntry(entryID, true);
+                this.loadEntry(entryID, true);
             }
 
-            const newEntry = entryFromJSON(rawJSON);
-            newEntry['source'] = 'browser cache';
-            this.entrySubject.next(newEntry);
+            this.entrySubject.next(entryFromJSON(rawJSON));
             // We either don't have the entry or have a different one, so fetch from the API
         } else {
             const entryURL = `${environment.serverURL}/${entryID}`;
-            return this.http.get(entryURL).pipe(
-                map(jsonData => {
-                    const newEntry = entryFromJSON(jsonData);
-                    newEntry['source'] = 'API server';
-                    this.entrySubject.next(newEntry);
+            this.http.get(entryURL).subscribe(
+                jsonData => {
+                    this.entrySubject.next(entryFromJSON(jsonData));
                     this.saveEntry(true);
-                    return this.cachedEntry;
-                }),
-                catchError(error => {
-                    if (!environment.debug) {
-                        this.messagesService.sendMessage(new Message('Invalid entry ID. Returning to main page in 10 seconds.',
-                            MessageType.ErrorMessage, 10000));
-                        setTimeout(() => {
-                            this.router.navigate(['/']);
-                        }, 10000);
-                        return of(new Entry(entryID));
-                    } else {
-                        throw error;
-                    }
-                })
+                },
+                error => this.handleError(error)
             );
         }
-
-        return of(this.cachedEntry);
     }
 
     saveEntry(initialSave: boolean = false, skipMessage: boolean = true): void {
@@ -241,6 +221,9 @@ export class ApiService {
         } else {
             this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
             console.error('An unhandled server error code occurred:', error);
+        }
+        if (environment.debug) {
+            throw error;
         }
 
         return of(null);
