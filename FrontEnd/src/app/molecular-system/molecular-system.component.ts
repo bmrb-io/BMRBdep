@@ -21,9 +21,7 @@ export class MolecularSystemComponent implements OnInit {
     this.titleService.setTitle('Help: Chemical component, Molecular Entity, and Molecular assembly');
 
     const parent: MolecularSystemComponent = this;
-    this.route.params.subscribe(function (params) {
-      parent.api.loadEntry(params['entry']);
-    });
+    this.route.params.subscribe(params => parent.api.loadEntry(params['entry']));
   }
 
   goBack(): void {

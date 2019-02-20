@@ -72,18 +72,18 @@ export class ApiService {
     loadEntry(entryID: string, skipCache: boolean = false): void {
         // If all we did was reroute, we still have the entry
         if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
-            return;
+            this.entrySubject.next(this.cachedEntry);
             // The page is being reloaded, but we can get the entry from the browser cache
         } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
 
             // Make sure both the entry and schema are saved locally - if not, loadEntry() but force load from server
             const rawJSON = JSON.parse(localStorage.getItem('entry'));
             if (rawJSON === null) {
-                this.loadEntry(entryID, true);
+                return this.loadEntry(entryID, true);
             }
             rawJSON['schema'] = JSON.parse(localStorage.getItem('schema'));
             if (rawJSON['schema'] === null) {
-                this.loadEntry(entryID, true);
+                return this.loadEntry(entryID, true);
             }
 
             this.entrySubject.next(entryFromJSON(rawJSON));
