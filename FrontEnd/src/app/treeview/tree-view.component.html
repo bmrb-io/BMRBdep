@@ -14,7 +14,7 @@
 
 
                             <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
-                                <mat-icon [routerLink]="['/entry', entry.entryID, 'help', 'molecular-assembly']"
+                                <mat-icon routerLink="/help/molecular-assembly"
                                           *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
                                           class="pointer">help_outline
                                 </mat-icon>
@@ -27,7 +27,7 @@
                                     (!showInvalidOnly && (entry.showAll || category.display == 'Y') && category.display != 'H')">
                                     <a mat-list-item [ngClass]="{'active': active==category.category && page=='category'}"
                                        [title]="entry.schema.saveframeSchema[category.category]['group_view_help']"
-                                       [routerLink]="['/entry', entry.entryID, 'saveframe', category.category, 'category']"
+                                       [routerLink]="['/entry', 'saveframe', category.category]"
                                        [id]="category.category">
                                         <mat-icon *ngIf="category.valid">done</mat-icon>
                                         <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
@@ -46,17 +46,21 @@
                     <h3 matLine>Deposition Options</h3>
 
                     <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted"
-                       [routerLink]="['/entry', entry.entryID, 'restore']" id="restore">
+                       routerLink="/entry/restore" id="restore">
                         <h2 matLine>Restore deleted saveframes</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
-                       [routerLink]="['/entry', entry.entryID, 'review']">
+                       routerLink="/entry/review">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
                         <span *ngIf="entry.valid" class="cdk-visually-hidden">Completed</span>
                         <h2 matLine>Deposit entry</h2>
+                    </a>
+
+                    <a mat-list-item routerLink="/" (click)="endSession()">
+                        <h2 matLine>End session</h2>
                     </a>
 
                     <div *ngIf="developerMode">

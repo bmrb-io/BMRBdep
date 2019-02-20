@@ -8,15 +8,17 @@ import {ReviewComponent} from './review/review.component';
 import {RestoreComponent} from './restore/restore.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
 import {PendingValidationComponent} from './pending-validation/pending-validation.component';
+import {LoadEntryComponent} from './load-entry/load-entry.component';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
-  {path: 'entry/:entry', component: EntryComponent},
-  {path: 'entry/:entry/saveframe/:saveframe_description/:load_type', component: SaveframeEditorComponent},
-  {path: 'entry/:entry/review', component: ReviewComponent},
-  {path: 'entry/:entry/restore', component: RestoreComponent},
-  {path: 'entry/:entry/pending-verification', component: PendingValidationComponent},
-  {path: 'entry/:entry/help/molecular-assembly', component: MolecularSystemComponent}
+  {path: 'entry', component: EntryComponent},
+  {path: 'entry/load/:entry', component: LoadEntryComponent},
+  {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
+  {path: 'entry/review', component: ReviewComponent},
+  {path: 'entry/restore', component: RestoreComponent},
+  {path: 'entry/pending-verification', component: PendingValidationComponent},
+  {path: 'help/molecular-assembly', component: MolecularSystemComponent}
 ];
 
 @NgModule({

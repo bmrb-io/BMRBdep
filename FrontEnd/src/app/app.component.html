@@ -6,7 +6,13 @@
       <mat-icon>menu</mat-icon>
       <span style="vertical-align: bottom">Menu</span>
     </div>
-    <span class="title-center" routerLink="/" (click)="clearEntry()">BMRBDep</span>
+    <ng-container *ngIf="entry">
+      <span class="title-center">BMRBDep deposition "{{entry.depositionNickname}}"</span>
+      <span class="title-right" routerLink="/" (click)="clearEntry()">End session</span>
+    </ng-container>
+
+    <span *ngIf="!entry" class="title-center">BMRBDep Home</span>
+
   </mat-toolbar-row>
   <mat-toolbar-row class="loading-bar-holder">
     <div *mkLoadingPage="{checkPendingHttp: true}">
@@ -17,7 +23,7 @@
 
 <mat-sidenav-container>
   <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false">
-    <app-tree-view #treeView></app-tree-view>
+    <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
   </mat-sidenav>
 
   <mat-sidenav-content>

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
@@ -15,6 +15,7 @@ export class TreeViewComponent implements OnInit {
   entry: Entry;
   page: string;
   @Input() showInvalidOnly: boolean;
+  @Output() sessionEnd = new EventEmitter<>();
 
   constructor(private api: ApiService,
               private router: Router,
@@ -50,6 +51,11 @@ export class TreeViewComponent implements OnInit {
 
   logEntry(): void {
     console.log(this.entry);
+  }
+
+  endSession(): void {
+    this.api.clearDeposition();
+    this.sessionEnd.emit();
   }
 
   refresh(): void {
