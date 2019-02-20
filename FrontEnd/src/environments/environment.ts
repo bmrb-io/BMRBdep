@@ -5,6 +5,6 @@
 
 export const environment = {
   production: false,
-  debug: false,
+  debug: true,
   serverURL: 'http://localhost:9000/deposition'
 };
