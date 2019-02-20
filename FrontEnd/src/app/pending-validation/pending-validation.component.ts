@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 
 @Component({
@@ -12,22 +12,30 @@ export class PendingValidationComponent implements OnInit {
 
     entry: Entry;
     constructor(private api: ApiService,
-                private route: ActivatedRoute,
                 private router: Router) {
     }
 
     ngOnInit() {
         const parent: PendingValidationComponent = this;
         this.api.entrySubject.subscribe(entry => {
-            this.entry = entry;
+            parent.entry = entry;
+            // Route straight to the entry if validated
             if (entry && entry.emailValidated) {
-                parent.router.navigate(['/entry/', parent.entry.entryID, 'saveframe', 'deposited_data_files', 'category']);
+                parent.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
             }
         });
 
-        this.route.params.subscribe(function (params) {
-            parent.api.loadEntry(params['entry'], true);
-        });
+        // Check the validation status every 5 seconds
+        const timer = setInterval(() => {
+            parent.api.checkValid().subscribe(valid => {
+                if (valid) {
+                    clearInterval(timer);
+                    parent.entry.emailValidated = true;
+                    parent.api.saveEntry(true, true);
+                    parent.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
+                }
+            });
+        }, 2500);
     }
 
     resendValidationEmail(): void {
