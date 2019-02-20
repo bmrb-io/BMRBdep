@@ -16,7 +16,7 @@ export class TreeViewComponent implements OnInit {
   page: string;
   @Input() showInvalidOnly: boolean;
 
-  constructor(public api: ApiService,
+  constructor(private api: ApiService,
               private router: Router,
               private route: ActivatedRoute) {
     this.developerMode = false;
@@ -58,10 +58,14 @@ export class TreeViewComponent implements OnInit {
   }
 
   scrollSideNav(): void {
+    let element: HTMLElement;
     if (this.page === 'category') {
-      document.getElementById(this.active).parentElement.scrollIntoView({behavior: 'smooth'});
+      element = document.getElementById(this.active);
     } else {
-      document.getElementById(this.page).parentElement.scrollIntoView({behavior: 'smooth'});
+      element = document.getElementById(this.page);
+    }
+    if (element) {
+      element.parentElement.scrollIntoView({behavior: 'smooth'});
     }
   }
 }
