@@ -1,5 +1,7 @@
+@import "../../../custom-theme.scss";
+
 .star {
-  border: solid 2px #33527b;
+  border: solid 2px mat-color($custom-theme-primary, darker);
   margin-top: 0.5em;
   max-width: 98%;
 }
