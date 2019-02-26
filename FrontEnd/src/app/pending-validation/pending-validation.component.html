@@ -1,9 +1,15 @@
 <div *ngIf="entry" class="main-content">
-  <h2>Pending e-mail verification.</h2>
-  <p>In order to proceed with your deposition, you must click on the verification link you were sent when you created
-  your deposition. If you have not received that e-mail, we will re-send it if you click
-    <button class="mat-flat-button mat-primary" (click)="resendValidationEmail()">here</button>.
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Pending e-mail verification.</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>In order to proceed with your deposition, you must click on the verification link you were sent when you created
+        your deposition.
 
-  <p><strong>Why do I need to do this?</strong> Verifying your email before you begin your deposition ensures
-  that we have a working e-mail associated with you deposition. It also allows us to verify ownership of the deposition.</p>
+      <p><strong>Why do I need to do this?</strong> Verifying your email before you begin your deposition ensures
+        that we have a working e-mail associated with you deposition. It also allows us to verify ownership of the deposition.</p>
+        <button class="mat-flat-button mat-primary" (click)="resendValidationEmail()">Resend validation email</button>
+    </mat-card-content>
+  </mat-card>
 </div>
