@@ -45,6 +45,11 @@
                 <div>
                     <h3 matLine>Deposition Options</h3>
 
+                    <a mat-list-item [ngClass]="{'active': page=='new'}"
+                       routerLink="/" id="new">
+                        <h2 matLine>Create new deposition</h2>
+                    </a>
+
                     <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted"
                        routerLink="/entry/restore" id="restore">
                         <h2 matLine>Restore deleted saveframes</h2>
@@ -56,7 +61,7 @@
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
                         <span *ngIf="entry.valid" class="cdk-visually-hidden">Completed</span>
-                        <h2 matLine>Deposit entry</h2>
+                        <h2 matLine>Deposit current entry</h2>
                     </a>
 
                     <a mat-list-item routerLink="/" (click)="endSession()">
