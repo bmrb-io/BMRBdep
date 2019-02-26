@@ -33,12 +33,17 @@ export class TreeViewComponent implements OnInit {
         r = r.firstChild;
       }
       r.params.subscribe(params => {
-        if (params['saveframe_description'] !== undefined) {
-          parent.active = params['saveframe_description'];
+        if (params['saveframe_category'] !== undefined) {
+          parent.active = params['saveframe_category'];
+          parent.page = 'category';
+        } else {
+          parent.showInvalidOnly = this.router.url.endsWith('/review');
+          const urlSegments = this.router.url.split('/');
+          parent.page = urlSegments[urlSegments.length - 1];
+          if (parent.page === '') {
+            parent.page = 'new';
+          }
         }
-        parent.showInvalidOnly = this.router.url.endsWith('/review');
-        const urlSegments = this.router.url.split('/');
-        parent.page = urlSegments[urlSegments.length - 1];
       });
     });
 
