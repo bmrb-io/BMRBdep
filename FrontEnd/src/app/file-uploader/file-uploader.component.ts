@@ -9,7 +9,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 @Component({
   selector: 'app-file-uploader',
   templateUrl: './file-uploader.component.html',
-  styleUrls: ['./file-uploader.component.css']
+  styleUrls: ['./file-uploader.component.scss']
 })
 export class FileUploaderComponent implements OnInit {
 

@@ -1,5 +1,7 @@
+@import "../../custom-theme.scss";
+
 .type-error {
-  background-color: #ffe4e1 !important;
+  background-color: mat-color($custom-theme-warn, lighter) !important;
 }
 
 .saveframe-input {
@@ -13,7 +15,7 @@
 }
 
 .saveframe-input:hover {
-  outline: #33527b solid 1px;
+  outline: mat-color($custom-theme-primary, darker) solid 1px;
 }
 
 .invisible {

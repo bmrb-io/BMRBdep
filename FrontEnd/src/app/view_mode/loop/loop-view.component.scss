@@ -1,9 +1,11 @@
+@import "../../../custom-theme.scss";
+
 table.alternating_color tr:nth-child(even) {
-  background-color: #CBDBFF;
+  background-color: mat-color($custom-theme-primary);
 }
 
 table.alternating_color tr:nth-child(even) .datum {
-  background-color: #CBDBFF;
+  background-color: mat-color($custom-theme-primary);
 }
 
 .datum {
