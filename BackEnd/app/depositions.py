@@ -7,11 +7,16 @@ import json
 from git import Repo, CacheError
 import werkzeug.utils
 import flask
+import logging
 import pynmrstar
 from filelock import Timeout, FileLock
 
 # Local imports
 from common import ServerError, RequestError, configuration
+
+if not os.path.exists(configuration['repo_path']):
+    logging.warning('The deposition root directory did not exist... creating it.')
+    os.mkdir(configuration['repo_path'])
 
 
 def secure_filename(filename):
