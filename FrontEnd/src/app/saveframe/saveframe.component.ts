@@ -7,7 +7,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 @Component({
   selector: 'app-saveframe',
   templateUrl: './saveframe.component.html',
-  styleUrls: ['./saveframe.component.css'],
+  styleUrls: ['./saveframe.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class SaveframeComponent implements OnInit {
