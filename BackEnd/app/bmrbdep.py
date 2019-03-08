@@ -423,7 +423,7 @@ def new_deposition():
                   'last_ip': request.environ['REMOTE_ADDR'],
                   'deposition_origination': {'request': dict(request.headers),
                                              'ip': request.environ['REMOTE_ADDR']},
-                  'email_validated': False,
+                  'email_validated': configuration['debug'],
                   'schema_version': schema.version,
                   'entry_deposited': False,
                   'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
