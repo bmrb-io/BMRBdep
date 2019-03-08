@@ -2,8 +2,8 @@
 
 @include mat-core();
 
-$custom-theme-primary: mat-palette($mat-indigo);
-$custom-theme-accent: mat-palette($mat-cyan, A200, A100, A400);
+$custom-theme-primary: mat-palette($mat-blue, 200);
+$custom-theme-accent: mat-palette($mat-grey, 300, 100, 400);
 $custom-theme-warn: mat-palette($mat-red);
 
 $custom-app-theme: mat-light-theme($custom-theme-primary, $custom-theme-accent, $custom-theme-warn);

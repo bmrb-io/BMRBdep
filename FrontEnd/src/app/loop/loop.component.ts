@@ -9,7 +9,7 @@ import * as crs from '../javascript/crs.min';
 @Component({
   selector: 'app-loop',
   templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.css']
+  styleUrls: ['./loop.component.scss']
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;

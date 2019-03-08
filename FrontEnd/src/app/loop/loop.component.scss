@@ -1,0 +1,66 @@
+@import "../../custom-theme.scss";
+
+.mandatory {
+  color: mat-color($custom-theme-warn, darker);
+}
+
+.invisible {
+  background-color: white;
+  padding: 1px;
+  margin: 0;
+}
+
+.invalid {
+  background-color: mat-color($custom-theme-warn, lighter);
+}
+
+.greyed-out {
+  background-color: mat-color($custom-theme-accent);
+}
+
+.tag-header {
+  cursor: help;
+  background-color: mat-color($custom-theme-accent);
+}
+
+.header-text {
+  vertical-align: middle;
+  font-size: larger;
+  font-weight: bold;
+}
+
+.button-column {
+  width: 2.5em;
+}
+
+table {
+  width: calc(100% - 1em);
+  background-color: mat-color($custom-theme-accent);
+  margin-bottom: 1em;
+  margin-left: 1em;
+
+  padding: 0 .25em 0 .25em;
+  border-collapse: collapse;
+  border-radius: 5px;
+}
+
+th {
+  text-align: left;
+  background-color: mat-color($custom-theme-primary);
+  font-weight: bold;
+  font-style: normal;
+  color: black;
+  border: 1px solid mat-color($custom-theme-primary, darker);
+  padding: .5em;
+}
+
+td {
+  text-align: left;
+  background-color: mat-color($custom-theme-primary);
+  font-weight: normal;
+  font-style: normal;
+  color: black;
+  border: 1px solid mat-color($custom-theme-primary, darker);
+  padding: 0 0.25em;
+} 
+
