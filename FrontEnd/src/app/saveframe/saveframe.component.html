@@ -30,7 +30,7 @@
               <a class="fake-button line left-margin"
                  *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
                  (click)='saveframe.restore(); processChange()'>Restore</a>
-            <a class="fake-button line"
+            <a class="fake-button line left-margin"
               *ngIf="showCategoryLink"
               [routerLink]="['/entry', saveframe.parent.entryID, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
             </div>

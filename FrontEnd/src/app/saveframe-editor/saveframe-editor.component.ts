@@ -12,8 +12,7 @@ import {Saveframe} from '../nmrstar/saveframe';
 export class SaveframeEditorComponent implements OnInit {
   saveframes: Saveframe[];
   entry: Entry;
-  saveframeDescription: string;
-  loadType: string;
+  saveframeCategory: string;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -31,41 +30,29 @@ export class SaveframeEditorComponent implements OnInit {
     // Listen for the changing of the params string
     const parent = this;
     this.route.params.subscribe(function (params) {
-      parent.loadType = params['load_type'];
-      parent.saveframeDescription = params['saveframe_description'];
-      if (parent.entry === null || parent.entry.entryID !== params['entry']) {
-        parent.api.loadEntry(params['entry']);
-      }
+      parent.saveframeCategory = params['saveframe_category'];
       parent.reloadSaveframes();
     });
   }
 
   reloadSaveframes(nextCategory: string = null): void {
 
-    if (this.entry === null) {
+    if (this.entry === null || !this.saveframeCategory) {
       this.saveframes = [];
       return;
     }
-    if (this.loadType === 'name') {
-      const theSaveframe = this.entry.getSaveframeByName(this.saveframeDescription);
-      if (theSaveframe !== null) {
-        this.saveframes = [theSaveframe];
-      } else {
-        this.saveframes = [];
-      }
-    } else if (this.loadType === 'category') {
-      const allCategorySaveframes = this.entry.getSaveframesByCategory(this.saveframeDescription);
-      this.saveframes = [];
-      for (const saveframe of allCategorySaveframes) {
-        if (!saveframe.deleted) {
-          this.saveframes.push(saveframe);
-        }
+
+    const allCategorySaveframes = this.entry.getSaveframesByCategory(this.saveframeCategory);
+    this.saveframes = [];
+    for (const saveframe of allCategorySaveframes) {
+      if (!saveframe.deleted) {
+        this.saveframes.push(saveframe);
       }
     }
 
     // If there are no saveframes of the category we are trying to display, reroute
     if (nextCategory && this.saveframes.length === 0) {
-      this.router.navigate(['/entry', this.entry.entryID, 'saveframe', nextCategory, 'category']);
+      this.router.navigate(['/entry', 'saveframe', nextCategory]);
     }
 
     this.entry.updateCategories();

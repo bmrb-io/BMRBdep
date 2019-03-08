@@ -1,3 +1,5 @@
+@import "../../custom-theme.scss";
+
 .messages {
   /* Center the display on the bottom. */
   position: fixed;
@@ -11,18 +13,18 @@
 }
 
 .SuccessMessage {
-  background-color: #a4f29e;
+  background-color: mat-color($custom-theme-primary, lighter);
 }
 
 .WarningMessage {
-  background-color: #f2807a;
+  background-color: mat-color($custom-theme-warn);
 }
 
 .ErrorMessage {
-  background-color: #f24b3d;
+  background-color: mat-color($custom-theme-warn, darker);
   font-weight: bold;
 }
 
 .NotificationMessage {
-  background-color: #cbdbff;
+  background-color: mat-color($custom-theme-accent);
 }

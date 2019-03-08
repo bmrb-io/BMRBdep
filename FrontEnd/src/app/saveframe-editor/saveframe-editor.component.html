@@ -3,14 +3,14 @@
     <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
     <button class="real-button line margin-right"
             *ngIf="saveframes[0].previousCategory"
-            [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
+            [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]">
       Previous section</button>
     <button class="real-button line"
             *ngIf="saveframes[0].nextCategory ; else final_review_top"
-            [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
+            [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]">
       Next section</button>
     <ng-template #final_review_top>
-      <button class="real-button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+      <button class="real-button line" routerLink="/entry/review"> Review deposition</button>
     </ng-template>
     <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes($event)"></app-saveframe>
     <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have chosen to hide non-mandatory tags. To view these tags, please
@@ -18,14 +18,14 @@
     <div *ngIf="this.saveframes.length">
       <button class="real-button line margin-right"
               *ngIf="saveframes[0].previousCategory"
-              [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].previousCategory, 'category']">
+              [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]">
         Previous section</button>
       <button class="real-button line"
               *ngIf="saveframes[0].nextCategory; else final_review_bottom"
-              [routerLink]="['/entry', entry.entryID, 'saveframe', saveframes[0].nextCategory, 'category']">
+              [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]">
         Next section</button>
       <ng-template #final_review_bottom>
-        <button class="real-button line" [routerLink]="['/entry', entry.entryID, 'review']"> Review deposition</button>
+        <button class="real-button line" routerLink="/entry/review"> Review deposition</button>
       </ng-template>
     </div>
   </div>
@@ -37,11 +37,11 @@
           There are no sections of this type remaining.
         </mat-card-content>
         <mat-card-actions>
-          <button mat-button class="mat-raised-button" (click)="restoreCategory(saveframeDescription)">Restore all
+          <button mat-button class="mat-raised-button" (click)="restoreCategory(saveframeCategory)">Restore all
             sections of this type
           </button>
           <button mat-button class="mat-raised-button"
-                  [routerLink]="['/entry', entry.entryID, 'saveframe', 'deposited_data_files', 'category']">
+                  routerLink="/entry/saveframe/deposited_data_files">
             Return to a section that exists.
           </button>
         </mat-card-actions>
