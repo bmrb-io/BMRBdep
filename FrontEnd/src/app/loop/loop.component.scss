@@ -31,14 +31,12 @@
 
 .button-column {
   width: 2.5em;
+  min-width: 2.5em;
 }
 
 table {
-  width: calc(100% - 1em);
   background-color: mat-color($custom-theme-accent);
-  margin-bottom: 1em;
-  margin-left: 1em;
-
+  margin: 0;
   padding: 0 .25em 0 .25em;
   border-collapse: collapse;
   border-radius: 5px;
@@ -62,5 +60,12 @@ td {
   color: black;
   border: 1px solid mat-color($custom-theme-primary, darker);
   padding: 0 0.25em;
-} 
+}
 
+.loop-wrapper-div {
+  margin-bottom: 1em;
+  margin-left: 1em;
+  div {
+    overflow-x: auto;
+  }
+}
