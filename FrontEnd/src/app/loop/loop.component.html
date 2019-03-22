@@ -1,5 +1,6 @@
-<div *ngIf="(showInvalidOnly && !loop.valid) || !showInvalidOnly">
-	<table class="loop">
+<div *ngIf="(showInvalidOnly && !loop.valid) || !showInvalidOnly" class="loop-wrapper-div">
+  <div>
+	<table>
    		<colgroup>
 	      <col span="1" class="button-column">
 	   </colgroup>
@@ -49,7 +50,7 @@
 
 		</tbody>
 	</table>
-
+  </div>
 
 	<div *ngIf='activeTag' class='tag-info-box'>
       <b>{{activeTag.schemaValues['Prompt']}}</b>
