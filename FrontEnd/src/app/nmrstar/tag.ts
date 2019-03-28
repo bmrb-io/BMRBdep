@@ -164,10 +164,14 @@ export class Tag {
           }
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
-          this.enums = new Set(function* () {
-            yield* enumerationSet;
-            yield* temp;
-          }());
+          this.enums = new Set();
+          const parent = this;
+          enumerationSet.forEach(function (item) {
+              parent.enums.add(item);
+          });
+          for (const item of temp) {
+              this.enums.add(item);
+          }
         }
       }
 
