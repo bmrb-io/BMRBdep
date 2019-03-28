@@ -126,7 +126,7 @@ class DepositionRepo:
         if not root:
             filename = os.path.join('data_files', filename)
         try:
-            file_obj = open(os.path.join(self._entry_dir, filename), "r")
+            file_obj = open(os.path.join(self._entry_dir, filename), "rb")
             if raw_file:
                 return file_obj
             else:
