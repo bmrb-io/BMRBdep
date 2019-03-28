@@ -15,8 +15,11 @@ from filelock import Timeout, FileLock
 from common import ServerError, RequestError, configuration
 
 if not os.path.exists(configuration['repo_path']):
-    logging.warning('The deposition root directory did not exist... creating it.')
-    os.mkdir(configuration['repo_path'])
+    try:
+        os.mkdir(configuration['repo_path'])
+        logging.warning('The deposition root directory did not exist... creating it.')
+    except FileExistsError:
+        pass
 
 
 def secure_filename(filename):
@@ -126,7 +129,7 @@ class DepositionRepo:
         if not root:
             filename = os.path.join('data_files', filename)
         try:
-            file_obj = open(os.path.join(self._entry_dir, filename), "r")
+            file_obj = open(os.path.join(self._entry_dir, filename), "rb")
             if raw_file:
                 return file_obj
             else:
