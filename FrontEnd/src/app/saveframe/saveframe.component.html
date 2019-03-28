@@ -32,7 +32,7 @@
                  (click)='saveframe.restore(); processChange()'>Restore</a>
             <a class="fake-button line left-margin"
               *ngIf="showCategoryLink"
-              [routerLink]="['/entry', saveframe.parent.entryID, 'saveframe', saveframe.category, 'category']">View sections of this category</a>
+              [routerLink]="['/entry', 'saveframe', saveframe.category]">View sections of this category</a>
             </div>
           </th>
         </tr>

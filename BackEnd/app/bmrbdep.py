@@ -5,8 +5,9 @@ import sys
 import logging
 import datetime
 import traceback
-from logging.handlers import SMTPHandler
+from io import BytesIO
 from uuid import uuid4
+from logging.handlers import SMTPHandler
 
 import requests
 import pynmrstar
@@ -115,7 +116,7 @@ def handle_other_errors(exception):
 
 @application.route('/')
 @application.route('/<file_name>')
-def send_file(file_name=None):
+def send_local_file(file_name=None):
     if file_name is None:
         file_name = "index.html"
 
@@ -483,7 +484,7 @@ def file_operations(uuid, filename):
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(filename, raw_file=True, root=False),
+            return send_file(BytesIO(repo.get_file(filename, raw_file=False, root=False)),
                              attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
