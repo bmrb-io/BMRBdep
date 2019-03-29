@@ -5,8 +5,9 @@ import sys
 import logging
 import datetime
 import traceback
-from logging.handlers import SMTPHandler
+from io import BytesIO
 from uuid import uuid4
+from logging.handlers import SMTPHandler
 
 import requests
 import pynmrstar
@@ -115,7 +116,7 @@ def handle_other_errors(exception):
 
 @application.route('/')
 @application.route('/<file_name>')
-def send_file(file_name=None):
+def send_local_file(file_name=None):
     if file_name is None:
         file_name = "index.html"
 
@@ -126,7 +127,16 @@ def send_file(file_name=None):
     elif os.path.exists(container_path):
         return send_from_directory(container_path, file_name)
     else:
-        return 'Broken installation'
+        return 'Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ' \
+               'Did your Angular compilation step fail?'
+
+
+@application.route('/deposition/<uuid:uuid>/check-valid')
+def send_validation_status(uuid):
+    """ Returns whether or not an entry has been validated. """
+
+    with depositions.DepositionRepo(str(uuid)) as repo:
+        return jsonify({'status': repo.metadata['email_validated']})
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
@@ -155,12 +165,16 @@ You can use <a href="%s">this link</a> to return to your deposition later if you
 If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
 share this e-mail with will have access to the full contents of your in-progress deposition and can make
 changes to it.
+
+If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
+leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
+computer could access your in-process deposition.
 <br><br>
 Thank you,
 <br>
 BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                      url_for('validate_user', token=token, _external=True),
-                     request.url_root + 'entry/%s/saveframe/deposited_data_files/category' % uuid)
+                     request.url_root + 'entry/load/%s' % uuid)
 
         mail.send(confirm_message)
 
@@ -183,8 +197,7 @@ def validate_user(token):
             repo.metadata['email_validated'] = True
             repo.commit("E-mail validated.")
 
-    return redirect('/entry/%s/pending-verification' %
-                    deposition_id, code=302)
+    return redirect('/entry/load/%s' % deposition_id, code=302)
 
 
 @application.route('/deposition/new', methods=('POST',))
@@ -411,7 +424,7 @@ def new_deposition():
                   'last_ip': request.environ['REMOTE_ADDR'],
                   'deposition_origination': {'request': dict(request.headers),
                                              'ip': request.environ['REMOTE_ADDR']},
-                  'email_validated': False,
+                  'email_validated': configuration['debug'],
                   'schema_version': schema.version,
                   'entry_deposited': False,
                   'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
@@ -471,7 +484,7 @@ def file_operations(uuid, filename):
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(filename, raw_file=True, root=False),
+            return send_file(BytesIO(repo.get_file(filename, raw_file=False, root=False)),
                              attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:

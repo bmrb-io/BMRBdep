@@ -7,7 +7,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 @Component({
   selector: 'app-saveframe',
   templateUrl: './saveframe.component.html',
-  styleUrls: ['./saveframe.component.css'],
+  styleUrls: ['./saveframe.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class SaveframeComponent implements OnInit {
@@ -19,14 +19,12 @@ export class SaveframeComponent implements OnInit {
 
   constructor(public api: ApiService, private route: ActivatedRoute) {
     this.activeTag = null;
-    this.showCategoryLink = true;
+    this.showCategoryLink = false;
   }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
-        if (params['load_type'] === 'category') {
-          this.showCategoryLink = params['saveframe_description'] !== this.saveframe.category;
-        }
+      this.showCategoryLink = (!('saveframe_category' in params));
       });
   }
 

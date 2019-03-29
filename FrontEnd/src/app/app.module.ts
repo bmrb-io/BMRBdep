@@ -19,6 +19,7 @@ import {FileUploaderComponent} from './file-uploader/file-uploader.component';
 import {MessageComponent} from './message/message.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
 import {PendingValidationComponent} from './pending-validation/pending-validation.component'; // Saving/loading bar
+import {LoadEntryComponent} from './load-entry/load-entry.component';
 
 // For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
@@ -43,6 +44,7 @@ import {
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -61,6 +63,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     RestoreComponent,
     MolecularSystemComponent,
     PendingValidationComponent,
+    LoadEntryComponent,
   ],
   imports: [
     BrowserModule,
