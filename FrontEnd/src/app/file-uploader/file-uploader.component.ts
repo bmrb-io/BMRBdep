@@ -33,6 +33,10 @@ export class FileUploaderComponent implements OnInit {
     });
   }
 
+  openInput() {
+    this.fileUploadElement.nativeElement.click();
+  }
+
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.entry.refresh();

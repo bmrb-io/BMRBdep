@@ -9,10 +9,9 @@
   </div>
   <br>
   <div class="button-div">
-    <button class="mat-flat-button mat-primary"
+    <button mat-raised-button class="saveframe-button"
             [disabled]="!entry.valid"
-            (click)="submitEntry()">Submit deposition to BMRB
-    </button>
-    <button class="mat-flat-button mat-primary left-pad" (click)="goBack()">Return to previous page</button>
+            (click)="submitEntry()" color="accent">Submit deposition to BMRB</button>
+    <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
   </div>
 </div>
