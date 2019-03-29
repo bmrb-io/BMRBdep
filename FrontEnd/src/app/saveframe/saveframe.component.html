@@ -18,21 +18,21 @@
           </th>
           <th>
             <div class="right-float">
-              <a class="fake-button line left-margin"
-                *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-                (click)='saveframe.duplicate(); processChange()'>Duplicate</a>
-            <a class="fake-button line left-margin"
+              <button mat-raised-button
+                      *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
+                      (click)='saveframe.duplicate(); processChange()' color="accent">Duplicate</button>
+              <button mat-raised-button
               *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-              (click)='saveframe.duplicate(true); processChange()'>Create new</a>
-            <a class="fake-button line left-margin"
+              (click)='saveframe.duplicate(true); processChange()' color="accent">Create new</button>
+              <button mat-raised-button
               *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
-              (click)='saveframe.delete(); processChange()'>Delete</a>
-              <a class="fake-button line left-margin"
+              (click)='saveframe.delete(); processChange()' color="accent">Delete</button>
+              <button mat-raised-button
                  *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
-                 (click)='saveframe.restore(); processChange()'>Restore</a>
-            <a class="fake-button line left-margin"
+                 (click)='saveframe.restore(); processChange()' color="accent">Restore</button>
+              <button mat-raised-button
               *ngIf="showCategoryLink"
-              [routerLink]="['/entry', 'saveframe', saveframe.category]">View sections of this category</a>
+              [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">View sections of this category</button>
             </div>
           </th>
         </tr>
