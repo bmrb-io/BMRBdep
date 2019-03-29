@@ -30,7 +30,7 @@
         <td>
           <button mat-raised-button
                   *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 1)"
-                  (click)='deleteRow(r)' color="accent">-</button>
+                  (click)='deleteRow(r)' color="accent" class="square-button">-</button>
         </td>
         <ng-container *ngFor="let col of row; let c = index">
           <td *ngIf="loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)"
@@ -45,9 +45,10 @@
         </ng-container>
       </tr>
       <tr>
-        <td colspan=999>
-          <button mat-raised-button (click)='addRow()' color="accent">+</button>
+        <td colspan=1>
+          <button mat-raised-button (click)='addRow()' color="accent" class="square-button">+</button>
         </td>
+        <td colspan=999></td>
       </tr>
 
       </tbody>
