@@ -38,7 +38,8 @@ import {
   MatSelectModule,
   MatSidenavModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatButtonModule
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page
@@ -82,8 +83,9 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     MatIconModule,
     MatMenuModule,
     MatCardModule,
+    MatButtonModule,
     LoadingPageModule,
-    SlidingBarModule
+    SlidingBarModule,
   ],
   bootstrap: [AppComponent]
 })

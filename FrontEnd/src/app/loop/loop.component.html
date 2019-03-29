@@ -8,8 +8,9 @@
       <tr (contextmenu)="log()">
         <th colspan=999>
           {{loop.data[0][0].schemaValues['ADIT category view name']}}
-          <a *ngIf="loop.category == '_Citation_author' && loop.empty" class="fake-button line"
-             (click)="copyAuthors()">Copy authors from 'Entry information'</a>
+          <button mat-raised-button
+                  *ngIf="loop.category == '_Citation_author' && loop.empty"
+                  (click)="copyAuthors()" color="accent">Copy authors from 'Entry information'</button>
         </th>
       </tr>
       <tr>
@@ -27,8 +28,9 @@
       <tbody>
       <tr *ngFor="let row of loop.data; let r = index">
         <td>
-          <button *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 1)"
-                  class="real-button" (click)='deleteRow(r)'>-</button>
+          <button mat-raised-button
+                  *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 1)"
+                  (click)='deleteRow(r)' color="accent">-</button>
         </td>
         <ng-container *ngFor="let col of row; let c = index">
           <td *ngIf="loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)"
@@ -44,7 +46,7 @@
       </tr>
       <tr>
         <td colspan=999>
-          <button class="real-button" (click)='addRow()'>+</button>
+          <button mat-raised-button (click)='addRow()' color="accent">+</button>
         </td>
       </tr>
 
