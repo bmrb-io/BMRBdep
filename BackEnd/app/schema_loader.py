@@ -19,6 +19,7 @@ from common import root_dir
 dictionary_dir = tempfile.mkdtemp()
 Git(dictionary_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
 repo = Repo(os.path.join(dictionary_dir, 'nmr-star-dictionary'))
+repo.git.checkout('development')
 
 # Load the data types
 dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
@@ -78,7 +79,7 @@ def schema_emitter():
 
     last_schema_version = None
 
-    for commit in repo.iter_commits('master'):
+    for commit in repo.iter_commits('development'):
         next_schema = load_schemas(commit)
         if next_schema is None:
             print("Reached old incompatible schemas.")
