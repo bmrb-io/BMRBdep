@@ -15,11 +15,15 @@
 }
 
 .mat-raised-button.saveframe-button {
-  margin: 10px 10px 10px 0 !important;
+  margin: .5em .5em .5em 0;
 }
 
 .mat-raised-button.square-button {
   min-width: auto;
+  margin-top: .25em;
+  margin-bottom: .25em;
+  width: 40px;
+  font-weight: bold !important;
 }
 
 .highlight:hover {
