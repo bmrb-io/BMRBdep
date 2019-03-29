@@ -1,3 +1,5 @@
+@import "../../custom-theme.scss";
+
 .header-text {
   vertical-align: middle;
   font-size: larger;
@@ -6,7 +8,7 @@
 
 table {
   width: auto;
-  background-color: #E5E6Ef;
+  background-color: mat-color($custom-theme-primary);
   margin-bottom: 1em;
   margin-right: 1em;
   padding: 0 0.25em;
@@ -16,21 +18,21 @@ table {
 
 th {
   text-align: left;
-  background-color: #CBDBFF;
+  background-color: mat-color($custom-theme-primary);
   font-weight: bold;
   font-style: normal;
   color: black;
-  border: 1px solid #666699;
+  border: 1px solid mat-color($custom-theme-primary, darker);
   padding: .5em;
 }
 
 td {
   text-align: left;
-  background-color: #E5E6EF;
+  background-color: mat-color($custom-theme-accent);
   font-weight: normal;
   font-style: normal;
   color: black;
-  border: 1px solid #666699;
+  border: 1px solid mat-color($custom-theme-primary, darker);
   padding: 0 0.25em;
 }
 
@@ -47,7 +49,7 @@ td {
 .drag-box {
   height: 4em;
   margin: .5em;
-  border: 2px solid #33527b;
+  border: 2px solid mat-color($custom-theme-primary, darker);
   border-radius: 5px;
   text-align: center;
   position: relative;
@@ -69,7 +71,7 @@ td {
 }
 
 .invalid {
-  background-color: #ffe4e1;
+  background-color: mat-color($custom-theme-warn, lighter);
 }
 
 .index-column {
