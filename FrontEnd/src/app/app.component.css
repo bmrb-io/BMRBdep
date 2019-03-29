@@ -1,6 +1,10 @@
 .title-center {
   margin: 0 auto;
+}
+
+.title-right {
   cursor: pointer;
+  text-align: right;
 }
 
 .loading-bar-holder {

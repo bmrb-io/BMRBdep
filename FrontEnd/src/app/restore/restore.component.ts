@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
-import {ActivatedRoute} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 
 @Component({
@@ -11,17 +10,11 @@ import {Entry} from '../nmrstar/entry';
 export class RestoreComponent implements OnInit {
 
   entry: Entry;
-  constructor(private route: ActivatedRoute,
-              public api: ApiService) {
+  constructor(public api: ApiService) {
   }
 
   ngOnInit() {
     this.api.entrySubject.subscribe(entry => this.entry = entry);
-
-    const parent = this;
-    this.route.params.subscribe(function (params) {
-      parent.api.loadEntry(params['entry']);
-    });
   }
 
 }

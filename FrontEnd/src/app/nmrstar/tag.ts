@@ -164,10 +164,14 @@ export class Tag {
           }
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
-          this.enums = new Set(function* () {
-            yield* enumerationSet;
-            yield* temp;
-          }());
+          this.enums = new Set();
+          const parent = this;
+          enumerationSet.forEach(function (item) {
+              parent.enums.add(item);
+          });
+          for (const item of temp) {
+              this.enums.add(item);
+          }
         }
       }
 
@@ -288,18 +292,6 @@ export class SaveframeTag extends Tag {
     return this.parent;
   }
 
-  updateTagStatus(): void {
-    super.updateTagStatus();
-
-    // Copy the value of Name to Sf_framecode if such a tag exists
-    if (this.name === 'Name' && this.value) {
-      const parentSaveframe = this.getParentSaveframe();
-      if (parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode']) {
-        parentSaveframe.tagDict[parentSaveframe.tagPrefix + '.Sf_framecode'].value = this.value;
-      }
-    }
-  }
-
 }
 
 export class LoopTag extends Tag {
@@ -316,10 +308,6 @@ export class LoopTag extends Tag {
 
   getParentSaveframe(): Saveframe {
     return this.parent.parent;
-  }
-
-  updateTagStatus(): void {
-    super.updateTagStatus();
   }
 
 }

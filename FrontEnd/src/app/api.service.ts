@@ -23,7 +23,18 @@ export class ApiService {
 
     constructor(private http: HttpClient,
                 private messagesService: MessagesService) {
-        this.entrySubject = new BehaviorSubject<Entry>(null);
+
+
+        const rawJSON = JSON.parse(localStorage.getItem('entry'));
+        const schema = JSON.parse(localStorage.getItem('schema'));
+        if (rawJSON !== null && schema !== null) {
+            rawJSON['schema'] = schema;
+            const entry = entryFromJSON(rawJSON);
+            this.entrySubject = new BehaviorSubject<Entry>(entry);
+        } else {
+            this.entrySubject = new BehaviorSubject<Entry>(null);
+        }
+
         this.entrySubject.subscribe(entry => {
             this.cachedEntry = entry;
         });
@@ -67,6 +78,21 @@ export class ApiService {
             }
         );
         return of(false);
+    }
+
+    checkValid(): Observable<boolean> {
+        if (!this.cachedEntry) {
+            return of(false);
+        }
+
+        const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
+        return this.http.get(entryURL).pipe(
+            map(response => {
+                return response['status'];
+            }),
+            // Convert the error into something we can handle
+            catchError((error: HttpErrorResponse) => this.handleError(error))
+        );
     }
 
     loadEntry(entryID: string, skipCache: boolean = false): void {
@@ -220,7 +246,6 @@ export class ApiService {
                 MessageType.WarningMessage, 15000));
         } else {
             this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
-            console.error('An unhandled server error code occurred:', error);
         }
         if (environment.debug) {
             throw error;

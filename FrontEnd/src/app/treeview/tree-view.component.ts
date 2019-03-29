@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
@@ -15,6 +15,7 @@ export class TreeViewComponent implements OnInit {
   entry: Entry;
   page: string;
   @Input() showInvalidOnly: boolean;
+  @Output() sessionEnd = new EventEmitter<boolean>();
 
   constructor(private api: ApiService,
               private router: Router,
@@ -32,12 +33,17 @@ export class TreeViewComponent implements OnInit {
         r = r.firstChild;
       }
       r.params.subscribe(params => {
-        if (params['saveframe_description'] !== undefined) {
-          parent.active = params['saveframe_description'];
+        if (params['saveframe_category'] !== undefined) {
+          parent.active = params['saveframe_category'];
+          parent.page = 'category';
+        } else {
+          parent.showInvalidOnly = this.router.url.endsWith('/review');
+          const urlSegments = this.router.url.split('/');
+          parent.page = urlSegments[urlSegments.length - 1];
+          if (parent.page === '') {
+            parent.page = 'new';
+          }
         }
-        parent.showInvalidOnly = this.router.url.endsWith('/review');
-        const urlSegments = this.router.url.split('/');
-        parent.page = urlSegments[urlSegments.length - 1];
       });
     });
 
@@ -50,6 +56,11 @@ export class TreeViewComponent implements OnInit {
 
   logEntry(): void {
     console.log(this.entry);
+  }
+
+  endSession(): void {
+    this.api.clearDeposition();
+    this.sessionEnd.emit(true);
   }
 
   refresh(): void {
