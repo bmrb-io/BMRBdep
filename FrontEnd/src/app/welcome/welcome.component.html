@@ -47,29 +47,27 @@
       </mat-form-field>
 
       <div *ngIf="sessionType.value == 'file'">
-        <input type="file" #inputFile (change)="fileChangeEvent()"/><br><br>
-
-        <button *ngIf="sessionType.value == 'file' && !inputFile.files[0]" mat-flat-button
-                class="mat-flat-button mat-primary" disabled>
-          Please select a file to upload.
+        <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
+        <button mat-raised-button color="accent" (click)="openInput()" id="fileUploadButton">
+          Click to select a file to upload.
         </button>
+        <p></p>
 
-        <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-flat-button
-                class="mat-flat-button mat-primary">
+        <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-raised-button color="primary">
           Click here to start a new deposition from {{inputFile.files[0]?.name}}.
         </button>
       </div>
 
       <br>
-      <button *ngIf="sessionType.value == 'bmrb_id'" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="sessionType.value == 'bmrb_id'" mat-raised-button color="primary">
         Click here to start a new deposition from an existing entry.
       </button>
 
-      <button *ngIf="sessionType.value == 'new'" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="sessionType.value == 'new'" mat-raised-button color="primary">
         Click here to start a new deposition from scratch.
       </button>
 
-      <button *ngIf="!sessionType.value" mat-flat-button class="mat-flat-button mat-primary">
+      <button *ngIf="!sessionType.value" mat-raised-button color="primary">
         Click here to start a new deposition.
       </button>
 
