@@ -47,11 +47,11 @@
       </mat-form-field>
 
       <div *ngIf="sessionType.value == 'file'">
-        <input type="file" #inputFile (change)="fileChangeEvent()"/><br><br>
-
-        <button *ngIf="sessionType.value == 'file' && !inputFile.files[0]" mat-raised-button color="primary" disabled>
-          Please select a file to upload.
+        <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
+        <button mat-raised-button color="accent" (click)="openInput()" id="fileUploadButton">
+          Click to select a file to upload.
         </button>
+        <p></p>
 
         <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-raised-button color="primary">
           Click here to start a new deposition from {{inputFile.files[0]?.name}}.
