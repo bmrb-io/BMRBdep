@@ -47,6 +47,10 @@ export class WelcomeComponent implements OnInit {
   fileChangeEvent() {
   }
 
+  openInput() {
+    this.fileUploadElement.nativeElement.click();
+  }
+
   new(f: FormGroup) {
 
     if (!f.valid) {
