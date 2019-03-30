@@ -59,7 +59,7 @@
     <tr>
         <td colspan="1"></td>
         <td colspan="1">
-            <input type="file" hidden #inputFile (change)="selectFile($event)"/>
+            <input type="file" hidden #inputFile (change)="selectFile($event)" multiple/>
             <button mat-raised-button color="primary" (click)="openInput()" id="fileUploadButton">
                 Please select a file to upload.
             </button>
