@@ -109,7 +109,7 @@ def handle_other_errors(exception):
                         "recognized as a local IP:\n%s" %
                         traceback.format_exc(), mimetype="text/plain")
     else:
-        response = jsonify({"error": "Server error. Contact webmaster@bmrb.wisc.edu."})
+        response = jsonify({"error": "Server error."})
         response.status_code = 500
         return response
 
