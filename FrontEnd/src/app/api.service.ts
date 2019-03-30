@@ -68,7 +68,7 @@ export class ApiService {
         const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
         this.http.delete(apiEndPoint).subscribe(
             () => {
-                this.messagesService.sendMessage(new Message('File deleted.'));
+                this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
                 return of(true);
             },
             () => {
@@ -197,7 +197,7 @@ export class ApiService {
 
         if (!this.cachedEntry.valid) {
             this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
-                MessageType.WarningMessage, 15000));
+                MessageType.ErrorMessage, 15000));
             return;
         }
 
@@ -243,7 +243,7 @@ export class ApiService {
     handleError(error: HttpErrorResponse) {
         if (error.status === 400) {
             this.messagesService.sendMessage(new Message(error.error.error,
-                MessageType.WarningMessage, 15000));
+                MessageType.ErrorMessage, 15000));
         } else {
             this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
         }
