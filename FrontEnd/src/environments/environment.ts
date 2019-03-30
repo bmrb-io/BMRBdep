@@ -6,5 +6,6 @@
 export const environment = {
   production: false,
   debug: true,
-  serverURL: 'http://localhost:9000/deposition'
+  serverURL: 'http://localhost:9000/deposition',
+  contactEmail: 'bmrbhelp@bmrb.wisc.edu'
 };

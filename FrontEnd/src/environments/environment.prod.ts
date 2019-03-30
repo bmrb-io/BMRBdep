@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
   debug: false,
-  serverURL: '/deposition'
+  serverURL: '/deposition',
+  contactEmail: 'bmrbhelp@bmrb.wisc.edu'
 };

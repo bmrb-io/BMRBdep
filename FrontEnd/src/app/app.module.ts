@@ -16,7 +16,6 @@ import {SaveframeEditorComponent} from './saveframe-editor/saveframe-editor.comp
 import {ReviewComponent} from './review/review.component';
 import {TreeViewComponent} from './treeview/tree-view.component';
 import {FileUploaderComponent} from './file-uploader/file-uploader.component';
-import {MessageComponent} from './message/message.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
 import {PendingValidationComponent} from './pending-validation/pending-validation.component'; // Saving/loading bar
 import {LoadEntryComponent} from './load-entry/load-entry.component';
@@ -39,7 +38,8 @@ import {
   MatSidenavModule,
   MatSlideToggleModule,
   MatToolbarModule,
-  MatButtonModule
+  MatButtonModule,
+  MatSnackBarModule
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page
@@ -59,7 +59,6 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     TagComponent,
     TreeViewComponent,
     FileUploaderComponent,
-    MessageComponent,
     ReviewComponent,
     RestoreComponent,
     MolecularSystemComponent,
@@ -84,6 +83,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     MatMenuModule,
     MatCardModule,
     MatButtonModule,
+    MatSnackBarModule,
     LoadingPageModule,
     SlidingBarModule,
   ],
