@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+from common import ServerError, RequestError, configuration, get_schema, root_dir
+import depositions
+
+
 import os
 import sys
 import logging
@@ -8,6 +12,7 @@ import traceback
 from io import BytesIO
 from uuid import uuid4
 from logging.handlers import SMTPHandler
+from typing import Dict, Union, Any, Optional, List
 
 import requests
 import pynmrstar
@@ -17,6 +22,7 @@ import simplejson as json
 # Import flask
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 from flask_mail import Mail, Message
 
 # Set up paths for imports and such
@@ -25,8 +31,6 @@ os.chdir(local_dir)
 sys.path.append(local_dir)
 
 # Import the functions needed to service requests - must be after path updates
-from common import ServerError, RequestError, configuration, get_schema, root_dir
-import depositions
 from validate_email import validate_email
 
 # Set up the flask application
@@ -81,7 +85,7 @@ else:
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)
-def handle_our_errors(error):
+def handle_our_errors(error: Union[ServerError, RequestError]):
     """ Handles exceptions we raised ourselves. """
 
     response = jsonify(error.to_dict())
@@ -90,12 +94,12 @@ def handle_our_errors(error):
 
 
 @application.errorhandler(Exception)
-def handle_other_errors(exception):
+def handle_other_errors(exception: Exception):
     """ Catches any other exceptions and formats them. Only
     displays the actual error to local clients (to prevent disclosing
     issues that could be security vulnerabilities)."""
 
-    def check_local_ip():
+    def check_local_ip() -> bool:
         """ Checks if the given IP is a local user."""
 
         for local_address in configuration['local-ips']:
@@ -116,7 +120,7 @@ def handle_other_errors(exception):
 
 @application.route('/')
 @application.route('/<file_name>')
-def send_local_file(file_name=None):
+def send_local_file(file_name: str = None) -> Response:
     if file_name is None:
         file_name = "index.html"
 
@@ -127,12 +131,12 @@ def send_local_file(file_name=None):
     elif os.path.exists(container_path):
         return send_from_directory(container_path, file_name)
     else:
-        return 'Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ' \
-               'Did your Angular compilation step fail?'
+        return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. '
+                        'Did your Angular compilation step fail?')
 
 
 @application.route('/deposition/<uuid:uuid>/check-valid')
-def send_validation_status(uuid):
+def send_validation_status(uuid) -> Response:
     """ Returns whether or not an entry has been validated. """
 
     with depositions.DepositionRepo(str(uuid)) as repo:
@@ -140,7 +144,7 @@ def send_validation_status(uuid):
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
-def send_validation_email(uuid):
+def send_validation_email(uuid) -> Response:
     """ Sends the validation e-mail. """
 
     uuid = str(uuid)
@@ -182,8 +186,8 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 
 
 @application.route('/deposition/validate_email/<token>')
-def validate_user(token):
-    """ Validate a user-email. """
+def validate_user(token: str):
+    """ Perform validation of user-email and then redirect to the entry loader URL. """
 
     serializer = URLSafeSerializer(application.config['SECRET_KEY'])
     try:
@@ -201,10 +205,10 @@ def validate_user(token):
 
 
 @application.route('/deposition/new', methods=('POST',))
-def new_deposition():
+def new_deposition() -> Response:
     """ Starts a new deposition. """
 
-    request_info = request.form
+    request_info: Dict[str, Any] = request.form
 
     if not request_info or 'email' not in request_info:
         raise RequestError("Must specify user e-mail to start a session.")
@@ -212,8 +216,8 @@ def new_deposition():
     if 'deposition_nickname' not in request_info:
         raise RequestError("Must specify a nickname for the deposition.")
 
-    uploaded_entry = None
-    entry_bootstrap = False
+    uploaded_entry: Optional[pynmrstar.Entry] = None
+    entry_bootstrap: bool = False
     if 'nmrstar_file' in request.files and request.files['nmrstar_file'] and request.files['nmrstar_file'].filename:
         try:
             uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read())
@@ -229,8 +233,8 @@ def new_deposition():
             raise RequestError('Invalid entry ID specified. No such entry exists, or is released.')
         entry_bootstrap = True
 
-    author_email = request_info.get('email')
-    author_orcid = request_info.get('orcid')
+    author_email: str = request_info.get('email', '')
+    author_orcid: Optional[str] = request_info.get('orcid')
     if not author_orcid:
         author_orcid = None
 
@@ -249,10 +253,10 @@ def new_deposition():
     # Create the deposition
     deposition_id = str(uuid4())
     pynmrstar._SCHEMA_URL = 'https://raw.githubusercontent.com/uwbmrb/nmr-star-dictionary/development/xlschem_ann.csv'
-    schema = pynmrstar.Schema()
-    json_schema = get_schema(schema.version)
-    entry_template = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True, default_values=True,
-                                                   schema=schema)
+    schema: pynmrstar.Schema = pynmrstar.Schema()
+    json_schema: dict = get_schema(schema.version)
+    entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
+                                                                    default_values=True, schema=schema)
 
     # Merge the entries
     if uploaded_entry:
@@ -306,12 +310,12 @@ def new_deposition():
         entry_template.normalize()
 
     # Set the entry information tags
-    entry_information = entry_template.get_saveframes_by_category('entry_information')[0]
+    entry_information: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
     entry_information['NMR_STAR_version'] = schema.version
     entry_information['Original_NMR_STAR_version'] = schema.version
 
     # Suggest some default sample conditions
-    sample_conditions = entry_template.get_loops_by_category('_Sample_condition_variable')[0]
+    sample_conditions: pynmrstar.Loop = entry_template.get_loops_by_category('_Sample_condition_variable')[0]
     if sample_conditions.empty:
         sample_conditions.data = [[None for _ in range(len(sample_conditions.tags))] for _ in range(4)]
         sample_conditions['Type'] = ['temperature', 'pH', 'pressure', 'ionic strength']
@@ -338,11 +342,11 @@ def new_deposition():
             author_given = orcid_json['person']['name']['given-names']['value']
             author_family = orcid_json['person']['name']['family-name']['value']
 
-    entry_saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
+    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
     entry_saveframe['UUID'] = deposition_id
 
     # Update the loops with the data we have
-    author_loop = pynmrstar.Loop.from_scratch()
+    author_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
     author_loop.add_tag(['_Entry_author.Given_name',
                          '_Entry_author.Middle_initials',
                          '_Entry_author.Family_name',
@@ -362,7 +366,7 @@ def new_deposition():
     author_loop.sort_tags(schema=schema)
     entry_saveframe['_Entry_author'] = author_loop
 
-    contact_loop = pynmrstar.Loop.from_scratch()
+    contact_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
     contact_loop.add_tag(['_Contact_person.Given_name',
                           '_Contact_person.Middle_initials',
                           '_Contact_person.Family_name',
@@ -410,7 +414,7 @@ def new_deposition():
                 loop.data = [row_data]
 
     # Set the entry_interview tags
-    entry_interview = entry_template.get_saveframes_by_category('entry_interview')[0]
+    entry_interview: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_interview')[0]
     for tag in json_schema['file_upload_types']:
         entry_interview[tag[2]] = "no"
     entry_interview['PDB_deposition'] = "no"
@@ -419,18 +423,18 @@ def new_deposition():
     if entry_bootstrap:
         entry_interview['Previous_BMRB_entry_used'] = request_info['bootstrapID']
 
-    entry_meta = {'deposition_id': deposition_id,
-                  'author_email': author_email,
-                  'author_orcid': author_orcid,
-                  'last_ip': request.environ['REMOTE_ADDR'],
-                  'deposition_origination': {'request': dict(request.headers),
-                                             'ip': request.environ['REMOTE_ADDR']},
-                  'email_validated': configuration['debug'],
-                  'schema_version': schema.version,
-                  'entry_deposited': False,
-                  'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
-                  'deposition_nickname': request_info['deposition_nickname'],
-                  'deposition_from_file': True if uploaded_entry else False}
+    entry_meta: dict = {'deposition_id': deposition_id,
+                        'author_email': author_email,
+                        'author_orcid': author_orcid,
+                        'last_ip': request.environ['REMOTE_ADDR'],
+                        'deposition_origination': {'request': dict(request.headers),
+                                                   'ip': request.environ['REMOTE_ADDR']},
+                        'email_validated': configuration['debug'],
+                        'schema_version': schema.version,
+                        'entry_deposited': False,
+                        'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                        'deposition_nickname': request_info['deposition_nickname'],
+                        'deposition_from_file': True if uploaded_entry else False}
     if uploaded_entry:
         if entry_bootstrap:
             entry_meta['bootstrap_entry'] = request_info['bootstrapID']
@@ -445,7 +449,7 @@ def new_deposition():
         repo.write_file('schema.json', json.dumps(json_schema), root=True)
         if uploaded_entry:
             if entry_bootstrap:
-                repo.write_file('bootstrap_entry.str', str(uploaded_entry), root=True)
+                repo.write_file('bootstrap_entry.str', str(uploaded_entry).encode(), root=True)
             else:
                 request.files['nmrstar_file'].seek(0)
                 repo.write_file('bootstrap_entry.str', request.files['nmrstar_file'].read(), root=True)
@@ -458,7 +462,7 @@ def new_deposition():
 
 
 @application.route('/deposition/<uuid:uuid>/deposit', methods=('POST',))
-def deposit_entry(uuid):
+def deposit_entry(uuid) -> Response:
     """ Complete the deposition. """
 
     with depositions.DepositionRepo(uuid) as repo:
@@ -480,27 +484,29 @@ def deposit_entry(uuid):
 
 
 @application.route('/deposition/<uuid:uuid>/file/<filename>', methods=('GET', 'DELETE'))
-def file_operations(uuid, filename):
+def file_operations(uuid, file_name: str) -> Response:
     """ Either retrieve or delete a file. """
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(BytesIO(repo.get_file(filename, raw_file=False, root=False)),
-                             attachment_filename=secure_filename(filename))
+            return send_file(BytesIO(repo.get_file(file_name, root=False)),
+                             attachment_filename=secure_filename(file_name))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
-            repo.delete_data_file(filename)
-            repo.commit('Deleted file %s' % filename)
+            repo.delete_data_file(file_name)
+            repo.commit('Deleted file %s' % file_name)
         return jsonify({'status': 'success'})
+    else:
+        raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')
 
 
 @application.route('/deposition/<uuid:uuid>/file', methods=('POST',))
-def store_file(uuid):
+def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
-    file_obj = request.files.get('file', None)
+    file_obj: Optional[FileStorage] = request.files.get('file', None)
 
     if not file_obj or not file_obj.filename:
         raise RequestError('No file uploaded!')
@@ -526,7 +532,7 @@ def fetch_or_store_deposition(uuid):
     # Store an entry
     if request.method == "PUT":
         try:
-            entry = pynmrstar.Entry.from_json(request.get_json())
+            entry: pynmrstar.Entry = pynmrstar.Entry.from_json(request.get_json())
         except ValueError:
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
@@ -538,7 +544,7 @@ def fetch_or_store_deposition(uuid):
             if repo.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
 
-            existing_entry = repo.get_entry()
+            existing_entry: pynmrstar.Entry = repo.get_entry()
 
             # If they aren't making any changes
             try:
@@ -560,23 +566,21 @@ def fetch_or_store_deposition(uuid):
     elif request.method == "GET":
 
         with depositions.DepositionRepo(uuid) as repo:
-            entry = repo.get_entry()
-            schema_version = entry.get_tag('_Entry.NMR_STAR_version')[0]
-            data_files = repo.get_data_file_list()
-            email_validated = repo.metadata['email_validated']
-            deposition_nickname = repo.metadata['deposition_nickname']
+            entry: pynmrstar.Entry = repo.get_entry()
+            schema_version: str = entry.get_tag('_Entry.NMR_STAR_version')[0]
+            data_files: List[str] = repo.get_data_file_list()
+            email_validated: bool = repo.metadata['email_validated']
+            deposition_nickname: str = repo.metadata['deposition_nickname']
         try:
-            schema = get_schema(schema_version)
+            schema: dict = get_schema(schema_version)
         except RequestError:
             raise ServerError("Entry specifies schema that doesn't exist on the server: %s" % schema_version)
 
-        entry = entry.get_json(serialize=False)
+        entry: dict = entry.get_json(serialize=False)
         entry['schema'] = schema
         entry['data_files'] = data_files
         entry['email_validated'] = email_validated
         entry['deposition_nickname'] = deposition_nickname
 
         return jsonify(entry)
-
-
 
