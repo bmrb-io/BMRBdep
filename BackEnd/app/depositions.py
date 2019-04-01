@@ -3,6 +3,8 @@
 import os
 import json
 
+from typing import Optional, BinaryIO, Union, List
+
 # Pip module imports
 from git import Repo, CacheError
 import werkzeug.utils
@@ -22,13 +24,13 @@ if not os.path.exists(configuration['repo_path']):
         pass
 
 
-def secure_filename(filename):
+def secure_filename(file_name: str) -> str:
     """ Wraps werkzeug secure_filename but raises an error if the filename comes out empty. """
 
-    filename = werkzeug.utils.secure_filename(filename)
-    if not filename:
+    file_name = werkzeug.utils.secure_filename(file_name)
+    if not file_name:
         raise RequestError('Invalid upload file name. Please rename the file and try again.')
-    return filename
+    return file_name
 
 
 class DepositionRepo:
@@ -37,16 +39,16 @@ class DepositionRepo:
     You *MUST* use the 'with' statement when using this class to ensure that
     changes are committed."""
 
-    def __init__(self, uuid, initialize=False):
-        self._repo = None
+    def __init__(self, uuid, initialize: bool = False):
+        self._repo: Repo
         self._uuid = uuid
-        self._initialize = initialize
-        self._entry_dir = os.path.join(configuration['repo_path'], str(self._uuid))
-        self._modified_files = False
-        self._live_metadata = None
-        self._original_metadata = None
-        self._lock_path = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
-        self._lock_object = None
+        self._initialize: bool = initialize
+        self._entry_dir: str = os.path.join(configuration['repo_path'], str(self._uuid))
+        self._modified_files: bool = False
+        self._live_metadata: dict = {}
+        self._original_metadata: dict = {}
+        self._lock_path: str = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
+        self._lock_object: Optional[FileLock] = None
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
@@ -95,15 +97,17 @@ class DepositionRepo:
             self._lock_object.release()
 
     @property
-    def metadata(self):
+    def metadata(self) -> dict:
         """ Return the metadata dictionary. """
 
         if not self._live_metadata:
-            self._live_metadata = json.loads(self.get_file('submission_info.json'))
+            submission_file_name = self.get_file('submission_info.json')
+            assert isinstance(submission_file_name, str)
+            self._live_metadata = json.loads(submission_file_name)
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
-    def get_entry(self):
+    def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
 
         entry_location = os.path.join(self._entry_dir, 'entry.str')
@@ -113,72 +117,65 @@ class DepositionRepo:
         except Exception as e:
             raise ServerError('Error loading an entry!\nError: %s\nEntry location:%s' % (repr(e), entry_location))
 
-    def write_entry(self, entry):
+    def write_entry(self, entry: pynmrstar.Entry) -> None:
         """ Save an entry in the standard place. """
 
         try:
             self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
         except RuntimeError:
             pass
-        self.write_file('entry.str', str(entry), root=True)
+        self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, filename, raw_file=False, root=True):
+    def get_file(self, file_name: str, root: bool = True) -> bytes:
         """ Returns the current version of a file from the repo. """
 
-        filename = secure_filename(filename)
+        secured_filename: str = secure_filename(file_name)
         if not root:
-            filename = os.path.join('data_files', filename)
+            secured_filename = os.path.join('data_files', secured_filename)
         try:
-            file_obj = open(os.path.join(self._entry_dir, filename), "rb")
-            if raw_file:
-                return file_obj
-            else:
-                return file_obj.read()
+            return open(os.path.join(self._entry_dir, secured_filename), "rb").read()
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
 
-    def get_data_file_list(self):
+    def get_data_file_list(self) -> List[str]:
         """ Returns the list of data files associated with this deposition. """
 
         return os.listdir(os.path.join(self._entry_dir, 'data_files'))
 
-    def delete_data_file(self, filename):
+    def delete_data_file(self, file_name: str) -> None:
         """ Delete a data file by name."""
 
-        filename = secure_filename(filename)
-        os.unlink(os.path.join(self._entry_dir, 'data_files', filename))
+        secured_filename = secure_filename(file_name)
+        os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
         self._modified_files = True
 
-    def write_file(self, file_name, data, root=False):
-        """ Adds (or overwrites) a file to the repo. """
+    def write_file(self, file_name: str, data: bytes, root: bool = False) -> str:
+        """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
         try:
             self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
         except RuntimeError:
             pass
 
-        file_name = secure_filename(file_name)
-        file_path = file_name
+        secured_filename: str = secure_filename(file_name)
+        file_path: str = secured_filename
         if not root:
-            file_path = os.path.join('data_files', file_name)
+            file_path = os.path.join('data_files', secured_filename)
 
-        try:
-            with open(os.path.join(self._entry_dir, file_path), "w") as fo:
-                fo.write(data)
-        except TypeError:
-            with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
-                fo.write(data)
+        with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
+            fo.write(data)
+
         self._modified_files = True
 
         return file_name
 
-    def commit(self, message):
+    def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
 
         # Check if the metadata has changed
         if self._live_metadata != self._original_metadata:
             self.write_file('submission_info.json',
-                            json.dumps(self._live_metadata, indent=2, sort_keys=True),
+                            json.dumps(self._live_metadata, indent=2, sort_keys=True).encode(),
                             root=True)
             self._original_metadata = self._live_metadata.copy()
 
