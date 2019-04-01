@@ -24,13 +24,13 @@ if not os.path.exists(configuration['repo_path']):
         pass
 
 
-def secure_filename(file_name: str) -> str:
+def secure_filename(filename: str) -> str:
     """ Wraps werkzeug secure_filename but raises an error if the filename comes out empty. """
 
-    file_name = werkzeug.utils.secure_filename(file_name)
-    if not file_name:
+    filename = werkzeug.utils.secure_filename(filename)
+    if not filename:
         raise RequestError('Invalid upload file name. Please rename the file and try again.')
-    return file_name
+    return filename
 
 
 class DepositionRepo:
@@ -101,9 +101,9 @@ class DepositionRepo:
         """ Return the metadata dictionary. """
 
         if not self._live_metadata:
-            submission_file_name = self.get_file('submission_info.json')
-            assert isinstance(submission_file_name, str)
-            self._live_metadata = json.loads(submission_file_name)
+            submission_info = self.get_file('submission_info.json')
+            assert isinstance(submission_info, str), ''
+            self._live_metadata = json.loads(submission_info)
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
@@ -126,10 +126,10 @@ class DepositionRepo:
             pass
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, file_name: str, root: bool = True) -> bytes:
+    def get_file(self, filename: str, root: bool = True) -> bytes:
         """ Returns the current version of a file from the repo. """
 
-        secured_filename: str = secure_filename(file_name)
+        secured_filename: str = secure_filename(filename)
         if not root:
             secured_filename = os.path.join('data_files', secured_filename)
         try:
@@ -142,14 +142,14 @@ class DepositionRepo:
 
         return os.listdir(os.path.join(self._entry_dir, 'data_files'))
 
-    def delete_data_file(self, file_name: str) -> None:
+    def delete_data_file(self, filename: str) -> None:
         """ Delete a data file by name."""
 
-        secured_filename = secure_filename(file_name)
+        secured_filename = secure_filename(filename)
         os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
         self._modified_files = True
 
-    def write_file(self, file_name: str, data: bytes, root: bool = False) -> str:
+    def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
         try:
@@ -157,7 +157,7 @@ class DepositionRepo:
         except RuntimeError:
             pass
 
-        secured_filename: str = secure_filename(file_name)
+        secured_filename: str = secure_filename(filename)
         file_path: str = secured_filename
         if not root:
             file_path = os.path.join('data_files', secured_filename)
@@ -167,7 +167,7 @@ class DepositionRepo:
 
         self._modified_files = True
 
-        return file_name
+        return filename
 
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
