@@ -119,17 +119,17 @@ def handle_other_errors(exception: Exception):
 
 
 @application.route('/')
-@application.route('/<file_name>')
-def send_local_file(file_name: str = None) -> Response:
-    if file_name is None:
-        file_name = "index.html"
+@application.route('/<filename>')
+def send_local_file(filename: str = None) -> Response:
+    if filename is None:
+        filename = "index.html"
 
     no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'dist')
     container_path = os.path.join(root_dir, 'html')
     if os.path.exists(no_container_path):
-        return send_from_directory(no_container_path, file_name)
+        return send_from_directory(no_container_path, filename)
     elif os.path.exists(container_path):
-        return send_from_directory(container_path, file_name)
+        return send_from_directory(container_path, filename)
     else:
         return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. '
                         'Did your Angular compilation step fail?')
@@ -446,7 +446,7 @@ def new_deposition() -> Response:
         # Manually set the metadata during object creation - never should be done this way elsewhere
         repo._live_metadata = entry_meta
         repo.write_entry(entry_template)
-        repo.write_file('schema.json', json.dumps(json_schema), root=True)
+        repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
         if uploaded_entry:
             if entry_bootstrap:
                 repo.write_file('bootstrap_entry.str', str(uploaded_entry).encode(), root=True)
@@ -484,19 +484,19 @@ def deposit_entry(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/file/<filename>', methods=('GET', 'DELETE'))
-def file_operations(uuid, file_name: str) -> Response:
+def file_operations(uuid, filename: str) -> Response:
     """ Either retrieve or delete a file. """
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(BytesIO(repo.get_file(file_name, root=False)),
-                             attachment_filename=secure_filename(file_name))
+            return send_file(BytesIO(repo.get_file(filename, root=False)),
+                             attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
-            repo.delete_data_file(file_name)
-            repo.commit('Deleted file %s' % file_name)
+            repo.delete_data_file(filename)
+            repo.commit('Deleted file %s' % filename)
         return jsonify({'status': 'success'})
     else:
         raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')

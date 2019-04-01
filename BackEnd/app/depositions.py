@@ -101,9 +101,7 @@ class DepositionRepo:
         """ Return the metadata dictionary. """
 
         if not self._live_metadata:
-            submission_info = self.get_file('submission_info.json')
-            assert isinstance(submission_info, str), ''
-            self._live_metadata = json.loads(submission_info)
+            self._live_metadata = json.loads(self.get_file('submission_info.json'))
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
