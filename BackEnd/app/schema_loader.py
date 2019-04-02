@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# Standard libraries
 import re
 import os
 import csv
@@ -9,11 +10,13 @@ import optparse
 import tempfile
 from shutil import rmtree
 
+# Installed modules
 import simplejson as json
 import pynmrstar
 from io import StringIO
 from git import Git, Repo, GitCommandError
 
+# Local modules
 from common import root_dir
 
 dictionary_dir = tempfile.mkdtemp()
