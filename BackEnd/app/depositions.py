@@ -4,12 +4,16 @@
 import os
 import json
 from typing import Optional, List
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 
 # Installed modules
 import flask
 import logging
 import pynmrstar
 import werkzeug.utils
+import psycopg2
+import psycopg2.extensions
 from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
@@ -104,6 +108,84 @@ class DepositionRepo:
             self._live_metadata = json.loads(self.get_file('submission_info.json'))
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
+
+    def deposit(self) -> bool:
+        """ Deposits an entry into ETS. """
+
+        entry = self.get_entry()
+
+        today_str: str = date.today().isoformat()
+        today_date: datetime = datetime.now()
+
+        params = {'source': 'Author',
+                  'submit_type': 'Dep',
+                  'status': 'nd',
+                  'lit_search_required': 'N',
+                  'submission_date': today_str,
+                  'accession_date': today_str,
+                  'last_updated': today_str,
+                  'molecular_system': entry['entry_information_1']['Title'][0],
+                  'onhold_status': 'Pub',
+                  'restart_id': entry.entry_id
+                  }
+
+        release_status: str = entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
+        if release_status == 'RELEASE NOW':
+            params['onhold_status'] = today_date.strftime("%m/%d/%y")
+        elif release_status == 'HOLD FOR 4 WEEKS':
+            params['onhold_status'] = (today_date + relativedelta(weeks=4)).strftime("%m/%d/%y")
+        elif release_status == 'HOLD FOR 8 WEEKS':
+            params['onhold_status'] = (today_date + relativedelta(weeks=+8)).strftime("%m/%d/%y")
+        elif release_status == 'HOLD FOR 6 MONTHS':
+            params['onhold_status'] = (today_date + relativedelta(months=+6)).strftime("%m/%d/%y")
+        elif release_status == 'HOLD FOR 1 YEAR':
+            params['onhold_status'] = (today_date + relativedelta(years=+1)).strftime("%m/%d/%y")
+        else:
+            raise ServerError('Invalid release code.')
+
+        contact_loop: pynmrstar.Loop = entry.get_loops_by_category("_Contact_Person")[0]
+        params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
+        contact_people = [', '.join(x) for x in contact_loop.get_tag(['Family_name', 'Given_name'])]
+        params['contact_person1'] = contact_people[0]
+        params['contact_person2'] = contact_people[1]
+
+        # nmr_dep_code = ""
+        ranges = configuration['ets']['deposition_ranges']
+        if len(ranges) == 0:
+            raise ServerError('Server configuration error.')
+
+        conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
+                                database=configuration['ets']['database'])
+        cur = conn.cursor()
+
+        try:
+            # Determine which bmrbnum to use
+            bmrb_sql = 'SELECT bmrbnum FROM entrylog WHERE '
+            valid_ids = set()
+            for id_range in ranges:
+                bmrb_sql += 'bmrbnum >= %s AND bmrbnum <= %s' % (id_range[0], id_range[1])
+                valid_ids.update(range(id_range[0], id_range[1]))
+            cur.execute(bmrb_sql)
+            # This gets the first valid ID in the specified ranges
+            params['bmrbnum'] = valid_ids.difference(set(cur.fetchall())).pop()
+
+            # Create the deposition record
+            insert_query = """
+            INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
+                                  contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
+                                  restart_id, last_updated)
+            VALUES (nextval('depnum_seq'), %(bmrbnum)s, %(status)s, %(submission_date)s, %(accession_date)s, %(onhold_status)s,
+                                         %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
+                                         %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s)"""
+            cur.execute(insert_query, params)
+            log_sql = """
+            INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
+              VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
+            cur.execute(log_sql)
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            conn.rollback()
+            raise ServerError('Could not create deposition in ETS: %s' % error)
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """

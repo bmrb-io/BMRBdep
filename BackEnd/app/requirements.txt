@@ -9,6 +9,11 @@ Flask-Mail==0.9.1
 pynmrstar==2.6.3
 dnspython==1.16.0
 filelock==3.0.10
-# This makes the local flask server faster to reload during development
+python-dateutil==2.8.0
+# For putting entries in ETS
+psycopg2-binary==2.7.7
+
+## Development related
+# This makes the local flask server faster to reload when editing the code
 watchdog==0.9.0
 git+git://github.com/uwbmrb/validate_email.git@4f3c8544af83d9e8ef56c44ba0a5a5ea12e7182d
