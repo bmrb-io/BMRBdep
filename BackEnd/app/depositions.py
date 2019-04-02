@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
+# Standard libraries
 import os
 import json
+from typing import Optional, List
 
-from typing import Optional, BinaryIO, Union, List
-
-# Pip module imports
-from git import Repo, CacheError
-import werkzeug.utils
+# Installed modules
 import flask
 import logging
 import pynmrstar
+import werkzeug.utils
+from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
-# Local imports
+# Local modules
 from common import ServerError, RequestError, configuration
 
 if not os.path.exists(configuration['repo_path']):
