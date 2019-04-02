@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 
-from common import ServerError, RequestError, configuration, get_schema, root_dir
-import depositions
-
-
+# Standard libraries
 import os
-import sys
 import logging
 import datetime
 import traceback
@@ -14,24 +10,22 @@ from uuid import uuid4
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 
+# Installed modules
 import requests
 import pynmrstar
-from itsdangerous import URLSafeSerializer, BadSignature
 import simplejson as json
+from validate_email import validate_email
+from itsdangerous import URLSafeSerializer, BadSignature
 
-# Import flask
-from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
+# Flask related modules
+from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask_mail import Mail, Message
+from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 
-# Set up paths for imports and such
-local_dir = os.path.dirname(__file__)
-os.chdir(local_dir)
-sys.path.append(local_dir)
-
-# Import the functions needed to service requests - must be after path updates
-from validate_email import validate_email
+# Local modules
+import depositions
+from common import ServerError, RequestError, configuration, get_schema, root_dir
 
 # Set up the flask application
 application = Flask(__name__)
@@ -44,7 +38,6 @@ if application.debug:
     CORS(application)
 
 application.secret_key = configuration['secret_key']
-
 
 # Set up the mail interface
 application.config.update(
