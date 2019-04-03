@@ -2,7 +2,8 @@
 
     <mat-card>
         <mat-card-title (dblclick)="developerMode=true;logEntry()">
-            Deposition "{{entry.depositionNickname}}" Navigation</mat-card-title>
+            Deposition "{{entry.depositionNickname}}" Navigation
+        </mat-card-title>
         <mat-card-content>
 
             <mat-nav-list>
@@ -55,13 +56,13 @@
                         <h2 matLine>Create new deposition</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted"
+                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted && !entry.deposited"
                        routerLink="/entry/restore" id="restore">
                         <h2 matLine>Restore deleted saveframes</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
-                       routerLink="/entry/review">
+                       routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
