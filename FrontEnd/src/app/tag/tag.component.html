@@ -6,6 +6,7 @@
     [title]="tag.validationMessage"
     [attr.data-region-id]="'state'+getRow()"
     [attr.data-default-value]="tag.value"
+    [disabled]="tag.disabled"
     data-preferred="US,GB,CN,JP,AU,MX">
   </select>
 </label>
@@ -18,6 +19,7 @@
     [title]="tag.validationMessage"
     [id]="'state'+getRow()"
     [attr.data-default-value]="tag.value"
+    [disabled]="tag.disabled"
     data-default-option="Select State or Province">
   </select>
 </label>
