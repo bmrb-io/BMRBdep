@@ -554,6 +554,7 @@ def fetch_or_store_deposition(uuid):
             schema_version: str = entry.get_tag('_Entry.NMR_STAR_version')[0]
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
+            entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
         try:
             schema: dict = get_schema(schema_version)
@@ -564,6 +565,7 @@ def fetch_or_store_deposition(uuid):
         entry['schema'] = schema
         entry['data_files'] = data_files
         entry['email_validated'] = email_validated
+        entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
 
         return jsonify(entry)
