@@ -243,7 +243,7 @@ export class ApiService {
     }
 
     handleError(error: HttpErrorResponse) {
-        if (error.status === 400) {
+        if (error.status === 400 || (error.status === 500 && error.error)) {
             this.messagesService.sendMessage(new Message(error.error.error,
                 MessageType.ErrorMessage, 15000));
         } else {
