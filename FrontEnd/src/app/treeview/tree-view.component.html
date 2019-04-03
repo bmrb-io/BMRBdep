@@ -72,7 +72,7 @@
                         <mat-list-item
                                 (click)='download(entry.entryID + ".str", entry)'>Download entry
                         </mat-list-item>
-                        <mat-list-item (click)='refresh()'>Refresh cache/page</mat-list-item>
+                        <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
                         <mat-list-item>
                             <mat-slide-toggle [(ngModel)]="entry.showAll"
                                               (ngModelChange)="entry.updateCategories()"
