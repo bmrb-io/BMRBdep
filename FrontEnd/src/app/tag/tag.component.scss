@@ -14,7 +14,7 @@
   background-color: white;
 }
 
-.saveframe-input:hover {
+.saveframe-input:hover:not([disabled]) {
   outline: mat-color($custom-theme-primary, darker) solid 1px;
 }
 
