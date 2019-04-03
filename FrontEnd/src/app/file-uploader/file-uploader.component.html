@@ -29,7 +29,7 @@
         <td>
             <div class="file-upload">
                 <div *ngIf="file.fileName">
-                    <button mat-raised-button (click)="deleteFile(file.fileName)" color="primary"
+                    <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)" color="primary"
                             class="square-button">-</button>
                     <a download *ngIf="file.percent == 100; else uploading"
                        [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName"
@@ -60,13 +60,14 @@
         <td colspan="1"></td>
         <td colspan="1">
             <input type="file" hidden #inputFile (change)="selectFile($event)" multiple/>
-            <button mat-raised-button color="primary" (click)="openInput()" id="fileUploadButton">
+            <button mat-raised-button color="primary" (click)="openInput()" id="fileUploadButton"
+                    [disabled]="entry.deposited">
                 Please select a file to upload.
             </button>
         </td>
         <td class="drag-td" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
             <div class="drag-box">
-                <div class="drag-text">Or drag and drop files here</div>
+                <div class="drag-text" *ngIf="!entry.deposited">Or drag and drop files here</div>
             </div>
         </td>
     </tr>
