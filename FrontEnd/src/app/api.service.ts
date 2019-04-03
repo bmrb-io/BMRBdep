@@ -195,7 +195,7 @@ export class ApiService {
             );
     }
 
-    submitEntry(): Observable<any> {
+    depositEntry(): Observable<any> {
 
         if (!this.cachedEntry.valid) {
             this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
@@ -205,9 +205,13 @@ export class ApiService {
 
         const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
 
+        const formData = new FormData();
+        formData.append('deposition_contents', this.cachedEntry.print());
+
         this.messagesService.sendMessage(new Message('Submitting deposition...',
             MessageType.NotificationMessage, 0));
-        return this.http.post(apiEndPoint, null)
+
+        return this.http.post(apiEndPoint, formData)
             .pipe(
                 map(jsonData => {
                     this.messagesService.clearMessage();
