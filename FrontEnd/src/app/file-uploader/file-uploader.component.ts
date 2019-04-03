@@ -90,8 +90,8 @@ export class FileUploaderComponent implements OnInit {
             }
           },
           error => {
-            this.api.handleError(error);
             this.entry.dataStore.deleteFile(dataFile.fileName);
+            this.api.handleError(error);
           },
           () => {
             closure -= 1;
