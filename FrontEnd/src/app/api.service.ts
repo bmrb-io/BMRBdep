@@ -119,9 +119,9 @@ export class ApiService {
             this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
             this.http.get(entryURL).subscribe(
                 jsonData => {
+                    this.messagesService.clearMessage();
                     this.entrySubject.next(entryFromJSON(jsonData));
                     this.saveEntry(true);
-                    this.messagesService.clearMessage();
                 },
                 error => this.handleError(error)
             );
