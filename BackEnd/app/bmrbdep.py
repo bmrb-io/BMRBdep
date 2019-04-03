@@ -457,11 +457,19 @@ def new_deposition() -> Response:
 def deposit_entry(uuid) -> Response:
     """ Complete the deposition. """
 
+    if 'deposition_contents' not in request.form or not request.form['deposition_contents']:
+        raise RequestError('No deposition submitted.')
+    final_entry: pynmrstar.Entry = pynmrstar.Entry.from_string(request.form['deposition_contents'])
+
     with depositions.DepositionRepo(uuid) as repo:
-        bmrb_num = repo.deposit()
+        bmrb_num = repo.deposit(final_entry)
 
         # Ask them to confirm their e-mail
-        message = Message("Your entry has been deposited!", recipients=[repo.metadata['author_email']])
+        contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
+        if repo.metadata['author_email'] not in contact_emails:
+            raise RequestError('At least one contact person must have the email of the original deposition creator.')
+        logging.warning(contact_emails)
+        message = Message("Your entry has been deposited!", recipients=contact_emails)
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the' \
                        ' deposition contents for reference. You may also use this file to start a new deposition. ' \
                        'You will hear from our annotators in the next few days.' % bmrb_num

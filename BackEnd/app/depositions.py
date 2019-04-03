@@ -91,7 +91,7 @@ class DepositionRepo:
 
         # If nothing changed the commit won't do anything
         try:
-            self.commit("Repo closed with changed but without a manual commit... Potential software bug.")
+            self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
             self._repo.close()
             self._repo.__del__()
         # Catches all git-related errors
@@ -109,17 +109,19 @@ class DepositionRepo:
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
-    def deposit(self) -> int:
+    def deposit(self, final_entry: pynmrstar.Entry) -> int:
         """ Deposits an entry into ETS. """
 
         self.raise_write_errors()
+        existing_entry_id = self.get_entry().entry_id
 
-        entry = self.get_entry()
-        logging.info('Depositing deposition %s' % entry.entry_id)
+        if existing_entry_id != final_entry.entry_id:
+            raise RequestError('Invalid deposited entry. The ID must match that of this deposition.')
 
-        if self.metadata['entry_deposited']:
-            logging.warning('User attempted to deposit already existing entry again: %s' % entry.entry_id)
-            raise RequestError('Entry already deposited, no changes allowed.')
+        logging.info('Depositing deposition %s' % final_entry.entry_id)
+
+        # Write the final deposition to disk
+        self.write_file('deposition.str', str(final_entry).encode(), root=True)
 
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
@@ -131,12 +133,12 @@ class DepositionRepo:
                   'submission_date': today_str,
                   'accession_date': today_str,
                   'last_updated': today_str,
-                  'molecular_system': entry['entry_information_1']['Title'][0],
+                  'molecular_system': final_entry['entry_information_1']['Title'][0],
                   'onhold_status': 'Pub',
-                  'restart_id': entry.entry_id
+                  'restart_id': final_entry.entry_id
                   }
 
-        release_status: str = entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
+        release_status: str = final_entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
         if release_status == 'RELEASE NOW':
             params['onhold_status'] = today_date.strftime("%m/%d/%y")
         elif release_status == 'HOLD FOR 4 WEEKS':
@@ -150,7 +152,7 @@ class DepositionRepo:
         else:
             raise ServerError('Invalid release code.')
 
-        contact_loop: pynmrstar.Loop = entry.get_loops_by_category("_Contact_Person")[0]
+        contact_loop: pynmrstar.Loop = final_entry.get_loops_by_category("_Contact_Person")[0]
         params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
         contact_people = [', '.join(x) for x in contact_loop.get_tag(['Family_name', 'Given_name'])]
         params['contact_person1'] = contact_people[0]
@@ -194,7 +196,6 @@ class DepositionRepo:
                 logging.exception('No valid IDs remaining in any of the ranges!')
                 raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
 
-            bmrbnum = 20001
             params['bmrbnum'] = bmrbnum
 
             # Create the deposition record
@@ -211,10 +212,10 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
   VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
             cur.execute(log_sql)
             conn.commit()
-        except psycopg2.IntegrityError as error:
+        except psycopg2.IntegrityError:
             logging.exception('Could not assign the chosen BMRB ID - it was already assigned.')
             conn.rollback()
-            raise ServerError('Could not create deposition: %s' % error)
+            raise ServerError('Could not create deposition. Please try again.')
 
         self.metadata['entry_deposited'] = True
         self.metadata['bmrbnum'] = bmrbnum
@@ -277,7 +278,9 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
-        self.raise_write_errors()
+        # The submission info file should always be writeable
+        if filename != 'submission_info.json':
+            self.raise_write_errors()
 
         secured_filename: str = secure_filename(filename)
         file_path: str = secured_filename
