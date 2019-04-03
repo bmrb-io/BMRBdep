@@ -4,7 +4,7 @@
   background-color: mat-color($custom-theme-warn, lighter) !important;
 }
 
-.saveframe-input {
+.tag-input {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
@@ -14,7 +14,7 @@
   background-color: white;
 }
 
-.saveframe-input:hover:not([disabled]) {
+.tag-input:hover:not([disabled]) {
   outline: mat-color($custom-theme-primary, darker) solid 1px;
 }
 

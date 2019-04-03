@@ -1,7 +1,7 @@
 <label *ngIf="tag.interfaceType == 'country'">
   <select
     [(ngModel)]="tag.value"
-    [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true, 'crs-country': true}"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true, 'crs-country': true}"
     (change)="validateTag()"
     [title]="tag.validationMessage"
     [attr.data-region-id]="'state'+getRow()"
@@ -14,7 +14,7 @@
 <label *ngIf="tag.interfaceType == 'state'">
   <select
     [(ngModel)]="tag.value"
-    [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
     (change)="validateTag()"
     [title]="tag.validationMessage"
     [id]="'state'+getRow()"
@@ -29,7 +29,7 @@
 <label *ngIf="tag.interfaceType == 'standard'">
   <input
     [(ngModel)]="tag.value"
-    [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
     [placeholder]="tag.schemaValues['default value']"
     (change)="validateTag()"
     [type]="tag.dataType"
@@ -40,7 +40,7 @@
 
 <label *ngIf="tag.interfaceType == 'closed_enum'">
   <select [(ngModel)]="tag.value"
-          [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+          [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
           (change)="validateTag()"
           [title]="tag.validationMessage"
           [disabled]="tag.disabled">
@@ -58,7 +58,7 @@
 
 <label *ngIf="tag.interfaceType == 'sf_pointer'">
   <select [(ngModel)]="tag.value"
-          [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+          [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
           (ngModelChange)="validateTag()"
           [title]="tag.validationMessage"
           [disabled]="tag.disabled">
@@ -72,7 +72,7 @@
   <label>
     <input [attr.list]="tag.fullyQualifiedTagName"
            [(ngModel)]="tag.value"
-           [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+           [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
            [placeholder]="storedValue"
            (change)="restoreValue()"
            [title]="tag.validationMessage"
@@ -87,7 +87,7 @@
 </ng-container>
 
 <ng-container *ngIf="tag.interfaceType == 'yes_no'">
-  <div [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+  <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
        (change)="validateTag()"
        [title]="tag.validationMessage">
     <label>Yes
@@ -114,7 +114,7 @@
 <ng-container *ngIf="tag.interfaceType == 'text'">
   <label>
     <textarea [(ngModel)]="tag.value"
-              [ngClass]="{'type-error': !tag.valid, 'saveframe-input': true}"
+              [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
               [placeholder]="tag.schemaValues['default value']"
               (change)="validateTag()"
               [title]="tag.validationMessage"
