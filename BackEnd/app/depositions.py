@@ -13,7 +13,7 @@ import logging
 import pynmrstar
 import werkzeug.utils
 import psycopg2
-import psycopg2.extensions
+
 from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
@@ -109,10 +109,17 @@ class DepositionRepo:
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
-    def deposit(self) -> bool:
+    def deposit(self) -> int:
         """ Deposits an entry into ETS. """
 
         entry = self.get_entry()
+        logging.info('Depositing deposition %s' % entry.entry_id)
+
+        if self.metadata['entry_deposited']:
+            logging.warning('User attempted to deposit already existing entry again: %s' % entry.entry_id)
+            raise RequestError('Entry already deposited, no changes allowed.')
+        if not self.metadata['email_validated']:
+            raise RequestError('Please click confirm on the e-mail validation link you were sent prior to deposition.')
 
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
@@ -154,38 +161,67 @@ class DepositionRepo:
         if len(ranges) == 0:
             raise ServerError('Server configuration error.')
 
-        conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
-                                database=configuration['ets']['database'])
-        cur = conn.cursor()
+        try:
+            conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
+                                    database=configuration['ets']['database'])
+            cur = conn.cursor()
+        except psycopg2.OperationalError:
+            logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
+            raise ServerError('Could not connect to entry tracking system. Please contact us.')
 
         try:
-            # Determine which bmrbnum to use
-            bmrb_sql = 'SELECT bmrbnum FROM entrylog WHERE '
-            valid_ids = set()
+            # Determine which bmrbnum to use - one range at a time
+            bmrbnum: Optional[int] = None
             for id_range in ranges:
-                bmrb_sql += 'bmrbnum >= %s AND bmrbnum <= %s' % (id_range[0], id_range[1])
-                valid_ids.update(range(id_range[0], id_range[1]))
-            cur.execute(bmrb_sql)
-            # This gets the first valid ID in the specified ranges
-            params['bmrbnum'] = valid_ids.difference(set(cur.fetchall())).pop()
+                # Get the existing IDs from ETS
+                bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
+                cur.execute(bmrb_sql, [id_range[0], id_range[1]])
+
+                # Calculate the list of valid IDs
+                existing_ids: set = set([_[0] for _ in cur.fetchall()])
+                ids_in_range: set = set(range(id_range[0], id_range[1]))
+                assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
+
+                # A valid ID has been found in this range
+                if len(assignable_ids) > 0:
+                    bmrbnum = assignable_ids[0]
+                    break
+                else:
+                    logging.warn('No valid IDs found in range %d to %d. Continuing to next range...' %
+                                 (id_range[0], id_range[1]))
+
+            if not bmrbnum:
+                logging.exception('No valid IDs remaining in any of the ranges!')
+                raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
+
+            bmrbnum = 20001
+            params['bmrbnum'] = bmrbnum
 
             # Create the deposition record
             insert_query = """
-            INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
-                                  contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
-                                  restart_id, last_updated)
-            VALUES (nextval('depnum_seq'), %(bmrbnum)s, %(status)s, %(submission_date)s, %(accession_date)s, %(onhold_status)s,
-                                         %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
-                                         %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s)"""
+INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
+                      contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
+                      restart_id, last_updated)
+  VALUES (nextval('depnum_seq'), %(bmrbnum)s, %(status)s, %(submission_date)s, %(accession_date)s, %(onhold_status)s,
+                             %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
+                             %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s)"""
             cur.execute(insert_query, params)
             log_sql = """
-            INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
-              VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
+INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
+  VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
             cur.execute(log_sql)
             conn.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
+        except psycopg2.IntegrityError as error:
+            logging.exception('Could not assign the chosen BMRB ID - it was already assigned.')
             conn.rollback()
-            raise ServerError('Could not create deposition in ETS: %s' % error)
+            raise ServerError('Could not create deposition: %s' % error)
+
+        self.metadata['entry_deposited'] = True
+        self.metadata['bmrbnum'] = bmrbnum
+        self.commit('Deposition submitted!')
+
+        # Return the assigned BMRB ID
+        return bmrbnum
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
