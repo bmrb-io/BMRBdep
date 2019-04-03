@@ -45,6 +45,11 @@
                 <div>
                     <h3 matLine>Deposition Options</h3>
 
+                    <a mat-list-item [ngClass]="{'active': page=='pending-verification'}" *ngIf="!entry.emailValidated"
+                       routerLink="/entry/pending-verification" id="pending-verification">
+                        <h2 matLine>Verify your email</h2>
+                    </a>
+
                     <a mat-list-item [ngClass]="{'active': page=='new'}"
                        routerLink="/" id="new">
                         <h2 matLine>Create new deposition</h2>
