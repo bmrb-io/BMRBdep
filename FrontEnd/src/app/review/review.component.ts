@@ -8,7 +8,7 @@ import {Entry} from '../nmrstar/entry';
 @Component({
   selector: 'app-review',
   templateUrl: './review.component.html',
-  styleUrls: ['./review.component.css']
+  styleUrls: ['./review.component.scss']
 })
 export class ReviewComponent implements OnInit {
 
@@ -29,12 +29,10 @@ export class ReviewComponent implements OnInit {
   }
 
   submitEntry(): void {
-    this.api.submitEntry().subscribe(() => {
-      this.messagesService.sendMessage(new Message('Submission accepted! Redirecting to home page.',
-        MessageType.NotificationMessage, 10000));
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 10000);
+    this.api.depositEntry().subscribe(() => {
+      this.messagesService.sendMessage(new Message('Submission accepted!',
+        MessageType.NotificationMessage, 15000));
+      this.router.navigate(['/']);
     });
   }
 }

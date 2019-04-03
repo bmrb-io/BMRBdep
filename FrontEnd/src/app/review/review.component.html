@@ -1,17 +1,23 @@
-<div class="main-content" *ngIf="entry">
-  <h2 *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be completed.</h2>
-  <h2 *ngIf="entry.valid">Your deposition is ready to submit.</h2>
-
-  <div *ngIf="!entry.valid">
-    <ng-container *ngFor='let saveframe of entry.saveframes'>
-      <app-saveframe *ngIf="!saveframe.deleted" [saveframe]='saveframe' [showInvalidOnly]="'true'"></app-saveframe>
-    </ng-container>
-  </div>
-  <br>
-  <div class="button-div">
-    <button mat-raised-button class="saveframe-button" color="primary"
-            [disabled]="!entry.valid"
-            (click)="submitEntry()">Submit deposition to BMRB</button>
-    <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
-  </div>
+<div class="main-content">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be completed.</mat-card-title>
+            <mat-card-title *ngIf="entry.valid">Your deposition is ready to submit.</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-nav-list>
+                <ng-container *ngFor='let saveframe of entry.saveframes'>
+                    <a mat-raised-button *ngIf="!saveframe.deleted && !saveframe.valid"
+                       [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
+                        {{saveframe.schemaValues['category_group_view_name']}}</a>
+                </ng-container>
+            </mat-nav-list>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button class="saveframe-button" [disabled]="!entry.valid" color="accent"
+                    (click)="submitEntry()">Submit deposition to BMRB
+            </button>
+            <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
+        </mat-card-actions>
+    </mat-card>
 </div>
