@@ -112,14 +112,14 @@ class DepositionRepo:
     def deposit(self) -> int:
         """ Deposits an entry into ETS. """
 
+        self.raise_write_errors()
+
         entry = self.get_entry()
         logging.info('Depositing deposition %s' % entry.entry_id)
 
         if self.metadata['entry_deposited']:
             logging.warning('User attempted to deposit already existing entry again: %s' % entry.entry_id)
             raise RequestError('Entry already deposited, no changes allowed.')
-        if not self.metadata['email_validated']:
-            raise RequestError('Please click confirm on the e-mail validation link you were sent prior to deposition.')
 
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
@@ -236,6 +236,8 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def write_entry(self, entry: pynmrstar.Entry) -> None:
         """ Save an entry in the standard place. """
 
+        self.raise_write_errors()
+
         try:
             self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
         except RuntimeError:
@@ -261,13 +263,26 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def delete_data_file(self, filename: str) -> None:
         """ Delete a data file by name."""
 
+        self.raise_write_errors()
         secured_filename = secure_filename(filename)
         os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
         self._modified_files = True
 
+    def raise_write_errors(self):
+        """ Raises an error if the entry may not be edited. This could happen if it is already deposited, or the email
+        has not been validated."""
+
+        if self.metadata['entry_deposited']:
+            raise RequestError('Entry already deposited, no changes allowed.')
+        if not self.metadata['email_validated']:
+            raise RequestError('Deposition e-mail has not been validated. No changes to the deposition are allowed. '
+                               'Please click confirm on the e-mail validation link you were sent when you created your '
+                               'deposition to proceed.')
+
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
+        self.raise_write_errors()
         try:
             self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
         except RuntimeError:

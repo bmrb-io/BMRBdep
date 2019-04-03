@@ -482,8 +482,6 @@ def file_operations(uuid, filename: str) -> Response:
                              attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
-            if repo.metadata['entry_deposited']:
-                raise RequestError('Entry already deposited, no changes allowed.')
             repo.delete_data_file(filename)
             repo.commit('Deleted file %s' % filename)
         return jsonify({'status': 'success'})
@@ -502,9 +500,6 @@ def store_file(uuid) -> Response:
 
     # Store a data file
     with depositions.DepositionRepo(uuid) as repo:
-        if repo.metadata['entry_deposited']:
-            raise RequestError('Entry already deposited, no changes allowed.')
-
         filename = repo.write_file(file_obj.filename, file_obj.read())
 
         # Update the entry data
@@ -526,13 +521,6 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
-            if not repo.metadata['email_validated']:
-                raise RequestError(
-                    'Please click confirm on the e-mail validation link you were sent when you created your '
-                    'deposition. Changes cannot be saved until you have validated your entry.')
-            if repo.metadata['entry_deposited']:
-                raise RequestError('Entry already deposited, no changes allowed.')
-
             existing_entry: pynmrstar.Entry = repo.get_entry()
 
             # If they aren't making any changes
