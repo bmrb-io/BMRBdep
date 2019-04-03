@@ -124,8 +124,7 @@ def send_local_file(filename: str = None) -> Response:
     elif os.path.exists(container_path):
         return send_from_directory(container_path, filename)
     else:
-        return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. '
-                        'Did your Angular compilation step fail?')
+        return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ')
 
 
 @application.route('/deposition/<uuid:uuid>/check-valid')
