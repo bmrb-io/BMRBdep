@@ -6,7 +6,7 @@ import {Entry} from '../nmrstar/entry';
 @Component({
     selector: 'app-pending-validation',
     templateUrl: './pending-validation.component.html',
-    styleUrls: ['./pending-validation.component.css']
+    styleUrls: ['./pending-validation.component.scss']
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
 
