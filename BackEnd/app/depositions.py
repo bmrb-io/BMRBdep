@@ -237,11 +237,6 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         """ Save an entry in the standard place. """
 
         self.raise_write_errors()
-
-        try:
-            self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
-        except RuntimeError:
-            pass
         self.write_file('entry.str', str(entry).encode(), root=True)
 
     def get_file(self, filename: str, root: bool = True) -> bytes:
@@ -283,10 +278,6 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
         self.raise_write_errors()
-        try:
-            self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
-        except RuntimeError:
-            pass
 
         secured_filename: str = secure_filename(filename)
         file_path: str = secured_filename
@@ -317,6 +308,12 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # See if they wrote the same value to an existing file
         if not self._repo.untracked_files and not [item.a_path for item in self._repo.index.diff(None)]:
             return False
+
+        # Store the IP of the user making the change
+        try:
+            self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
+        except RuntimeError:
+            pass
 
         # Add the changes, commit
         self._repo.git.add(all=True)
