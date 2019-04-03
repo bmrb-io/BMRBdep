@@ -459,17 +459,13 @@ def deposit_entry(uuid) -> Response:
     """ Complete the deposition. """
 
     with depositions.DepositionRepo(uuid) as repo:
-        if repo.metadata['entry_deposited']:
-            raise RequestError('Entry already deposited, no changes allowed.')
-        if not repo.metadata['email_validated']:
-            raise RequestError('Please click confirm on the e-mail validation link you were sent prior to deposition.')
-        repo.metadata['entry_deposited'] = True
-        repo.commit('Deposition submitted!')
+        bmrb_num = repo.deposit()
 
         # Ask them to confirm their e-mail
         message = Message("Your entry has been deposited!", recipients=[repo.metadata['author_email']])
-        message.html = 'Thank you for your deposition! The NMR-STAR representation of your entry is attached. You ' + \
-                       'will hear from our annotators in the next few days.'
+        message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the' \
+                       ' deposition contents for reference. You may also use this file to start a new deposition. ' \
+                       'You will hear from our annotators in the next few days.' % bmrb_num
         message.attach("%s.str" % uuid, "text/plain", str(repo.get_entry()))
         mail.send(message)
 
