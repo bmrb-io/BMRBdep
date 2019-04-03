@@ -1,14 +1,16 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'app-load-entry',
     templateUrl: './load-entry.component.html',
     styleUrls: ['./load-entry.component.css']
 })
-export class LoadEntryComponent implements OnInit {
+export class LoadEntryComponent implements OnInit, OnDestroy {
 
+    subscription: Subscription;
     constructor(private api: ApiService,
                 private route: ActivatedRoute,
                 private router: Router) {
@@ -16,7 +18,7 @@ export class LoadEntryComponent implements OnInit {
 
     ngOnInit() {
         const parent: LoadEntryComponent = this;
-        this.api.entrySubject.subscribe(entry => {
+        this.subscription = this.api.entrySubject.subscribe(entry => {
             if (entry) {
                 if (entry.emailValidated) {
                     this.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
@@ -29,4 +31,7 @@ export class LoadEntryComponent implements OnInit {
         this.route.params.subscribe(params => parent.api.loadEntry(params['entry']));
     }
 
+    ngOnDestroy() {
+        this.subscription.unsubscribe();
+    }
 }
