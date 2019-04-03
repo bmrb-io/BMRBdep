@@ -47,6 +47,7 @@ export function entryFromJSON(jdata: Object): Entry {
   const entry = new Entry(jdata['entry_id']);
   entry.schema = new Schema(jdata['schema']);
   entry.emailValidated = jdata['email_validated'];
+  entry.deposited = jdata['entry_deposited']
   entry.depositionNickname = jdata['deposition_nickname'];
 
   for (const saveframeJSON of jdata['saveframes']) {
@@ -71,6 +72,7 @@ export class Entry {
   showAll: boolean;
   hasDeleted: boolean;
   emailValidated: boolean;
+  deposited: boolean;
   depositionNickname: string;
 
   constructor(dataName: string) {
@@ -81,6 +83,7 @@ export class Entry {
     this.showAll = true;
     this.hasDeleted = false;
     this.emailValidated = false;
+    this.deposited = false;
     this.depositionNickname = null;
 
     this.updateCategories();
@@ -88,7 +91,7 @@ export class Entry {
 
   toJSON(): {} {
     return {entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
-      deposition_nickname: this.depositionNickname};
+      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited};
   }
 
   /* Add a new saveframe to the saveframe list.
