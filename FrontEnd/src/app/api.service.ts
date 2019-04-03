@@ -116,10 +116,12 @@ export class ApiService {
             // We either don't have the entry or have a different one, so fetch from the API
         } else {
             const entryURL = `${environment.serverURL}/${entryID}`;
+            this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
             this.http.get(entryURL).subscribe(
                 jsonData => {
                     this.entrySubject.next(entryFromJSON(jsonData));
                     this.saveEntry(true);
+                    this.messagesService.clearMessage();
                 },
                 error => this.handleError(error)
             );
