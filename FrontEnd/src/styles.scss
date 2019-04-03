@@ -66,8 +66,9 @@ select{
   color: black !important;
 
   .mat-button-wrapper {
-    color: mat-color($custom-theme-accent, darker) !important;
+    color: black !important;
     font-weight: bold !important;
+    font-size: larger !important;
   }
 }
 
