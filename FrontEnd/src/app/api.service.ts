@@ -214,6 +214,10 @@ export class ApiService {
         return this.http.post(apiEndPoint, formData)
             .pipe(
                 map(jsonData => {
+                    // Trigger everything watching the entry to see that it changed - because "deposited" changed
+                    this.cachedEntry.deposited = true;
+                    this.entrySubject.next(this.cachedEntry);
+
                     this.messagesService.clearMessage();
                     return jsonData;
                 }),
