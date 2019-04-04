@@ -74,6 +74,7 @@ export class Entry {
   emailValidated: boolean;
   deposited: boolean;
   depositionNickname: string;
+  firstIncompleteCategory: string;
 
   constructor(dataName: string) {
     this.entryID = dataName;
@@ -85,6 +86,7 @@ export class Entry {
     this.emailValidated = false;
     this.deposited = false;
     this.depositionNickname = null;
+    this.firstIncompleteCategory = null;
 
     this.updateCategories();
   }
@@ -130,12 +132,15 @@ export class Entry {
     const categoryStatusDict = {};
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
+    //  Also, set the first invalid saveframe in the process
+    this.firstIncompleteCategory = null;
+    let lastCategory = null;
     for (const category of Array.from(categories)) {
       if (!this.schema.saveframeSchema[category]) {
         console.error('A saveframe exists with an invalid category:', category);
         continue;
       }
-      const pretty_name = this.schema.saveframeSchema[category]['category_group_view_name'];
+      const prettyName = this.schema.saveframeSchema[category]['category_group_view_name'];
 
       const matchingSaveframes = this.getSaveframesByCategory(category);
 
@@ -158,8 +163,21 @@ export class Entry {
         }
       }
 
+      // Determine the first incomplete category
+      if (this.firstIncompleteCategory === null && !valid && display !== 'H') {
+        this.firstIncompleteCategory = category;
+      }
+      if (display !== 'H') {
+        lastCategory = category;
+      }
+
       // Add the record
-      categoryStatusDict[category] = new CategoryInfo(category, pretty_name, valid, display);
+      categoryStatusDict[category] = new CategoryInfo(category, prettyName, valid, display);
+    }
+
+    // If all sections are complete, go to the last category in the file
+    if (this.firstIncompleteCategory === null) {
+      this.firstIncompleteCategory = lastCategory;
     }
 
     // Update a record of which supergroup categories are valid and should be displayed

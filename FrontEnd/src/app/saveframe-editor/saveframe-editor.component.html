@@ -33,10 +33,11 @@
           There are no sections of this type remaining.
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button class="saveframe-button" (click)="restoreCategory(saveframeCategory)"
-                  color="accent">Restore all sections of this type</button>
-          <button mat-raised-button class="saveframe-button" color="accent"
-                  routerLink="/entry/saveframe/deposited_data_files">Return to a section that exists.</button>
+          <button *ngIf="entry.getSaveframesByCategory(saveframeCategory).length > 0" mat-raised-button
+                  class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
+              Restore all sections of this type</button>
+          <a mat-raised-button class="saveframe-button" color="accent"
+                  [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next incomplete section</a>
         </mat-card-actions>
       </mat-card>
     </div>
