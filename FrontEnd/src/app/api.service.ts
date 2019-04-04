@@ -80,7 +80,7 @@ export class ApiService {
         return this.http.request(req);
     }
 
-    deleteFile(fileName: string): void {
+    deleteFile(fileName: string, verifyDeleted: boolean = false): void {
         const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
         this.http.delete(apiEndPoint).subscribe(
             () => {
@@ -91,8 +91,16 @@ export class ApiService {
                 this.saveEntry(false, true);
             },
             () => {
-                this.messagesService.sendMessage(new Message('Failed to delete file.',
-                    MessageType.ErrorMessage, 15000));
+                // verifyDeleted will be set if they cancel an upload
+                if (!verifyDeleted) {
+                    this.messagesService.sendMessage(new Message('Failed to delete file.',
+                      MessageType.ErrorMessage, 15000));
+                } else {
+                    this.messagesService.clearMessage();
+                    this.cachedEntry.dataStore.deleteFile(fileName);
+                    this.cachedEntry.updateUploadedData();
+                    this.cachedEntry.refresh();
+                }
             }
         );
     }
