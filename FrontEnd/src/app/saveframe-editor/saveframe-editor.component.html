@@ -6,7 +6,7 @@
     <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].nextCategory ; else final_review_top"
        [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">Next section</a>
     <ng-template #final_review_top>
-      <a mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
+      <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
     </ng-template>
     <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes($event)"></app-saveframe>
     <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have chosen to hide non-mandatory tags. To view these tags, please
@@ -21,7 +21,7 @@
               [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">
         Next section</a>
       <ng-template #final_review_bottom>
-        <a mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
+        <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
       </ng-template>
     </div>
   </div>
@@ -33,10 +33,11 @@
           There are no sections of this type remaining.
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button class="saveframe-button" (click)="restoreCategory(saveframeCategory)">Restore all
-            sections of this type</button>
-          <button mat-raised-button class="saveframe-button"
-                  routerLink="/entry/saveframe/deposited_data_files">Return to a section that exists.</button>
+          <button *ngIf="entry.getSaveframesByCategory(saveframeCategory).length > 0" mat-raised-button
+                  class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
+              Restore all sections of this type</button>
+          <a mat-raised-button class="saveframe-button" color="accent"
+                  [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next incomplete section</a>
         </mat-card-actions>
       </mat-card>
     </div>

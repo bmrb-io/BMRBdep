@@ -22,7 +22,7 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
             parent.entry = entry;
             // Route straight to the entry if validated
             if (entry && entry.emailValidated) {
-                parent.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
+                parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
             }
         });
 
@@ -33,7 +33,7 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
                     clearInterval(parent.timer);
                     parent.entry.emailValidated = true;
                     parent.api.saveEntry(true, true);
-                    parent.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
+                    parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]);
                 }
             });
         }, 2500);

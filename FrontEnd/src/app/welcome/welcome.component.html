@@ -1,7 +1,22 @@
 <div>
   <h1>Welcome to BMRBDep!</h1>
   <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
-    <div class="content-box">
+      <div class="content-box resume-box" *ngIf="entry">
+          <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
+          <div>
+              <div>
+                  <a mat-raised-button color="primary"
+                     [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">
+                      Click here to return to your deposition</a>
+              </div>
+              <div>
+                  <button mat-raised-button color="primary" (click)="api.clearDeposition()">
+                      Click here to end your session for this deposition
+                  </button>
+              </div>
+          </div>
+      </div>
+      <div class="content-box">
       <h2>Start a new deposition</h2>
 
       <mat-form-field>
@@ -14,36 +29,44 @@
       </mat-form-field>
 
       <mat-form-field>
-        <input matInput
-               [formControl]="authorEmail"
-               placeholder="Please enter your e-mail."
-               required>
-        <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
+          <label>
+              <input matInput
+                     [formControl]="authorEmail"
+                     placeholder="Please enter your e-mail."
+                     required>
+          </label>
+          <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
       </mat-form-field>
 
       <mat-form-field>
-        <input matInput
-               [formControl]="depositionNickname"
-               placeholder="Please enter a brief nickname for this deposition."
-               required>
-        <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the deposition.</mat-error>
+          <label>
+              <input matInput
+                     [formControl]="depositionNickname"
+                     placeholder="Please enter a brief nickname for this deposition."
+                     required>
+          </label>
+          <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the deposition.</mat-error>
       </mat-form-field>
 
       <mat-form-field>
-        <input matInput
-               [formControl]="authorORCID"
-               placeholder="Please enter your ORCID if you have one.">
-        <mat-error *ngIf="authorORCID.invalid">Invalid ORCID value. Valid ORCID IDs look like: 0000-0002-1825-0097
+          <label>
+              <input matInput
+                     [formControl]="authorORCID"
+                     placeholder="Please enter your ORCID if you have one.">
+          </label>
+          <mat-error *ngIf="authorORCID.invalid">Invalid ORCID value. Valid ORCID IDs look like: 0000-0002-1825-0097
         </mat-error>
       </mat-form-field>
 
 
       <mat-form-field *ngIf="sessionType.value == 'bmrb_id'">
-        <input matInput
-               [formControl]="bootstrapID"
-               placeholder="Enter the BMRB ID from which to start a new deposition."
-               required>
-        <mat-error *ngIf="bootstrapID.invalid" [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
+          <label>
+              <input matInput
+                     [formControl]="bootstrapID"
+                     placeholder="Enter the BMRB ID from which to start a new deposition."
+                     required>
+          </label>
+          <mat-error *ngIf="bootstrapID.invalid" [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
       </mat-form-field>
 
       <div *ngIf="sessionType.value == 'file'">
@@ -78,7 +101,7 @@
     <h3>Resume deposition</h3>
     <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the deposition.</p>
     <p>If you have lost that e-mail, please
-      <a href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBDep session">contact us.</a>
+      <a mat-raised-button href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBDep session" color="primary">contact us.</a>
     </p>
   </div>
 </div>

@@ -5,16 +5,16 @@ import zlib
 import simplejson as json
 
 # Load the configuration file
-root_dir = os.path.dirname(os.path.realpath(__file__))
-configuration = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
+root_dir: str = os.path.dirname(os.path.realpath(__file__))
+configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
 
 
-def get_schema(version):
+def get_schema(version: str) -> dict:
     """ Return the schema from Redis. """
 
     try:
         with open(os.path.join(root_dir, 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
-            schema = json.loads(zlib.decompress(schema_file.read()))
+            schema = json.loads(zlib.decompress(schema_file.read()).decode())
     except IOError:
         raise RequestError("Invalid schema version.")
 
@@ -32,13 +32,13 @@ class ServerError(Exception):
             self.status_code = status_code
         self.payload = payload
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'ServerError("%s")' % self.message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """ Converts the payload to a dictionary."""
         rv = dict(self.payload or ())
         rv['error'] = self.message
@@ -56,13 +56,13 @@ class RequestError(Exception):
             self.status_code = status_code
         self.payload = payload
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'RequestError("%s")' % self.message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """ Converts the payload to a dictionary."""
         rv = dict(self.payload or ())
         rv['error'] = self.message

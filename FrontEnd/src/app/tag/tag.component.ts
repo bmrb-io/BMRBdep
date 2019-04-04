@@ -14,7 +14,7 @@ export class TagComponent implements OnInit {
 
   public height: number;
 
-  constructor(public api: ApiService) { }
+  constructor(private api: ApiService) { }
 
   ngOnInit() {
     if (this.tag.interfaceType === 'text') {
@@ -25,6 +25,11 @@ export class TagComponent implements OnInit {
     } else {
       this.storedValue = '';
     }
+    this.api.entrySubject.subscribe(entry => {
+      if (entry.deposited) {
+        this.tag.disabled = true;
+      }
+    });
   }
 
   getRow() {

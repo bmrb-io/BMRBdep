@@ -11,6 +11,22 @@
   width: 100%;
 }
 
+.resume-box {
+  div {
+    display: flex;
+
+    div {
+      flex: 1 1 0;
+      a, button {
+        width: 100%;
+      }
+    }
+    div:first-child {
+      padding-right: 1em;
+    }
+  }
+}
+
 h1 {
   margin-left: .5em;
 }

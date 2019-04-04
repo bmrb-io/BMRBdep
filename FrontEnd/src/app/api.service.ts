@@ -1,10 +1,11 @@
-import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
+import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +14,7 @@ export class ApiService {
 
     private cachedEntry: Entry;
     private activeSaveRequest: Subscription;
-    entrySubject: BehaviorSubject<Entry>;
+    entrySubject: ReplaySubject<Entry>;
 
     private JSONOptions = {
         headers: new HttpHeaders({
@@ -22,26 +23,41 @@ export class ApiService {
     };
 
     constructor(private http: HttpClient,
-                private messagesService: MessagesService) {
+                private messagesService: MessagesService,
+                private router: Router,
+                private route: ActivatedRoute) {
 
+        this.entrySubject = new ReplaySubject<Entry>();
+
+        this.entrySubject.subscribe(entry => {
+            this.cachedEntry = entry;
+        });
 
         const rawJSON = JSON.parse(localStorage.getItem('entry'));
         const schema = JSON.parse(localStorage.getItem('schema'));
         if (rawJSON !== null && schema !== null) {
             rawJSON['schema'] = schema;
             const entry = entryFromJSON(rawJSON);
-            this.entrySubject = new BehaviorSubject<Entry>(entry);
+            this.entrySubject.next(entry);
         } else {
-            this.entrySubject = new BehaviorSubject<Entry>(null);
+            const sub = this.router.events.subscribe(event => {
+                if (event instanceof NavigationEnd) {
+                    let r = this.route;
+                    while (r.firstChild) {
+                        r = r.firstChild;
+                    }
+                    r.params.subscribe(() => {
+                        if (this.router.url.indexOf('/load/') < 0 && !this.cachedEntry) {
+                            sub.unsubscribe();
+                            router.navigate(['/']);
+                        }
+                    });
+                }
+            });
         }
-
-        this.entrySubject.subscribe(entry => {
-            this.cachedEntry = entry;
-        });
     }
 
     clearDeposition(): void {
-        localStorage.removeItem('entry_key');
         localStorage.removeItem('entry');
         localStorage.removeItem('schema');
         this.entrySubject.next(null);
@@ -95,35 +111,17 @@ export class ApiService {
         );
     }
 
-    loadEntry(entryID: string, skipCache: boolean = false): void {
-        // If all we did was reroute, we still have the entry
-        if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
-            return;
-            // The page is being reloaded, but we can get the entry from the browser cache
-        } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
-
-            // Make sure both the entry and schema are saved locally - if not, loadEntry() but force load from server
-            const rawJSON = JSON.parse(localStorage.getItem('entry'));
-            if (rawJSON === null) {
-                return this.loadEntry(entryID, true);
-            }
-            rawJSON['schema'] = JSON.parse(localStorage.getItem('schema'));
-            if (rawJSON['schema'] === null) {
-                return this.loadEntry(entryID, true);
-            }
-
-            this.entrySubject.next(entryFromJSON(rawJSON));
-            // We either don't have the entry or have a different one, so fetch from the API
-        } else {
-            const entryURL = `${environment.serverURL}/${entryID}`;
-            this.http.get(entryURL).subscribe(
-                jsonData => {
-                    this.entrySubject.next(entryFromJSON(jsonData));
-                    this.saveEntry(true);
-                },
-                error => this.handleError(error)
-            );
-        }
+    loadEntry(entryID: string): void {
+        const entryURL = `${environment.serverURL}/${entryID}`;
+        this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
+        this.http.get(entryURL).subscribe(
+            jsonData => {
+                this.messagesService.clearMessage();
+                this.entrySubject.next(entryFromJSON(jsonData));
+                this.saveEntry(true);
+            },
+            error => this.handleError(error)
+        );
     }
 
     saveEntry(initialSave: boolean = false, skipMessage: boolean = true): void {
@@ -137,7 +135,6 @@ export class ApiService {
             localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
         }
         localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
-        localStorage.setItem('entry_key', this.cachedEntry.entryID);
 
         // Save to remote server if we haven't just loaded the entry
         if (!initialSave) {
@@ -193,7 +190,7 @@ export class ApiService {
             );
     }
 
-    submitEntry(): Observable<any> {
+    depositEntry(): Observable<any> {
 
         if (!this.cachedEntry.valid) {
             this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
@@ -203,11 +200,19 @@ export class ApiService {
 
         const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
 
+        const formData = new FormData();
+        formData.append('deposition_contents', this.cachedEntry.print());
+
         this.messagesService.sendMessage(new Message('Submitting deposition...',
             MessageType.NotificationMessage, 0));
-        return this.http.post(apiEndPoint, null)
+
+        return this.http.post(apiEndPoint, formData)
             .pipe(
                 map(jsonData => {
+                    // Trigger everything watching the entry to see that it changed - because "deposited" changed
+                    this.cachedEntry.deposited = true;
+                    this.entrySubject.next(this.cachedEntry);
+
                     this.messagesService.clearMessage();
                     return jsonData;
                 }),
@@ -241,7 +246,7 @@ export class ApiService {
     }
 
     handleError(error: HttpErrorResponse) {
-        if (error.status === 400) {
+        if (error.status === 400 || (error.status === 500 && error.error)) {
             this.messagesService.sendMessage(new Message(error.error.error,
                 MessageType.ErrorMessage, 15000));
         } else {
