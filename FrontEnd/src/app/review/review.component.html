@@ -7,9 +7,9 @@
         <mat-card-content>
             <mat-nav-list>
                 <ng-container *ngFor='let saveframe of entry.saveframes'>
-                    <a mat-raised-button *ngIf="!saveframe.deleted && !saveframe.valid"
+                    <p *ngIf="!saveframe.deleted && !saveframe.valid"><a mat-raised-button
                        [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
-                        {{saveframe.schemaValues['category_group_view_name']}}</a>
+                        {{saveframe.schemaValues['category_group_view_name']}}</a></p>
                 </ng-container>
             </mat-nav-list>
         </mat-card-content>
