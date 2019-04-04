@@ -41,7 +41,6 @@ export class ApiService {
     }
 
     clearDeposition(): void {
-        localStorage.removeItem('entry_key');
         localStorage.removeItem('entry');
         localStorage.removeItem('schema');
         this.entrySubject.next(null);
@@ -95,37 +94,17 @@ export class ApiService {
         );
     }
 
-    loadEntry(entryID: string, skipCache: boolean = false): void {
-        // If all we did was reroute, we still have the entry
-        if ((this.cachedEntry && entryID === this.cachedEntry.entryID) && (!skipCache)) {
-            return;
-            // The page is being reloaded, but we can get the entry from the browser cache
-        } else if ((entryID === localStorage.getItem('entry_key')) && (!skipCache)) {
-
-            // Make sure both the entry and schema are saved locally - if not, loadEntry() but force load from server
-            const rawJSON = JSON.parse(localStorage.getItem('entry'));
-            if (rawJSON === null) {
-                return this.loadEntry(entryID, true);
-            }
-            rawJSON['schema'] = JSON.parse(localStorage.getItem('schema'));
-            if (rawJSON['schema'] === null) {
-                return this.loadEntry(entryID, true);
-            }
-
-            this.entrySubject.next(entryFromJSON(rawJSON));
-            // We either don't have the entry or have a different one, so fetch from the API
-        } else {
-            const entryURL = `${environment.serverURL}/${entryID}`;
-            this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
-            this.http.get(entryURL).subscribe(
-                jsonData => {
-                    this.messagesService.clearMessage();
-                    this.entrySubject.next(entryFromJSON(jsonData));
-                    this.saveEntry(true);
-                },
-                error => this.handleError(error)
-            );
-        }
+    loadEntry(entryID: string): void {
+        const entryURL = `${environment.serverURL}/${entryID}`;
+        this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
+        this.http.get(entryURL).subscribe(
+            jsonData => {
+                this.messagesService.clearMessage();
+                this.entrySubject.next(entryFromJSON(jsonData));
+                this.saveEntry(true);
+            },
+            error => this.handleError(error)
+        );
     }
 
     saveEntry(initialSave: boolean = false, skipMessage: boolean = true): void {
@@ -139,7 +118,6 @@ export class ApiService {
             localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
         }
         localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
-        localStorage.setItem('entry_key', this.cachedEntry.entryID);
 
         // Save to remote server if we haven't just loaded the entry
         if (!initialSave) {
