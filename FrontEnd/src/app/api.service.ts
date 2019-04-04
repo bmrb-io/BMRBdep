@@ -1,4 +1,4 @@
-import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
+import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
 import {Injectable} from '@angular/core';
@@ -13,7 +13,7 @@ export class ApiService {
 
     private cachedEntry: Entry;
     private activeSaveRequest: Subscription;
-    entrySubject: BehaviorSubject<Entry>;
+    entrySubject: ReplaySubject<Entry>;
 
     private JSONOptions = {
         headers: new HttpHeaders({
@@ -24,20 +24,19 @@ export class ApiService {
     constructor(private http: HttpClient,
                 private messagesService: MessagesService) {
 
+        this.entrySubject = new ReplaySubject<Entry>();
+
+        this.entrySubject.subscribe(entry => {
+            this.cachedEntry = entry;
+        });
 
         const rawJSON = JSON.parse(localStorage.getItem('entry'));
         const schema = JSON.parse(localStorage.getItem('schema'));
         if (rawJSON !== null && schema !== null) {
             rawJSON['schema'] = schema;
             const entry = entryFromJSON(rawJSON);
-            this.entrySubject = new BehaviorSubject<Entry>(entry);
-        } else {
-            this.entrySubject = new BehaviorSubject<Entry>(null);
+            this.entrySubject.next(entry);
         }
-
-        this.entrySubject.subscribe(entry => {
-            this.cachedEntry = entry;
-        });
     }
 
     clearDeposition(): void {
