@@ -47,7 +47,7 @@ export function entryFromJSON(jdata: Object): Entry {
   const entry = new Entry(jdata['entry_id']);
   entry.schema = new Schema(jdata['schema']);
   entry.emailValidated = jdata['email_validated'];
-  entry.deposited = jdata['entry_deposited']
+  entry.deposited = jdata['entry_deposited'];
   entry.depositionNickname = jdata['deposition_nickname'];
 
   for (const saveframeJSON of jdata['saveframes']) {
