@@ -6,6 +6,7 @@ import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpR
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {Title} from '@angular/platform-browser';
 
 @Injectable({
     providedIn: 'root'
@@ -25,12 +26,16 @@ export class ApiService {
     constructor(private http: HttpClient,
                 private messagesService: MessagesService,
                 private router: Router,
-                private route: ActivatedRoute) {
+                private route: ActivatedRoute,
+                private titleService: Title) {
 
         this.entrySubject = new ReplaySubject<Entry>();
 
         this.entrySubject.subscribe(entry => {
             this.cachedEntry = entry;
+            if (entry) {
+                this.titleService.setTitle(`BMRBDep: ${entry.depositionNickname}`);
+            }
         });
 
         const rawJSON = JSON.parse(localStorage.getItem('entry'));
