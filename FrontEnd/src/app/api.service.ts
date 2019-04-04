@@ -5,6 +5,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 @Injectable({
     providedIn: 'root'
@@ -22,7 +23,9 @@ export class ApiService {
     };
 
     constructor(private http: HttpClient,
-                private messagesService: MessagesService) {
+                private messagesService: MessagesService,
+                private router: Router,
+                private route: ActivatedRoute) {
 
         this.entrySubject = new ReplaySubject<Entry>();
 
@@ -36,6 +39,21 @@ export class ApiService {
             rawJSON['schema'] = schema;
             const entry = entryFromJSON(rawJSON);
             this.entrySubject.next(entry);
+        } else {
+            const sub = this.router.events.subscribe(event => {
+                if (event instanceof NavigationEnd) {
+                    let r = this.route;
+                    while (r.firstChild) {
+                        r = r.firstChild;
+                    }
+                    r.params.subscribe(() => {
+                        if (this.router.url.indexOf('/load/') < 0 && !this.cachedEntry) {
+                            sub.unsubscribe();
+                            router.navigate(['/']);
+                        }
+                    });
+                }
+            });
         }
     }
 
