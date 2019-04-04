@@ -19,6 +19,7 @@ import {FileUploaderComponent} from './file-uploader/file-uploader.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
 import {PendingValidationComponent} from './pending-validation/pending-validation.component'; // Saving/loading bar
 import {LoadEntryComponent} from './load-entry/load-entry.component';
+import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 
 // For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
@@ -39,7 +40,7 @@ import {
   MatSlideToggleModule,
   MatToolbarModule,
   MatButtonModule,
-  MatSnackBarModule
+  MatSnackBarModule, MatDialogModule
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page
@@ -64,6 +65,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     MolecularSystemComponent,
     PendingValidationComponent,
     LoadEntryComponent,
+    ConfirmationDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -86,8 +88,10 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     MatSnackBarModule,
     LoadingPageModule,
     SlidingBarModule,
+    MatDialogModule,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [ConfirmationDialogComponent]
 })
 export class AppModule {
 }

@@ -3,6 +3,8 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation} from 
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params} from '@angular/router';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {MatDialog, MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-saveframe',
@@ -16,8 +18,11 @@ export class SaveframeComponent implements OnInit {
   @Output() sfReload = new EventEmitter<string>();
   activeTag: SaveframeTag;
   showCategoryLink: boolean;
+  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
 
-  constructor(public api: ApiService, private route: ActivatedRoute) {
+  constructor(public api: ApiService,
+              private route: ActivatedRoute,
+              private dialog: MatDialog) {
     this.activeTag = null;
     this.showCategoryLink = false;
   }
@@ -25,7 +30,7 @@ export class SaveframeComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
       this.showCategoryLink = (!('saveframe_category' in params));
-      });
+    });
   }
 
   /* A saveframe-level change has happened. Save the changes and
@@ -37,4 +42,27 @@ export class SaveframeComponent implements OnInit {
     this.api.saveEntry();
   }
 
+  deleteSaveframe(): void {
+
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    if (nameTag && nameTag.value) {
+      this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the saveframe '${nameTag.value}'?` +
+          ' You can always restore it later using the "Restore deleted saveframes" panel in the navigation menu.';
+    } else {
+      this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete this saveframe?` +
+          ' You can always restore it later using the "Restore deleted saveframes" panel in the navigation menu.';
+    }
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Delete the saveframe
+        this.saveframe.delete();
+        this.processChange();
+      }
+      this.dialogRef = null;
+    });
+  }
 }
