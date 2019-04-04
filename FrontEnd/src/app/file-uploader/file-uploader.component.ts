@@ -18,11 +18,13 @@ export class FileUploaderComponent implements OnInit {
   @ViewChild('inputFile') fileUploadElement: ElementRef;
   serverURL: String = null;
   showCategoryLink: boolean;
+  uploadSubscriptionDict$: {};
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
               private route: ActivatedRoute) {
     this.showCategoryLink = true;
+    this.uploadSubscriptionDict$ = {};
   }
 
   ngOnInit() {
@@ -76,7 +78,7 @@ export class FileUploaderComponent implements OnInit {
     for (let i = 0; i < files.length; i++) {
       const dataFile = this.entry.dataStore.addFile(files[i].name);
 
-      this.api.uploadFile(files[i])
+      this.uploadSubscriptionDict$[files[i].name] = this.api.uploadFile(files[i])
         .subscribe(
           event => {
             if (event.type === HttpEventType.UploadProgress) {
@@ -105,11 +107,13 @@ export class FileUploaderComponent implements OnInit {
   }
 
   deleteFile(fileName: string): void {
-    this.api.deleteFile(fileName).subscribe(response => {
-      if (response) {
-        this.entry.dataStore.deleteFile(fileName);
-        this.updateAndSaveDataFiles();
-      }
-    });
+    if (fileName in this.uploadSubscriptionDict$) {
+      this.messagesService.sendMessage(new Message('Cancelling upload...', MessageType.NotificationMessage,
+        15000));
+      this.uploadSubscriptionDict$[fileName].unsubscribe();
+      this.api.deleteFile(fileName, true);
+    } else {
+      this.api.deleteFile(fileName);
+    }
   }
 }
