@@ -64,7 +64,7 @@ export class TreeViewComponent implements OnInit {
   }
 
   refresh(): void {
-    this.api.loadEntry(this.entry.entryID, true);
+    this.api.loadEntry(this.entry.entryID);
   }
 
   scrollSideNav(): void {
