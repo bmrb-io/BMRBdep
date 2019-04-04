@@ -80,20 +80,29 @@ export class ApiService {
         return this.http.request(req);
     }
 
-    deleteFile(fileName: string): Observable<boolean> {
+    deleteFile(fileName: string, verifyDeleted: boolean = false): void {
         const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
         this.http.delete(apiEndPoint).subscribe(
             () => {
                 this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
-                return of(true);
+                this.cachedEntry.dataStore.deleteFile(fileName);
+                this.cachedEntry.updateUploadedData();
+                this.cachedEntry.refresh();
+                this.saveEntry(false, true);
             },
             () => {
-                this.messagesService.sendMessage(new Message('Failed to delete file.',
-                    MessageType.ErrorMessage, 15000));
-                return of(false);
+                // verifyDeleted will be set if they cancel an upload
+                if (!verifyDeleted) {
+                    this.messagesService.sendMessage(new Message('Failed to delete file.',
+                      MessageType.ErrorMessage, 15000));
+                } else {
+                    this.messagesService.clearMessage();
+                    this.cachedEntry.dataStore.deleteFile(fileName);
+                    this.cachedEntry.updateUploadedData();
+                    this.cachedEntry.refresh();
+                }
             }
         );
-        return of(false);
     }
 
     checkValid(): Observable<boolean> {
