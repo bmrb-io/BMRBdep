@@ -80,3 +80,10 @@ select{
   background-color: mat-color($custom-theme-accent) !important;
   color: black !important;
 }
+
+.mat-card:not(.nav-card) {
+  background-color: mat-color($custom-theme-primary) !important;
+  .mat-card-header-text {
+    margin: 0;
+  }
+}
