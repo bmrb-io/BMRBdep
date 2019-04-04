@@ -26,7 +26,7 @@
               (click)='saveframe.duplicate(true); processChange()' color="accent">Create new</button>
               <button mat-raised-button class="saveframe-button"
               *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
-              (click)='saveframe.delete(); processChange()' color="accent">Delete</button>
+              (click)='deleteSaveframe()' color="accent">Delete</button>
               <button mat-raised-button class="saveframe-button"
                  *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
                  (click)='saveframe.restore(); processChange()' color="accent">Restore</button>
