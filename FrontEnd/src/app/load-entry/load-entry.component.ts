@@ -17,6 +17,7 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        console.log('would load');
         const parent: LoadEntryComponent = this;
         this.subscription = this.api.entrySubject.subscribe(entry => {
             if (entry) {
