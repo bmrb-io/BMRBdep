@@ -4,6 +4,8 @@ import {Router} from '@angular/router';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Location} from '@angular/common';
 import {Entry} from '../nmrstar/entry';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {MatDialog, MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-review',
@@ -12,12 +14,14 @@ import {Entry} from '../nmrstar/entry';
 })
 export class ReviewComponent implements OnInit {
 
+  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   entry: Entry;
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
               private router: Router,
-              private location: Location) {
+              private location: Location,
+              private dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -29,12 +33,22 @@ export class ReviewComponent implements OnInit {
   }
 
   submitEntry(): void {
-    this.api.submitEntry().subscribe(() => {
-      this.messagesService.sendMessage(new Message('Submission accepted! Redirecting to home page.',
-        MessageType.NotificationMessage, 10000));
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 10000);
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to deposit the entry '${this.entry.depositionNickname}'?` +
+        'No changes are allowed after deposition.';
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Submit the entry!
+        this.api.depositEntry().subscribe(() => {
+          this.messagesService.sendMessage(new Message('Submission accepted!',
+              MessageType.NotificationMessage, 15000));
+          this.router.navigate(['/']);
+        });
+      }
+      this.dialogRef = null;
     });
   }
 }

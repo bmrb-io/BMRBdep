@@ -2,16 +2,20 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {ApiService} from '../api.service';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {Entry} from '../nmrstar/entry';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.css']
+  styleUrls: ['./welcome.component.scss']
 })
 export class WelcomeComponent implements OnInit {
+  entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
 
-  constructor(private router: Router, private api: ApiService) {
+  constructor(private router: Router,
+              public api: ApiService) {
+    this.entry = null;
   }
 
   sessionType = new FormControl('', [Validators.required]);
@@ -41,6 +45,9 @@ export class WelcomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.api.entrySubject.subscribe(entry => {
+      this.entry = entry;
+    });
   }
 
   // This is needed for angular to detect the file upload

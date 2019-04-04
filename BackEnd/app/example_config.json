@@ -2,7 +2,8 @@
     "ets": {
         "user": "CHANGE_ME",
         "database": "CHANGE_ME",
-        "host": "CHANGE_ME"
+        "host": "CHANGE_ME",
+        "deposition_ranges": [[40000, 50000]]
     },
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],

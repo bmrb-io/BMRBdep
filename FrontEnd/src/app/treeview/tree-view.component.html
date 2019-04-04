@@ -1,8 +1,9 @@
 <ng-container *ngIf="entry">
 
-    <mat-card>
+    <mat-card class="nav-card">
         <mat-card-title (dblclick)="developerMode=true;logEntry()">
-            Deposition "{{entry.depositionNickname}}" Navigation</mat-card-title>
+            Deposition "{{entry.depositionNickname}}" Navigation
+        </mat-card-title>
         <mat-card-content>
 
             <mat-nav-list>
@@ -16,7 +17,8 @@
                             <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
                                 <mat-icon routerLink="/help/molecular-assembly"
                                           *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
-                                          class="pointer">help_outline
+                                          class="pointer"
+                                          title="Molecular assembly help">help_outline
                                 </mat-icon>
                             </h3>
 
@@ -43,20 +45,25 @@
 
                 <mat-divider></mat-divider>
                 <div>
-                    <h3 matLine>Deposition Options</h3>
+                    <h3 matLine>Deposition options</h3>
+
+                    <a mat-list-item [ngClass]="{'active': page=='pending-verification'}" *ngIf="!entry.emailValidated"
+                       routerLink="/entry/pending-verification" id="pending-verification">
+                        <h2 matLine>Verify your email</h2>
+                    </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='new'}"
                        routerLink="/" id="new">
                         <h2 matLine>Create new deposition</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted"
+                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted && !entry.deposited"
                        routerLink="/entry/restore" id="restore">
                         <h2 matLine>Restore deleted saveframes</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
-                       routerLink="/entry/review">
+                       routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
@@ -72,7 +79,7 @@
                         <mat-list-item
                                 (click)='download(entry.entryID + ".str", entry)'>Download entry
                         </mat-list-item>
-                        <mat-list-item (click)='refresh()'>Refresh cache/page</mat-list-item>
+                        <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
                         <mat-list-item>
                             <mat-slide-toggle [(ngModel)]="entry.showAll"
                                               (ngModelChange)="entry.updateCategories()"

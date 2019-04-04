@@ -3,8 +3,8 @@ EXPOSE 9000
 WORKDIR /opt/wsgi
 
 RUN apk update && \
-    apk --no-cache add bash git ca-certificates wget uwsgi-http python3 \
-    uwsgi-python3 && \
+    apk --no-cache add bash git ca-certificates wget uwsgi-http python3 uwsgi-python3 postgresql-libs && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev python3-dev && \
     update-ca-certificates && \
     apk --update add tzdata && \
     cp /usr/share/zoneinfo/America/Chicago /etc/localtime && \
@@ -20,7 +20,7 @@ COPY ./BackEnd/app /opt/wsgi
 COPY ./FrontEnd/dist /opt/wsgi/html
 
 RUN cd /opt/wsgi && chown -R uwsgi:uwsgi .
-RUN pip3 install -r /opt/wsgi/requirements.txt
+RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt && apk --purge del .build-deps
 
 ARG configfile
 ENV configfile=${configfile:-./development.conf}
