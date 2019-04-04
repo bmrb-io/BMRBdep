@@ -10,7 +10,7 @@ import {MatDialog, MatDialogRef} from '@angular/material';
 @Component({
   selector: 'app-review',
   templateUrl: './review.component.html',
-  styleUrls: ['./review.component.scss']
+  styleUrls: ['./review.component.css']
 })
 export class ReviewComponent implements OnInit {
 

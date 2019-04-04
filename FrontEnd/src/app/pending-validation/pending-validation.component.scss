@@ -1,9 +1,0 @@
-@import "../../custom-theme.scss";
-
-::ng-deep .mat-card-header-text {
-    margin: 0;
-}
-
-.mat-card {
-    background-color: mat-color($custom-theme-primary) !important;
-}
