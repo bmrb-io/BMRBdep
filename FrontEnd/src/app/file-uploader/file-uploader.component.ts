@@ -104,11 +104,6 @@ export class FileUploaderComponent implements OnInit {
   }
 
   deleteFile(fileName: string): void {
-    this.api.deleteFile(fileName).subscribe(response => {
-      if (response) {
-        this.entry.dataStore.deleteFile(fileName);
-        this.updateAndSaveDataFiles();
-      }
-    });
+    this.api.deleteFile(fileName);
   }
 }
