@@ -52,3 +52,4 @@ env/
 /installation.log
 /FrontEnd/dist
 /FrontEnd/src/environments/versions.ts 
+.mypy_cache
