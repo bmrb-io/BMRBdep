@@ -1,7 +1,22 @@
 <div>
   <h1>Welcome to BMRBDep!</h1>
   <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
-    <div class="content-box">
+      <div class="content-box resume-box" *ngIf="entry">
+          <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
+          <div>
+              <div>
+                  <a mat-raised-button color="primary"
+                     [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">
+                      Click here to return to your deposition</a>
+              </div>
+              <div>
+                  <button mat-raised-button color="primary" (click)="api.clearDeposition()">
+                      Click here to end your session for this deposition
+                  </button>
+              </div>
+          </div>
+      </div>
+      <div class="content-box">
       <h2>Start a new deposition</h2>
 
       <mat-form-field>
