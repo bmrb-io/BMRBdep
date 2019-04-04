@@ -5,6 +5,7 @@ import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-file-uploader',
