@@ -21,7 +21,7 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
         this.subscription = this.api.entrySubject.subscribe(entry => {
             if (entry) {
                 if (entry.emailValidated) {
-                    this.router.navigate(['/entry/', 'saveframe', 'deposited_data_files']);
+                    this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
                 } else {
                     this.router.navigate(['/entry', 'pending-verification']);
                 }
