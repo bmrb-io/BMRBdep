@@ -268,12 +268,13 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         """ Raises an error if the entry may not be edited. This could happen if it is already deposited, or the email
         has not been validated."""
 
-        if self.metadata['entry_deposited']:
-            raise RequestError('Entry already deposited, no changes allowed.')
-        if not self.metadata['email_validated']:
-            raise RequestError('Deposition e-mail has not been validated. No changes to the deposition are allowed. '
-                               'Please click confirm on the e-mail validation link you were sent when you created your '
-                               'deposition to proceed.')
+        if not self._initialize:
+            if self.metadata['entry_deposited']:
+                raise RequestError('Entry already deposited, no changes allowed.')
+            if not self.metadata['email_validated']:
+                raise RequestError('Deposition e-mail has not been validated. No changes to the deposition are allowed.'
+                                   ' Please click confirm on the e-mail validation link you were sent when you created '
+                                   'your deposition to proceed.')
 
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
