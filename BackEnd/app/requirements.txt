@@ -17,6 +17,8 @@ filelock==3.0.10
 python-dateutil==2.8.0
 # For putting entries in ETS
 psycopg2-binary==2.7.7
+# For stripping unicode
+Unidecode==1.0.23
 
 ## Development related
 # This makes the local flask server faster to reload when editing the code
