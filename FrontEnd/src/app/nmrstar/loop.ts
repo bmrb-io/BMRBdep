@@ -219,10 +219,6 @@ export class Loop {
 
   print(): string {
 
-    if (this.category === '_Upload_data') {
-      console.log(this, this.checkEmpty());
-    }
-
     const parent = this;
 
     // Check for totally empty loops
