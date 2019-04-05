@@ -7,13 +7,9 @@
         <mat-card-content>
 
             <mat-nav-list>
-                <div *ngIf="(showInvalidOnly && !entry.valid) || !showInvalidOnly">
+                <div>
                     <ng-container *ngFor="let superGroupCat of entry.superGroups">
-                        <div *ngIf="(showInvalidOnly && !superGroupCat.valid) ||
-                         (!showInvalidOnly && (superGroupCat.display == 'Y' ||
-                              (entry.showAll && superGroupCat.display != 'H')))">
-
-
+                        <div *ngIf="(superGroupCat.display == 'Y' || (entry.showAll && superGroupCat.display != 'H'))">
                             <h3 matLine [title]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
                                 <mat-icon routerLink="/help/molecular-assembly"
                                           *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
@@ -25,8 +21,7 @@
                             <mat-divider></mat-divider>
 
                             <ng-container *ngFor="let category of superGroupCat.children">
-                                <ng-container *ngIf="(showInvalidOnly && !category.valid) ||
-                                    (!showInvalidOnly && (entry.showAll || category.display == 'Y') && category.display != 'H')">
+                                <ng-container *ngIf="(entry.showAll || category.display == 'Y') && category.display != 'H'">
                                     <a mat-list-item [ngClass]="{'active': active==category.category && page=='category'}"
                                        [title]="entry.schema.saveframeSchema[category.category]['group_view_help']"
                                        [routerLink]="['/entry', 'saveframe', category.category]"
