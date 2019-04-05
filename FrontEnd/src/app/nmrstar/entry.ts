@@ -3,6 +3,7 @@ import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
+import {environment} from '../../environments/environment';
 
 class SuperCategoryInfo {
   superCategory: string;
@@ -342,7 +343,9 @@ export class Entry {
                 const conditionalTag = saveframe.tagDict[rule['Tag']];
                 // Set the tag to the override rule
                 if (!conditionalTag) {
-                  console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
+                  if (environment.debug) {
+                    console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
+                  }
                 } else {
                   conditionalTag.display = rule['Override view value'];
                 }
