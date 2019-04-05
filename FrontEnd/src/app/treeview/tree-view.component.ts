@@ -17,7 +17,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   developerMode: boolean;
   entry: Entry;
   page: string;
-  showInvalidOnly: boolean;
   @Output() sessionEnd = new EventEmitter<boolean>();
   subscription$: Subscription;
 
@@ -26,7 +25,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
               private route: ActivatedRoute) {
     this.developerMode = false;
     this.page = '?';
-    this.showInvalidOnly = false;
   }
 
   ngOnInit() {
