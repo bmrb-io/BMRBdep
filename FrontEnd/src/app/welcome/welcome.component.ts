@@ -81,9 +81,8 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
     this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement,
       this.bootstrapID.value).then(
-
       deposition_id => {
-          this.router.navigate(['/entry', 'load', deposition_id]);
+        this.router.navigate(['/entry', 'load', deposition_id]);
       });
   }
 }
