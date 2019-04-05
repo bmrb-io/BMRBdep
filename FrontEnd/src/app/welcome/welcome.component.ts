@@ -1,17 +1,19 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {ApiService} from '../api.service';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss']
 })
-export class WelcomeComponent implements OnInit {
+export class WelcomeComponent implements OnInit, OnDestroy {
   entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
+  subscription$: Subscription;
 
   constructor(private router: Router,
               public api: ApiService) {
@@ -45,9 +47,13 @@ export class WelcomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.api.entrySubject.subscribe(entry => {
+    this.subscription$ = this.api.entrySubject.subscribe(entry => {
       this.entry = entry;
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription$.unsubscribe();
   }
 
   // This is needed for angular to detect the file upload
@@ -74,12 +80,9 @@ export class WelcomeComponent implements OnInit {
     }
 
     this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement,
-      this.bootstrapID.value).subscribe(
-      response => {
-        if (response) {
-          this.router.navigate(['/entry', 'load', response['deposition_id']]);
-        }
+      this.bootstrapID.value).then(
+      deposition_id => {
+        this.router.navigate(['/entry', 'load', deposition_id]);
       });
-
   }
 }

@@ -13,7 +13,6 @@ export class Loop {
   displayTags: string[];
   valid: boolean;
   empty: boolean;
-  disabled: boolean;
 
   toJSON(): {} {
 
@@ -43,7 +42,6 @@ export class Loop {
     this.displayTags = new Array(tags.length).fill('H');
     this.valid = true;
     this.empty = false;
-    this.disabled = false;
 
     // Turn text nulls into logical nulls
     for (let m = 0; m < data.length; m++) {
@@ -180,7 +178,7 @@ export class Loop {
     }
 
     // Update the per-tag visibility
-    this.displayTags  = new Array(this.displayTags.length).fill('H');
+    this.displayTags = new Array(this.displayTags.length).fill('H');
     for (const row of this.data) {
       for (let col = 0; col < row.length; col++) {
         if (row[col].display === 'Y') {

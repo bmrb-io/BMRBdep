@@ -167,10 +167,10 @@ export class Tag {
           this.enums = new Set();
           const parent = this;
           enumerationSet.forEach(function (item) {
-              parent.enums.add(item);
+            parent.enums.add(item);
           });
           for (const item of temp) {
-              this.enums.add(item);
+            this.enums.add(item);
           }
         }
       }
