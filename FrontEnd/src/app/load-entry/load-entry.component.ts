@@ -1,7 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs';
+import {combineLatest, Subscription} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 @Component({
     selector: 'app-load-entry',
@@ -10,7 +11,6 @@ import {Subscription} from 'rxjs';
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
 
-    loadingID: string;
     subscription$: Subscription;
     constructor(private api: ApiService,
                 private route: ActivatedRoute,
@@ -20,27 +20,25 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
     ngOnInit() {
         const parent: LoadEntryComponent = this;
 
-        this.subscription$ = this.route.params.subscribe(params => {
-          parent.api.loadEntry(params['entry']);
-          parent.loadingID = params['entry'];
-        });
+        this.subscription$ = combineLatest(this.route.params, this.api.entrySubject).pipe(
+          map(results => {
+            const entryID = results[0]['entry'];
+            parent.api.loadEntry(entryID);
 
-        // TODO: Chain these two subscriptions together - theoretically this subscription could return before the previous one and
-        // then the code would fail
-        this.subscription$.add(this.api.entrySubject.subscribe(entry => {
-            if (entry && parent.loadingID === entry.entryID) {
-                if (entry.emailValidated) {
-                    if (entry.deposited) {
-                        this.router.navigate(['/entry']);
-                    } else {
-                        this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
-                    }
-
+            // Wait for the specific entry we want to load
+            if (results[1] && results[1].entryID === entryID) {
+              if (results[1].emailValidated) {
+                if (results[1].deposited) {
+                  this.router.navigate(['/entry']);
                 } else {
-                    this.router.navigate(['/entry', 'pending-verification']);
+                  this.router.navigate(['/entry/', 'saveframe', results[1].firstIncompleteCategory]);
                 }
+              } else {
+                this.router.navigate(['/entry', 'pending-verification']);
+              }
             }
-        }));
+          })
+        ).subscribe();
     }
 
     ngOnDestroy() {
