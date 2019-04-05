@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
@@ -12,13 +12,14 @@ import {Subscription} from 'rxjs';
   templateUrl: './file-uploader.component.html',
   styleUrls: ['./file-uploader.component.scss']
 })
-export class FileUploaderComponent implements OnInit {
+export class FileUploaderComponent implements OnInit, OnDestroy {
 
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
   serverURL: String = null;
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};
+  subscription$: Subscription;
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
@@ -29,11 +30,17 @@ export class FileUploaderComponent implements OnInit {
 
   ngOnInit() {
     this.serverURL = environment.serverURL;
-    this.route.params.subscribe((params: Params) => {
+    this.subscription$ = this.route.params.subscribe((params: Params) => {
       if (params['load_type'] === 'category' && params['saveframe_description'] === 'deposited_data_files') {
         this.showCategoryLink = false;
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription$) {
+      this.subscription$.unsubscribe();
+    }
   }
 
   openInput() {
