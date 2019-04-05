@@ -56,10 +56,10 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     const nameTag: SaveframeTag = this.saveframe.getTag('Name');
     if (nameTag && nameTag.value) {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the section '${nameTag.value}'?` +
-          ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
+        ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
     } else {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete this section?` +
-          ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
+        ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
     }
 
     this.dialogRef.afterClosed().subscribe(result => {

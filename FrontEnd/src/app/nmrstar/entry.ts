@@ -93,8 +93,10 @@ export class Entry {
   }
 
   toJSON(): {} {
-    return {entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
-      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited};
+    return {
+      entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
+      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited
+    };
   }
 
   /* Add a new saveframe to the saveframe list.
