@@ -13,7 +13,6 @@ import * as crs from '../javascript/crs.min';
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;
-  @Input() showInvalidOnly: false;
   activeTag: LoopTag;
   crsInit: boolean;
 
@@ -24,11 +23,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
-    this.api.entrySubject.subscribe(entry => {
-      if (entry.deposited) {
-        this.loop.disabled = true;
-      }
-    });
   }
 
   // Load the country autofill code
