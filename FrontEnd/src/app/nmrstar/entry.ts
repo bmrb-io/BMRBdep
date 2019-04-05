@@ -3,6 +3,7 @@ import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
+import {environment} from '../../environments/environment';
 
 class SuperCategoryInfo {
   superCategory: string;
@@ -92,8 +93,10 @@ export class Entry {
   }
 
   toJSON(): {} {
-    return {entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
-      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited};
+    return {
+      entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
+      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited
+    };
   }
 
   /* Add a new saveframe to the saveframe list.
@@ -342,7 +345,9 @@ export class Entry {
                 const conditionalTag = saveframe.tagDict[rule['Tag']];
                 // Set the tag to the override rule
                 if (!conditionalTag) {
-                  console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
+                  if (environment.debug) {
+                    console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
+                  }
                 } else {
                   conditionalTag.display = rule['Override view value'];
                 }

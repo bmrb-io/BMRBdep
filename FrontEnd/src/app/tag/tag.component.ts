@@ -1,20 +1,23 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-tag',
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss']
 })
-export class TagComponent implements OnInit {
+export class TagComponent implements OnInit, OnDestroy {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
   storedValue: string;
+  subscription$: Subscription;
 
   public height: number;
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService) {
+  }
 
   ngOnInit() {
     if (this.tag.interfaceType === 'text') {
@@ -25,11 +28,17 @@ export class TagComponent implements OnInit {
     } else {
       this.storedValue = '';
     }
-    this.api.entrySubject.subscribe(entry => {
-      if (entry.deposited) {
+    this.subscription$ = this.api.entrySubject.subscribe(entry => {
+      if (entry && entry.deposited) {
         this.tag.disabled = true;
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription$) {
+      this.subscription$.unsubscribe();
+    }
   }
 
   getRow() {

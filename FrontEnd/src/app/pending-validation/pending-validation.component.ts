@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
+import {Subscription, timer} from 'rxjs';
 
 @Component({
     selector: 'app-pending-validation',
@@ -11,14 +12,15 @@ import {Entry} from '../nmrstar/entry';
 export class PendingValidationComponent implements OnInit, OnDestroy {
 
     entry: Entry;
-    timer;
+    subscription$: Subscription;
+
     constructor(private api: ApiService,
                 private router: Router) {
     }
 
     ngOnInit() {
         const parent: PendingValidationComponent = this;
-        this.api.entrySubject.subscribe(entry => {
+        this.subscription$ = this.api.entrySubject.subscribe(entry => {
             parent.entry = entry;
             // Route straight to the entry if validated
             if (entry && entry.emailValidated) {
@@ -26,21 +28,22 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
             }
         });
 
-        // Check the validation status every 5 seconds
-        this.timer = setInterval(() => {
-            parent.api.checkValid().subscribe(valid => {
-                if (valid) {
-                    clearInterval(parent.timer);
+        // Check the validation status every 2.5 seconds
+        this.subscription$.add(timer(0, 2500).subscribe(() => {
+            parent.api.checkValid().then(status => {
+                if (status) {
                     parent.entry.emailValidated = true;
                     parent.api.saveEntry(true, true);
                     parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]);
                 }
             });
-        }, 2500);
+        }));
     }
 
     ngOnDestroy() {
-        clearInterval(this.timer);
+        if (this.subscription$) {
+            this.subscription$.unsubscribe();
+        }
     }
 
     resendValidationEmail(): void {
