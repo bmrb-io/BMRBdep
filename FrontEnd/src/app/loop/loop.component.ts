@@ -24,11 +24,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
-    this.api.entrySubject.subscribe(entry => {
-      if (entry.deposited) {
-        this.loop.disabled = true;
-      }
-    });
   }
 
   // Load the country autofill code
