@@ -13,7 +13,6 @@ import * as crs from '../javascript/crs.min';
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;
-  @Input() showInvalidOnly: false;
   activeTag: LoopTag;
   crsInit: boolean;
 
