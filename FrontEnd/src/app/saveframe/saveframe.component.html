@@ -1,88 +1,90 @@
 <ng-container *ngIf="(showInvalidOnly && !saveframe.valid) || !showInvalidOnly">
-<app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal" [entry]="saveframe.parent"></app-file-uploader>
-<ng-template #normal>
-  <div *ngIf="saveframe.display == 'Y' || (saveframe.parent.showAll && saveframe.display == 'N')">
+    <app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal"
+                       [entry]="saveframe.parent"></app-file-uploader>
+    <ng-template #normal>
+        <div *ngIf="saveframe.display == 'Y' || (saveframe.parent.showAll && saveframe.display == 'N')">
 
-    <table>
-      <colgroup>
-           <col class="tag-column">
-           <col class="value-column">
-        </colgroup>
+            <table>
+                <colgroup>
+                    <col class="tag-column">
+                    <col class="value-column">
+                </colgroup>
 
-      <thead>
-        <tr>
-          <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
-          <a class="header-text" [title]="saveframe.schemaValues['group_view_help']">
-            {{saveframe.tags[0].schemaValues['ADIT category view name']}}
-          </a>
-          </th>
-          <th>
-            <div class="right-float">
-                <button mat-raised-button class="saveframe-button"
-                        *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-                        (click)='saveframe.duplicate(); processChange()' color="accent"
-                        [disabled]="saveframe.parent.deposited">Duplicate
-                </button>
-                <button mat-raised-button class="saveframe-button"
-                        *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-                        (click)='saveframe.duplicate(true); processChange()' color="accent"
-                        [disabled]="saveframe.parent.deposited">Create new
-                </button>
-                <button mat-raised-button class="saveframe-button"
-                        *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
-                        (click)='deleteSaveframe()' color="accent"
-                        [disabled]="saveframe.parent.deposited">Delete
-                </button>
-                <button mat-raised-button class="saveframe-button"
-                        *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
-                        (click)='saveframe.restore(); processChange()' color="accent"
-                        [disabled]="saveframe.parent.deposited">Restore
-                </button>
-                <button mat-raised-button class="saveframe-button" *ngIf="showCategoryLink"
-                        [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
-                    View sections of this category
-                </button>
+                <thead>
+                <tr>
+                    <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
+                        <a class="header-text" [title]="saveframe.schemaValues['group_view_help']">
+                            {{saveframe.tags[0].schemaValues['ADIT category view name']}}
+                        </a>
+                    </th>
+                    <th>
+                        <div class="right-float">
+                            <button mat-raised-button class="saveframe-button"
+                                    *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
+                                    (click)='saveframe.duplicate(); processChange()' color="accent"
+                                    [disabled]="saveframe.parent.deposited">Duplicate
+                            </button>
+                            <button mat-raised-button class="saveframe-button"
+                                    *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
+                                    (click)='saveframe.duplicate(true); processChange()' color="accent"
+                                    [disabled]="saveframe.parent.deposited">Create new
+                            </button>
+                            <button mat-raised-button class="saveframe-button"
+                                    *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
+                                    (click)='deleteSaveframe()' color="accent"
+                                    [disabled]="saveframe.parent.deposited">Delete
+                            </button>
+                            <button mat-raised-button class="saveframe-button"
+                                    *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
+                                    (click)='saveframe.restore(); processChange()' color="accent"
+                                    [disabled]="saveframe.parent.deposited">Restore
+                            </button>
+                            <button mat-raised-button class="saveframe-button" *ngIf="showCategoryLink"
+                                    [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
+                                View sections of this category
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let saveframeTag of saveframe.tags">
+                    <tr *ngIf="saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')"
+                        (contextmenu)="saveframeTag.log()">
+                        <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag-description"
+                            [title]="saveframeTag.schemaValues['Interface']"
+                            [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
+                            (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
+                        </td>
+                        <ng-template #non_mandatory>
+                            <td class="tag-description"
+                                [title]="saveframeTag.schemaValues['Interface']"
+                                [innerHTML]="saveframeTag.schemaValues['Prompt']"
+                                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
+                            </td>
+                        </ng-template>
+                        <td [ngClass]="{'invisible': true, 'invalid': !saveframeTag.valid}">
+                            <app-tag [tag]='saveframeTag' [unique_identifier]="'_' + saveframe.name"></app-tag>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+
+            <div *ngIf='activeTag' class='tag-info-box'>
+                <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
+                <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
+                <p *ngIf="activeTag.schemaValues['Example'] != '?'"
+                   [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
+                <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
+                <p *ngIf='activeTag.validationMessage' class='mandatory'>{{activeTag.validationMessage}}</p>
             </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-      <ng-container *ngFor="let saveframeTag of saveframe.tags">
-        <tr *ngIf="saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')"
-              (contextmenu)="saveframeTag.log()">
-          <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag-description"
-                [title]="saveframeTag.schemaValues['Interface']"
-                [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
-                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
-          </td>
-          <ng-template #non_mandatory>
-            <td class="tag-description"
-                [title]="saveframeTag.schemaValues['Interface']"
-                [innerHTML]="saveframeTag.schemaValues['Prompt']"
-                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
-            </td>
-          </ng-template>
-          <td [ngClass]="{'invisible': true, 'invalid': !saveframeTag.valid}">
-            <app-tag [tag]='saveframeTag' [unique_identifier]="'_' + saveframe.name"></app-tag>
-          </td>
-        </tr>
-      </ng-container>
-      </tbody>
-    </table>
 
-    <div *ngIf='activeTag' class='tag-info-box'>
-      <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
-      <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
-      <p *ngIf="activeTag.schemaValues['Example'] != '?'" [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
-      <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
-      <p *ngIf='activeTag.validationMessage' class='mandatory'>{{activeTag.validationMessage}}</p>
-    </div>
-
-    <ng-container *ngFor='let loop of saveframe.loops'>
-      <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && saveframe.parent.showAll)"
-                [loop]='loop'
-                [showInvalidOnly]="showInvalidOnly"></app-loop>
-    </ng-container>
-  </div>
-</ng-template>
+            <ng-container *ngFor='let loop of saveframe.loops'>
+                <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && saveframe.parent.showAll)"
+                          [loop]='loop'
+                          [showInvalidOnly]="showInvalidOnly"></app-loop>
+            </ng-container>
+        </div>
+    </ng-template>
 </ng-container>

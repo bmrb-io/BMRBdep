@@ -21,8 +21,10 @@
                             <mat-divider></mat-divider>
 
                             <ng-container *ngFor="let category of superGroupCat.children">
-                                <ng-container *ngIf="(entry.showAll || category.display == 'Y') && category.display != 'H'">
-                                    <a mat-list-item [ngClass]="{'active': active==category.category && page=='category'}"
+                                <ng-container
+                                        *ngIf="(entry.showAll || category.display == 'Y') && category.display != 'H'">
+                                    <a mat-list-item
+                                       [ngClass]="{'active': active==category.category && page=='category'}"
                                        [title]="entry.schema.saveframeSchema[category.category]['group_view_help']"
                                        [routerLink]="['/entry', 'saveframe', category.category]"
                                        [id]="category.category">
@@ -52,7 +54,8 @@
                         <h2 matLine>Create new deposition</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted && !entry.deposited"
+                    <a mat-list-item [ngClass]="{'active': page=='restore'}"
+                       *ngIf="entry.hasDeleted && !entry.deposited"
                        routerLink="/entry/restore" id="restore">
                         <h2 matLine>View and restore deleted sections</h2>
                     </a>
