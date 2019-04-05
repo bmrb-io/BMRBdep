@@ -15,7 +15,6 @@ import {Subscription} from 'rxjs';
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
   @Input() saveframe: Saveframe;
-  @Input() showInvalidOnly: false;
   @Output() sfReload = new EventEmitter<string>();
   activeTag: SaveframeTag;
   showCategoryLink: boolean;
