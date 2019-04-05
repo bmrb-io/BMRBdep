@@ -1,45 +1,51 @@
 <div *ngIf="entry">
-  <div class="main-content" *ngIf="saveframes.length > 0; else missing">
-    <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
-    <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].previousCategory"
-       [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">Previous section</a>
-    <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].nextCategory ; else final_review_top"
-       [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">Next section</a>
-    <ng-template #final_review_top>
-      <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
+    <div class="main-content" *ngIf="saveframes.length > 0; else missing">
+        <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
+        <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].previousCategory"
+           [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">Previous section</a>
+        <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].nextCategory ; else final_review_top"
+           [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">Next section</a>
+        <ng-template #final_review_top>
+            <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
+               color="accent"> Review deposition</a>
+        </ng-template>
+        <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe'
+                       (sfReload)="reloadSaveframes($event)"></app-saveframe>
+        <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have
+            chosen to hide non-mandatory tags. To view these tags, please
+            click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
+        <div *ngIf="this.saveframes.length">
+            <a mat-raised-button class="saveframe-button"
+               *ngIf="saveframes[0].previousCategory"
+               [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">
+                Previous section</a>
+            <a mat-raised-button class="saveframe-button"
+               *ngIf="saveframes[0].nextCategory; else final_review_bottom"
+               [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">
+                Next section</a>
+            <ng-template #final_review_bottom>
+                <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
+                   color="accent"> Review deposition</a>
+            </ng-template>
+        </div>
+    </div>
+    <ng-template #missing>
+        <div class="main-content">
+            <mat-card>
+                <mat-card-title>Invalid data category</mat-card-title>
+                <mat-card-content>
+                    There are no sections of this type remaining.
+                </mat-card-content>
+                <mat-card-actions>
+                    <button *ngIf="entry.getSaveframesByCategory(saveframeCategory).length > 0" mat-raised-button
+                            class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
+                        Restore all sections of this type
+                    </button>
+                    <a mat-raised-button class="saveframe-button" color="accent"
+                       [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next
+                        incomplete section</a>
+                </mat-card-actions>
+            </mat-card>
+        </div>
     </ng-template>
-    <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe' (sfReload)="reloadSaveframes($event)"></app-saveframe>
-    <p *ngIf="saveframes[0].display == 'N' && !entry.showAll">All tags in this category are optional, and you have chosen to hide non-mandatory tags. To view these tags, please
-      click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
-    <div *ngIf="this.saveframes.length">
-      <a mat-raised-button class="saveframe-button"
-              *ngIf="saveframes[0].previousCategory"
-              [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">
-        Previous section</a>
-      <a mat-raised-button class="saveframe-button"
-              *ngIf="saveframes[0].nextCategory; else final_review_bottom"
-              [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">
-        Next section</a>
-      <ng-template #final_review_bottom>
-        <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review" color="accent"> Review deposition</a>
-      </ng-template>
-    </div>
-  </div>
-  <ng-template #missing>
-    <div class="main-content">
-      <mat-card>
-        <mat-card-title>Invalid data category</mat-card-title>
-        <mat-card-content>
-          There are no sections of this type remaining.
-        </mat-card-content>
-        <mat-card-actions>
-          <button *ngIf="entry.getSaveframesByCategory(saveframeCategory).length > 0" mat-raised-button
-                  class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
-              Restore all sections of this type</button>
-          <a mat-raised-button class="saveframe-button" color="accent"
-                  [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next incomplete section</a>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </ng-template>
 </div>

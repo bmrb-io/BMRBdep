@@ -1,15 +1,18 @@
 <div class="main-content">
     <mat-card>
         <mat-card-header>
-            <mat-card-title *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be completed.</mat-card-title>
+            <mat-card-title *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be
+                completed.
+            </mat-card-title>
             <mat-card-title *ngIf="entry.valid">Your deposition is ready to submit.</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <mat-nav-list>
                 <ng-container *ngFor='let saveframe of entry.saveframes'>
-                    <p *ngIf="!saveframe.deleted && !saveframe.valid"><a mat-raised-button
-                       [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
-                        {{saveframe.schemaValues['category_group_view_name']}}</a></p>
+                    <p *ngIf="!saveframe.deleted && !saveframe.valid">
+                        <a mat-raised-button [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
+                            {{saveframe.schemaValues['category_group_view_name']}}</a>
+                    </p>
                 </ng-container>
             </mat-nav-list>
         </mat-card-content>
