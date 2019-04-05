@@ -1,18 +1,20 @@
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-saveframe-editor',
   templateUrl: './saveframe-editor.component.html',
   styleUrls: ['./saveframe-editor.component.css']
 })
-export class SaveframeEditorComponent implements OnInit {
+export class SaveframeEditorComponent implements OnInit, OnDestroy {
   saveframes: Saveframe[];
   entry: Entry;
   saveframeCategory: string;
+  subscription$: Subscription;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -22,17 +24,23 @@ export class SaveframeEditorComponent implements OnInit {
 
   ngOnInit() {
 
-    this.api.entrySubject.subscribe(entry => {
+    this.subscription$ = this.api.entrySubject.subscribe(entry => {
       this.entry = entry;
       this.reloadSaveframes();
     });
 
     // Listen for the changing of the params string
     const parent = this;
-    this.route.params.subscribe(function (params) {
+    this.subscription$.add(this.route.params.subscribe(function (params) {
       parent.saveframeCategory = params['saveframe_category'];
       parent.reloadSaveframes();
-    });
+    }));
+  }
+
+  ngOnDestroy() {
+    if (this.subscription$) {
+      this.subscription$.unsubscribe();
+    }
   }
 
   reloadSaveframes(nextCategory: string = null): void {

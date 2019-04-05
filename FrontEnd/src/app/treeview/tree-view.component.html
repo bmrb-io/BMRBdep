@@ -62,6 +62,11 @@
                         <h2 matLine>Restore deleted saveframes</h2>
                     </a>
 
+                    <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
+                       routerLink="/entry" id="entry">
+                        <h2 matLine>View full deposition</h2>
+                    </a>
+
                     <a mat-list-item [ngClass]="{'active': page=='review'}" title="Deposit Entry" id="review"
                        routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>

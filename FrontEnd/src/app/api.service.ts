@@ -1,7 +1,7 @@
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
-import {Injectable} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
@@ -11,11 +11,12 @@ import {Title} from '@angular/platform-browser';
 @Injectable({
     providedIn: 'root'
 })
-export class ApiService {
+export class ApiService implements OnDestroy {
 
     private cachedEntry: Entry;
     private activeSaveRequest: Subscription;
     entrySubject: ReplaySubject<Entry>;
+    subscription$: Subscription;
 
     private JSONOptions = {
         headers: new HttpHeaders({
@@ -45,21 +46,21 @@ export class ApiService {
             const entry = entryFromJSON(rawJSON);
             this.entrySubject.next(entry);
         } else {
-            const sub = this.router.events.subscribe(event => {
-                if (event instanceof NavigationEnd) {
-                    let r = this.route;
-                    while (r.firstChild) {
-                        r = r.firstChild;
-                    }
-                    r.params.subscribe(() => {
-                        if (this.router.url.indexOf('/load/') < 0 && !this.cachedEntry) {
-                            sub.unsubscribe();
-                            router.navigate(['/']);
-                        }
-                    });
+          this.subscription$ = this.router.events.subscribe(
+            event => {
+              if (event instanceof NavigationEnd) {
+                if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('help') < 0 && !this.cachedEntry) {
+                  this.subscription$.unsubscribe();
+                  router.navigate(['/']);
                 }
-            });
+              }
+            }
+          );
         }
+    }
+
+    ngOnDestroy() {
+      this.subscription$.unsubscribe();
     }
 
     clearDeposition(): void {
@@ -110,19 +111,17 @@ export class ApiService {
         );
     }
 
-    checkValid(): Observable<boolean> {
-        if (!this.cachedEntry) {
-            return of(false);
-        }
-
-        const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
-        return this.http.get(entryURL).pipe(
-            map(response => {
-                return response['status'];
-            }),
-            // Convert the error into something we can handle
-            catchError((error: HttpErrorResponse) => this.handleError(error))
-        );
+    checkValid(): Promise<boolean> {
+        return new Promise(((resolve, reject) => {
+            const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
+            this.http.get(entryURL).subscribe(response => {
+                  resolve(response['status']);
+              }, error => {
+                  this.handleError(error);
+                  reject();
+              }
+            );
+        }));
     }
 
     loadEntry(entryID: string): void {
@@ -153,13 +152,12 @@ export class ApiService {
         // Save to remote server if we haven't just loaded the entry
         if (!initialSave) {
             const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-            const parent = this;
             this.activeSaveRequest = this.http.put(entryURL, JSON.stringify(this.cachedEntry), this.JSONOptions).subscribe(
                 () => {
                     if (!skipMessage) {
                         this.messagesService.sendMessage(new Message('Changes saved.'));
                     }
-                    parent.activeSaveRequest = null;
+                    this.activeSaveRequest = null;
                 },
                 err => this.handleError(err)
             );
@@ -170,7 +168,7 @@ export class ApiService {
                   depositionNickname: string,
                   orcid: string = null,
                   file: File = null,
-                  bootstrapID: string = null): Observable<any> {
+                  bootstrapID: string = null): Promise<string> {
         const apiEndPoint = `${environment.serverURL}/new`;
         this.messagesService.sendMessage(new Message('Creating deposition...',
             MessageType.NotificationMessage, 0));
@@ -193,18 +191,20 @@ export class ApiService {
             reportProgress: true,
         };
 
-        return this.http.post(apiEndPoint, body, options)
-            .pipe(
-                map(jsonData => {
-                    this.messagesService.clearMessage();
-                    return jsonData;
-                }),
-                // Convert the error into something we can handle
-                catchError((error: HttpErrorResponse) => this.handleError(error))
-            );
+        return new Promise((resolve, reject) => {
+
+          this.http.post(apiEndPoint, body, options)
+            .subscribe(jsonData => {
+                this.messagesService.clearMessage();
+                resolve(jsonData['deposition_id']);
+              }, error => {
+              this.handleError(error);
+              reject();
+            });
+        });
     }
 
-    depositEntry(): Observable<any> {
+    depositEntry(): Promise<boolean> {
 
         if (!this.cachedEntry.valid) {
             this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
@@ -220,19 +220,22 @@ export class ApiService {
         this.messagesService.sendMessage(new Message('Submitting deposition...',
             MessageType.NotificationMessage, 0));
 
-        return this.http.post(apiEndPoint, formData)
-            .pipe(
-                map(jsonData => {
-                    // Trigger everything watching the entry to see that it changed - because "deposited" changed
-                    this.cachedEntry.deposited = true;
-                    this.entrySubject.next(this.cachedEntry);
+      return new Promise(((resolve, reject) => {
+        this.http.post(apiEndPoint, formData).subscribe(jsonData => {
+              // Trigger everything watching the entry to see that it changed - because "deposited" changed
+              this.cachedEntry.deposited = true;
+              this.saveEntry(true);
+              this.entrySubject.next(this.cachedEntry);
 
-                    this.messagesService.clearMessage();
-                    return jsonData;
-                }),
-                // Convert the error into something we can handle
-                catchError((error: HttpErrorResponse) => this.handleError(error))
-            );
+              this.messagesService.sendMessage(new Message('Submission accepted!',
+                MessageType.NotificationMessage, 15000));
+              this.router.navigate(['/entry']);
+              resolve(jsonData['status']);
+            }, error => {
+          this.handleError(error);
+          reject();
+        });
+      }));
     }
 
     resendValidationEmail(): Observable<any> {
@@ -259,7 +262,7 @@ export class ApiService {
         return this.cachedEntry.entryID;
     }
 
-    handleError(error: HttpErrorResponse) {
+  handleError(error: HttpErrorResponse): Observable<null> | null {
         if (error.status === 400 || (error.status === 500 && error.error)) {
             this.messagesService.sendMessage(new Message(error.error.error,
                 MessageType.ErrorMessage, 15000));
