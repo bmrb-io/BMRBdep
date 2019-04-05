@@ -40,7 +40,8 @@ import {
   MatSlideToggleModule,
   MatToolbarModule,
   MatButtonModule,
-  MatSnackBarModule, MatDialogModule
+  MatSnackBarModule,
+  MatDialogModule
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page

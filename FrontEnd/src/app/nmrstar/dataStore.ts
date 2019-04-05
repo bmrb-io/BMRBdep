@@ -83,7 +83,7 @@ export class DataFileStore {
       // Update the reference to point to the new file upload
       this.dataFileMap[dataFile.fileName] = dataFile;
 
-    // Name change, but same file
+      // Name change, but same file
     } else {
       this.dataFileMap[fileName] = dataFile;
 

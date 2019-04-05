@@ -16,7 +16,8 @@ export class TagComponent implements OnInit, OnDestroy {
 
   public height: number;
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService) {
+  }
 
   ngOnInit() {
     if (this.tag.interfaceType === 'text') {

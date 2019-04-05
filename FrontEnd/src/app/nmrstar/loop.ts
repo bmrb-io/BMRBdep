@@ -178,7 +178,7 @@ export class Loop {
     }
 
     // Update the per-tag visibility
-    this.displayTags  = new Array(this.displayTags.length).fill('H');
+    this.displayTags = new Array(this.displayTags.length).fill('H');
     for (const row of this.data) {
       for (let col = 0; col < row.length; col++) {
         if (row[col].display === 'Y') {

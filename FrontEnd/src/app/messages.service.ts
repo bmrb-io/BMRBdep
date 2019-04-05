@@ -42,8 +42,10 @@ export class MessagesService {
     if (message.messageType === MessageType.ErrorMessage) {
       action = 'Notify Us';
     }
-    this.snackBarRef = this.snackBar.open(message.messageBody, action, {duration: message.messageTimeout,
-      panelClass: MessageTypeLabel.get(message.messageType)});
+    this.snackBarRef = this.snackBar.open(message.messageBody, action, {
+      duration: message.messageTimeout,
+      panelClass: MessageTypeLabel.get(message.messageType)
+    });
 
     this.snackBarRef.onAction().subscribe(() => {
       const mail = document.createElement('a');
