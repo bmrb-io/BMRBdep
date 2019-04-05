@@ -242,8 +242,10 @@ export class Tag {
       }
       // Check data type
     } else if (!this.schemaValues['Regex'].test(this.value)) {
-      this.valid = false;
-      this.validationMessage = 'Value does not match specified data type.';
+      if (this.fullyQualifiedTagName !== '_Contact_person.State_province' && this.fullyQualifiedTagName !== '_Contact_person.Country') {
+        this.valid = false;
+        this.validationMessage = 'Value does not match specified data type.';
+      }
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (!this.enums.has(this.value)) {
