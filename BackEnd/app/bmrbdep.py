@@ -473,7 +473,7 @@ def deposit_entry(uuid) -> Response:
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the' \
                        ' deposition contents for reference. You may also use this file to start a new deposition. ' \
                        'You will hear from our annotators in the next few days.' % bmrb_num
-        message.attach("%s.str" % uuid, "text/plain", str(repo.get_entry()))
+        message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
 
     return jsonify({'status': 'success'})
