@@ -1,4 +1,4 @@
-<ng-container *ngIf="(showInvalidOnly && !saveframe.valid) || !showInvalidOnly">
+<ng-container>
     <app-file-uploader *ngIf="saveframe.category == 'deposited_data_files'; else normal"
                        [entry]="saveframe.parent"></app-file-uploader>
     <ng-template #normal>
@@ -82,8 +82,7 @@
 
             <ng-container *ngFor='let loop of saveframe.loops'>
                 <app-loop *ngIf="loop.display == 'Y' || (loop.display == 'N' && saveframe.parent.showAll)"
-                          [loop]='loop'
-                          [showInvalidOnly]="showInvalidOnly"></app-loop>
+                          [loop]='loop'></app-loop>
             </ng-container>
         </div>
     </ng-template>
