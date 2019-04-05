@@ -18,21 +18,30 @@
           </th>
           <th>
             <div class="right-float">
-              <button mat-raised-button class="saveframe-button"
-                      *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-                      (click)='saveframe.duplicate(); processChange()' color="accent">Duplicate</button>
-              <button mat-raised-button class="saveframe-button"
-              *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
-              (click)='saveframe.duplicate(true); processChange()' color="accent">Create new</button>
-              <button mat-raised-button class="saveframe-button"
-              *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
-              (click)='deleteSaveframe()' color="accent">Delete</button>
-              <button mat-raised-button class="saveframe-button"
-                 *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
-                 (click)='saveframe.restore(); processChange()' color="accent">Restore</button>
-              <button mat-raised-button class="saveframe-button"
-              *ngIf="showCategoryLink"
-              [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">View sections of this category</button>
+                <button mat-raised-button class="saveframe-button"
+                        *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
+                        (click)='saveframe.duplicate(); processChange()' color="accent"
+                        [disabled]="saveframe.parent.deposited">Duplicate
+                </button>
+                <button mat-raised-button class="saveframe-button"
+                        *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
+                        (click)='saveframe.duplicate(true); processChange()' color="accent"
+                        [disabled]="saveframe.parent.deposited">Create new
+                </button>
+                <button mat-raised-button class="saveframe-button"
+                        *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
+                        (click)='deleteSaveframe()' color="accent"
+                        [disabled]="saveframe.parent.deposited">Delete
+                </button>
+                <button mat-raised-button class="saveframe-button"
+                        *ngIf="saveframe.index >= saveframe.schemaValues['mandatory_number'] && saveframe.deleted"
+                        (click)='saveframe.restore(); processChange()' color="accent"
+                        [disabled]="saveframe.parent.deposited">Restore
+                </button>
+                <button mat-raised-button class="saveframe-button" *ngIf="showCategoryLink"
+                        [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
+                    View sections of this category
+                </button>
             </div>
           </th>
         </tr>
