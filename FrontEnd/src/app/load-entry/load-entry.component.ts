@@ -10,6 +10,7 @@ import {Subscription} from 'rxjs';
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
 
+    loadingID: string;
     subscription$: Subscription;
     constructor(private api: ApiService,
                 private route: ActivatedRoute,
@@ -18,8 +19,16 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         const parent: LoadEntryComponent = this;
-        this.subscription$ = this.api.entrySubject.subscribe(entry => {
-            if (entry) {
+
+        this.subscription$ = this.route.params.subscribe(params => {
+          parent.api.loadEntry(params['entry']);
+          parent.loadingID = params['entry'];
+        });
+
+        // TODO: Chain these two subscriptions together - theoretically this subscription could return before the previous one and
+        // then the code would fail
+        this.subscription$.add(this.api.entrySubject.subscribe(entry => {
+            if (entry && parent.loadingID === entry.entryID) {
                 if (entry.emailValidated) {
                     if (entry.deposited) {
                         this.router.navigate(['/entry']);
@@ -31,9 +40,7 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
                     this.router.navigate(['/entry', 'pending-verification']);
                 }
             }
-        });
-
-        this.route.params.subscribe(params => parent.api.loadEntry(params['entry']));
+        }));
     }
 
     ngOnDestroy() {
