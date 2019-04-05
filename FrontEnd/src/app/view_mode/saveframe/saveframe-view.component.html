@@ -1,32 +1,41 @@
 <div class="saveframe">
-  <span class="uneditable line">save_</span>
-  <input class="saveframe-name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
-  <table>
-    <tr>
-      <th class="tag-column"></th>
-      <th class="value-column"></th>
-    </tr>
-    <ng-container *ngFor="let saveframeTag of saveframe.tags">
-      <tr class="highlight" *ngIf="saveframeTag.value || saveframe.parent.showAll">
-        <td><span class="uneditable">{{saveframe.tagPrefix + '.' + saveframeTag.name}}</span></td>
-        <ng-container *ngIf='saveframeTag.name != "Sf_framecode"; then normal_tag else sf_framecode'></ng-container>
-        <ng-template #normal_tag>
-          <td>
-            <div>
-              <a *ngIf='saveframeTag.value && saveframeTag.value.indexOf("$")==0'
-                 [routerLink]="['/entry', saveframe.getID(), 'saveframe', saveframeTag.value.substring(1), 'name']">Jump
-                to: </a>
-              <input class="datum" [(ngModel)]="saveframeTag.value" placeholder=".">
-            </div>
-          </td>
-        </ng-template>
-        <ng-template #sf_framecode>
-          <td><input class="datum" [(ngModel)]="saveframe.name" placeholder="."></td>
-        </ng-template>
+    <span class="uneditable line">save_</span>
+    <label>
+        <input class="saveframe-name" [(ngModel)]="saveframe.name" placeholder="{{saveframe.category}}">
+    </label>
+    <table>
+        <tr>
+            <th class="tag-column"></th>
+            <th class="value-column"></th>
+        </tr>
+        <ng-container *ngFor="let saveframeTag of saveframe.tags">
+            <tr class="highlight" *ngIf="saveframeTag.value || saveframe.parent.showAll">
+                <td><span class="uneditable">{{saveframe.tagPrefix + '.' + saveframeTag.name}}</span></td>
+                <ng-container
+                        *ngIf='saveframeTag.name != "Sf_framecode"; then normal_tag else sf_framecode'></ng-container>
+                <ng-template #normal_tag>
+                    <td>
+                        <div>
+                            <a *ngIf='saveframeTag.value && saveframeTag.value.indexOf("$")==0'
+                               [routerLink]="['/entry', saveframe.getID(), 'saveframe', saveframeTag.value.substring(1), 'name']">Jump
+                                to: </a>
+                            <label>
+                                <input class="datum" [(ngModel)]="saveframeTag.value" placeholder=".">
+                            </label>
+                        </div>
+                    </td>
+                </ng-template>
+                <ng-template #sf_framecode>
+                    <td>
+                        <label>
+                            <input class="datum" [(ngModel)]="saveframe.name" placeholder=".">
+                        </label>
+                    </td>
+                </ng-template>
 
-      </tr>
-    </ng-container>
-  </table>
-  <app-loop-view *ngFor='let loop of saveframe.loops' [loop]='loop'></app-loop-view>
-  <span class="uneditable line">save_</span>
+            </tr>
+        </ng-container>
+    </table>
+    <app-loop-view *ngFor='let loop of saveframe.loops' [loop]='loop'></app-loop-view>
+    <span class="uneditable line">save_</span>
 </div>

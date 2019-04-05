@@ -1,38 +1,38 @@
 <mat-toolbar>
-  <mat-toolbar-row>
-    <div *ngIf="entry"
-         (click)="sidenav.toggle(); treeView.scrollSideNav()"
-         class="valign-center">
-      <mat-icon>menu</mat-icon>
-      <span style="vertical-align: bottom">Menu</span>
-    </div>
-    <ng-container *ngIf="entry">
+    <mat-toolbar-row>
+        <div *ngIf="entry"
+             (click)="sidenav.toggle(); treeView.scrollSideNav()"
+             class="valign-center">
+            <mat-icon>menu</mat-icon>
+            <span style="vertical-align: bottom">Menu</span>
+        </div>
+        <ng-container *ngIf="entry">
       <span *ngIf="entry && !entry.deposited" class="title-center">
         BMRBDep - Deposition '{{entry.depositionNickname}}' in progress
       </span>
-      <span *ngIf="entry && entry.deposited" class="title-center">
+            <span *ngIf="entry && entry.deposited" class="title-center">
         BMRBDep - Deposition '{{entry.depositionNickname}}' completed and deposited
       </span>
-      <span *ngIf="!entry" class="title-center">BMRBDep</span>
-      <span class="title-right" routerLink="/" (click)="clearEntry()">End session</span>
-    </ng-container>
+            <span *ngIf="!entry" class="title-center">BMRBDep</span>
+            <span class="title-right" routerLink="/" (click)="clearEntry()">End session</span>
+        </ng-container>
 
-    <span *ngIf="!entry" class="title-center">BMRBDep Home</span>
+        <span *ngIf="!entry" class="title-center">BMRBDep Home</span>
 
-  </mat-toolbar-row>
-  <mat-toolbar-row class="loading-bar-holder">
-    <div *mkLoadingPage="{checkPendingHttp: true}">
-      <mk-sliding-bar colorOne="#CBDBFF" colorTwo="#F5F5F5"></mk-sliding-bar>
-    </div>
-  </mat-toolbar-row>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="loading-bar-holder">
+        <div *mkLoadingPage="{checkPendingHttp: true}">
+            <mk-sliding-bar colorOne="#CBDBFF" colorTwo="#F5F5F5"></mk-sliding-bar>
+        </div>
+    </mat-toolbar-row>
 </mat-toolbar>
 
 <mat-sidenav-container>
-  <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false">
-    <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
-  </mat-sidenav>
+    <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false">
+        <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
+    </mat-sidenav>
 
-  <mat-sidenav-content>
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
+    <mat-sidenav-content>
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
 </mat-sidenav-container>
