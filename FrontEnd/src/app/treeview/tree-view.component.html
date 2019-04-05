@@ -54,7 +54,7 @@
 
                     <a mat-list-item [ngClass]="{'active': page=='restore'}" *ngIf="entry.hasDeleted && !entry.deposited"
                        routerLink="/entry/restore" id="restore">
-                        <h2 matLine>Restore deleted saveframes</h2>
+                        <h2 matLine>View and restore deleted sections</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
