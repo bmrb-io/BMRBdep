@@ -10,7 +10,7 @@ import {Subscription} from 'rxjs';
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
 
-    subscription: Subscription;
+    subscription$: Subscription;
     constructor(private api: ApiService,
                 private route: ActivatedRoute,
                 private router: Router) {
@@ -18,7 +18,7 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         const parent: LoadEntryComponent = this;
-        this.subscription = this.api.entrySubject.subscribe(entry => {
+        this.subscription$ = this.api.entrySubject.subscribe(entry => {
             if (entry) {
                 if (entry.emailValidated) {
                     if (entry.deposited) {
@@ -37,6 +37,8 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.subscription.unsubscribe();
+        if (this.subscription$) {
+            this.subscription$.unsubscribe();
+        }
     }
 }
