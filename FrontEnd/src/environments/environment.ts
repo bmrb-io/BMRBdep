@@ -8,4 +8,5 @@ export const environment = {
   debug: true,
   serverURL: 'http://localhost:9000/deposition',
   contactEmail: 'bmrbhelp@bmrb.wisc.edu',
+  socketURL: 'http://localhost:9000',
 };

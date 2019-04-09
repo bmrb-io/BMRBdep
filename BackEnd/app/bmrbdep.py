@@ -33,7 +33,7 @@ application = Flask(__name__)
 socketio = SocketIO(application, path='/deposition/socket')
 
 # Set debug if running from command line
-if application.debug:
+if application.debug or configuration['debug']:
     from flask_cors import CORS
 
     configuration['debug'] = True
@@ -82,7 +82,7 @@ def connected(json_message):
     print('registered', json_message['uuid'])
     session['uuid'] = json_message['uuid']
     with depositions.DepositionRepo(session['uuid']) as d:
-        print(d._last_commit)
+        print(d.last_commit)
 
 
 @socketio.on('disconnect')
@@ -572,6 +572,7 @@ def fetch_or_store_deposition(uuid):
             email_validated: bool = repo.metadata['email_validated']
             entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
+            commit: str = repo.last_commit
         try:
             schema: dict = get_schema(schema_version)
         except RequestError:
@@ -583,6 +584,7 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
+        entry['commit'] = commit
 
         return jsonify(entry)
 
