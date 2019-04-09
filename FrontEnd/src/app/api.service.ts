@@ -60,22 +60,23 @@ export class ApiService implements OnDestroy {
       );
     }
 
-
-
+    const parent: ApiService = this;
     socket.on('connect', () => {
-      socket.emit('register', {uuid: this.cachedEntry.entryID});
+      console.log('subbed');
+      parent.entrySubject.subscribe(entry => {
+        console.log('got entry');
+        if (entry) {
+          socket.emit('register', {uuid: entry.entryID});
+        }
+      });
     });
 
-    const parent: ApiService = this;
+
     socket.on('disconnect', function() {
       parent.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
           ' to the server once the connection is restored.'));
     });
 
-    socket.on('unlockable', () => {
-      console.log('could not lock');
-      parent.messagesService.sendMessage(new Message('This deposition is already active elsewhere!', MessageType.ErrorMessage));
-    });
   }
 
   ngOnDestroy() {

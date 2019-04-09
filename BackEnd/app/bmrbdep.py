@@ -11,7 +11,6 @@ from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 
 # Installed modules
-import filelock
 import requests
 import pynmrstar
 import simplejson as json
@@ -78,28 +77,18 @@ else:
     logging.getLogger().setLevel('WARNING')
 
 
-@socketio.on('connect')
-def connected():
-    print('connect')
-
-
 @socketio.on('register')
 def connected(json_message):
     print('registered', json_message['uuid'])
-    try:
-        lock: filelock = depositions.DepositionRepo(json_message['uuid']).get_session_lock()
-        lock.acquire()
-        session['lock'] = lock
-        session['uuid'] = json_message['uuid']
-    except filelock.Timeout:
-        emit('unlockable')
+    session['uuid'] = json_message['uuid']
+    with depositions.DepositionRepo(session['uuid']) as d:
+        print(d._last_commit)
 
 
 @socketio.on('disconnect')
 def disconnected():
     if 'uuid' in session:
         print('disconnect', session['uuid'])
-        session['lock'].release()
 
 
 # Set up error handling

@@ -51,8 +51,8 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
 
 // For sockets
 // Source: https://www.npmjs.com/package/ngx-socket-io
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
-const config: SocketIoConfig = { url: environment.socketURL, options: {path: '/deposition/socket'} };
+import {SocketIoModule, SocketIoConfig} from 'ngx-socket-io';
+const config: SocketIoConfig = {url: environment.serverURL, options: {path: '/socket'}};
 
 
 @NgModule({
