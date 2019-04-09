@@ -2,6 +2,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
+import {environment} from '../environments/environment';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -17,9 +18,10 @@ import {ReviewComponent} from './review/review.component';
 import {TreeViewComponent} from './treeview/tree-view.component';
 import {FileUploaderComponent} from './file-uploader/file-uploader.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
-import {PendingValidationComponent} from './pending-validation/pending-validation.component'; // Saving/loading bar
+import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
+
 
 // For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
@@ -46,6 +48,11 @@ import {
 
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+
+// For sockets
+// Source: https://www.npmjs.com/package/ngx-socket-io
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+const config: SocketIoConfig = { url: environment.socketURL, options: {path: '/deposition/socket'} };
 
 
 @NgModule({
@@ -90,6 +97,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     LoadingPageModule,
     SlidingBarModule,
     MatDialogModule,
+    SocketIoModule.forRoot(config)
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent]

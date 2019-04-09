@@ -11,6 +11,7 @@ from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 
 # Installed modules
+import filelock
 import requests
 import pynmrstar
 import simplejson as json
@@ -21,7 +22,8 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
+from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response, session
+from flask_socketio import SocketIO, emit
 
 # Local modules
 import depositions
@@ -29,6 +31,7 @@ from common import ServerError, RequestError, configuration, get_schema, root_di
 
 # Set up the flask application
 application = Flask(__name__)
+socketio = SocketIO(application, path='/deposition/socket')
 
 # Set debug if running from command line
 if application.debug:
@@ -73,6 +76,30 @@ if configuration['debug']:
     logging.getLogger().setLevel('INFO')
 else:
     logging.getLogger().setLevel('WARNING')
+
+
+@socketio.on('connect')
+def connected():
+    print('connect')
+
+
+@socketio.on('register')
+def connected(json_message):
+    print('registered', json_message['uuid'])
+    try:
+        lock: filelock = depositions.DepositionRepo(json_message['uuid']).get_session_lock()
+        lock.acquire()
+        session['lock'] = lock
+        session['uuid'] = json_message['uuid']
+    except filelock.Timeout:
+        emit('unlockable')
+
+
+@socketio.on('disconnect')
+def disconnected():
+    if 'uuid' in session:
+        print('disconnect', session['uuid'])
+        session['lock'].release()
 
 
 # Set up error handling
@@ -570,3 +597,6 @@ def fetch_or_store_deposition(uuid):
 
         return jsonify(entry)
 
+
+if __name__ == "__main__":
+    socketio.run(application, host='localhost', port=9000)
