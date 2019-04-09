@@ -7,6 +7,7 @@ import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
+import {Socket} from 'ngx-socket-io';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,8 @@ export class ApiService implements OnDestroy {
               private messagesService: MessagesService,
               private router: Router,
               private route: ActivatedRoute,
-              private titleService: Title) {
+              private titleService: Title,
+              private socket: Socket) {
 
     this.entrySubject = new ReplaySubject<Entry>();
 
@@ -57,6 +59,23 @@ export class ApiService implements OnDestroy {
         }
       );
     }
+
+
+
+    socket.on('connect', () => {
+      socket.emit('register', {uuid: this.cachedEntry.entryID});
+    });
+
+    const parent: ApiService = this;
+    socket.on('disconnect', function() {
+      parent.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
+          ' to the server once the connection is restored.'));
+    });
+
+    socket.on('unlockable', () => {
+      console.log('could not lock');
+      parent.messagesService.sendMessage(new Message('This deposition is already active elsewhere!', MessageType.ErrorMessage));
+    });
   }
 
   ngOnDestroy() {

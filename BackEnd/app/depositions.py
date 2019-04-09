@@ -100,6 +100,10 @@ class DepositionRepo:
         finally:
             self._lock_object.release()
 
+    def get_session_lock(self):
+        session_lock_path = os.path.join(configuration['repo_path'], str(self._uuid), '.git', 'session.lock')
+        return FileLock(session_lock_path, timeout=1)
+
     @property
     def metadata(self) -> dict:
         """ Return the metadata dictionary. """
