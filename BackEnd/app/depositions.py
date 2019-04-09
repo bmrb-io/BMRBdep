@@ -83,7 +83,7 @@ class DepositionRepo:
         else:
             self._lock_object = FileLock(self._lock_path, timeout=10)
             self._lock_object.acquire()
-            self._repo = Repo(self._entry_dir, search_parent_directories=True)
+            self._repo = Repo(self._entry_dir)
 
         self._last_commit = self._repo.head.object.hexsha
         return self
@@ -110,6 +110,10 @@ class DepositionRepo:
             self._live_metadata = json.loads(self.get_file('submission_info.json'))
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
+
+    @property
+    def last_commit(self) -> str:
+        return self._last_commit
 
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
         """ Deposits an entry into ETS. """

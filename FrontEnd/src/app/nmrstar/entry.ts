@@ -50,6 +50,12 @@ export function entryFromJSON(jdata: Object): Entry {
   entry.emailValidated = jdata['email_validated'];
   entry.deposited = jdata['entry_deposited'];
   entry.depositionNickname = jdata['deposition_nickname'];
+  entry.commit = jdata['commit'];
+  if ('unsaved' in jdata) {
+    entry.unsaved = jdata['unsaved'];
+  } else {
+    entry.unsaved = false;
+  }
 
   for (const saveframeJSON of jdata['saveframes']) {
     const newFrame = saveframeFromJSON(saveframeJSON, entry);
@@ -76,6 +82,8 @@ export class Entry {
   deposited: boolean;
   depositionNickname: string;
   firstIncompleteCategory: string;
+  commit: string;
+  unsaved: boolean;
 
   constructor(dataName: string) {
     this.entryID = dataName;
@@ -95,7 +103,8 @@ export class Entry {
   toJSON(): {} {
     return {
       entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
-      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited
+      deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
+      commit: this.commit
     };
   }
 
