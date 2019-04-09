@@ -53,6 +53,7 @@ class DepositionRepo:
         self._original_metadata: dict = {}
         self._lock_path: str = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
         self._lock_object: Optional[FileLock] = None
+        self._last_commit: str
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
@@ -82,8 +83,9 @@ class DepositionRepo:
         else:
             self._lock_object = FileLock(self._lock_path, timeout=10)
             self._lock_object.acquire()
-            self._repo = Repo(self._entry_dir)
+            self._repo = Repo(self._entry_dir, search_parent_directories=True)
 
+        self._last_commit = self._repo.head.object.hexsha
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -99,10 +101,6 @@ class DepositionRepo:
             raise ServerError("An exception happened while closing the entry repository: %s" % err)
         finally:
             self._lock_object.release()
-
-    def get_session_lock(self):
-        session_lock_path = os.path.join(configuration['repo_path'], str(self._uuid), '.git', 'session.lock')
-        return FileLock(session_lock_path, timeout=1)
 
     @property
     def metadata(self) -> dict:
