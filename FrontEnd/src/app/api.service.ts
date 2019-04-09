@@ -38,6 +38,7 @@ export class ApiService implements OnDestroy {
       this.cachedEntry = entry;
       if (entry) {
         this.titleService.setTitle(`BMRBDep: ${entry.depositionNickname}`);
+        socket.emit('register', {uuid: entry.entryID});
       }
     });
 
@@ -60,20 +61,16 @@ export class ApiService implements OnDestroy {
       );
     }
 
-    const parent: ApiService = this;
-    socket.on('connect', () => {
-      console.log('subbed');
-      parent.entrySubject.subscribe(entry => {
-        console.log('got entry');
-        if (entry) {
-          socket.emit('register', {uuid: entry.entryID});
-        }
-      });
-    });
+    socket.on('hash', commit => {
+      if (this.cachedEntry) {
+        this.cachedEntry.commit = commit;
+      } else {
+        console.log('Got new commit but no entry.');
+      }
+    })
 
-
-    socket.on('disconnect', function() {
-      parent.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
+    socket.on('disconnect', () => {
+      this.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
           ' to the server once the connection is restored.'));
     });
 
