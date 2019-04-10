@@ -492,7 +492,7 @@ def deposit_entry(uuid) -> Response:
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
 
-    return jsonify({'status': 'success'})
+    return jsonify({'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>/file/<filename>', methods=('GET', 'DELETE'))
@@ -507,7 +507,7 @@ def file_operations(uuid, filename: str) -> Response:
         with depositions.DepositionRepo(uuid) as repo:
             repo.delete_data_file(filename)
             repo.commit('Deleted file %s' % filename)
-        return jsonify({'status': 'success'})
+        return jsonify({'commit': repo.last_commit})
     else:
         raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')
 
@@ -527,9 +527,11 @@ def store_file(uuid) -> Response:
 
         # Update the entry data
         if repo.commit("User uploaded file: %s" % filename):
-            return jsonify({'filename': filename, 'changed': True})
+            return jsonify({'filename': filename, 'changed': True,
+                            'commit': repo.last_commit})
         else:
-            return jsonify({'filename': filename, 'changed': False})
+            return jsonify({'filename': filename, 'changed': False,
+                            'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>', methods=('GET', 'PUT'))
@@ -538,8 +540,9 @@ def fetch_or_store_deposition(uuid):
 
     # Store an entry
     if request.method == "PUT":
+        entry_json: dict = request.get_json()
         try:
-            entry: pynmrstar.Entry = pynmrstar.Entry.from_json(request.get_json())
+            entry: pynmrstar.Entry = pynmrstar.Entry.from_json(entry_json)
         except ValueError:
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
@@ -549,18 +552,22 @@ def fetch_or_store_deposition(uuid):
             # If they aren't making any changes
             try:
                 if existing_entry == entry:
-                    return jsonify({'changed': False})
+                    return jsonify({'commit': repo.last_commit})
             except ValueError as err:
                 raise RequestError(repr(err))
 
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
+            if repo.last_commit != entry_json['commit']:
+                if 'force' not in entry_json:
+                    return jsonify({'error': 'reload'})
+
             # Update the entry data
             repo.write_entry(entry)
             repo.commit("Entry updated.")
 
-            return jsonify({'changed': True})
+            return jsonify({'commit': repo.last_commit})
 
     # Load an entry
     elif request.method == "GET":

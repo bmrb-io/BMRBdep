@@ -91,6 +91,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
             if (event.type === HttpEventType.UploadProgress) {
               dataFile.percent = Math.round(100 * event.loaded / event.total);
             } else if (event instanceof HttpResponse) {
+              this.entry.commit = event.body['commit'];
               dataFile.percent = 100;
               this.entry.dataStore.updateName(dataFile, event.body['filename']);
               if (!event.body['changed']) {
@@ -99,9 +100,10 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
               }
             }
           },
-          error => {
+          () => {
             this.entry.dataStore.deleteFile(dataFile.fileName);
-            this.api.handleError(error);
+            this.messagesService.sendMessage(new Message('Failed to upload file. Do you have an internet connection?',
+                MessageType.ErrorMessage, 15000));
           },
           () => {
             closure -= 1;
