@@ -2,7 +2,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import {environment} from '../environments/environment';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
@@ -49,12 +48,6 @@ import {
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
 
-// For sockets
-// Source: https://www.npmjs.com/package/ngx-socket-io
-import {SocketIoModule, SocketIoConfig} from 'ngx-socket-io';
-const config: SocketIoConfig = {url: environment.socketURL, options: {path: '/deposition/socket'}};
-
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -97,7 +90,6 @@ const config: SocketIoConfig = {url: environment.socketURL, options: {path: '/de
     LoadingPageModule,
     SlidingBarModule,
     MatDialogModule,
-    SocketIoModule.forRoot(config)
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent]
