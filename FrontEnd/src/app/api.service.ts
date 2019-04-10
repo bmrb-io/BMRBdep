@@ -7,7 +7,6 @@ import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
-import {Socket} from 'ngx-socket-io';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material';
 
@@ -32,7 +31,6 @@ export class ApiService implements OnDestroy {
               private router: Router,
               private route: ActivatedRoute,
               private titleService: Title,
-              private socket: Socket,
               private dialog: MatDialog) {
 
     this.entrySubject = new ReplaySubject<Entry>();
@@ -41,7 +39,6 @@ export class ApiService implements OnDestroy {
       this.cachedEntry = entry;
       if (entry) {
         this.titleService.setTitle(`BMRBDep: ${entry.depositionNickname}`);
-        socket.emit('register', {uuid: entry.entryID});
       }
     });
 
@@ -51,6 +48,10 @@ export class ApiService implements OnDestroy {
       rawJSON['schema'] = schema;
       const entry = entryFromJSON(rawJSON);
       this.entrySubject.next(entry);
+      if (entry.unsaved) {
+        console.log(entry);
+        this.saveEntry(false, false);
+      }
     } else {
       this.subscription$ = this.router.events.subscribe(
         event => {
@@ -63,22 +64,6 @@ export class ApiService implements OnDestroy {
         }
       );
     }
-
-    socket.on('hash', commit => {
-      if (this.cachedEntry) {
-        if (commit !== this.cachedEntry.commit) {
-          this.loadEntry(this.cachedEntry.entryID);
-        }
-      } else {
-        console.log('Got new commit but no entry.');
-      }
-    });
-
-    socket.on('disconnect', () => {
-      this.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
-          ' to the server once the connection is restored.'));
-    });
-
   }
 
   ngOnDestroy() {
@@ -183,7 +168,6 @@ export class ApiService implements OnDestroy {
       if (override) {
         jsonObject['force'] = true;
       }
-      console.log(jsonObject);
       this.activeSaveRequest = this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe(
         response => {
           if ('error' in response && response['error'] === 'reload') {
@@ -216,6 +200,7 @@ export class ApiService implements OnDestroy {
             }
             this.activeSaveRequest = null;
             this.cachedEntry.commit = response['commit'];
+            this.cachedEntry.unsaved = false;
           }
         },
         () => {

@@ -22,7 +22,6 @@ from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response, session
-from flask_socketio import SocketIO, emit
 
 # Local modules
 import depositions
@@ -30,7 +29,6 @@ from common import ServerError, RequestError, configuration, get_schema, root_di
 
 # Set up the flask application
 application = Flask(__name__)
-socketio = SocketIO(application, path='/deposition/socket')
 
 # Set debug if running from command line
 if application.debug or configuration['debug']:
@@ -75,20 +73,6 @@ if configuration['debug']:
     logging.getLogger().setLevel('INFO')
 else:
     logging.getLogger().setLevel('WARNING')
-
-
-@socketio.on('register')
-def connected(json_message):
-    print('registered', json_message['uuid'])
-    session['uuid'] = json_message['uuid']
-    with depositions.DepositionRepo(session['uuid']) as d:
-        print(d.last_commit)
-
-
-@socketio.on('disconnect')
-def disconnected():
-    if 'uuid' in session:
-        print('disconnect', session['uuid'])
 
 
 # Set up error handling
@@ -595,6 +579,3 @@ def fetch_or_store_deposition(uuid):
 
         return jsonify(entry)
 
-
-if __name__ == "__main__":
-    socketio.run(application, host='localhost', port=9000)
