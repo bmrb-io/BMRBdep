@@ -26,7 +26,7 @@ export class Saveframe {
   deleted: boolean;
   tagDict: {};
   schemaValues: {};
-  index: number;
+  saveframesInCategory: number;
   nextCategory: string;
   previousCategory: string;
 
@@ -41,7 +41,7 @@ export class Saveframe {
     this.display = 'H';
     this.valid = true;
     this.deleted = false;
-    this.index = 0;
+    this.saveframesInCategory = 0;
     this.nextCategory = null;
     this.previousCategory = null;
     if (this.parent.schema) {
@@ -227,8 +227,6 @@ export class Saveframe {
   }
 
   refresh(): void {
-    // Get the category number for this SF
-    this.index = this.parent.getSaveframesByCategory(this.category).indexOf(this);
 
     // Determine if deleted
     this.deleted = this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
