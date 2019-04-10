@@ -53,7 +53,6 @@ class DepositionRepo:
         self._original_metadata: dict = {}
         self._lock_path: str = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
         self._lock_object: Optional[FileLock] = None
-        self._last_commit: str
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
@@ -85,7 +84,6 @@ class DepositionRepo:
             self._lock_object.acquire()
             self._repo = Repo(self._entry_dir)
 
-        self._last_commit = self._repo.head.object.hexsha
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -113,7 +111,7 @@ class DepositionRepo:
 
     @property
     def last_commit(self) -> str:
-        return self._last_commit
+        return self._repo.head.object.hexsha
 
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
         """ Deposits an entry into ETS. """
