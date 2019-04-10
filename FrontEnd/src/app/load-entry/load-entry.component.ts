@@ -1,8 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {combineLatest, Subscription} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-load-entry',
@@ -23,28 +22,22 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
 
     this.subscription$ = this.route.params.subscribe(params => {
       parent.api.loadEntry(params['entry']);
-    });
 
-
-    this.subscription$ = combineLatest(this.route.params, this.api.entrySubject).pipe(
-      map(results => {
-        const entryID = results[0]['entry'];
-        parent.api.loadEntry(entryID);
-
+      this.subscription$.add(this.api.entrySubject.subscribe(entry => {
         // Wait for the specific entry we want to load
-        if (results[1] && results[1].entryID === entryID) {
-          if (results[1].emailValidated) {
-            if (results[1].deposited) {
+        if (entry && entry.entryID === params['entry']) {
+          if (entry.emailValidated) {
+            if (entry.deposited) {
               this.router.navigate(['/entry']);
             } else {
-              this.router.navigate(['/entry/', 'saveframe', results[1].firstIncompleteCategory]);
+              this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
             }
           } else {
             this.router.navigate(['/entry', 'pending-verification']);
           }
         }
-      })
-    ).subscribe();
+      }));
+    });
   }
 
   ngOnDestroy() {
