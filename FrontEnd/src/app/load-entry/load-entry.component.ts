@@ -21,9 +21,10 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const parent: LoadEntryComponent = this;
 
-    this.route.params.subscribe(params => {
+    this.subscription$ = this.route.params.subscribe(params => {
       parent.api.loadEntry(params['entry']);
-    })
+    });
+
 
     this.subscription$ = combineLatest(this.route.params, this.api.entrySubject).pipe(
       map(results => {

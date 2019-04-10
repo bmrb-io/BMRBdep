@@ -8,6 +8,8 @@ import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {Socket} from 'ngx-socket-io';
+import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
+import {MatDialog} from '@angular/material';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +32,8 @@ export class ApiService implements OnDestroy {
               private router: Router,
               private route: ActivatedRoute,
               private titleService: Title,
-              private socket: Socket) {
+              private socket: Socket,
+              private dialog: MatDialog) {
 
     this.entrySubject = new ReplaySubject<Entry>();
 
@@ -63,11 +66,13 @@ export class ApiService implements OnDestroy {
 
     socket.on('hash', commit => {
       if (this.cachedEntry) {
-        this.cachedEntry.commit = commit;
+        if (commit !== this.cachedEntry.commit) {
+          this.loadEntry(this.cachedEntry.entryID);
+        }
       } else {
         console.log('Got new commit but no entry.');
       }
-    })
+    });
 
     socket.on('disconnect', () => {
       this.messagesService.sendMessage(new Message('Disconnected from server! Changes will be saved locally and sent' +
@@ -106,17 +111,18 @@ export class ApiService implements OnDestroy {
   deleteFile(fileName: string, verifyDeleted: boolean = false): void {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
     this.http.delete(apiEndPoint).subscribe(
-      () => {
+      response => {
         this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
+        this.cachedEntry.commit = response['commit'];
         this.saveEntry(false, true);
       },
       () => {
         // verifyDeleted will be set if they cancel an upload
         if (!verifyDeleted) {
-          this.messagesService.sendMessage(new Message('Failed to delete file.',
+          this.messagesService.sendMessage(new Message('Failed to delete file. Do you have an internet connection?',
             MessageType.ErrorMessage, 15000));
         } else {
           this.messagesService.clearMessage();
@@ -141,12 +147,16 @@ export class ApiService implements OnDestroy {
     }));
   }
 
-  loadEntry(entryID: string): void {
+  loadEntry(entryID: string, skipMessage: boolean = false): void {
     const entryURL = `${environment.serverURL}/${entryID}`;
-    this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
+    if (!skipMessage) {
+      this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
+    }
     this.http.get(entryURL).subscribe(
       jsonData => {
-        this.messagesService.clearMessage();
+        if (!skipMessage) {
+          this.messagesService.clearMessage();
+        }
         this.entrySubject.next(entryFromJSON(jsonData));
         this.saveEntry(true);
       },
@@ -154,7 +164,7 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  saveEntry(initialSave: boolean = false, skipMessage: boolean = true): void {
+  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = false): void {
 
     // If the previous save action is still in progress, cancel it
     if (this.activeSaveRequest) {
@@ -169,14 +179,53 @@ export class ApiService implements OnDestroy {
     // Save to remote server if we haven't just loaded the entry
     if (!initialSave) {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-      this.activeSaveRequest = this.http.put(entryURL, JSON.stringify(this.cachedEntry), this.JSONOptions).subscribe(
-        () => {
-          if (!skipMessage) {
-            this.messagesService.sendMessage(new Message('Changes saved.'));
+      const jsonObject  = this.cachedEntry.toJSON();
+      if (override) {
+        jsonObject['force'] = true;
+      }
+      console.log(jsonObject);
+      this.activeSaveRequest = this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe(
+        response => {
+          if ('error' in response && response['error'] === 'reload') {
+
+            this.cachedEntry.unsaved = true;
+            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+              disableClose: false
+            });
+
+            dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
+                ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
+                'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
+                'unsure, load changes from the server.)';
+            dialogRef.componentInstance.proceedMessage = 'Load changes from server';
+            dialogRef.componentInstance.cancelMessage = 'Push changes to server';
+
+            dialogRef.afterClosed().subscribe(result => {
+              if (result) {
+                this.loadEntry(this.cachedEntry.entryID, true);
+              } else if (result === false) {
+                this.saveEntry(false, false, true);
+              } else if (result === undefined) {
+                this.cachedEntry.unsaved = true;
+              }
+            });
+
+          } else {
+            if (!skipMessage) {
+              this.messagesService.sendMessage(new Message('Changes saved.'));
+            }
+            this.activeSaveRequest = null;
+            this.cachedEntry.commit = response['commit'];
           }
-          this.activeSaveRequest = null;
         },
-        err => this.handleError(err)
+        () => {
+          if (!this.cachedEntry.unsaved) {
+            this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
+                ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
+                ' is restored and the entry can be saved.'));
+          }
+          this.cachedEntry.unsaved = true;
+        }
       );
     }
   }
