@@ -79,6 +79,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       fileElement = this.fileUploadElement.nativeElement.files[0];
     }
 
+    this.api.clearDeposition();
     this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement,
       this.bootstrapID.value).then(
       deposition_id => {
