@@ -200,6 +200,7 @@ export class ApiService implements OnDestroy {
             this.activeSaveRequest = null;
             this.cachedEntry.commit = response['commit'];
             this.cachedEntry.unsaved = false;
+            localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
           }
         },
         () => {
