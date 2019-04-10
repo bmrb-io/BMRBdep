@@ -417,6 +417,24 @@ export class Entry {
 
     // Update the category order
     this.updateCategories();
+
+    // Update the saveframe 'number of non-deleted saveframes' counter
+    for (const supercategory of this.superGroups) {
+      for (const category of supercategory.children) {
+        const categorySaveframes = this.getSaveframesByCategory(category.category);
+        let saveframesInCategory = 0;
+        for (const sf of categorySaveframes) {
+          if (!sf.deleted) {
+            saveframesInCategory += 1;
+          }
+        }
+
+        for (const sf of categorySaveframes) {
+          sf.saveframesInCategory = saveframesInCategory;
+        }
+      }
+    }
+
     // Check entry validity
     this.valid = true;
     for (const sf of this.saveframes) {
