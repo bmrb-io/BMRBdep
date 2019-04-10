@@ -163,7 +163,7 @@ export class ApiService implements OnDestroy {
     // Save to remote server if we haven't just loaded the entry
     if (!initialSave) {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-      const jsonObject  = this.cachedEntry.toJSON();
+      const jsonObject = this.cachedEntry.toJSON();
       if (override) {
         jsonObject['force'] = true;
       }
@@ -177,9 +177,9 @@ export class ApiService implements OnDestroy {
             });
 
             dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
-                ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
-                'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
-                'unsure, load changes from the server.)';
+              ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
+              'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
+              'unsure, load changes from the server.)';
             dialogRef.componentInstance.proceedMessage = 'Load changes from server';
             dialogRef.componentInstance.cancelMessage = 'Push changes to server';
 
@@ -205,8 +205,8 @@ export class ApiService implements OnDestroy {
         () => {
           if (!this.cachedEntry.unsaved) {
             this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
-                ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
-                ' is restored and the entry can be saved.'));
+              ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
+              ' is restored and the entry can be saved.'));
           }
           this.cachedEntry.unsaved = true;
         }
