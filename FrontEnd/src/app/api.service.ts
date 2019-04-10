@@ -49,7 +49,6 @@ export class ApiService implements OnDestroy {
       const entry = entryFromJSON(rawJSON);
       this.entrySubject.next(entry);
       if (entry.unsaved) {
-        console.log(entry);
         this.saveEntry(false, false);
       }
     } else {
