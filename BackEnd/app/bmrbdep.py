@@ -21,7 +21,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response, session
+from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 
 # Local modules
 import depositions
