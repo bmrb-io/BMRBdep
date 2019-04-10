@@ -11,7 +11,7 @@ export class ConfirmationDialogComponent {
   public cancelMessage: string;
 
   constructor(public dialogRef: MatDialogRef<ConfirmationDialogComponent>) {
-    this.proceedMessage = 'Enter';
+    this.proceedMessage = 'Proceed';
     this.cancelMessage = 'Cancel';
   }
 }
