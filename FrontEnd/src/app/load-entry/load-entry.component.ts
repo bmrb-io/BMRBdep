@@ -11,6 +11,7 @@ import {Subscription} from 'rxjs';
 export class LoadEntryComponent implements OnInit, OnDestroy {
 
   subscription$: Subscription;
+  subscription2$: Subscription;
 
   constructor(private api: ApiService,
               private route: ActivatedRoute,
@@ -23,7 +24,7 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
     this.subscription$ = this.route.params.subscribe(params => {
       parent.api.loadEntry(params['entry']);
 
-      this.subscription$.add(this.api.entrySubject.subscribe(entry => {
+      this.subscription2$ = this.api.entrySubject.subscribe(entry => {
         // Wait for the specific entry we want to load
         if (entry && entry.entryID === params['entry']) {
           if (entry.emailValidated) {
@@ -36,13 +37,16 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
             this.router.navigate(['/entry', 'pending-verification']);
           }
         }
-      }));
+      });
     });
   }
 
   ngOnDestroy() {
     if (this.subscription$) {
       this.subscription$.unsubscribe();
+    }
+    if (this.subscription2$) {
+      this.subscription2$.unsubscribe();
     }
   }
 }
