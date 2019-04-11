@@ -180,7 +180,6 @@ class DepositionRepo:
         params['contact_person1'] = contact_people[0]
         params['contact_person2'] = contact_people[1]
 
-        # nmr_dep_code = ""
         ranges = configuration['ets']['deposition_ranges']
         if len(ranges) == 0:
             raise ServerError('Server configuration error.')
@@ -211,8 +210,8 @@ class DepositionRepo:
                     bmrbnum = assignable_ids[0]
                     break
                 else:
-                    logging.warn('No valid IDs found in range %d to %d. Continuing to next range...' %
-                                 (id_range[0], id_range[1]))
+                    logging.warning('No valid IDs found in range %d to %d. Continuing to next range...' %
+                                    (id_range[0], id_range[1]))
 
             if not bmrbnum:
                 logging.exception('No valid IDs remaining in any of the ranges!')
