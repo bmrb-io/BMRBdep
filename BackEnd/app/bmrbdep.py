@@ -154,9 +154,11 @@ def send_validation_email(uuid) -> Response:
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
-Please click <a href="%s">here</a> to validate your e-mail for this session. This is required to proceed.
+Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to 
+proceed.
 <br><br>
-You can use <a href="%s">this link</a> to return to your deposition later if you close the page before it is complete.
+You can use <a href="%s" target="BMRBDep">this link</a> to return to your deposition later if you close the page before
+it is complete.
 <br><br>
 If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
 share this e-mail with will have access to the full contents of your in-progress deposition and can make
