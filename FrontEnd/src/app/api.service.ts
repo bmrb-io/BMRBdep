@@ -63,6 +63,9 @@ export class ApiService implements OnDestroy {
         }
       );
     }
+
+    // Used to open verification links in same tab
+    window.name = 'BMRBDep';
   }
 
   ngOnDestroy() {
