@@ -89,24 +89,11 @@
     <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
          (change)="validateTag()"
          [title]="tag.validationMessage">
-        <label>Yes
-            <input type="radio"
-                   [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
-                   [name]="tag.fullyQualifiedTagName + unique_identifier"
-                   [(ngModel)]="tag.value"
-                   [id]="tag.fullyQualifiedTagName + unique_identifier"
-                   [value]="'yes'"
-                   [disabled]="tag.disabled">
-        </label>
-        <label>No
-            <input type="radio"
-                   [attr.name]="tag.fullyQualifiedTagName + unique_identifier"
-                   [name]="tag.fullyQualifiedTagName + unique_identifier"
-                   [(ngModel)]="tag.value"
-                   [id]="tag.fullyQualifiedTagName + unique_identifier"
-                   [value]="'no'"
-                   [disabled]="tag.disabled">
-        </label>
+
+        <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled">
+            <mat-radio-button class="first-button" value="yes">Yes</mat-radio-button>
+            <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
     </div>
 </ng-container>
 
