@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 # Installed modules
 import flask
 import logging
+import unidecode
 import pynmrstar
 import werkzeug.utils
 import psycopg2
@@ -123,6 +124,21 @@ class DepositionRepo:
             raise RequestError('Invalid deposited entry. The ID must match that of this deposition.')
 
         logging.info('Depositing deposition %s' % final_entry.entry_id)
+
+        # Remove all unicode from the entry
+        for saveframe in final_entry:
+            for tag in saveframe.tag_iterator():
+                tag[1] = unidecode.unidecode(tag[1])
+                # In case only non-convertible unicode characters were there
+                if tag[1] == '':
+                    tag[1] = None
+            for loop in saveframe.loops:
+                for row in loop.data:
+                    for pos in range(0, row.length):
+                        row[pos] = unidecode.unidecode(row[pos])
+                        # In case only non-convertible unicode characters were there
+                        if row[pos] == '':
+                            row[pos] = None
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
