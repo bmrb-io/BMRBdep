@@ -57,7 +57,9 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   // (drop)="onDropFile($event)"
   onDropFile(event: DragEvent) {
     event.preventDefault();
-    this.uploadFile(event.dataTransfer.files);
+    if (this.entry && !this.entry.deposited) {
+      this.uploadFile(event.dataTransfer.files);
+    }
   }
 
   // At the drag drop area
