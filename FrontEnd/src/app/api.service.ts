@@ -66,6 +66,16 @@ export class ApiService implements OnDestroy {
 
     // Used to open verification links in same tab
     window.name = 'BMRBDep';
+
+    setInterval(() => {
+      const savedID = localStorage.getItem('entryID');
+      if (savedID && this.cachedEntry && savedID !== this.cachedEntry.entryID) {
+        this.entrySubject.next(null);
+        this.router.navigate(['/']);
+        this.messagesService.sendMessage(new Message('You were signed out on this tab because you loaded a different' +
+          ' deposition in another tab.', MessageType.NotificationMessage, 60000));
+      }
+    }, 100);
   }
 
   ngOnDestroy() {
@@ -74,6 +84,7 @@ export class ApiService implements OnDestroy {
 
   clearDeposition(): void {
     localStorage.removeItem('entry');
+    localStorage.removeItem('entryID');
     localStorage.removeItem('schema');
     this.entrySubject.next(null);
   }
@@ -161,6 +172,7 @@ export class ApiService implements OnDestroy {
 
     if (initialSave) {
       localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
+      localStorage.setItem('entryID', this.cachedEntry.entryID);
     }
     localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
 
@@ -183,7 +195,7 @@ export class ApiService implements OnDestroy {
             dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
               ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
               'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
-              'unsure, load changes from the server.)';
+              'unsure, load changes from the server.) Note that you should only edit one deposition at a time, in one tab.';
             dialogRef.componentInstance.proceedMessage = 'Load changes from server';
             dialogRef.componentInstance.cancelMessage = 'Push changes to server';
 
@@ -205,6 +217,7 @@ export class ApiService implements OnDestroy {
             this.cachedEntry.commit = response['commit'];
             this.cachedEntry.unsaved = false;
             localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
+            localStorage.setItem('entryID', this.cachedEntry.entryID);
           }
         },
         () => {
