@@ -42,7 +42,8 @@ import {
   MatToolbarModule,
   MatButtonModule,
   MatSnackBarModule,
-  MatDialogModule
+  MatDialogModule,
+  MatRadioModule
 } from '@angular/material';
 
 // From https://github.com/mika-el/angular-loading-page
@@ -90,6 +91,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     LoadingPageModule,
     SlidingBarModule,
     MatDialogModule,
+    MatRadioModule
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent]
