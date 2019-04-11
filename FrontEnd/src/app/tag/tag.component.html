@@ -87,10 +87,9 @@
 
 <ng-container *ngIf="tag.interfaceType == 'yes_no'">
     <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-         (change)="validateTag()"
          [title]="tag.validationMessage">
 
-        <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled">
+        <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled" (change)="validateTag()">
             <mat-radio-button class="first-button" value="yes">Yes</mat-radio-button>
             <mat-radio-button value="no">No</mat-radio-button>
         </mat-radio-group>
