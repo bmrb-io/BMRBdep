@@ -153,6 +153,8 @@ class DepositionRepo:
             params['onhold_status'] = (today_date + relativedelta(months=+6)).strftime("%m/%d/%y")
         elif release_status == 'HOLD FOR 1 YEAR':
             params['onhold_status'] = (today_date + relativedelta(years=+1)).strftime("%m/%d/%y")
+        elif release_status == 'HOLD FOR PUBLICATION':
+            params['onhold_status'] = 'Pub'
         else:
             raise ServerError('Invalid release code.')
 
