@@ -140,6 +140,12 @@ class DepositionRepo:
                         if row[pos] == '':
                             row[pos] = None
 
+        # Tweak the middle initials
+        for middle_initial_tag in ['_Contact_person.Middle_initials', '_Entry_author.Middle_initials',
+                                   '_Citation_author.First_initial', '_Citation_author.Middle_initials']:
+            for tag in final_entry.get_tag(middle_initial_tag, whole_tag=True):
+                tag[1] = ".".join(tag[1].replace(".", "")) + '.'
+
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
 
