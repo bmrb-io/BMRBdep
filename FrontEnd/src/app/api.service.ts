@@ -153,10 +153,11 @@ export class ApiService implements OnDestroy {
 
   saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = false): void {
 
+    /*
     // If the previous save action is still in progress, cancel it
     if (this.activeSaveRequest) {
       this.activeSaveRequest.unsubscribe();
-    }
+    }*/
 
     if (initialSave) {
       localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
