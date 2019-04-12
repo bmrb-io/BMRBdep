@@ -134,7 +134,7 @@ class DepositionRepo:
                     tag[1] = None
             for loop in saveframe.loops:
                 for row in loop.data:
-                    for pos in range(0, row.length):
+                    for pos in range(0, len(row)):
                         row[pos] = unidecode.unidecode(row[pos])
                         # In case only non-convertible unicode characters were there
                         if row[pos] == '':
