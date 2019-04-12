@@ -9,7 +9,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material';
-import {load} from '@angular/core/src/render3';
 
 @Injectable({
   providedIn: 'root'
@@ -160,7 +159,8 @@ export class ApiService implements OnDestroy {
 
         // Verify that the NMR-STAR matches the uploaded files
         if ('data_files' in jsonData) {
-          for (const dataFile of jsonData['data_files']) {
+          const files: Array<string> = jsonData['data_files'];
+          for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;
             }
