@@ -78,11 +78,13 @@ else:
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)
-def handle_our_errors(error: Union[ServerError, RequestError]):
+def handle_our_errors(exception: Union[ServerError, RequestError]):
     """ Handles exceptions we raised ourselves. """
 
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
+    logging.warning("A handled exception was thrown! Exception: %s" % exception)
+
+    response = jsonify(exception.to_dict())
+    response.status_code = exception.status_code
     return response
 
 
@@ -91,6 +93,8 @@ def handle_other_errors(exception: Exception):
     """ Catches any other exceptions and formats them. Only
     displays the actual error to local clients (to prevent disclosing
     issues that could be security vulnerabilities)."""
+
+    logging.exception("An unhandled exception was thrown! Exception: %s" % exception)
 
     def check_local_ip() -> bool:
         """ Checks if the given IP is a local user."""
