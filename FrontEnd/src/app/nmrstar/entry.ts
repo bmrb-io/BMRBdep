@@ -146,7 +146,6 @@ export class Entry {
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     //  Also, set the first invalid saveframe in the process
     this.firstIncompleteCategory = null;
-    let lastCategory = null;
     for (const category of Array.from(categories)) {
       if (!this.schema.saveframeSchema[category]) {
         console.error('A saveframe exists with an invalid category:', category);
@@ -179,17 +178,9 @@ export class Entry {
       if (this.firstIncompleteCategory === null && !valid && display !== 'H') {
         this.firstIncompleteCategory = category;
       }
-      if (display !== 'H') {
-        lastCategory = category;
-      }
 
       // Add the record
       categoryStatusDict[category] = new CategoryInfo(category, prettyName, valid, display);
-    }
-
-    // If all sections are complete, go to the last category in the file
-    if (this.firstIncompleteCategory === null) {
-      this.firstIncompleteCategory = lastCategory;
     }
 
     // Update a record of which supergroup categories are valid and should be displayed

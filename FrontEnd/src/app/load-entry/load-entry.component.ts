@@ -31,7 +31,11 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
             if (entry.deposited) {
               this.router.navigate(['/entry']);
             } else {
-              this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
+              if (entry.firstIncompleteCategory) {
+                this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
+              } else {
+                this.router.navigate(['/entry/', 'review']);
+              }
             }
           } else {
             this.router.navigate(['/entry', 'pending-verification']);
