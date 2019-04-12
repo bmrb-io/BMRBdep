@@ -42,6 +42,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
     });
     this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to deposit the entry '${this.entry.depositionNickname}'?` +
         ' No changes are allowed after deposition.';
+    this.dialogRef.componentInstance.proceedMessage = 'Deposit';
 
     this.dialogRef.afterClosed().subscribe(result => {
       if (result) {
