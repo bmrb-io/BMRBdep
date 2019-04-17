@@ -8,11 +8,13 @@
         </mat-card-header>
         <mat-card-content>
             <mat-nav-list>
-                <ng-container *ngFor='let saveframe of entry.saveframes'>
-                    <p *ngIf="!saveframe.deleted && !saveframe.valid">
-                        <a mat-raised-button [routerLink]="['/entry', 'saveframe', saveframe.category]" color="accent">
-                            {{saveframe.schemaValues['category_group_view_name']}}</a>
-                    </p>
+                <ng-container *ngFor="let superGroupCat of entry.superGroups">
+                    <ng-container *ngFor="let category of superGroupCat.children">
+                        <p *ngIf="(!category.valid  && category.display != 'H')">
+                            <a mat-raised-button [routerLink]="['/entry', 'saveframe', category]" color="accent">
+                                {{entry.schema.saveframeSchema[category.category]['category_group_view_name']}}</a>
+                        </p>
+                    </ng-container>
                 </ng-container>
             </mat-nav-list>
         </mat-card-content>
