@@ -35,7 +35,7 @@
                                     [disabled]="saveframe.parent.deposited">Delete
                             </button>
                             <button mat-raised-button class="saveframe-button"
-                                    *ngIf="saveframe.saveframesInCategory <= saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
+                                    *ngIf="!saveframe.deleted"
                                     (click)='clearSaveframe()' color="accent"
                                     [disabled]="saveframe.parent.deposited">Clear data
                             </button>
