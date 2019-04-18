@@ -66,6 +66,22 @@ export class Saveframe {
     console.log(this);
   }
 
+  clear(): void {
+    // Copy the tags
+    for (const tag of this.tags) {
+      tag.value = null;
+      if (tag.schemaValues['default value'] !== '?') {
+        tag.value = tag.schemaValues['default value'];
+      }
+    }
+
+    // Copy the loops
+    for (const loop of this.loops) {
+      loop.clear();
+    }
+    this.refresh();
+  }
+
   delete() {
     this.getTag('_Deleted').value = 'yes';
   }

@@ -83,6 +83,15 @@ export class Loop {
     return newRow;
   }
 
+  clear(): void {
+    if (this.category === '_Contact_person') {
+      this.data = [this.data[0], this.data[1]];
+    } else {
+      this.data = [];
+      this.addRow();
+    }
+  }
+
   deleteRow(rowID): void {
     this.data.splice(rowID, 1);
   }

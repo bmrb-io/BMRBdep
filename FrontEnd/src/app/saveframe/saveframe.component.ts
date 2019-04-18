@@ -70,4 +70,29 @@ export class SaveframeComponent implements OnInit, OnDestroy {
       this.dialogRef = null;
     });
   }
+
+  clearSaveframe(): void {
+
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    if (nameTag && nameTag.value) {
+      this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to clear all data in the section '${nameTag.value}'?` +
+        ' There is no way to undo this action later.';
+    } else {
+      this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to clear all data in this section?` +
+        ' There is no way to undo this action later.';
+    }
+    this.dialogRef.componentInstance.proceedMessage = 'Clear data';
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Delete the saveframe
+        this.saveframe.clear();
+        this.processChange();
+      }
+      this.dialogRef = null;
+    });
+  }
 }
