@@ -71,10 +71,22 @@
             </mat-form-field>
 
             <div *ngIf="sessionType.value == 'file'">
+                <span *ngIf="inputFile.files[0]">{{inputFile.files[0].name}}</span>
+                <span *ngIf="!inputFile.files[0]">No file selected</span>
                 <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
-                <button mat-raised-button color="accent" (click)="openInput()" id="fileUploadButton">
-                    Click to select a file to upload.
-                </button>
+                <ng-container *ngIf="!inputFile.files[0] else other_button">
+                    <button mat-raised-button color="accent" type="button" (click)="openInput()"
+                             id="fileUploadButton">
+                        Click to select a file to upload.
+                    </button>
+                </ng-container>
+                <ng-template #other_button>
+                    <button mat-raised-button color="accent" type="button" (click)="openInput()"
+                            id="fileUploadButton">
+                        Click to select a different file to upload.
+                    </button>
+                </ng-template>
+
                 <p></p>
 
                 <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-raised-button color="primary">
