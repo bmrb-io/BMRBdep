@@ -471,7 +471,7 @@ export class Entry {
           sfCategory = this.dataStore.dataFiles[i].control.value[n][1];
         }
         const newRow = dfLoop.addRow();
-        newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length + 1), dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length), dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', contentDescription, dfLoop);
         if (sfCategory === null) {
