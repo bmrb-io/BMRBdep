@@ -28,7 +28,7 @@
             <tr *ngFor="let row of loop.data; let r = index">
                 <td>
                     <button mat-raised-button
-                            *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 1)"
+                            *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 0 && loop.data.length > 2)"
                             (click)='deleteRow(r)' color="accent" class="square-button"
                             [disabled]="loop.parent.parent.deposited">-
                     </button>
