@@ -7,8 +7,6 @@ import csv
 import sys
 import zlib
 import optparse
-import tempfile
-from shutil import rmtree
 
 # Installed modules
 import simplejson as json
@@ -19,9 +17,12 @@ from git import Git, Repo, GitCommandError
 # Local modules
 from common import root_dir
 
-dictionary_dir = tempfile.mkdtemp()
-Git(dictionary_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
-repo = Repo(os.path.join(dictionary_dir, 'nmr-star-dictionary'))
+dictionary_dir = os.path.join(root_dir, 'nmr-star-dictionary')
+if not os.path.exists(dictionary_dir):
+    Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
+repo = Repo(dictionary_dir)
+o = repo.remotes.origin
+o.pull()
 repo.git.checkout('development')
 
 # Load the data types
@@ -290,4 +291,4 @@ if __name__ == "__main__":
                 if schema[0] == "3.2.1.21":
                     sys.exit(0)
     finally:
-        rmtree(dictionary_dir)
+        pass

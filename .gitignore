@@ -46,6 +46,7 @@ Thumbs.db
 __pycache__
 package-lock.json
 /BackEnd/depositions/
+/BackEnd/app/nmr-star-dictionary/
 configuration.json
 env/
 /BackEnd/app/schema_data/*.json.zlib
