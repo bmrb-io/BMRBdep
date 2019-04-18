@@ -11,7 +11,7 @@
                 <ng-container *ngFor="let superGroupCat of entry.superGroups">
                     <ng-container *ngFor="let category of superGroupCat.children">
                         <p *ngIf="(!category.valid  && category.display != 'H')">
-                            <a mat-raised-button [routerLink]="['/entry', 'saveframe', category]" color="accent">
+                            <a mat-raised-button [routerLink]="['/entry', 'saveframe', category.category]" color="accent">
                                 {{entry.schema.saveframeSchema[category.category]['category_group_view_name']}}</a>
                         </p>
                     </ng-container>
