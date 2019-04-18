@@ -218,7 +218,7 @@ def new_deposition() -> Response:
     entry_bootstrap: bool = False
     if 'nmrstar_file' in request.files and request.files['nmrstar_file'] and request.files['nmrstar_file'].filename:
         try:
-            uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read())
+            uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read().decode())
         except (ValueError, TypeError) as e:
             raise RequestError("Invalid NMR-STAR file. Parse error: %s" % repr(e))
     # Check if they are bootstrapping from an existing entry - if so, make sure they didn't also upload a file
@@ -451,6 +451,7 @@ def new_deposition() -> Response:
             else:
                 request.files['nmrstar_file'].seek(0)
                 repo.write_file('bootstrap_entry.str', request.files['nmrstar_file'].read(), root=True)
+                repo.write_file(request.files['nmrstar_file'].filename, str(uploaded_entry).encode())
         repo.commit("Entry created.")
 
     # Send the validation e-mail
