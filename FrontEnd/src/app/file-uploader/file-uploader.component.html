@@ -43,7 +43,7 @@
         <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
             <div class="file-upload">
                 <mat-form-field>
-                    <mat-select (selectionChange)="updateAndSaveDataFiles()"
+                    <mat-select (selectionChange)="updateAndSaveDataFiles()" [formControl]="file.control"
                                 placeholder="Please select the data type(s) for this file."
                                 multiple required [disabled]="entry.deposited">
                         <mat-option *ngFor="let dataType of file.dropDownList" [value]="dataType"
