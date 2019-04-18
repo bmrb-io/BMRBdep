@@ -279,9 +279,20 @@ if __name__ == "__main__":
     # Options, parse 'em
     (options, cmd_input) = optparser.parse_args()
 
+    one_overwritten = False
+
     try:
         for schema in schema_emitter():
-            with open(os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib'), 'wb') as schema_file:
+            schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
+            if os.path.exists(schema_location):
+                if one_overwritten:
+                    print("Quitting because the schemas already exist.")
+                    sys.exit(0)
+                else:
+                    print("Overwriting the most recent schema to ensure it is the newest one.")
+                one_overwritten = True
+
+            with open(schema_location, 'wb') as schema_file:
                 j = json.dumps(schema[1])
                 schema_file.write(zlib.compress(j.encode('utf-8')))
             highest_schema = schema[0]
