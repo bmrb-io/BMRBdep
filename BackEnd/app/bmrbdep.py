@@ -304,7 +304,21 @@ def new_deposition() -> Response:
                     filtered_original_loop = loop.filter(tags_to_pull)
                     filtered_original_loop.add_missing_tags(schema=schema, all_tags=True)
                     new_saveframe[filtered_original_loop.category] = filtered_original_loop
+
                 entry_template.add_saveframe(new_saveframe)
+
+        # Strip off any loop Entry_ID tags from the original entry
+        for saveframe in entry_template.frame_list:
+            for loop in saveframe:
+                for tag in loop.tags:
+                    fqtn = (loop.category + "." + tag).lower()
+                    try:
+                        tag_schema = schema.schema[fqtn]
+                        if tag_schema['Natural foreign key'] == '_Entry.ID':
+                            loop[tag] = [None] * len(loop[tag])
+                    except KeyError:
+                        pass
+
         entry_template.normalize()
 
     # Set the entry information tags
@@ -341,7 +355,6 @@ def new_deposition() -> Response:
             author_family = orcid_json['person']['name']['family-name']['value']
 
     entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
-    entry_saveframe['UUID'] = deposition_id
 
     # Update the loops with the data we have
     author_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
