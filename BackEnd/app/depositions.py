@@ -152,9 +152,6 @@ class DepositionRepo:
                     if first_initial_index:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
 
-        # Write the final deposition to disk
-        self.write_file('deposition.str', str(final_entry).encode(), root=True)
-
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
 
@@ -250,6 +247,8 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
             conn.rollback()
             raise ServerError('Could not create deposition. Please try again.')
 
+        # Write the final deposition to disk
+        self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
         self.metadata['bmrbnum'] = bmrbnum
         self.commit('Deposition submitted!')
