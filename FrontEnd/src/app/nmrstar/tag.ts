@@ -64,6 +64,8 @@ export class Tag {
       this.interfaceType = 'country';
     } else if (this.fullyQualifiedTagName === '_Contact_person.State_province') {
       this.interfaceType = 'state';
+    } else if (this.name === 'Experiment_name') {
+      this.interfaceType = 'sf_pointer';
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       this.interfaceType = 'sf_pointer';
@@ -142,7 +144,24 @@ export class Tag {
 
     let matchedPointer = false;
 
-    if (this.schemaValues['Sf pointer'] === 'N') {
+    if (this.name === 'Experiment_name') {
+      const experimentLoop: Loop = this.getEntry().getLoopsByCategory('_Experiment')[0];
+
+      this.frameLink = [['1', '2']];
+      const nameTagIndex = experimentLoop.getTagIndex('Name');
+      const sampleLabelIndex = experimentLoop.getTagIndex('Sample_label');
+      const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label');
+
+      for (const row of experimentLoop.data) {
+        const sampleName: string = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1)).name;
+        const sampleConditionsName: string = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1)).name;
+        this.frameLink.push(['', row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
+      }
+
+      if (this.display === 'N') {
+        this.frameLink.push(['', 'deselect option']);
+      }
+    } else if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
         // 19 is the special case that means the enumeration tie is for a file
         if (this.schemaValues['Enumeration ties'] === '19') {
