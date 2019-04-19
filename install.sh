@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-if [[ ! -d "${SCRIPT_DIR}/BackEnd/env" ]]
+if [[ ! -d "${SCRIPT_DIR}/BackEnd/env" ]] || [[ "$1" = "-force" ]]
 then
   echo "python environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a ${SCRIPT_DIR}/installation.log
   python3 -m venv ${SCRIPT_DIR}/BackEnd/env
@@ -12,7 +12,7 @@ then
   deactivate
 fi
 
-if [[ ! -d "${SCRIPT_DIR}/FrontEnd/node_env" ]]
+if [[ ! -d "${SCRIPT_DIR}/FrontEnd/node_env" ]] || [[ "$1" = "-force" ]]
 then
   echo "node environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a ${SCRIPT_DIR}/installation.log
   source ${SCRIPT_DIR}/BackEnd/env/bin/activate
@@ -27,7 +27,7 @@ then
   cd -
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]]
+if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]] || [[ "$1" = "-force" ]]
 then
   echo "No git release versions file. creating one now... (This only needs to happen once.)" | tee -a ${SCRIPT_DIR}/installation.log
   source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
@@ -43,10 +43,11 @@ then
   cp ${SCRIPT_DIR}/BackEnd/app/example_config.json ${SCRIPT_DIR}/BackEnd/app/configuration.json
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/schema_data/3.2.1.21.json.zlib" ]]
+if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/schema_data/generated" ]] || [[ "$1" = "-force" ]]
 then
     echo "Schemas not found. Generating local cache of schema versions... (This only needs to happen once.)" | tee -a ${SCRIPT_DIR}/installation.log
     source ${SCRIPT_DIR}/BackEnd/env/bin/activate
     ${SCRIPT_DIR}/BackEnd/app/schema_loader.py 2>&1 | tee -a ${SCRIPT_DIR}/installation.log
     deactivate
+    touch ${SCRIPT_DIR}/BackEnd/app/schema_data/generated
 fi

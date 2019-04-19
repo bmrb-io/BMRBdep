@@ -141,10 +141,16 @@ class DepositionRepo:
                             row[pos] = None
 
         # Tweak the middle initials
-        for middle_initial_tag in ['_Contact_person.Middle_initials', '_Entry_author.Middle_initials',
-                                   '_Citation_author.First_initial', '_Citation_author.Middle_initials']:
-            for tag in final_entry.get_tag(middle_initial_tag, whole_tag=True):
-                tag[1] = ".".join(tag[1].replace(".", "")) + '.'
+        for loop_cat in [final_entry.get_loops_by_category(x) for x in
+                         ['_Contact_person', '_Entry_author', '_Citation_author']]:
+            for loop in loop_cat:
+                middle_initial_index = loop._tag_index('Middle_initials')
+                first_initial_index = loop._tag_index('First_initial')
+                for row in loop.data:
+                    if middle_initial_index:
+                        row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
+                    if first_initial_index:
+                        row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
