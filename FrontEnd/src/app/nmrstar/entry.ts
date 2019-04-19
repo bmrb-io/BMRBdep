@@ -373,15 +373,29 @@ export class Entry {
         } else {
           for (const loop of saveframe.loops) {
             if (rule['Conditional tag prefix'] === loop.category) {
-              // We need to check each row
-              const tagCol = loop.tags.indexOf(rule['Conditional tag'].substr(rule['Conditional tag'].indexOf('.') + 1));
-              const applyCol = loop.tags.indexOf(rule['Tag'].substr(rule['Tag'].indexOf('.') + 1));
-              for (const row of loop.data) {
-                if (rule['Regex'].test(row[tagCol].value)) {
-                  if (rule['Tag category'] === loop.category) {
-                    row[applyCol].display = rule['Override view value'];
-                  } else {
-                    console.error('Rule applies to another loop/saveframe: not implemented', rule);
+
+              if (rule['Tag category'] === loop.category) {
+                // We need to check each row
+                const tagCol = loop.getTagIndex(rule['Conditional tag']);
+                const applyCol = loop.getTagIndex(rule['Tag']);
+                for (const row of loop.data) {
+                  if (rule['Regex'].test(row[tagCol].value)) {
+                    if (rule['Tag category'] === loop.category) {
+                      row[applyCol].display = rule['Override view value'];
+                    }
+                  }
+                }
+              } else {
+                // We are here if the rule applies to another loop
+                const conditionalIndex = loop.getTagIndex(rule['Conditional tag']);
+                if (!conditionalIndex) {
+                  console.error('Invalid rule: applies to tag that doesn\'t exist in the specified loop:', rule);
+                } else {
+                  for (const conditionalRow of loop.data) {
+                    if (rule['Regex'].test(conditionalRow[conditionalIndex].value)) {
+                      loop.parent.getLoopByPrefix(rule['Tag category']).setVisibility(rule);
+                      break;
+                    }
                   }
                 }
               }
