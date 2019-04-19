@@ -349,10 +349,12 @@ def new_deposition() -> Response:
                          '_Entry_author.Middle_initials',
                          '_Entry_author.Family_name',
                          '_Entry_author.ORCID'])
-    author_loop.add_data([author_given,
-                          None,
-                          author_family,
-                          author_orcid])
+    if author_orcid:
+        author_loop.add_data([author_given,
+                              None,
+                              author_family,
+                              author_orcid])
+
     if not entry_saveframe['_Entry_author'].empty:
         for row in entry_saveframe['_Entry_author'].get_tag(['_Entry_author.Given_name',
                                                              '_Entry_author.Middle_initials',
@@ -379,7 +381,6 @@ def new_deposition() -> Response:
                            author_email,
                            schema.schema['_contact_person.role']['default value'],
                            schema.schema['_contact_person.organization_type']['default value']])
-    contact_loop.add_data([None, None, None, None, None, 'responsible scientist', 'academic'])
     # Merge the uploaded data
     if not entry_saveframe['_Contact_person'].empty:
         for row in entry_saveframe['_Contact_person'].get_tag(['_Contact_person.Given_name',
@@ -390,6 +391,8 @@ def new_deposition() -> Response:
                                                                '_Contact_person.Role',
                                                                '_Contact_person.Organization_type']):
             contact_loop.add_data(row)
+    else:
+        contact_loop.add_data([None, None, None, None, None, 'responsible scientist', 'academic'])
     contact_loop.add_missing_tags(all_tags=True, schema=schema)
     contact_loop.sort_tags(schema=schema)
     entry_saveframe['_Contact_person'] = contact_loop
