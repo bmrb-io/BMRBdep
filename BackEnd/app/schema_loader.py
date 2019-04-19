@@ -27,7 +27,7 @@ repo.git.checkout('development')
 
 # Load the data types
 dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
-data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "rU"))}
+data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
 
 validate_mode = False
 
