@@ -226,6 +226,17 @@ export class Loop {
     this.specialRules();
   }
 
+  getTagIndex(tagName: string): number {
+    if (tagName.includes('.')) {
+      tagName = tagName.slice(tagName.indexOf('.') + 1);
+    }
+    const position = this.tags.indexOf(tagName);
+    if (position < 0) {
+      return null;
+    }
+    return position;
+  }
+
   print(): string {
 
     const parent = this;
