@@ -39,6 +39,8 @@ export class ApiService implements OnDestroy {
       this.cachedEntry = entry;
       if (entry) {
         this.titleService.setTitle(`BMRBDep: ${entry.depositionNickname}`);
+      } else {
+        this.titleService.setTitle('BMRBDep');
       }
     });
 
