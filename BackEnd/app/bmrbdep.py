@@ -421,7 +421,9 @@ def new_deposition() -> Response:
                 row_data = []
                 for tag in loop.tags:
                     fqtn = (loop.category + '.' + tag).lower()
-                    if schema.schema[fqtn]['default value'] not in ["?", '']:
+                    if tag == "ID":
+                        row_data.append('1')
+                    elif schema.schema[fqtn]['default value'] not in ["?", '']:
                         row_data.append(schema.schema[fqtn]['default value'])
                     else:
                         row_data.append('.')

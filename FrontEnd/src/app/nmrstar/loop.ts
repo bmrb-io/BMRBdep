@@ -68,6 +68,27 @@ export class Loop {
     }
   }
 
+  getAvailableOrdinal(): number {
+    const seenIDs = [];
+    const IDCol = this.getTagIndex('ID');
+    if (IDCol === null) {
+      return null;
+    }
+
+    for (const row of this.data) {
+      const parsedInt = parseInt(row[IDCol].value, 10);
+      if (parsedInt) {
+        seenIDs.push(parsedInt);
+      }
+    }
+
+    let free = 1;
+    while (seenIDs.includes(free)) {
+      free += 1;
+    }
+    return free;
+  }
+
   addRow(): Array<LoopTag> {
     const newRow = [];
     for (const tag of this.tags) {
@@ -75,6 +96,9 @@ export class Loop {
       // Add the default value if the tag has one
       if (!checkValueIsNull(newTag.schemaValues['default value'])) {
         newTag.value = newTag.schemaValues['default value'];
+      }
+      if (tag === 'ID') {
+        newTag.value = this.getAvailableOrdinal().toString();
       }
       newRow.push(newTag);
     }
