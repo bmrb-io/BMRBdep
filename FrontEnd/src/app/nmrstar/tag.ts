@@ -180,7 +180,7 @@ export class Tag {
       }
 
       if (this.display === 'N') {
-        this.frameLink.push(['', 'deselect option']);
+        this.frameLink.push(['', 'Deselect option']);
       }
     } else if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
@@ -262,7 +262,7 @@ export class Tag {
         this.frameLink.push([this.value, '']);
         // If non-mandatory, just use empty string
       } else if (this.display === 'N') {
-        this.frameLink.push(['', 'deselect option']);
+        this.frameLink.push(['', 'Deselect option']);
       }
 
       if (!matchedPointer && !checkValueIsNull(this.value)) {
