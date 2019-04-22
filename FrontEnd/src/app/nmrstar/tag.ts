@@ -160,7 +160,7 @@ export class Tag {
         if (!sampleFrame) {
           sampleName = 'No sample selected';
         } else {
-          sampleName = sampleFrame.name;
+          sampleName = sampleFrame.tagDict['_Sample.Name'].value;
         }
 
         const sampleConditionsFrame: Saveframe = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1));
@@ -168,7 +168,7 @@ export class Tag {
         if (!sampleConditionsFrame) {
           sampleConditionsName = 'No sample conditions selected';
         } else {
-          sampleConditionsName = sampleConditionsFrame.name;
+          sampleConditionsName = sampleConditionsFrame.tagDict['_Sample_condition_list.Name'].value;
         }
 
         this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
