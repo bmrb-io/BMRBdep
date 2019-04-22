@@ -146,6 +146,7 @@ export class Tag {
 
     if (this.name === 'Experiment_ID') {
       const experimentLoop: Loop = this.getEntry().getLoopsByCategory('_Experiment')[0];
+      this.valid = false;
 
       this.frameLink = [];
       const IDIndex = experimentLoop.getTagIndex('ID');
@@ -171,6 +172,11 @@ export class Tag {
         }
 
         this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
+
+        // Check the validity of this tag in the process
+        if (row[IDIndex].value === this.value) {
+          matchedPointer = true;
+        }
       }
 
       if (this.display === 'N') {
@@ -291,7 +297,7 @@ export class Tag {
           this.validationMessage = 'Value does not match one of the allowed options.';
         }
       }
-    } else if (this.interfaceType === 'sf_pointer') {
+    } else if (this.interfaceType === 'sf_pointer' || this.interfaceType === 'experiment_pointer') {
       // We have a value that doesn't exist...
       if (!matchedPointer) {
         // A non-null invalid value exists
