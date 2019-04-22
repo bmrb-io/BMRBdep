@@ -55,7 +55,7 @@
     </select>
 </label>
 
-<label *ngIf="tag.interfaceType == 'sf_pointer'">
+<label *ngIf="tag.interfaceType == 'sf_pointer' || tag.interfaceType == 'experiment_pointer'">
     <select [(ngModel)]="tag.value"
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (ngModelChange)="validateTag()"

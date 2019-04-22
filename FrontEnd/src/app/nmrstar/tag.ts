@@ -64,8 +64,8 @@ export class Tag {
       this.interfaceType = 'country';
     } else if (this.fullyQualifiedTagName === '_Contact_person.State_province') {
       this.interfaceType = 'state';
-    } else if (this.name === 'Experiment_name') {
-      this.interfaceType = 'sf_pointer';
+    } else if (this.name === 'Experiment_ID') {
+      this.interfaceType = 'experiment_pointer';
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       this.interfaceType = 'sf_pointer';
@@ -144,22 +144,33 @@ export class Tag {
 
     let matchedPointer = false;
 
-    if (this.name === 'Experiment_name') {
+    if (this.name === 'Experiment_ID') {
       const experimentLoop: Loop = this.getEntry().getLoopsByCategory('_Experiment')[0];
 
-      this.frameLink = [['1', '2']];
+      this.frameLink = [];
+      const IDIndex = experimentLoop.getTagIndex('ID');
       const nameTagIndex = experimentLoop.getTagIndex('Name');
       const sampleLabelIndex = experimentLoop.getTagIndex('Sample_label');
       const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label');
 
       for (const row of experimentLoop.data) {
-        const experimentFrame = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1));
-        if (!experimentFrame) {
-          break;
+        const sampleFrame = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1));
+        let sampleName: string;
+        if (!sampleFrame) {
+          sampleName = 'No sample selected';
+        } else {
+          sampleName = sampleFrame.name;
         }
-        const sampleName: string = experimentFrame.name;
-        const sampleConditionsName: string = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1)).name;
-        this.frameLink.push(['', row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
+
+        const sampleConditionsFrame: Saveframe = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1));
+        let sampleConditionsName: string;
+        if (!sampleConditionsFrame) {
+          sampleConditionsName = 'No sample conditions selected';
+        } else {
+          sampleConditionsName = sampleConditionsFrame.name;
+        }
+
+        this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
       }
 
       if (this.display === 'N') {
