@@ -153,7 +153,11 @@ export class Tag {
       const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label');
 
       for (const row of experimentLoop.data) {
-        const sampleName: string = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1)).name;
+        const experimentFrame = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1));
+        if (!experimentFrame) {
+          break;
+        }
+        const sampleName: string = experimentFrame.name;
         const sampleConditionsName: string = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1)).name;
         this.frameLink.push(['', row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
       }
