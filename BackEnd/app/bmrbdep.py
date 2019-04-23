@@ -297,7 +297,8 @@ def new_deposition() -> Response:
                                 new_saveframe.add_tag(tag[0], tag[1], update=True)
 
                 for loop in saveframe.loops:
-                    if loop.category == "_Upload_data":
+                    # Don't copy the experimental data loops
+                    if loop.category == "_Upload_data" or "Experiment_ID" in loop.tags:
                         continue
                     lower_tags = [_.lower() for _ in loop.tags]
                     tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
@@ -418,16 +419,24 @@ def new_deposition() -> Response:
 
         for loop in saveframe:
             if not loop.data:
-                row_data = []
-                for tag in loop.tags:
-                    fqtn = (loop.category + '.' + tag).lower()
-                    if tag == "ID":
-                        row_data.append('1')
-                    elif schema.schema[fqtn]['default value'] not in ["?", '']:
-                        row_data.append(schema.schema[fqtn]['default value'])
-                    else:
-                        row_data.append('.')
-                loop.data = [row_data]
+                loop.data = []
+
+                iterations: int = 1
+                if "Experiment_ID" in loop.tags:
+                    iterations = 3
+
+                for x in range(1, iterations + 1):
+                    row_data = []
+                    for tag in loop.tags:
+                        fqtn = (loop.category + '.' + tag).lower()
+                        # We only need to add ordinals to the experiment ID
+                        if tag == "ID" and "Experiment_ID" in loop.tags:
+                            row_data.append(x)
+                        elif schema.schema[fqtn]['default value'] not in ["?", '']:
+                            row_data.append(schema.schema[fqtn]['default value'])
+                        else:
+                            row_data.append('.')
+                    loop.data.append(row_data)
 
     # Set the entry_interview tags
     entry_interview: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_interview')[0]
