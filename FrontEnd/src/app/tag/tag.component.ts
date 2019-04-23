@@ -75,9 +75,9 @@ export class TagComponent implements OnInit, OnDestroy {
     if (checkValueIsNull(this.tag.value)) {
       this.tag.value = this.storedValue;
     } else {
-      if (this.tag.value !== this.storedValue) {
-        this.validateTag();
+      if (this.tag.value !== this.storedValue || this.tag.value === this.tag.schemaValues['default value']) {
         this.storedValue = this.tag.value;
+        this.validateTag();
       }
     }
   }
