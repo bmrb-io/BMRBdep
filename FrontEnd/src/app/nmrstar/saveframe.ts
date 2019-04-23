@@ -349,7 +349,7 @@ export class Saveframe {
 
     // Print the saveframe
     let returnString = sprintf('save_%s\n', this.name);
-    const standardFormatString = sprintf('   %%-%ds  %%s\n', width);
+    const standardFormatString = sprintf('   %%-%ds %%s\n', width);
     const multiLineFormatString = sprintf('   %%-%ds\n;\n%%s;\n', width);
 
     for (const tag of this.tags) {
@@ -381,7 +381,7 @@ export class Saveframe {
       returnString += loop.print();
     }
 
-    return returnString + 'save_\n\n';
+    return returnString + '\nsave_\n\n';
   }
 
   /* Special rules that aren't in the dictionary */
