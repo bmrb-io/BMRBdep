@@ -125,8 +125,15 @@ class DepositionRepo:
 
         logging.info('Depositing deposition %s' % final_entry.entry_id)
 
-        # Remove all unicode from the entry
+        # We'll use this to assign Experiment_name tags later
+        experiment_names: dict = {}
+        try:
+            experiment_names = dict(final_entry.get_loops_by_category('_Experiment')[0].get_tag(['id', 'name']))
+        except IndexError:
+            pass
+
         for saveframe in final_entry:
+            # Remove all unicode from the entry
             for tag in saveframe.tag_iterator():
                 tag[1] = unidecode.unidecode(tag[1])
                 # In case only non-convertible unicode characters were there
@@ -139,6 +146,14 @@ class DepositionRepo:
                         # In case only non-convertible unicode characters were there
                         if row[pos] == '':
                             row[pos] = None
+
+                # Set the "Experiment_name" tag from the "Experiment_ID" tag
+                if 'Experiment_ID' in loop.tags:
+                    name_tag_index = loop._tag_index('Experiment_name')
+                    id_tag_index = loop._tag_index('Experiment_ID')
+                    for row in loop.data:
+                        if row[id_tag_index] in experiment_names:
+                            row[name_tag_index] = experiment_names[row[id_tag_index]]
 
         # Tweak the middle initials
         for loop_cat in [final_entry.get_loops_by_category(x) for x in
