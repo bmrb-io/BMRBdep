@@ -296,11 +296,14 @@ export class Loop {
 
     // Print the categories
     const loopCategory = this.category;
-    for (const column of this.tags) {
-      returnString += sprintf(rowFormatString, loopCategory + '.' + column);
+    for (const column in this.tags) {
+      if (this.displayTags[column] !== 'H') {
+        returnString += sprintf(rowFormatString, loopCategory + '.' + this.tags[column]);
+      }
     }
 
     returnString += '\n';
+    let hadRealData = false;
 
     // If there is data to print, print it
     if (this.data.length !== 0) {
@@ -331,6 +334,14 @@ export class Loop {
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
+          if (this.displayTags[n] === 'H') {
+            continue;
+          }
+
+          if (!checkValueIsNull(row[n].value)) {
+            hadRealData = true;
+          }
+
           let datumCopy = cleanValue(row[n].value);
           if (datumCopy.indexOf('\n') !== -1) {
             datumCopy = sprintf('\n;\n%s;\n', datumCopy);
@@ -347,7 +358,11 @@ export class Loop {
 
     // Close the loop
     returnString += '\n   stop_\n';
-    return returnString;
+    if (hadRealData) {
+      return returnString;
+    } else {
+      return '';
+    }
   }
 
 
