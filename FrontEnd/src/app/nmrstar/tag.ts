@@ -179,9 +179,13 @@ export class Tag {
         }
       }
 
-      if (this.display === 'N') {
+      if (checkValueIsNull(this.value)) {
+        // If null, the deselect needs to match our actual value
+        this.frameLink.push([this.value, '']);
+      } else if (this.display === 'N') {
         this.frameLink.push(['', 'Deselect option']);
       }
+
     } else if (this.schemaValues['Sf pointer'] === 'N') {
       if (this.schemaValues['Enumeration ties']) {
         // 19 is the special case that means the enumeration tie is for a file
