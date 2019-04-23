@@ -183,17 +183,14 @@ export class Loop {
 
   checkEmpty(): boolean {
     this.empty = true;
-    if (this.data.length > 1) {
-      this.empty = false;
-      return this.empty;
-    }
-    for (const col of this.data[0]) {
-      if (!checkValueIsNull(col.value)) {
-        this.empty = false;
-        return this.empty;
+    for (const row of this.data) {
+      for (const item of row) {
+        if (!checkValueIsNull(item.value)) {
+          this.empty = false;
+          return this.empty;
+        }
       }
     }
-
     return this.empty;
   }
 
