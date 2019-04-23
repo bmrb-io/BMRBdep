@@ -105,11 +105,11 @@ export class Loop {
 
   clear(): void {
     if (this.category === '_Contact_person') {
-      this.data = [this.data[0], this.data[1]];
+      this.data = [this.data[0]];
     } else {
       this.data = [];
-      this.addRow();
     }
+    this.addRow();
   }
 
   deleteRow(rowID): void {
