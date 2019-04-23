@@ -2,6 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
 import {Subscription} from 'rxjs';
+import {checkValueIsNull} from '../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-tag',
@@ -64,14 +65,14 @@ export class TagComponent implements OnInit, OnDestroy {
   }
 
   storeValue(): void {
-    if (this.tag.value) {
+    if (!checkValueIsNull(this.tag.value)) {
       this.storedValue = this.tag.value;
       this.tag.value = null;
     }
   }
 
   restoreValue(): void {
-    if (!this.tag.value) {
+    if (checkValueIsNull(this.tag.value)) {
       this.tag.value = this.storedValue;
     } else {
       if (this.tag.value !== this.storedValue) {
@@ -83,7 +84,7 @@ export class TagComponent implements OnInit, OnDestroy {
 
   checkDelete(key): void {
     // This checks if they have pressed the delete/backspace key on an open enum - if so we must clear the stored value
-    if (['Backspace', 'Delete'].indexOf(key) >= 0) {
+    if (['Backspace', 'Delete'].includes(key)) {
       this.storedValue = '';
       this.validateTag();
     }
