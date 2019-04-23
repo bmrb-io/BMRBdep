@@ -68,7 +68,7 @@ export class Loop {
     }
   }
 
-  getAvailableOrdinal(): number {
+  getNextAvailableOrdinal(): number {
     const seenIDs = [];
     const IDCol = this.getTagIndex('ID');
     if (IDCol === null) {
@@ -82,11 +82,7 @@ export class Loop {
       }
     }
 
-    let free = 1;
-    while (seenIDs.includes(free)) {
-      free += 1;
-    }
-    return free;
+    return Math.max.apply(null, seenIDs) + 1;
   }
 
   addRow(): Array<LoopTag> {
@@ -98,7 +94,7 @@ export class Loop {
         newTag.value = newTag.schemaValues['default value'];
       }
       if (tag === 'ID') {
-        newTag.value = this.getAvailableOrdinal().toString();
+        newTag.value = this.getNextAvailableOrdinal().toString();
       }
       newRow.push(newTag);
     }
