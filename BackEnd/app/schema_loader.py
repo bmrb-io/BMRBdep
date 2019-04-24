@@ -285,7 +285,7 @@ if __name__ == "__main__":
         for schema in schema_emitter():
             schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
             if os.path.exists(schema_location):
-                if one_overwritten:
+                if one_overwritten and not options.full:
                     print("Quitting because the schemas already exist.")
                     sys.exit(0)
                 else:
