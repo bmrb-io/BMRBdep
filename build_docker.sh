@@ -13,14 +13,23 @@ if [[ $# -eq 0 ]]
     # Build the HTML
     source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
     cd ${SCRIPT_DIR}/FrontEnd/
-    npm run build.prod
+    if ! npm run build.prod; then
+      echo "Node build failed."
+      exit 1
+    fi
     deactivate_node
     cd ${SCRIPT_DIR}
 
-    sudo docker build -t bmrbdep .
+    if ! sudo docker build -t bmrbdep .; then
+      echo "Docker build failed."
+      exit 2
+    fi
     echo "Running in development mode."
     sudo docker run -d --name bmrbdep  -p 9000:9000 --restart=always -v /opt/wsgi/depositions:/opt/wsgi/depositions bmrbdep
   else
-    sudo docker build --build-arg configfile=$1 -t bmrbdep .
+    if ! sudo docker build --build-arg configfile=$1 -t bmrbdep .; then
+      echo "Docker build failed."
+      exit 3
+    fi
     echo "Building with configuration file: $1"
 fi

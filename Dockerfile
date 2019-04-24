@@ -16,9 +16,10 @@ RUN apk update && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache
 
+RUN mkdir /opt/wsgi/schema_data/
 COPY ./BackEnd/app/*py /opt/wsgi/
 COPY ./BackEnd/app/configuration.json /opt/wsgi/
-COPY ./BackEnd/app/schema_data /opt/wsgi/
+COPY ./BackEnd/app/schema_data /opt/wsgi/schema_data/
 COPY ./BackEnd/app/requirements.txt /opt/wsgi/
 COPY ./FrontEnd/dist /opt/wsgi/html
 
