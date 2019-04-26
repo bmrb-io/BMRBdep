@@ -320,7 +320,7 @@ def new_deposition() -> Response:
                     except KeyError:
                         pass
 
-        entry_template.normalize()
+    entry_template.normalize()
 
     # Set the entry information tags
     entry_information: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
@@ -430,7 +430,7 @@ def new_deposition() -> Response:
                     for tag in loop.tags:
                         fqtn = (loop.category + '.' + tag).lower()
                         # We only need to add ordinals to the experiment ID
-                        if tag == "ID" and "Experiment_ID" in loop.tags:
+                        if tag == "ID" and ("Experiment_ID" in loop.tags or loop.category == '_Experiment'):
                             row_data.append(x)
                         elif schema.schema[fqtn]['default value'] not in ["?", '']:
                             row_data.append(schema.schema[fqtn]['default value'])
