@@ -265,7 +265,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
             raise ServerError('Could not create deposition. Please try again.')
 
         # Assign the BMRB ID in all the appropriate places in the entry
-        schema: pynmrstar.Schema = pynmrstar.Schema()
+        schema: pynmrstar.Schema = pynmrstar.utils.get_schema()
         for saveframe in final_entry.frame_list:
             for tag in saveframe.tags:
                 fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
