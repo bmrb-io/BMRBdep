@@ -125,14 +125,15 @@ class DepositionRepo:
 
         logging.info('Depositing deposition %s' % final_entry.entry_id)
 
+        # Add tags stripped by the deposition interface
+        final_entry.add_missing_tags()
+
         # We'll use this to assign Experiment_name tags later
         experiment_names: dict = {}
         try:
             experiment_names = dict(final_entry.get_loops_by_category('_Experiment')[0].get_tag(['id', 'name']))
         except IndexError:
             pass
-
-        final_entry.add_missing_tags()
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
