@@ -259,7 +259,7 @@ def load_schemas(rev):
                 if validate_mode:
                     print("Enumeration for non-existent tag: %s" % saveframe.name)
 
-    except pynmrstar.exceptions.ParsingError as e:
+    except ValueError as e:
         if validate_mode:
             print("Invalid enum file in version %s: %s" % (res['version'], str(e)))
     finally:
