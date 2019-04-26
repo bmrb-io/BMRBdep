@@ -138,17 +138,19 @@ class DepositionRepo:
         for saveframe in final_entry:
             # Remove all unicode from the entry
             for tag in saveframe.tag_iterator():
-                tag[1] = unidecode.unidecode(tag[1])
-                # In case only non-convertible unicode characters were there
-                if tag[1] == '':
-                    tag[1] = None
+                if tag[1] is not None:
+                    tag[1] = unidecode.unidecode(tag[1])
+                    # In case only non-convertible unicode characters were there
+                    if tag[1] == '':
+                        tag[1] = None
             for loop in saveframe.loops:
                 for row in loop.data:
                     for pos in range(0, len(row)):
-                        row[pos] = unidecode.unidecode(row[pos])
-                        # In case only non-convertible unicode characters were there
-                        if row[pos] == '':
-                            row[pos] = None
+                        if row[pos] is not None:
+                            row[pos] = unidecode.unidecode(row[pos])
+                            # In case only non-convertible unicode characters were there
+                            if row[pos] == '':
+                                row[pos] = None
 
                 # Set the "Experiment_name" tag from the "Experiment_ID" tag
                 if 'Experiment_ID' in loop.tags:
