@@ -82,7 +82,11 @@ export class Loop {
       }
     }
 
-    return Math.max.apply(null, seenIDs) + 1;
+    const found = Math.max.apply(null, seenIDs) + 1;
+    if (!Number.isInteger(found)) {
+      return 1;
+    }
+    return found;
   }
 
   addRow(): Array<LoopTag> {
