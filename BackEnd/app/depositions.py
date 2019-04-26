@@ -132,6 +132,8 @@ class DepositionRepo:
         except IndexError:
             pass
 
+        final_entry.add_missing_tags()
+
         for saveframe in final_entry:
             # Remove all unicode from the entry
             for tag in saveframe.tag_iterator():
@@ -149,8 +151,8 @@ class DepositionRepo:
 
                 # Set the "Experiment_name" tag from the "Experiment_ID" tag
                 if 'Experiment_ID' in loop.tags:
-                    name_tag_index = loop._tag_index('Experiment_name')
-                    id_tag_index = loop._tag_index('Experiment_ID')
+                    name_tag_index = loop.tag_index('Experiment_name')
+                    id_tag_index = loop.tag_index('Experiment_ID')
                     for row in loop.data:
                         if row[id_tag_index] in experiment_names:
                             row[name_tag_index] = experiment_names[row[id_tag_index]]
@@ -159,8 +161,8 @@ class DepositionRepo:
         for loop_cat in [final_entry.get_loops_by_category(x) for x in
                          ['_Contact_person', '_Entry_author', '_Citation_author']]:
             for loop in loop_cat:
-                middle_initial_index = loop._tag_index('Middle_initials')
-                first_initial_index = loop._tag_index('First_initial')
+                middle_initial_index = loop.tag_index('Middle_initials')
+                first_initial_index = loop.tag_index('First_initial')
                 for row in loop.data:
                     if middle_initial_index:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
@@ -283,7 +285,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
                             loop[tag] = [bmrbnum] * len(loop[tag])
                     except KeyError:
                         pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = bmrbnum
+        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(bmrbnum)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
