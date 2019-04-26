@@ -70,8 +70,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (f.value.sessionType === 'bmrb_id' && !this.bootstrapID.value) {
-      return;
+    let bootstrapID = null;
+    if (f.value.sessionType === 'bmrb_id') {
+      if (!this.bootstrapID.value) {
+        return;
+      }
+      if (f.value.sessionType === 'bmrb_id') {
+        bootstrapID = this.bootstrapID.value;
+      }
     }
 
     let fileElement = null;
@@ -80,8 +86,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement,
-      this.bootstrapID.value).then(
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]);
       });
