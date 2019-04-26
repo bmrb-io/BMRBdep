@@ -283,7 +283,8 @@ def new_deposition() -> Response:
                 # Don't copy over the entry interview at all
                 if saveframe.category == "entry_interview":
                     continue
-                new_saveframe = pynmrstar.Saveframe.from_template(category, saveframe.name, deposition_id, True, schema)
+                new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name, entry_id=deposition_id,
+                                                                  default_values=True, schema=schema)
                 frame_prefix_lower = saveframe.tag_prefix.lower()
 
                 # Don't copy the tags from entry_information
@@ -374,6 +375,7 @@ def new_deposition() -> Response:
                                                              '_Entry_author.Middle_initials',
                                                              '_Entry_author.Family_name',
                                                              '_Entry_author.ORCID']):
+            assert isinstance(row, list)
             author_loop.add_data(row)
 
     author_loop.add_missing_tags(all_tags=True, schema=schema)
@@ -404,6 +406,7 @@ def new_deposition() -> Response:
                                                                '_Contact_person.Email_address',
                                                                '_Contact_person.Role',
                                                                '_Contact_person.Organization_type']):
+            assert isinstance(row, list)
             contact_loop.add_data(row)
     else:
         contact_loop.add_data([None, None, None, None, None, 'responsible scientist', 'academic'])
@@ -612,4 +615,3 @@ def fetch_or_store_deposition(uuid):
         entry['commit'] = commit
 
         return jsonify(entry)
-
