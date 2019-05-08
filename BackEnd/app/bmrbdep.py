@@ -284,7 +284,7 @@ def new_deposition() -> Response:
                 if saveframe.category == "entry_interview":
                     continue
                 new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name, entry_id=deposition_id,
-                                                                  default_values=True, schema=schema)
+                                                                  default_values=True, schema=schema, all_tags=True)
                 frame_prefix_lower = saveframe.tag_prefix.lower()
 
                 # Don't copy the tags from entry_information
