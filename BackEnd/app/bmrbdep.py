@@ -333,22 +333,25 @@ def new_deposition() -> Response:
     if uploaded_entry and not entry_bootstrap:
         data_file_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
         data_file_loop.add_tag(['_Upload_data.Data_file_ID',
+                                '_Upload_data.Deposited_data_files_ID',
                                 '_Upload_data.Data_file_name',
-                                '_Upload_data.Data_file_content_type'])
+                                '_Upload_data.Data_file_content_type',
+                                '_Upload_data.Data_file_Sf_category'])
         upload_filename: str = secure_filename(request.files['nmrstar_file'].filename)
 
         # Get the categories types which are "data types"
-        legal_data_categories = set()
+        legal_data_categories: dict = dict()
         for data_upload_record in json_schema['file_upload_types']:
             for one_data_type in data_upload_record[1]:
-                legal_data_categories.add(one_data_type)
-        legal_data_categories.remove('chem_comp')
-        legal_data_categories.remove('experiment_list')
+                legal_data_categories[one_data_type] = data_upload_record[0]
 
         # If this entry has categories that are valid data types, add them
+        pos: int = 1
         for data_type in uploaded_entry.category_list:
             if data_type in legal_data_categories:
-                data_file_loop.add_data([1, upload_filename, data_type])
+                if data_type != 'chem_comp' and data_type != 'experiment_list':
+                    data_file_loop.add_data([pos, 1, upload_filename, legal_data_categories[data_type], data_type])
+                    pos += 1
         data_file_loop.add_missing_tags(all_tags=True, schema=schema)
         entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data'] = data_file_loop
 
