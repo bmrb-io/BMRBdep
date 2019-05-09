@@ -118,6 +118,8 @@ class DepositionRepo:
         """ Deposits an entry into ETS. """
 
         self.raise_write_errors()
+        if not self.metadata['email_validated']:
+            raise RequestError('You must validate your e-mail before deposition.')
         existing_entry_id = self.get_entry().entry_id
 
         if existing_entry_id != final_entry.entry_id:
