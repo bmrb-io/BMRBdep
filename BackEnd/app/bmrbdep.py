@@ -19,13 +19,12 @@ from itsdangerous import URLSafeSerializer, BadSignature
 
 # Flask related modules
 from flask_mail import Mail, Message
-from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 
 # Local modules
 import depositions
-from common import ServerError, RequestError, configuration, get_schema, root_dir
+from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename
 
 # Set up the flask application
 application = Flask(__name__)
@@ -463,11 +462,6 @@ def new_deposition() -> Response:
                         'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
-    if uploaded_entry:
-        if entry_bootstrap:
-            entry_meta['bootstrap_entry'] = request_info['bootstrapID']
-        else:
-            entry_meta['bootstrap_filename'] = request.files['nmrstar_file'].filename
 
     # Initialize the repo
     with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
@@ -477,11 +471,13 @@ def new_deposition() -> Response:
         repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
         if uploaded_entry:
             if entry_bootstrap:
+                entry_meta['bootstrap_entry'] = request_info['bootstrapID']
                 repo.write_file('bootstrap_entry.str', str(uploaded_entry).encode(), root=True)
             else:
                 request.files['nmrstar_file'].seek(0)
                 repo.write_file('bootstrap_entry.str', request.files['nmrstar_file'].read(), root=True)
-                repo.write_file(request.files['nmrstar_file'].filename, str(uploaded_entry).encode())
+                entry_meta['bootstrap_filename'] = repo.write_file(request.files['nmrstar_file'].filename,
+                                                                   str(uploaded_entry).encode())
         repo.commit("Entry created.")
 
     # Send the validation e-mail
