@@ -15,6 +15,8 @@ import requests
 import pynmrstar
 import simplejson as json
 from validate_email import validate_email
+from dns.exception import Timeout
+from dns.resolver import NXDOMAIN
 from itsdangerous import URLSafeSerializer, BadSignature
 
 # Flask related modules
@@ -236,16 +238,23 @@ def new_deposition() -> Response:
         author_orcid = None
 
     # Check the e-mail
-    if not validate_email(author_email):
-        raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
-                           "provided for typos.")
-    elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
-        raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
-                           "have a typo in the part of your e-mail after the @?)" %
-                           (author_email[author_email.index("@") + 1:]))
-    elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
-        raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
-                           "server. (Do you have a typo in the e-mail address before the @?)")
+    try:
+        if not validate_email(author_email):
+            raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
+                               "provided for typos.")
+        elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
+            raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
+                               "have a typo in the part of your e-mail after the @?)" %
+                               (author_email[author_email.index("@") + 1:]))
+        elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
+            raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
+                               "server. (Do you have a typo in the e-mail address before the @?)")
+    except Timeout:
+        raise RequestError("The e-mail you provided is invalid. There was no response when attempting to connect "
+                           "to the server at %s." % author_email[author_email.index("@") + 1:])
+    except NXDOMAIN:
+        raise RequestError("The e-mail you provided is invalid. The domain '%s' is not a valid domain." %
+                           author_email[author_email.index("@") + 1:])
 
     # Create the deposition
     deposition_id = str(uuid4())
