@@ -300,7 +300,8 @@ def new_deposition() -> Response:
                     for tag in saveframe.tags:
                         lower_tag = tag[0].lower()
                         if lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
-                                             'original_nmr_star_version']:
+                                             'original_nmr_star_version', 'atomic_coordinate_file_name',
+                                             'atomic_coordinate_file_syntax', 'constraint_file_name']:
                             fqtn = frame_prefix_lower + '.' + lower_tag
                             if fqtn in schema.schema:
                                 new_saveframe.add_tag(tag[0], tag[1], update=True)
