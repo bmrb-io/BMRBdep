@@ -5,6 +5,8 @@ import zlib
 import simplejson as json
 
 # Load the configuration file
+import werkzeug.utils
+
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
 configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
 
@@ -19,6 +21,15 @@ def get_schema(version: str) -> dict:
         raise RequestError("Invalid schema version.")
 
     return schema
+
+
+def secure_filename(filename: str) -> str:
+    """ Wraps werkzeug secure_filename but raises an error if the filename comes out empty. """
+
+    filename = werkzeug.utils.secure_filename(filename)
+    if not filename:
+        raise RequestError('Invalid upload file name. Please rename the file and try again.')
+    return filename
 
 
 class ServerError(Exception):
