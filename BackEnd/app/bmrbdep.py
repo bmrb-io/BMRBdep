@@ -15,17 +15,18 @@ import requests
 import pynmrstar
 import simplejson as json
 from validate_email import validate_email
+from dns.exception import Timeout
+from dns.resolver import NXDOMAIN
 from itsdangerous import URLSafeSerializer, BadSignature
 
 # Flask related modules
 from flask_mail import Mail, Message
-from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 
 # Local modules
 import depositions
-from common import ServerError, RequestError, configuration, get_schema, root_dir
+from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename
 
 # Set up the flask application
 application = Flask(__name__)
@@ -237,16 +238,23 @@ def new_deposition() -> Response:
         author_orcid = None
 
     # Check the e-mail
-    if not validate_email(author_email):
-        raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
-                           "provided for typos.")
-    elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
-        raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
-                           "have a typo in the part of your e-mail after the @?)" %
-                           (author_email[author_email.index("@") + 1:]))
-    elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
-        raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
-                           "server. (Do you have a typo in the e-mail address before the @?)")
+    try:
+        if not validate_email(author_email):
+            raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
+                               "provided for typos.")
+        elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
+            raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
+                               "have a typo in the part of your e-mail after the @?)" %
+                               (author_email[author_email.index("@") + 1:]))
+        elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
+            raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
+                               "server. (Do you have a typo in the e-mail address before the @?)")
+    except Timeout:
+        raise RequestError("The e-mail you provided is invalid. There was no response when attempting to connect "
+                           "to the server at %s." % author_email[author_email.index("@") + 1:])
+    except NXDOMAIN:
+        raise RequestError("The e-mail you provided is invalid. The domain '%s' is not a valid domain." %
+                           author_email[author_email.index("@") + 1:])
 
     # Create the deposition
     deposition_id = str(uuid4())
@@ -284,7 +292,7 @@ def new_deposition() -> Response:
                 if saveframe.category == "entry_interview":
                     continue
                 new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name, entry_id=deposition_id,
-                                                                  default_values=True, schema=schema)
+                                                                  default_values=True, schema=schema, all_tags=True)
                 frame_prefix_lower = saveframe.tag_prefix.lower()
 
                 # Don't copy the tags from entry_information
@@ -292,7 +300,8 @@ def new_deposition() -> Response:
                     for tag in saveframe.tags:
                         lower_tag = tag[0].lower()
                         if lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
-                                             'original_nmr_star_version']:
+                                             'original_nmr_star_version', 'atomic_coordinate_file_name',
+                                             'atomic_coordinate_file_syntax', 'constraint_file_name']:
                             fqtn = frame_prefix_lower + '.' + lower_tag
                             if fqtn in schema.schema:
                                 new_saveframe.add_tag(tag[0], tag[1], update=True)
@@ -320,6 +329,32 @@ def new_deposition() -> Response:
                             loop[tag] = [None] * len(loop[tag])
                     except KeyError:
                         pass
+
+    # Calculate the uploaded file types, if they upload a file
+    if uploaded_entry and not entry_bootstrap:
+        data_file_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
+        data_file_loop.add_tag(['_Upload_data.Data_file_ID',
+                                '_Upload_data.Deposited_data_files_ID',
+                                '_Upload_data.Data_file_name',
+                                '_Upload_data.Data_file_content_type',
+                                '_Upload_data.Data_file_Sf_category'])
+        upload_filename: str = secure_filename(request.files['nmrstar_file'].filename)
+
+        # Get the categories types which are "data types"
+        legal_data_categories: dict = dict()
+        for data_upload_record in json_schema['file_upload_types']:
+            for one_data_type in data_upload_record[1]:
+                legal_data_categories[one_data_type] = data_upload_record[0]
+
+        # If this entry has categories that are valid data types, add them
+        pos: int = 1
+        for data_type in uploaded_entry.category_list:
+            if data_type in legal_data_categories:
+                if data_type != 'chem_comp' and data_type != 'experiment_list':
+                    data_file_loop.add_data([pos, 1, upload_filename, legal_data_categories[data_type], data_type])
+                    pos += 1
+        data_file_loop.add_missing_tags(all_tags=True, schema=schema)
+        entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data'] = data_file_loop
 
     entry_template.normalize()
 
@@ -463,11 +498,6 @@ def new_deposition() -> Response:
                         'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
-    if uploaded_entry:
-        if entry_bootstrap:
-            entry_meta['bootstrap_entry'] = request_info['bootstrapID']
-        else:
-            entry_meta['bootstrap_filename'] = request.files['nmrstar_file'].filename
 
     # Initialize the repo
     with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
@@ -477,11 +507,13 @@ def new_deposition() -> Response:
         repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
         if uploaded_entry:
             if entry_bootstrap:
+                entry_meta['bootstrap_entry'] = request_info['bootstrapID']
                 repo.write_file('bootstrap_entry.str', str(uploaded_entry).encode(), root=True)
             else:
                 request.files['nmrstar_file'].seek(0)
                 repo.write_file('bootstrap_entry.str', request.files['nmrstar_file'].read(), root=True)
-                repo.write_file(request.files['nmrstar_file'].filename, str(uploaded_entry).encode())
+                entry_meta['bootstrap_filename'] = repo.write_file(request.files['nmrstar_file'].filename,
+                                                                   str(uploaded_entry).encode())
         repo.commit("Entry created.")
 
     # Send the validation e-mail

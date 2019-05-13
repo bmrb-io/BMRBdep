@@ -298,36 +298,38 @@ export class Loop {
         with the category intact, specify it when generating the loop, or set it using setCategory.');
     }
 
-    // Print the categories
-    const loopCategory = this.category;
-    for (const column in this.tags) {
-      if (this.displayTags[column] !== 'H') {
-        returnString += sprintf(rowFormatString, loopCategory + '.' + this.tags[column]);
-      }
-    }
-
-    returnString += '\n';
     let hadRealData = false;
 
     // If there is data to print, print it
     if (this.data.length !== 0) {
 
-      const widths = Array(this.data[0].length).fill(3);
+      const widths = Array(this.data[0].length).fill(null);
 
       // Figure out the maximum row lengths
       for (const row of this.data) {
         for (let n = 0; n < row.length; n++) {
-          if (row[n] && row[n].value) {
+          if (row[n] && (!checkValueIsNull(row[n].value))) {
             // Don't count data that goes on its own line
             if (row[n].value.indexOf('\n') !== -1) {
               continue;
             }
-            if (row[n].value.length + 3 > widths[n]) {
+            if (widths[n] === null) {
+              widths[n] = row[n].value.length + 3;
+            } else if (row[n].value.length + 3 > widths[n]) {
               widths[n] = row[n].value.length + 3;
             }
           }
         }
       }
+
+      // Print the categories
+      const loopCategory = this.category;
+      for (const column in this.tags) {
+        if ((this.displayTags[column] !== 'H' && widths[column] !== null) || this.tags[column] === 'Experiment_ID' || this.category === '_Upload_data') {
+          returnString += sprintf(rowFormatString, loopCategory + '.' + this.tags[column]);
+        }
+      }
+      returnString += '\n';
 
       // Go through and print the data
       for (const row of this.data) {
@@ -338,7 +340,7 @@ export class Loop {
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
-          if (this.displayTags[n] === 'H') {
+          if ((this.displayTags[n] === 'H' || widths[n] === null) && row[n].name !== 'Experiment_ID' && this.category !== '_Upload_data') {
             continue;
           }
 
@@ -351,6 +353,9 @@ export class Loop {
             datumCopy = sprintf('\n;\n%s;\n', datumCopy);
           }
 
+          if (widths[n] === null) {
+            widths[n] = 3;
+          }
           // Add the data to the return string
           returnString += sprintf('%-' + widths[n] + 's', datumCopy);
         }

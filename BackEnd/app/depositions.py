@@ -12,14 +12,13 @@ import flask
 import logging
 import unidecode
 import pynmrstar
-import werkzeug.utils
 import psycopg2
 
 from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
 # Local modules
-from common import ServerError, RequestError, configuration
+from common import ServerError, RequestError, configuration, secure_filename
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -27,15 +26,6 @@ if not os.path.exists(configuration['repo_path']):
         logging.warning('The deposition root directory did not exist... creating it.')
     except FileExistsError:
         pass
-
-
-def secure_filename(filename: str) -> str:
-    """ Wraps werkzeug secure_filename but raises an error if the filename comes out empty. """
-
-    filename = werkzeug.utils.secure_filename(filename)
-    if not filename:
-        raise RequestError('Invalid upload file name. Please rename the file and try again.')
-    return filename
 
 
 class DepositionRepo:
@@ -118,6 +108,8 @@ class DepositionRepo:
         """ Deposits an entry into ETS. """
 
         self.raise_write_errors()
+        if not self.metadata['email_validated']:
+            raise RequestError('You must validate your e-mail before deposition.')
         existing_entry_id = self.get_entry().entry_id
 
         if existing_entry_id != final_entry.entry_id:
