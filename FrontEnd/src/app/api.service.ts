@@ -176,7 +176,7 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = false): void {
+  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = true): void {
 
     /*
     // If the previous save action is still in progress, cancel it
