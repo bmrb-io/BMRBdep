@@ -25,7 +25,7 @@ if [[ $# -eq 0 ]]
       exit 2
     fi
     echo "Running in development mode."
-    sudo docker run -d --name bmrbdep  -p 9000:9000 --restart=always -v /opt/wsgi/depositions:/opt/wsgi/depositions bmrbdep
+    sudo docker run -d --name bmrbdep  -p 9000:9000 --restart=always -v /opt/wsgi/depositions:/opt/wsgi/depositions -v /zfs/git/BMRBDep/BackEnd/app/configuration.json:/opt/wsgi/configuration.json bmrbdep
   else
     if ! sudo docker build --build-arg configfile=$1 -t bmrbdep .; then
       echo "Docker build failed."
