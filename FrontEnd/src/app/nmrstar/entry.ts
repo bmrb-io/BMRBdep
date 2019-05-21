@@ -380,7 +380,7 @@ export class Entry {
                 const tagCol = loop.getTagIndex(rule['Conditional tag']);
                 const applyCol = loop.getTagIndex(rule['Tag']);
                 for (const row of loop.data) {
-                  if (rule['Regex'].test(row[tagCol].value)) {
+                  if (row[tagCol] && rule['Regex'].test(row[tagCol].value)) {
                     if (rule['Tag category'] === loop.category) {
                       row[applyCol].display = rule['Override view value'];
                     }
