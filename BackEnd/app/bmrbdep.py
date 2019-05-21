@@ -160,9 +160,7 @@ def send_validation_email(uuid) -> Response:
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
 Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to 
-proceed.
-<br><br>
-You can use <a href="%s" target="BMRBDep">this link</a> to return to your deposition later if you close the page before
+proceed. You can also use this link to return to your deposition later if you close the page before
 it is complete.
 <br><br>
 If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
@@ -176,8 +174,7 @@ computer could access your in-process deposition.
 Thank you,
 <br>
 BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
-                     url_for('validate_user', token=token, _external=True),
-                     request.url_root + 'entry/load/%s' % uuid)
+                     url_for('validate_user', token=token, _external=True))
 
         mail.send(confirm_message)
 
