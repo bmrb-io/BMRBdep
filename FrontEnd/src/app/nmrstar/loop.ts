@@ -325,7 +325,8 @@ export class Loop {
       // Print the categories
       const loopCategory = this.category;
       for (const column in this.tags) {
-        if ((this.displayTags[column] !== 'H' && widths[column] !== null) || this.tags[column] === 'Experiment_ID' || this.category === '_Upload_data') {
+        if ((this.displayTags[column] !== 'H' && widths[column] !== null) || this.tags[column] === 'Experiment_ID' ||
+          this.category === '_Upload_data' || this.tags[column] === 'ID' ) {
           returnString += sprintf(rowFormatString, loopCategory + '.' + this.tags[column]);
         }
       }
@@ -340,7 +341,8 @@ export class Loop {
         // Get the data ready for printing
         for (let n = 0; n < row.length; n++) {
 
-          if ((this.displayTags[n] === 'H' || widths[n] === null) && row[n].name !== 'Experiment_ID' && this.category !== '_Upload_data') {
+          if ((this.displayTags[n] === 'H' || widths[n] === null) && row[n].name !== 'Experiment_ID' && this.category !== '_Upload_data' &&
+            row[n].name !== 'ID') {
             continue;
           }
 
