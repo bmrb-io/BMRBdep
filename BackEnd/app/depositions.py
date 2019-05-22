@@ -159,9 +159,9 @@ class DepositionRepo:
                 middle_initial_index = loop.tag_index('Middle_initials')
                 first_initial_index = loop.tag_index('First_initial')
                 for row in loop.data:
-                    if middle_initial_index:
+                    if middle_initial_index and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
-                    if first_initial_index:
+                    if first_initial_index and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
 
         today_str: str = date.today().isoformat()
