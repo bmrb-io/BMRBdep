@@ -18,7 +18,6 @@ RUN apk update && \
 
 RUN mkdir /opt/wsgi/schema_data/
 COPY ./BackEnd/app/*py /opt/wsgi/
-COPY ./BackEnd/app/configuration.json /opt/wsgi/
 COPY ./BackEnd/app/schema_data /opt/wsgi/schema_data/
 COPY ./BackEnd/app/requirements.txt /opt/wsgi/
 COPY ./FrontEnd/dist /opt/wsgi/html
