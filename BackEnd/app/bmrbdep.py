@@ -154,7 +154,7 @@ def send_validation_email(uuid) -> Response:
         confirm_message = Message("Please validate your e-mail address for BMRBDep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
-                                  reply_to=configuration['reply_to_address'])
+                                  reply_to=configuration['smtp']['reply_to_address'])
         token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
         confirm_message.html = """
@@ -537,7 +537,7 @@ def deposit_entry(uuid) -> Response:
             raise RequestError('At least one contact person must have the email of the original deposition creator.')
         logging.warning(contact_emails)
         message = Message("Your entry has been deposited!", recipients=contact_emails,
-                          reply_to=configuration['reply_to_address'])
+                          reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the' \
                        ' deposition contents for reference. You may also use this file to start a new deposition. ' \
                        'You will hear from our annotators in the next few days.' % bmrb_num
