@@ -150,7 +150,7 @@ export class ApiService implements OnDestroy {
   loadEntry(entryID: string, skipMessage: boolean = false): void {
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
-      this.messagesService.sendMessage(new Message(`Loading entry ${entryID}...`));
+      this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
     }
     this.http.get(entryURL).subscribe(
       jsonData => {
