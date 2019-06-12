@@ -37,8 +37,6 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     });
 
     this.subscription$.add(this.api.entrySubject.subscribe(entry => {
-      console.log('heard new entry', entry);
-
       for (const file of this.entry.dataStore.dataFiles) {
         if (entry.deposited) {
           file.control.disable();
