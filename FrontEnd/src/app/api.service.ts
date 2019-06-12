@@ -9,6 +9,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material';
+import {Loop} from './nmrstar/loop';
 
 @Injectable({
   providedIn: 'root'
@@ -244,6 +245,43 @@ export class ApiService implements OnDestroy {
         }
       );
     }
+  }
+
+  newSupportRequest(comment: string): Promise<any> {
+
+    const contactLoop: Loop = this.cachedEntry.getLoopsByCategory('_Contact_person')[0];
+    const userEmail = contactLoop.data[0][contactLoop.tags.indexOf('Email_address')].value;
+    let userName = contactLoop.data[0][contactLoop.tags.indexOf('Given_name')].value + ' ' +
+      contactLoop.data[0][contactLoop.tags.indexOf('Family_name')].value;
+    if (userName.length < 2) {
+      userName = 'Unknown User';
+    }
+
+    comment = `${comment}\n\nDeposition ID: ${this.cachedEntry.entryID}`;
+
+    const jsonData = {
+      'request': {
+        'requester': {
+          'name': userName
+        },
+        'subject': 'BMRBDep Support Request',
+        'comment': {
+          'body': comment
+        },
+        'email': userEmail
+      }
+    };
+
+    return new Promise((resolve, reject) => {
+
+      this.http.post(environment.supportURL, jsonData)
+        .subscribe(responseJson => {
+          resolve(responseJson);
+        }, error => {
+          this.handleError(error);
+          reject();
+        });
+    });
   }
 
   newDeposition(authorEmail: string,

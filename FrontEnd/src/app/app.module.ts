@@ -48,6 +48,7 @@ import {
 
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+import { ContactUsComponent } from './contact-us/contact-us.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
     PendingValidationComponent,
     LoadEntryComponent,
     ConfirmationDialogComponent,
+    ContactUsComponent,
   ],
   imports: [
     BrowserModule,

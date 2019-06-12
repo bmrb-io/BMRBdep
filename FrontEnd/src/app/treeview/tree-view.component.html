@@ -78,6 +78,11 @@
                         <h2 matLine>End session</h2>
                     </a>
 
+                    <a mat-list-item [ngClass]="{'active': page=='contact-us'}"
+                       routerLink="/contact-us" id="contact-us">
+                        <h2 matLine>Contact us</h2>
+                    </a>
+
                     <div *ngIf="developerMode">
                         <mat-list-item
                                 (click)='download(entry.entryID + ".str", entry)'>Download entry
