@@ -35,6 +35,18 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         this.showCategoryLink = false;
       }
     });
+
+    this.subscription$.add(this.api.entrySubject.subscribe(entry => {
+      console.log('heard new entry', entry);
+
+      for (const file of this.entry.dataStore.dataFiles) {
+        if (entry.deposited) {
+          file.control.disable();
+        } else {
+          file.control.enable();
+        }
+      }
+    }));
   }
 
   ngOnDestroy() {
@@ -105,7 +117,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
           () => {
             this.entry.dataStore.deleteFile(dataFile.fileName);
             this.messagesService.sendMessage(new Message('Failed to upload file. Do you have an internet connection?',
-                MessageType.ErrorMessage, 15000));
+              MessageType.ErrorMessage, 15000));
           },
           () => {
             closure -= 1;
