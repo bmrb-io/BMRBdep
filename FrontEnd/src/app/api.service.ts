@@ -249,6 +249,8 @@ export class ApiService implements OnDestroy {
 
   newSupportRequest(comment: string): Promise<any> {
 
+    // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
+
     const contactLoop: Loop = this.cachedEntry.getLoopsByCategory('_Contact_person')[0];
     const userEmail = contactLoop.data[0][contactLoop.tags.indexOf('Email_address')].value;
     let userName = contactLoop.data[0][contactLoop.tags.indexOf('Given_name')].value + ' ' +
