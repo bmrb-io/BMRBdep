@@ -31,22 +31,24 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
     const parent = this;
     this.subscription$ = combineLatest(this.router.events, this.route.queryParams).pipe(
-      map(results => {
+      map(() => {
         let r = this.route;
         while (r.firstChild) {
           r = r.firstChild;
         }
 
-        if (results[1]['saveframe_category'] !== undefined) {
-          parent.active = results[1]['saveframe_category'];
+        const urlSegments = this.router.url.split('/');
+
+        if (urlSegments[2] === 'saveframe') {
+          parent.active = urlSegments[3];
           parent.page = 'category';
         } else {
-          const urlSegments = this.router.url.split('/');
           parent.page = urlSegments[urlSegments.length - 1];
           if (parent.page === '') {
             parent.page = 'new';
           }
         }
+
       })
     ).subscribe();
 
