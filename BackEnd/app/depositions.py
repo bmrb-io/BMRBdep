@@ -164,6 +164,10 @@ class DepositionRepo:
                     if first_initial_index and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
 
+        # Do final entry normalization
+        final_entry.normalize()
+
+        # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
 
