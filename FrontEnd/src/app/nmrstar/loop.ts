@@ -347,7 +347,10 @@ export class Loop {
           }
 
           if (!checkValueIsNull(row[n].value)) {
-            hadRealData = true;
+            // ID alone isn't worth printing
+            if (row[n].name !== 'ID') {
+              hadRealData = true;
+            }
           }
 
           let datumCopy = cleanValue(row[n].value);

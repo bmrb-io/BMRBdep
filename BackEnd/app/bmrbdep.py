@@ -416,14 +416,16 @@ def new_deposition() -> Response:
     entry_saveframe['_Entry_author'] = author_loop
 
     contact_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
-    contact_loop.add_tag(['_Contact_person.Given_name',
+    contact_loop.add_tag(['_Contact_person.ID',
+                          '_Contact_person.Given_name',
                           '_Contact_person.Middle_initials',
                           '_Contact_person.Family_name',
                           '_Contact_person.ORCID',
                           '_Contact_person.Email_address',
                           '_Contact_person.Role',
                           '_Contact_person.Organization_type'])
-    contact_loop.add_data([author_given,
+    contact_loop.add_data([1,
+                           author_given,
                            None,
                            author_family,
                            author_orcid,
@@ -432,17 +434,18 @@ def new_deposition() -> Response:
                            schema.schema['_contact_person.organization_type']['default value']])
     # Merge the uploaded data
     if not entry_saveframe['_Contact_person'].empty:
-        for row in entry_saveframe['_Contact_person'].get_tag(['_Contact_person.Given_name',
-                                                               '_Contact_person.Middle_initials',
-                                                               '_Contact_person.Family_name',
-                                                               '_Contact_person.ORCID',
-                                                               '_Contact_person.Email_address',
-                                                               '_Contact_person.Role',
-                                                               '_Contact_person.Organization_type']):
+        for pos, row in enumerate(entry_saveframe['_Contact_person'].get_tag(['_Contact_person.Given_name',
+                                                                              '_Contact_person.Middle_initials',
+                                                                              '_Contact_person.Family_name',
+                                                                              '_Contact_person.ORCID',
+                                                                              '_Contact_person.Email_address',
+                                                                              '_Contact_person.Role',
+                                                                              '_Contact_person.Organization_type'])):
             assert isinstance(row, list)
+            row.insert(0, pos + 2)
             contact_loop.add_data(row)
     else:
-        contact_loop.add_data([None, None, None, None, None, 'responsible scientist', 'academic'])
+        contact_loop.add_data([2, None, None, None, None, None, 'responsible scientist', 'academic'])
     contact_loop.add_missing_tags(all_tags=True, schema=schema)
     contact_loop.sort_tags(schema=schema)
     entry_saveframe['_Contact_person'] = contact_loop
@@ -465,8 +468,7 @@ def new_deposition() -> Response:
                     row_data = []
                     for tag in loop.tags:
                         fqtn = (loop.category + '.' + tag).lower()
-                        # We only need to add ordinals to the experiment ID
-                        if tag == "ID" and ("Experiment_ID" in loop.tags or loop.category == '_Experiment'):
+                        if tag == "ID":
                             row_data.append(x)
                         elif schema.schema[fqtn]['default value'] not in ["?", '']:
                             row_data.append(schema.schema[fqtn]['default value'])
