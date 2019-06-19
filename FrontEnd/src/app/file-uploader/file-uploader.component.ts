@@ -37,11 +37,13 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     });
 
     this.subscription$.add(this.api.entrySubject.subscribe(entry => {
-      for (const file of this.entry.dataStore.dataFiles) {
-        if (entry.deposited) {
-          file.control.disable();
-        } else {
-          file.control.enable();
+      if (entry) {
+        for (const file of entry.dataStore.dataFiles) {
+          if (entry.deposited) {
+            file.control.disable();
+          } else {
+            file.control.enable();
+          }
         }
       }
     }));
