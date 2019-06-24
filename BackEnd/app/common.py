@@ -10,6 +10,12 @@ import werkzeug.utils
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
 configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
 
+residue_mappings = {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 'ARG', 'N': 'ASN',
+                    'D': 'ASP', 'C': 'CYS', 'Q': 'GLN', 'E': 'GLU', 'H': 'HIS',
+                    'I': 'ILE', 'L': 'LEU', 'K': 'LYS', 'M': 'MET', 'F': 'PHE',
+                    'S': 'SER', 'T': 'THR', 'W': 'TRP', 'Y': 'TYR', 'V': 'VAL',
+                    'U': 'SEC'}
+
 
 def get_schema(version: str) -> dict:
     """ Return the schema from Redis. """
