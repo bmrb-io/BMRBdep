@@ -18,7 +18,7 @@ from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
 # Local modules
-from common import ServerError, RequestError, configuration, secure_filename
+from common import ServerError, RequestError, configuration, secure_filename, residue_mappings
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -163,6 +163,32 @@ class DepositionRepo:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
                     if first_initial_index and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
+
+        # Insert the loops for residue sequences
+        for entity in final_entry.get_saveframes_by_category('entity'):
+            polymer_code = entity['Polymer_seq_one_letter_code'][0].strip().replace('\n', '')
+            if polymer_code and polymer_code is not None and polymer_code != '.':
+                comp_loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
+                comp_loop.add_tag(['_Entity_comp_index.ID',
+                                   '_Entity_comp_index.Auth_seq_ID',
+                                   '_Entity_comp_index.Comp_ID',
+                                   '_Entity_comp_index.Comp_label',
+                                   '_Entity_comp_index.Entry_ID',
+                                   '_Entity_comp_index.Entity_ID'])
+                for x, residue in enumerate(polymer_code):
+                    comp_loop.data.append([x+1, None, residue_mappings.get(residue, 'X'), None, None, None])
+                entity.add_loop(comp_loop)
+
+                polymer_loop = pynmrstar.Loop.from_scratch('_Entity_poly_seq')
+                polymer_loop.add_tag(['_Entity_poly_seq.Hetero',
+                                      '_Entity_poly_seq.Mon_ID',
+                                      '_Entity_poly_seq.Num',
+                                      '_Entity_poly_seq.Comp_index_ID',
+                                      '_Entity_poly_seq.Entry_ID',
+                                      '_Entity_poly_seq.Entity_ID'])
+                for x, residue in enumerate(polymer_code):
+                    polymer_loop.data.append([None, residue_mappings.get(residue, 'X'), x+1, x+1, None, None])
+                entity.add_loop(polymer_loop)
 
         # Do final entry normalization
         final_entry.normalize()
