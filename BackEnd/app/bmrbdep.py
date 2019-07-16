@@ -219,7 +219,7 @@ def new_deposition() -> Response:
         try:
             uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read().decode())
         except pynmrstar.exceptions.ParsingError as e:
-            raise RequestError("Invalid NMR-STAR file. Parse error: %s" % repr(e))
+            raise RequestError("Invalid NMR-STAR file: %s" % repr(e))
     # Check if they are bootstrapping from an existing entry - if so, make sure they didn't also upload a file
     if 'bootstrapID' in request_info and request_info['bootstrapID'] != 'null':
         if uploaded_entry:
