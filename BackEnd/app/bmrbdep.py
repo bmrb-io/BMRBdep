@@ -218,8 +218,10 @@ def new_deposition() -> Response:
     if 'nmrstar_file' in request.files and request.files['nmrstar_file'] and request.files['nmrstar_file'].filename:
         try:
             uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read().decode())
-        except (pynmrstar.exceptions.ParsingError, UnicodeDecodeError) as e:
+        except pynmrstar.exceptions.ParsingError as e:
             raise RequestError("Invalid NMR-STAR file: %s" % repr(e))
+        except UnicodeDecodeError:
+            raise RequestError("Invalid uploaded file. It is not an ASCII file.")
     # Check if they are bootstrapping from an existing entry - if so, make sure they didn't also upload a file
     if 'bootstrapID' in request_info and request_info['bootstrapID'] != 'null':
         if uploaded_entry:
