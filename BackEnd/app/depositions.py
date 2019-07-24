@@ -190,12 +190,17 @@ class DepositionRepo:
                     polymer_loop.data.append([None, residue_mappings.get(residue, 'X'), x+1, x+1, None, None])
                 entity.add_loop(polymer_loop)
 
-        # Do final entry normalization
-        final_entry.normalize()
-
         # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
+
+        # Set the accession and submission date
+        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        entry_saveframe['Submission_date'] = today_str
+        entry_saveframe['Accession_date'] = today_str
+
+        # Do final entry normalization
+        final_entry.normalize()
 
         params = {'source': 'Author',
                   'submit_type': 'Dep',
