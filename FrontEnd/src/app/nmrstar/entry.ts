@@ -148,6 +148,9 @@ export class Entry {
     //  Also, set the first invalid saveframe in the process
     this.firstIncompleteCategory = null;
     for (const category of Array.from(categories)) {
+      if (!(typeof category === 'string')) {
+        throw new Error(('Bug in code: category should have been a string.'));
+      }
       if (!this.schema.saveframeSchema[category]) {
         console.error('A saveframe exists with an invalid category:', category);
         continue;
