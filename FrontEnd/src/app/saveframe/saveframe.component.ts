@@ -4,7 +4,7 @@ import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params} from '@angular/router';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatDialog, MatDialogRef} from '@angular/material';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 @Component({

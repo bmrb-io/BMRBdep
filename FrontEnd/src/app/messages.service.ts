@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {environment} from '../environments/environment';
-import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material';
+import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 
 export enum MessageType {
   ErrorMessage,
