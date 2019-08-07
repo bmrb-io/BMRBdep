@@ -4,7 +4,7 @@ import {MessagesService} from '../messages.service';
 import {Location} from '@angular/common';
 import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatDialog, MatDialogRef} from '@angular/material';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -41,7 +41,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
       disableClose: false
     });
     this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to deposit the entry '${this.entry.depositionNickname}'?` +
-        ' No changes are allowed after deposition.';
+      ' No changes are allowed after deposition.';
     this.dialogRef.componentInstance.proceedMessage = 'Deposit';
 
     this.dialogRef.afterClosed().subscribe(result => {

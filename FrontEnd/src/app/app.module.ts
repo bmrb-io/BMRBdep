@@ -29,26 +29,24 @@ import {RestoreComponent} from './restore/restore.component'; // Saving/loading 
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {
-  MatIconModule,
-  MatInputModule,
-  MatListModule,
-  MatMenuModule,
-  MatCardModule,
-  MatProgressBarModule,
-  MatSelectModule,
-  MatSidenavModule,
-  MatSlideToggleModule,
-  MatToolbarModule,
-  MatButtonModule,
-  MatSnackBarModule,
-  MatDialogModule,
-  MatRadioModule
-} from '@angular/material';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatSelectModule} from '@angular/material/select';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatToolbarModule} from '@angular/material/toolbar';
 
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
-import { ContactUsComponent } from './contact-us/contact-us.component';
+import {ContactUsComponent} from './contact-us/contact-us.component';
 
 @NgModule({
   declarations: [
