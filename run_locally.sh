@@ -1,18 +1,19 @@
 #!/bin/bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # Kill everything on script exit
+# shellcheck disable=SC2064
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 # Check if the initial setups need to happen
-${SCRIPT_DIR}/install.sh
+"${SCRIPT_DIR}"/install.sh
 
 # Run flask
-${SCRIPT_DIR}/BackEnd/run.sh &
+"${SCRIPT_DIR}"/BackEnd/run.sh &
 
 # Run angular
-source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
-cd ${SCRIPT_DIR}/FrontEnd/
+source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
+cd "${SCRIPT_DIR}"/FrontEnd/ || exit 1
 echo "Please open http://localhost:4200 in your browser when Angular is done compiling."
 ng serve

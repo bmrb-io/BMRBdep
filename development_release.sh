@@ -1,31 +1,31 @@
 #!/bin/bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 echo "Getting newest schema."
-source ${SCRIPT_DIR}/BackEnd/schema_venv/bin/activate
-if ! ${SCRIPT_DIR}/BackEnd/app/schema_loader.py; then
+source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
+if ! "${SCRIPT_DIR}"/BackEnd/app/schema_loader.py; then
   echo "Schema loader failed, quitting."
   exit
 fi
 deactivate
 
 echo "Compiling angular."
-source ${SCRIPT_DIR}/FrontEnd/node_env/bin/activate
-cd ${SCRIPT_DIR}/FrontEnd
+source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
+cd "${SCRIPT_DIR}"/FrontEnd || exit 1
 if ! npm run build.prod; then
   echo "Angular build failed, quitting."
   exit
 fi
-cd dist
+cd dist || exit 2
 tar -czvf ../release.tgz * .htaccess
 scp ../release.tgz wedell@manta:/tmp/
-cd ..;
+cd ..
 rm -rfv release.tgz
-cd ${SCRIPT_DIR}
+cd "${SCRIPT_DIR}" || exit 3
 
 echo "Building docker instance..."
-if ! ${SCRIPT_DIR}/build_docker.sh production.conf; then
+if ! "${SCRIPT_DIR}"/build_docker.sh production.conf; then
   echo "Building docker instance failed, quitting."
   exit
 fi
