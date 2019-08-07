@@ -9,7 +9,8 @@
         "admins": ["wedell@bmrb.wisc.edu"],
         "server": "CHANGE_ME",
         "from_address": "noreply@bmrb.wisc.edu",
-        "reply_to_address": "support@bmrb.zendesk.com"
+        "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
+        "annotator_address": "annotators@lists.bmrb.wisc.edu"
     },
     "orcid": {
       "url": "https://pub.orcid.org/v2.1/%s/record",
