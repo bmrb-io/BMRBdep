@@ -12,7 +12,7 @@ import {Subscription} from 'rxjs';
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   entry: Entry;
-  @ViewChild('inputFile') fileUploadElement: ElementRef;
+  @ViewChild('inputFile', { static: false }) fileUploadElement: ElementRef;
   subscription$: Subscription;
 
   constructor(private router: Router,
