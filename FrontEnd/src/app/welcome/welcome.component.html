@@ -1,5 +1,5 @@
 <div>
-    <h1>Welcome to BMRBDep!</h1>
+    <h1>Welcome to BMRBdep!</h1>
     <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
         <div class="content-box resume-box" *ngIf="entry && !entry.deposited">
             <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
@@ -115,7 +115,7 @@
         <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
             deposition.</p>
         <p>If you have lost that e-mail, please
-            <a mat-raised-button href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBDep session"
+            <a mat-raised-button href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBdep session"
                color="primary">contact us.</a>
         </p>
     </div>
