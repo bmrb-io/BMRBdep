@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "instant-dep": {
+    "BMRBdep": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -65,24 +65,24 @@
                   "with": "src/environments/environment.devprod.ts"
                 }
               ]
-            },
+            }
           }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "instant-dep:build"
+            "browserTarget": "BMRBdep:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "instant-dep:build:production"
+              "browserTarget": "BMRBdep:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "instant-dep:build"
+            "browserTarget": "BMRBdep:build"
           }
         },
         "test": {
@@ -121,7 +121,7 @@
         }
       }
     },
-    "instant-dep-e2e": {
+    "BMRBdep-e2e": {
       "root": "",
       "sourceRoot": "",
       "projectType": "application",
@@ -130,7 +130,7 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "instant-dep:serve"
+            "devServerTarget": "BMRBdep:serve"
           }
         },
         "lint": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "defaultProject": "instant-dep",
+  "defaultProject": "BMRBdep",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
