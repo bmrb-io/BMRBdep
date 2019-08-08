@@ -49,7 +49,7 @@ export class MessagesService {
 
     this.snackBarRef.onAction().subscribe(() => {
       const mail = document.createElement('a');
-      mail.href = 'mailto:' + environment.contactEmail + '?subject=' + 'An BMRBDep error occurred: ' + message.messageBody;
+      mail.href = 'mailto:' + environment.contactEmail + '?subject=' + 'An BMRBdep error occurred: ' + message.messageBody;
       mail.click();
     });
 

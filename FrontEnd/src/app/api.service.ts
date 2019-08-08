@@ -39,9 +39,9 @@ export class ApiService implements OnDestroy {
     this.entrySubject.subscribe(entry => {
       this.cachedEntry = entry;
       if (entry) {
-        this.titleService.setTitle(`BMRBDep: ${entry.depositionNickname}`);
+        this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
       } else {
-        this.titleService.setTitle('BMRBDep');
+        this.titleService.setTitle('BMRBdep');
       }
     });
 
@@ -68,7 +68,7 @@ export class ApiService implements OnDestroy {
     }
 
     // Used to open verification links in same tab
-    window.name = 'BMRBDep';
+    window.name = 'BMRBdep';
 
     setInterval(() => {
       const savedID = localStorage.getItem('entryID');
@@ -266,7 +266,7 @@ export class ApiService implements OnDestroy {
         'requester': {
           'name': userName
         },
-        'subject': 'BMRBDep Support Request',
+        'subject': 'BMRBdep Support Request',
         'comment': {
           'body': comment
         },
