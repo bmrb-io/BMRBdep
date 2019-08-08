@@ -1,6 +1,6 @@
 import { AppPage } from './app.po';
 
-describe('instant-dep App', () => {
+describe('BMRBdep App', () => {
   let page: AppPage;
 
   beforeEach(() => {
