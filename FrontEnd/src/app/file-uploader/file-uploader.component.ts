@@ -31,7 +31,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.serverURL = environment.serverURL;
     this.subscription$ = this.route.params.subscribe((params: Params) => {
-      if (params['load_type'] === 'category' && params['saveframe_description'] === 'deposited_data_files') {
+      if (params['saveframe_category'] === 'deposited_data_files') {
         this.showCategoryLink = false;
       }
     });
