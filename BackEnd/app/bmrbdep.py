@@ -550,7 +550,7 @@ def deposit_entry(uuid) -> Response:
         mail.send(message)
 
         # Send a message to the annotators
-        message = Message("BMRBdep: Entry %s has been deposited." % bmrb_num,
+        message = Message("BMRBdep: BMRB entry %s has been deposited." % bmrb_num,
                           recipients=[configuration['smtp']['annotator_address']])
         message.body = '''The following new entry has been deposited via BMRBdep:
 
