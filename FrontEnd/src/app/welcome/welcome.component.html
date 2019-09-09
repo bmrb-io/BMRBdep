@@ -38,6 +38,11 @@
                 <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
             </mat-form-field>
 
+            <div *ngIf="emailValidationError" class="fake-form-field">
+                <mat-checkbox color="primary" [(ngModel)]="skipEmailValidation"
+                              [ngModelOptions]="{standalone: true}">My e-mail is correct</mat-checkbox>
+            </div>
+
             <mat-form-field>
                 <label>
                     <input matInput
@@ -95,6 +100,7 @@
             </div>
 
             <br>
+
             <button *ngIf="sessionType.value == 'bmrb_id'" mat-raised-button color="primary">
                 Click here to start a new deposition from an existing entry.
             </button>

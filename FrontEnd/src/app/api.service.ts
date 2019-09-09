@@ -289,6 +289,7 @@ export class ApiService implements OnDestroy {
   newDeposition(authorEmail: string,
                 depositionNickname: string,
                 orcid: string = null,
+                skipEmailValidation: boolean = false,
                 file: File = null,
                 bootstrapID: string = null): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;
@@ -298,6 +299,9 @@ export class ApiService implements OnDestroy {
     const body = new FormData();
     body.append('email', authorEmail);
     body.append('deposition_nickname', depositionNickname);
+    if (skipEmailValidation) {
+      body.append('skip_validation', 'true');
+    }
     if (orcid) {
       body.append('orcid', orcid);
     }
@@ -320,8 +324,11 @@ export class ApiService implements OnDestroy {
           this.messagesService.clearMessage();
           resolve(jsonData['deposition_id']);
         }, error => {
+          if (error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
+            reject('Invalid e-mail');
+          }
           this.handleError(error);
-          reject();
+          reject(error);
         });
     });
   }
