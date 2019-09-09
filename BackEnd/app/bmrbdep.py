@@ -213,6 +213,10 @@ def new_deposition() -> Response:
     if 'deposition_nickname' not in request_info:
         raise RequestError("Must specify a nickname for the deposition.")
 
+    skip_email_validation = False
+    if 'skip_validation' in request_info:
+        skip_email_validation = True
+
     uploaded_entry: Optional[pynmrstar.Entry] = None
     entry_bootstrap: bool = False
     if 'nmrstar_file' in request.files and request.files['nmrstar_file'] and request.files['nmrstar_file'].filename:
@@ -238,23 +242,30 @@ def new_deposition() -> Response:
         author_orcid = None
 
     # Check the e-mail
-    try:
-        if not validate_email(author_email):
-            raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
-                               "provided for typos.")
-        elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
-            raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
-                               "have a typo in the part of your e-mail after the @?)" %
-                               (author_email[author_email.index("@") + 1:]))
-        elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
-            raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
-                               "server. (Do you have a typo in the e-mail address before the @?)")
-    except Timeout:
-        raise RequestError("The e-mail you provided is invalid. There was no response when attempting to connect "
-                           "to the server at %s." % author_email[author_email.index("@") + 1:])
-    except NXDOMAIN:
-        raise RequestError("The e-mail you provided is invalid. The domain '%s' is not a valid domain." %
-                           author_email[author_email.index("@") + 1:])
+    if not skip_email_validation:
+        try:
+            if not validate_email(author_email):
+                raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
+                                   "provided for typos.")
+            elif not validate_email(author_email, check_mx=True, smtp_timeout=3):
+                raise RequestError("The e-mail you provided is invalid. There is no e-mail server at '%s'. (Do you "
+                                   "have a typo in the part of your e-mail after the @?) If you are certain"
+                                   " that your e-mail is correct, please select the 'My e-mail is correct' checkbox "
+                                   "and click to start a new deposition again." %
+                                   (author_email[author_email.index("@") + 1:]))
+            elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
+                raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
+                                   "server. (Do you have a typo in the e-mail address before the @?) If you are certain"
+                                   " that your e-mail is correct, please select the 'My e-mail is correct' checkbox "
+                                   "and click to start a new deposition again.")
+        except Timeout:
+            raise RequestError("The e-mail you provided is invalid. There was no response when attempting to connect "
+                               "to the server at %s. If you are certain that your e-mail is correct, please select the"
+                               " 'My e-mail is correct' checkbox and click to start a new deposition again."
+                               % author_email[author_email.index("@") + 1:])
+        except NXDOMAIN:
+            raise RequestError("The e-mail you provided is invalid. The domain '%s' is not a valid domain." %
+                               author_email[author_email.index("@") + 1:])
 
     # Create the deposition
     deposition_id = str(uuid4())
