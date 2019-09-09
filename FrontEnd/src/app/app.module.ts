@@ -27,6 +27,10 @@ import {LoopViewComponent} from './view_mode/loop/loop-view.component';
 import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
 import {RestoreComponent} from './restore/restore.component'; // Saving/loading bar
 
+// From https://github.com/mika-el/angular-loading-page
+import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+import {ContactUsComponent} from './contact-us/contact-us.component';
+
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
@@ -43,10 +47,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatToolbarModule} from '@angular/material/toolbar';
-
-// From https://github.com/mika-el/angular-loading-page
-import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
-import {ContactUsComponent} from './contact-us/contact-us.component';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [
@@ -91,7 +92,8 @@ import {ContactUsComponent} from './contact-us/contact-us.component';
     LoadingPageModule,
     SlidingBarModule,
     MatDialogModule,
-    MatRadioModule
+    MatRadioModule,
+    MatCheckboxModule
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent]

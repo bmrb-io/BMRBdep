@@ -14,10 +14,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   entry: Entry;
   @ViewChild('inputFile', { static: false }) fileUploadElement: ElementRef;
   subscription$: Subscription;
+  skipEmailValidation: boolean;
+  emailValidationError: boolean;
 
   constructor(private router: Router,
               public api: ApiService) {
     this.entry = null;
+    this.skipEmailValidation = false;
+    this.emailValidationError = false;
   }
 
   sessionType = new FormControl('', [Validators.required]);
@@ -86,9 +90,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, fileElement, bootstrapID).then(
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, this.skipEmailValidation, fileElement,
+      bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]);
+      }, error => {
+        if (error === 'Invalid e-mail') {
+          this.emailValidationError = true;
+        }
       });
   }
 }
