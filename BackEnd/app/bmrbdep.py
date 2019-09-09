@@ -548,15 +548,19 @@ def deposit_entry(uuid) -> Response:
 
         # Ask them to confirm their e-mail
         contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
-        contact_full = ["%s %s <%s>" % tuple(x) for x in final_entry.get_loops_by_category("_Contact_Person")[0].get_tag( ['Given_name','Family_name', 'Email_address'])]
-        logging.exception(contact_full)
+        contact_full = ["%s %s <%s>" % tuple(x) for x in
+                        final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
+                          ['Given_name', 'Family_name', 'Email_address'])]
         if repo.metadata['author_email'] not in contact_emails:
             raise RequestError('At least one contact person must have the email of the original deposition creator.')
         message = Message("Your entry has been deposited!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
-        message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the' \
-                       ' deposition contents for reference. You may also use this file to start a new deposition. ' \
-                       'You will hear from our annotators in the next few days.' % bmrb_num
+        message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
+                       'deposition contents for reference. You may also use this file to start a new deposition. ' \
+                       'You will hear from our annotators in the next few days. Please note that any data files that ' \
+                       'you uploaded will be manually integrated into the final NMR-STAR file by the BMRB annotators ' \
+                       '- their contents are not included in the NMR-STAR file attached to this e-mail. Deposited ' \
+                       'data files: %s' % (bmrb_num, repo.get_data_file_list())
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
 
