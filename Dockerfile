@@ -14,16 +14,16 @@ RUN apk update && \
     pip3 install --upgrade pip setuptools && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache
+    rm -r /root/.cache && \
+    mkdir /opt/wsgi/schema_data/ && \
+    cd /opt/wsgi && chown -R uwsgi:uwsgi .
 
-RUN mkdir /opt/wsgi/schema_data/
+COPY ./BackEnd/app/requirements.txt /opt/wsgi/
+RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
+
 COPY ./BackEnd/app/*py /opt/wsgi/
 COPY ./BackEnd/app/schema_data /opt/wsgi/schema_data/
-COPY ./BackEnd/app/requirements.txt /opt/wsgi/
 COPY ./FrontEnd/dist /opt/wsgi/html
-
-RUN cd /opt/wsgi && chown -R uwsgi:uwsgi .
-RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt && apk --purge del .build-deps
 
 ARG configfile
 ENV configfile=${configfile:-./development.conf}
