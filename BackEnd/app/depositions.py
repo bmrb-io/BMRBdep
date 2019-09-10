@@ -166,8 +166,9 @@ class DepositionRepo:
 
         # Insert the loops for residue sequences
         for entity in final_entry.get_saveframes_by_category('entity'):
-            polymer_code = entity['Polymer_seq_one_letter_code'][0].strip().replace('\n', '')
+            polymer_code = entity['Polymer_seq_one_letter_code'][0]
             if polymer_code and polymer_code is not None and polymer_code != '.':
+                polymer_code = polymer_code.strip().replace('\n', '')
                 comp_loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
                 comp_loop.add_tag(['_Entity_comp_index.ID',
                                    '_Entity_comp_index.Auth_seq_ID',
