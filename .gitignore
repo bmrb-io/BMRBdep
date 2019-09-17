@@ -49,7 +49,6 @@ package-lock.json
 /BackEnd/app/nmr-star-dictionary/
 configuration.json
 env/
-/BackEnd/app/schema_data/*.json.zlib
 /BackEnd/schema_env/
 /installation.log
 /FrontEnd/dist
