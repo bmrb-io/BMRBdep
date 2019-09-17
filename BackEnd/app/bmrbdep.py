@@ -269,9 +269,8 @@ def new_deposition() -> Response:
 
     # Create the deposition
     deposition_id = str(uuid4())
-    # schema_url = 'https://raw.githubusercontent.com/uwbmrb/nmr-star-dictionary/development/xlschem_ann.csv'
-    schema: pynmrstar.Schema = pynmrstar.utils.get_schema()
-    json_schema: dict = get_schema(schema.version)
+    schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(configuration['schema_version'], schema_format='xml'))
+    json_schema: dict = get_schema(configuration['schema_version'])
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
