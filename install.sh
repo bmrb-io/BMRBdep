@@ -35,7 +35,7 @@ if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]] || [[ "$1" =
 fi
 
 if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/configuration.json" ]]; then
-  echo "No configuration file found. Copying example configuration file (which will work for local testing) to ${SCRIPT_DIR}/BackEnd/app/configuration.json. You should edit this file before deployment." | tee -a ${SCRIPT_DIR}/installation.log
+  echo "No configuration file found. Copying example configuration file (which will work for local testing) to ${SCRIPT_DIR}/BackEnd/app/configuration.json. You should edit this file before deployment." | tee -a "${SCRIPT_DIR}"/installation.log
   cp "${SCRIPT_DIR}"/BackEnd/app/example_config.json "${SCRIPT_DIR}"/BackEnd/app/configuration.json
 fi
 
