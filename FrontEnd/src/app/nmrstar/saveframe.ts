@@ -229,7 +229,11 @@ export class Saveframe {
         if (rule['Override view value'] === 'O') {
           this.tagDict[rule['Tag']].display = this.tagDict[rule['Tag']].schemaValues['User full view'];
         } else {
-          this.tagDict[rule['Tag']].display = rule['Override view value'];
+          if (this.tagDict[rule['Tag']] === undefined) {
+            console.warn('Dictionary over-ride rule specifies non-existent tag: ' + rule['Conditional tag'], rule);
+          } else {
+            this.tagDict[rule['Tag']].display = rule['Override view value'];
+          }
         }
       }
     }
