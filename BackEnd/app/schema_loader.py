@@ -17,16 +17,26 @@ from git import Git, Repo, GitCommandError
 # Local modules
 from common import root_dir
 
+dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
 dictionary_dir = os.path.join(root_dir, 'nmr-star-dictionary')
+
 if not os.path.exists(dictionary_dir):
     Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
 repo = Repo(dictionary_dir)
 o = repo.remotes.origin
-o.pull()
+most_recent_commit = o.pull()[0].commit
+
+# Quit early if there aren't any new commits
+last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
+if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit):
+    print('Schemas already up to date. Quitting.')
+    sys.exit(0)
+else:
+    open(last_commit_file, 'w').write(str(most_recent_commit))
+
 repo.git.checkout('development')
 
 # Load the data types
-dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
 data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
 
 validate_mode = False
