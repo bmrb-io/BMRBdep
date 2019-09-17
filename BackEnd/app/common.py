@@ -3,6 +3,7 @@
 import os
 import zlib
 import simplejson as json
+from typing import Union, TextIO
 
 # Load the configuration file
 import werkzeug.utils
@@ -17,12 +18,17 @@ residue_mappings = {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 'ARG', 'N': 'ASN',
                     'U': 'SEC'}
 
 
-def get_schema(version: str) -> dict:
-    """ Return the schema from Redis. """
+def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]:
+    """ Return the schema from disk. """
 
     try:
-        with open(os.path.join(root_dir, 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
-            schema = json.loads(zlib.decompress(schema_file.read()).decode())
+        if schema_format == "json":
+            with open(os.path.join(root_dir, 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
+                schema = json.loads(zlib.decompress(schema_file.read()).decode())
+        elif schema_format == "xml":
+            return open(os.path.join(root_dir, 'schema_data', version + '.xml'), 'r')
+        else:
+            raise ServerError('Attempted to load invalid schema type.')
     except IOError:
         raise RequestError("Invalid schema version.")
 
