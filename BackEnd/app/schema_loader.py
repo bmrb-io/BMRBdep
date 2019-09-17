@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
 # Standard libraries
-import re
-import os
 import csv
+import io
+import optparse
+import os
+import re
 import sys
 import zlib
-import optparse
+from io import StringIO
 
 # Installed modules
-import simplejson as json
 import pynmrstar
-from io import StringIO
-from git import Git, Repo, GitCommandError
+import simplejson as json
 
 # Local modules
 from common import root_dir
+from git import Git, Repo, GitCommandError
 
 data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      'Coupling_constants': 'coupling_constants',
@@ -91,19 +92,17 @@ def get_main_schema(commit):
         xmlschem_ann = csv.reader(get_file("xlschem_ann.csv", commit))
     except GitCommandError:
         return
-    all_headers = next(xmlschem_ann)
-    next(xmlschem_ann)
-    next(xmlschem_ann)
-    version = next(xmlschem_ann)[3]
+    whole_schema = [next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann)]
+    version = whole_schema[3][3]
 
     cc = ['Tag', 'Tag category', 'SFCategory', 'BMRB data type', 'Prompt', 'Interface',
           'default value', 'Example', 'User full view',
           'Foreign Table', 'Sf pointer', 'Item enumerated', 'Item enumeration closed', 'ADIT category view name',
-          'Enumeration ties']
+          'Enumeration ties', 'Metabolites']
     # Todo: remove ADIT category view name once code is refactored
 
-    header_idx = {x: all_headers.index(x) for x in cc}
-    header_idx_list = [all_headers.index(x) for x in cc]
+    header_idx = {x: whole_schema[0].index(x) for x in cc}
+    header_idx_list = [whole_schema[0].index(x) for x in cc]
 
     res = {'version': version,
            'tags': {'headers': cc + ['enumerations'], 'values': {}},
@@ -111,8 +110,9 @@ def get_main_schema(commit):
 
     for row in xmlschem_ann:
         res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
+        whole_schema.append(row)
 
-    return res
+    return res, whole_schema
 
 
 def get_data_file_types(rev, validate_mode=False):
@@ -191,23 +191,23 @@ def get_dict(fob, headers, number_fields, skip):
 def load_schemas(rev, validate_mode=False):
     # Load the schemas into the DB
 
-    res = get_main_schema(rev)
-    if not res:
+    result, xl_schema = get_main_schema(rev)
+    if not result:
         return None
 
-    res['data_types'] = data_types
-    res['overrides'] = get_dict(get_file("adit_man_over.csv", rev),
+    result['data_types'] = data_types
+    result['overrides'] = get_dict(get_file("adit_man_over.csv", rev),
                                 ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
                                  'Override value', 'Order of operation'],
                                 ['Order of operation'],
                                 1)
 
-    res['supergroup_descriptions'] = get_dict(get_file('adit_super_grp_o.csv', rev),
+    result['supergroup_descriptions'] = get_dict(get_file('adit_super_grp_o.csv', rev),
                                               ['super_group_ID', 'super_group_name', 'Description'],
                                               ['super_group_ID'],
                                               2)
 
-    res['category_supergroups'] = get_dict(get_file("adit_cat_grp_o.csv", rev),
+    result['category_supergroups'] = get_dict(get_file("adit_cat_grp_o.csv", rev),
                                            ['category_super_group', 'saveframe_category', 'mandatory_number',
                                             'allowed_user_defined_framecode', 'category_group_view_name',
                                             'group_view_help', 'category_super_group_ID'],
@@ -216,8 +216,8 @@ def load_schemas(rev, validate_mode=False):
 
     # Check for outdated overrides
     if validate_mode:
-        for override in res['overrides']['values']:
-            if override[0] != "*" and override[0] not in res['tags']['values']:
+        for override in result['overrides']['values']:
+            if override[0] != "*" and override[0] not in result['tags']['values']:
                 print("Override specifies invalid tag: %s" % override[0])
 
     sf_category_info = get_dict(get_file("adit_cat_grp_o.csv", rev),
@@ -226,9 +226,9 @@ def load_schemas(rev, validate_mode=False):
                                 ['mandatory_number'],
                                 2)
 
-    res['saveframes'] = {'headers': sf_category_info['headers'][1:], 'values': {}}
+    result['saveframes'] = {'headers': sf_category_info['headers'][1:], 'values': {}}
     for sfo in sf_category_info['values']:
-        res['saveframes']['values'][sfo[0]] = sfo[1:]
+        result['saveframes']['values'][sfo[0]] = sfo[1:]
 
     # Load the enumerations
     try:
@@ -240,20 +240,20 @@ def load_schemas(rev, validate_mode=False):
         for saveframe in enum_entry:
             enums = [x.replace("$", ",") for x in saveframe[0].get_data_by_tag('_item_enumeration_value')[0]]
             try:
-                res['tags']['values'][saveframe.name].append(enums)
+                result['tags']['values'][saveframe.name].append(enums)
             except KeyError:
                 if validate_mode:
                     print("Enumeration for non-existent tag: %s" % saveframe.name)
 
     except ValueError as e:
         if validate_mode:
-            print("Invalid enum file in version %s: %s" % (res['version'], str(e)))
+            print("Invalid enum file in version %s: %s" % (result['version'], str(e)))
     finally:
         pynmrstar.ALLOW_V2_ENTRIES = False
 
-    res['file_upload_types'] = get_data_file_types(rev, validate_mode=validate_mode)
+    result['file_upload_types'] = get_data_file_types(rev, validate_mode=validate_mode)
 
-    return res['version'], res
+    return result['version'], result, xl_schema
 
 
 if __name__ == "__main__":
@@ -295,8 +295,9 @@ if __name__ == "__main__":
     one_overwritten = False
     try:
         for schema in schema_emitter(validate_mode=options.validate):
-            schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
-            if os.path.exists(schema_location):
+            web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
+            xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.xml')
+            if os.path.exists(web_schema_location):
                 if one_overwritten and not options.full:
                     print("Quitting because the schemas already exist.")
                     sys.exit(0)
@@ -304,9 +305,17 @@ if __name__ == "__main__":
                     print("Overwriting the most recent schema to ensure it is the newest one.")
                 one_overwritten = True
 
-            with open(schema_location, 'wb') as schema_file:
+            # Write out the web schema
+            with open(web_schema_location, 'wb') as schema_file:
                 j = json.dumps(schema[1])
                 schema_file.write(zlib.compress(j.encode('utf-8')))
+
+            # Write out the pynmrstar input file XML
+            with open(xml_schema_location, 'w') as schema_file:
+                output = io.StringIO()
+                csv.writer(output).writerows(schema[2])
+                schema_file.write(output.getvalue())
+
             highest_schema = schema[0]
             print("Set schema: %s" % schema[0])
             if not options.full:
