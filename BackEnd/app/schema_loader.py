@@ -310,8 +310,8 @@ if __name__ == "__main__":
             highest_schema = schema[0]
             print("Set schema: %s" % schema[0])
             if not options.full:
-                # Make schemas at least up to the one specified in the install script
-                if schema[0] == "3.2.1.21":
+                # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
+                if schema[0] == "3.2.1.31":
                     sys.exit(0)
     finally:
         pass
