@@ -17,30 +17,6 @@ from git import Git, Repo, GitCommandError
 # Local modules
 from common import root_dir
 
-dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
-dictionary_dir = os.path.join(root_dir, 'nmr-star-dictionary')
-
-if not os.path.exists(dictionary_dir):
-    Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
-repo = Repo(dictionary_dir)
-o = repo.remotes.origin
-most_recent_commit = o.pull()[0].commit
-
-# Quit early if there aren't any new commits
-last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
-if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit):
-    print('Schemas already up to date. Quitting.')
-    sys.exit(0)
-else:
-    open(last_commit_file, 'w').write(str(most_recent_commit))
-
-repo.git.checkout('development')
-
-# Load the data types
-data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
-
-validate_mode = False
-
 data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      'Coupling_constants': 'coupling_constants',
                      'Auto_relaxation': 'auto_relaxation',
@@ -88,13 +64,13 @@ data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      }
 
 
-def schema_emitter():
+def schema_emitter(validate_mode=False):
     """ Yields all the schemas in the SVN repo. """
 
     last_schema_version = None
 
     for commit in repo.iter_commits('development'):
-        next_schema = load_schemas(commit)
+        next_schema = load_schemas(commit, validate_mode=validate_mode)
         if next_schema is None:
             print("Reached old incompatible schemas.")
             return
@@ -139,7 +115,7 @@ def get_main_schema(commit):
     return res
 
 
-def get_data_file_types(rev):
+def get_data_file_types(rev, validate_mode=False):
     """ Returns the list of enabled data file [description, sf_category, entry_interview.tag_name. """
 
     try:
@@ -212,7 +188,7 @@ def get_dict(fob, headers, number_fields, skip):
     return {'headers': headers, 'values': values}
 
 
-def load_schemas(rev):
+def load_schemas(rev, validate_mode=False):
     # Load the schemas into the DB
 
     res = get_main_schema(rev)
@@ -275,7 +251,7 @@ def load_schemas(rev):
     finally:
         pynmrstar.ALLOW_V2_ENTRIES = False
 
-    res['file_upload_types'] = get_data_file_types(rev)
+    res['file_upload_types'] = get_data_file_types(rev, validate_mode=validate_mode)
 
     return res['version'], res
 
@@ -286,13 +262,39 @@ if __name__ == "__main__":
     optparser = optparse.OptionParser(description="Create local cache of NMR-STAR schemas.")
     optparser.add_option("--full", action="store_true", dest="full", default=False,
                          help="Create all schemas, not just the most recent one.")
+    optparser.add_option("--validate", action="store_true", dest="validate", default=False,
+                         help="Validate the schemas as they are loaded.")
     # Options, parse 'em
     (options, cmd_input) = optparser.parse_args()
 
-    one_overwritten = False
+    # Do some standard initialization
+    dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
+    dictionary_dir = os.path.join(root_dir, 'nmr-star-dictionary')
 
+    # Pull changes
+    if not os.path.exists(dictionary_dir):
+        Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
+    repo = Repo(dictionary_dir)
+    o = repo.remotes.origin
+    most_recent_commit = o.pull()[0].commit
+
+    # Quit early if there aren't any new commits
+    last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
+    if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit):
+        print('Schemas already up to date according to git commit stored.')
+        if not options.full:
+            sys.exit(0)
+    else:
+        open(last_commit_file, 'w').write(str(most_recent_commit))
+
+    repo.git.checkout('development')
+
+    # Load the data types
+    data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
+
+    one_overwritten = False
     try:
-        for schema in schema_emitter():
+        for schema in schema_emitter(validate_mode=options.validate):
             schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
             if os.path.exists(schema_location):
                 if one_overwritten and not options.full:
