@@ -7,8 +7,8 @@
     },
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],
-        "server": "CHANGE_ME",
-        "from_address": "noreply@bmrb.wisc.edu",
+        "server": "mail",
+        "from_address": "bmrbhelp@bmrb.wisc.edu",
         "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
         "annotator_address": "annotators@lists.bmrb.wisc.edu"
     },
