@@ -4,6 +4,7 @@
 import os
 import logging
 import datetime
+import re
 import traceback
 from io import BytesIO
 from uuid import uuid4
@@ -274,11 +275,24 @@ def new_deposition() -> Response:
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
+    def sort_saveframes(l):
+        """ Sort the given iterable in the way that humans expect.
+
+        Via: https://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python"""
+
+        def convert(text):
+            return int(text) if text.isdigit() else text
+
+        def alphanum_key(key):
+            return [convert(c) for c in re.split('([0-9]+)', key.name)]
+
+        return sorted(l, key=alphanum_key)
+
     # Merge the entries
     if uploaded_entry:
         # Rename the saveframes in the uploaded entry before merging them
         for category in uploaded_entry.category_list:
-            for x, saveframe in enumerate(uploaded_entry.get_saveframes_by_category(category)):
+            for x, saveframe in enumerate(sort_saveframes(uploaded_entry.get_saveframes_by_category(category))):
                 # Set the "Name" tag if it isn't already set
                 if (saveframe.tag_prefix + '.name').lower() in schema.schema:
                     try:
