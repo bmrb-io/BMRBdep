@@ -498,9 +498,16 @@ export class Saveframe {
               dataRow[referenceLoop.tags.indexOf('Chem_shift_units')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].value = '0.00';
               dataRow[referenceLoop.tags.indexOf('Chem_shift_val')].disabled = true;
-              dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'internal';
+
+              // C, N, and P ref_type is indirect
+              if (tag.fullyQualifiedTagName === '_Chem_shift_reference.Proton_shifts_flag') {
+                dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'internal';
+                dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'direct';
+              } else {
+                dataRow[referenceLoop.tags.indexOf('Ref_method')].value = 'na';
+                dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'indirect';
+              }
               dataRow[referenceLoop.tags.indexOf('Ref_method')].disabled = true;
-              dataRow[referenceLoop.tags.indexOf('Ref_type')].value = 'direct';
               dataRow[referenceLoop.tags.indexOf('Ref_type')].disabled = true;
             } else {
               dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].disabled = false;
