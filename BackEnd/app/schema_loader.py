@@ -341,8 +341,7 @@ if __name__ == "__main__":
 
                 if os.path.exists(web_schema_location):
                     if one_overwritten and not options.full:
-                        print("Quitting because the schemas already exist.")
-                        sys.exit(0)
+                        break
                     else:
                         print("Overwriting the most recent schema to ensure it is the newest one.")
                     one_overwritten = True
