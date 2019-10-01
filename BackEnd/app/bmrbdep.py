@@ -332,7 +332,7 @@ def new_deposition() -> Response:
 
                 for loop in saveframe.loops:
                     # Don't copy the experimental data loops
-                    if loop.category == "_Upload_data" or "Experiment_ID" in loop.tags:
+                    if loop.category == "_Upload_data" in loop.tags:
                         continue
                     lower_tags = [_.lower() for _ in loop.tags]
                     tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
