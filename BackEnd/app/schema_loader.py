@@ -65,16 +65,15 @@ data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      }
 
 
-def schema_emitter(validate_mode=False):
+def schema_emitter(validate_mode=False, small_molecule=False):
     """ Yields all the schemas in the SVN repo. """
 
     last_schema_version = None
 
     for commit in repo.iter_commits('development'):
-        next_schema = load_schemas(commit, validate_mode=validate_mode)
+        next_schema = load_schemas(commit, validate_mode=validate_mode, small_molecule=small_molecule)
         if next_schema is None:
-            print("Reached old incompatible schemas.")
-            return
+            continue
         if next_schema[0] != last_schema_version:
             yield next_schema
         last_schema_version = next_schema[0]
@@ -83,22 +82,39 @@ def schema_emitter(validate_mode=False):
 def get_file(file_name, commit):
     """ Returns a file-like object. """
 
-    return StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
+    try:
+        file_contents = StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
+    except GitCommandError as err:
+        if ("Path '" + file_name + "' does not exist") in str(err):
+            file_name = 'NMR-STAR/internal_106_distribution/%s' % file_name
+            try:
+                file_contents = StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
+            except GitCommandError:
+                return None
+        else:
+            return None
+
+    return file_contents
 
 
-def get_main_schema(commit):
+def get_main_schema(commit, small_molecule=False):
 
     try:
         xmlschem_ann = csv.reader(get_file("xlschem_ann.csv", commit))
     except GitCommandError:
-        return
+        return None, None
+    if xmlschem_ann is None:
+        return None, None
     whole_schema = [next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann)]
     version = whole_schema[3][3]
 
     cc = ['Tag', 'Tag category', 'SFCategory', 'BMRB data type', 'Prompt', 'Interface',
           'default value', 'Example', 'User full view',
           'Foreign Table', 'Sf pointer', 'Item enumerated', 'Item enumeration closed', 'ADIT category view name',
-          'Enumeration ties', 'Metabolites']
+          'Enumeration ties']
+    if small_molecule:
+        cc.append('Metabolites')
+
     # Todo: remove ADIT category view name once code is refactored
 
     header_idx = {x: whole_schema[0].index(x) for x in cc}
@@ -109,8 +125,11 @@ def get_main_schema(commit):
            }
 
     for row in xmlschem_ann:
-        small_molecule = row[header_idx['Metabolites']]
-        if small_molecule == 'B' or small_molecule == 'S':
+        if small_molecule:
+            if row[header_idx['Metabolites']] == 'B' or row[header_idx['Metabolites']] == 'S':
+                res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
+                whole_schema.append(row)
+        else:
             res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
             whole_schema.append(row)
 
@@ -121,12 +140,20 @@ def get_data_file_types(rev, validate_mode=False):
     """ Returns the list of enabled data file [description, sf_category, entry_interview.tag_name. """
 
     try:
-        enabled_types_file = csv.reader(get_file("adit_nmr_upload_tags.csv", rev))
+        enabled_types_file = get_file("adit_nmr_upload_tags.csv", rev)
     except GitCommandError:
         return
+    if enabled_types_file is None:
+        return None
+    else:
+        enabled_types_file = csv.reader(enabled_types_file)
 
     pynmrstar.ALLOW_V2_ENTRIES = True
-    types_description = pynmrstar.Entry.from_string(get_file('adit_interface_dict.txt', rev).read())
+    types_description = get_file('adit_interface_dict.txt', rev)
+    if types_description is None:
+        return None
+    else:
+        types_description = pynmrstar.Entry.from_string(types_description.read())
 
     interview_list = []
     data_mapping = {}
@@ -165,7 +192,7 @@ def get_dict(fob, headers, number_fields, skip):
 
     csv_reader = csv.reader(fob)
     all_headers = next(csv_reader)
-    for x in range(0, skip):
+    for x in range(skip):
         next(csv_reader)
 
     def skip_end():
@@ -190,15 +217,19 @@ def get_dict(fob, headers, number_fields, skip):
     return {'headers': headers, 'values': values}
 
 
-def load_schemas(rev, validate_mode=False):
+def load_schemas(rev, validate_mode=False, small_molecule=False):
     # Load the schemas into the DB
 
-    result, xl_schema = get_main_schema(rev)
+    result, xl_schema = get_main_schema(rev, small_molecule=small_molecule)
     if not result:
         return None
 
     result['data_types'] = data_types
-    result['overrides'] = get_dict(get_file("adit_man_over.csv", rev),
+
+    override = get_file("adit_man_over.csv", rev)
+    if not override:
+        return None
+    result['overrides'] = get_dict(override,
                                 ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
                                  'Override value', 'Order of operation'],
                                 ['Order of operation'],
@@ -286,8 +317,6 @@ if __name__ == "__main__":
         print('Schemas already up to date according to git commit stored.')
         if not options.full:
             sys.exit(0)
-    else:
-        open(last_commit_file, 'w').write(str(most_recent_commit))
 
     repo.git.checkout('development')
 
@@ -296,33 +325,47 @@ if __name__ == "__main__":
 
     one_overwritten = False
     try:
-        for schema in schema_emitter(validate_mode=options.validate):
-            web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
-            xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.xml')
-            if os.path.exists(web_schema_location):
-                if one_overwritten and not options.full:
-                    print("Quitting because the schemas already exist.")
-                    sys.exit(0)
+        for sm in [True, False]:
+            if sm:
+                print("Loading small molecule schemas.")
+            else:
+                print("Loading macromolecule schemas.")
+            for schema in schema_emitter(validate_mode=options.validate, small_molecule=sm):
+
+                if sm:
+                    web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '-sm.json.zlib')
+                    xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '-sm.xml')
                 else:
-                    print("Overwriting the most recent schema to ensure it is the newest one.")
-                one_overwritten = True
+                    web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
+                    xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.xml')
 
-            # Write out the web schema
-            with open(web_schema_location, 'wb') as schema_file:
-                j = json.dumps(schema[1])
-                schema_file.write(zlib.compress(j.encode('utf-8')))
+                if os.path.exists(web_schema_location):
+                    if one_overwritten and not options.full:
+                        print("Quitting because the schemas already exist.")
+                        sys.exit(0)
+                    else:
+                        print("Overwriting the most recent schema to ensure it is the newest one.")
+                    one_overwritten = True
 
-            # Write out the pynmrstar input file XML
-            with open(xml_schema_location, 'w') as schema_file:
-                output = io.StringIO()
-                csv.writer(output).writerows(schema[2])
-                schema_file.write(output.getvalue())
+                # Write out the web schema
+                with open(web_schema_location, 'wb') as schema_file:
+                    j = json.dumps(schema[1])
+                    schema_file.write(zlib.compress(j.encode('utf-8')))
 
-            highest_schema = schema[0]
-            print("Set schema: %s" % schema[0])
-            if not options.full:
-                # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
-                if schema[0] == "3.2.1.31":
-                    sys.exit(0)
+                # Write out the pynmrstar input file XML
+                with open(xml_schema_location, 'w') as schema_file:
+                    output = io.StringIO()
+                    csv.writer(output).writerows(schema[2])
+                    schema_file.write(output.getvalue())
+
+                highest_schema = schema[0]
+                print("Set schema: %s" % schema[0])
+                if not options.full:
+                    # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
+                    if schema[0] == "3.2.1.31":
+                        break
+
+        # Write out the commit at the end to ensure success
+        open(last_commit_file, 'w').write(str(most_recent_commit))
     finally:
         pass
