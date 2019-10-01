@@ -109,8 +109,10 @@ def get_main_schema(commit):
            }
 
     for row in xmlschem_ann:
-        res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
-        whole_schema.append(row)
+        small_molecule = row[header_idx['Metabolites']]
+        if small_molecule == 'B' or small_molecule == 'S':
+            res['tags']['values'][row[header_idx['Tag']]] = [row[x].replace("$", ",") for x in header_idx_list]
+            whole_schema.append(row)
 
     return res, whole_schema
 
