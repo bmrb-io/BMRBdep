@@ -380,7 +380,7 @@ def new_deposition() -> Response:
         data_file_loop.add_missing_tags(all_tags=True, schema=schema)
         entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data'] = data_file_loop
 
-    entry_template.normalize()
+    entry_template.normalize(schema=schema)
 
     # Set the entry information tags
     entry_information: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
