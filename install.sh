@@ -44,12 +44,12 @@ if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/schema_data/last_commit" ]] || [[ "$1" == 
 
   if [[ ! -d "${SCRIPT_DIR}/BackEnd/schema_venv" ]]; then
     echo "No schema_venv found. Generating special environment for schema loader... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    python3 -m venv "${SCRIPT_DIR}"/BackEnd/schema_env
-    source "${SCRIPT_DIR}"/BackEnd/schema_env/bin/activate
+    python3 -m venv "${SCRIPT_DIR}"/BackEnd/schema_venv
+    source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
     pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
     pip3 install -r "${SCRIPT_DIR}"/BackEnd/app/schema_requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
   else
-    source "${SCRIPT_DIR}"/BackEnd/schema_env/bin/activate
+    source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
   fi
   "${SCRIPT_DIR}"/BackEnd/app/schema_loader.py 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
   deactivate
