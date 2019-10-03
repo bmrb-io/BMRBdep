@@ -21,7 +21,7 @@ RUN apk update && \
 COPY ./BackEnd/app/requirements.txt /opt/wsgi/
 RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
 
-COPY ./BackEnd/app/*py /opt/wsgi/
+COPY ./BackEnd/app/*py ./BackEnd/app/version.txt /opt/wsgi/
 COPY ./BackEnd/app/schema_data /opt/wsgi/schema_data/
 COPY ./FrontEnd/dist /opt/wsgi/html
 

@@ -18,7 +18,7 @@ from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
 # Local modules
-from common import ServerError, RequestError, configuration, secure_filename, residue_mappings
+from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -166,7 +166,7 @@ class DepositionRepo:
 
         # Insert the loops for residue sequences
         for entity in final_entry.get_saveframes_by_category('entity'):
-            polymer_code = entity['Polymer_seq_one_letter_code'][0]
+            polymer_code: str = entity['Polymer_seq_one_letter_code'][0]
             if polymer_code and polymer_code is not None and polymer_code != '.':
                 polymer_code = polymer_code.strip().replace('\n', '')
                 comp_loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
@@ -323,6 +323,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
         self.metadata['bmrbnum'] = bmrbnum
+        self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
 
         # Return the assigned BMRB ID
