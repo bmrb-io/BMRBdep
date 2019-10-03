@@ -7,7 +7,7 @@ Flask-Mail==0.9.1
 # For fetching BMRB entries to create new entries from
 requests==2.21.0
 # For working with BMRB entries
-git+git://github.com/uwbmrb/pynmrstar.git@v3.0.beta1
+git+git://github.com/uwbmrb/pynmrstar.git@v3.0.beta2
 # The following two are for email validation
 git+git://github.com/uwbmrb/validate_email.git@4f3c8544af83d9e8ef56c44ba0a5a5ea12e7182d
 dnspython==1.16.0
@@ -24,4 +24,4 @@ Unidecode==1.0.23
 # This makes the local flask server faster to reload when editing the code
 watchdog==0.9.0
 # For type checking the project
-mypy>=0.670
+mypy>=0.730
