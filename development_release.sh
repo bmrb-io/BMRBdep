@@ -24,6 +24,19 @@ cd ..
 rm -rfv release.tgz
 cd "${SCRIPT_DIR}" || exit 3
 
+echo "Writing out git version to file..."
+# https://gist.github.com/dciccale/5560837
+function parse_git_dirty() {
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null; [[ $? -eq 1 ]] && echo "*"
+}
+function parse_git_branch() {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+}
+function parse_git_hash() {
+  git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
+}
+echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/app/version.txt
+
 echo "Building docker instance..."
 if ! "${SCRIPT_DIR}"/build_docker.sh production.conf; then
   echo "Building docker instance failed, quitting."

@@ -53,6 +53,7 @@ env/
 /installation.log
 /FrontEnd/dist
 /FrontEnd/src/environments/versions.ts 
+/BackEnd/app/version.txt
 .mypy_cache
 schema_venv
 schema_data
