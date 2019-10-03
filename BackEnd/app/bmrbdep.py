@@ -641,7 +641,7 @@ def fetch_or_store_deposition(uuid):
 
         with depositions.DepositionRepo(uuid) as repo:
             entry: pynmrstar.Entry = repo.get_entry()
-            schema_version: str = entry.get_tag('_Entry.NMR_STAR_version')[0]
+            schema_version: str = repo.metadata['schema_version']
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
             entry_deposited: bool = repo.metadata['entry_deposited']
