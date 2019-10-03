@@ -18,7 +18,7 @@ from git import Repo, CacheError
 from filelock import Timeout, FileLock
 
 # Local modules
-from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release
+from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release, get_schema
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -117,8 +117,11 @@ class DepositionRepo:
 
         logging.info('Depositing deposition %s' % final_entry.entry_id)
 
+        # Determine which schema version the entry is using
+        schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(self.metadata['schema_version'], schema_format='xml'))
+
         # Add tags stripped by the deposition interface
-        final_entry.add_missing_tags()
+        final_entry.add_missing_tags(schema=schema)
 
         # We'll use this to assign Experiment_name tags later
         experiment_names: dict = {}
@@ -201,7 +204,7 @@ class DepositionRepo:
         entry_saveframe['Accession_date'] = today_str
 
         # Do final entry normalization
-        final_entry.normalize()
+        final_entry.normalize(schema=schema)
 
         params = {'source': 'Author',
                   'submit_type': 'Dep',
@@ -297,7 +300,6 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         # Assign the BMRB ID in all the appropriate places in the entry
         final_entry.entry_id = bmrbnum
-        schema: pynmrstar.Schema = pynmrstar.utils.get_schema()
         for saveframe in final_entry.frame_list:
             for tag in saveframe.tags:
                 fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
