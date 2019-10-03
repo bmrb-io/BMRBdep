@@ -35,6 +35,12 @@ def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]
     return schema
 
 
+def get_release():
+    """ Returns the git branch and last commit that were present during the last release. """
+
+    return open(os.path.join(root_dir, 'version.txt'), 'r').read().strip()
+
+
 def secure_filename(filename: str) -> str:
     """ Wraps werkzeug secure_filename but raises an error if the filename comes out empty. """
 

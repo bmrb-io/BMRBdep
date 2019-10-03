@@ -27,7 +27,7 @@ from flask import Flask, request, jsonify, url_for, redirect, send_file, send_fr
 
 # Local modules
 import depositions
-from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename
+from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename, get_release
 
 # Set up the flask application
 application = Flask(__name__)
@@ -487,6 +487,7 @@ def new_deposition() -> Response:
                         'email_validated': configuration['debug'],
                         'schema_version': schema.version,
                         'entry_deposited': False,
+                        'server_version_at_creation': get_release(),
                         'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
