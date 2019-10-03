@@ -398,6 +398,29 @@ def new_deposition() -> Response:
     author_given = None
     author_family = None
 
+    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
+
+    # Just add a single row to the entry author loop
+    author_loop: pynmrstar.Loop = entry_saveframe['_Entry_author']
+    author_loop.data.insert(0, ['.'] * len(author_loop.tags))
+
+    # Modify the contact_loop as needed
+    contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
+
+    # Make sure that whoever started the deposition is locked as the first contact person
+    contact_emails: List[str] = contact_loop.get_tag('email_address')
+    if author_email in contact_emails:
+        # They are already there, move their data to the first row and update it if necessary
+        contact_loop.data.insert(0, contact_loop.data.pop(contact_emails.index(author_email)))
+    else:
+        # They are not yet present in the contact persons
+        contact_loop.data.insert(0, ['.'] * len(contact_loop.tags))
+        contact_loop.data[0][contact_loop.tag_index('Email_address')] = author_email
+    # Need to be 2 contact authors
+    if len(contact_loop.data) < 2:
+        contact_loop.data.append(['.'] * len(contact_loop.tags))
+    contact_loop.renumber_rows('ID')
+
     # Look up information based on the ORCID
     if author_orcid:
         if 'orcid' not in configuration:
@@ -415,66 +438,9 @@ def new_deposition() -> Response:
             author_given = orcid_json['person']['name']['given-names']['value']
             author_family = orcid_json['person']['name']['family-name']['value']
 
-    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
-
-    # Update the loops with the data we have
-    author_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
-    author_loop.add_tag(['_Entry_author.Given_name',
-                         '_Entry_author.Middle_initials',
-                         '_Entry_author.Family_name',
-                         '_Entry_author.ORCID'])
-
-    author_loop.add_data([author_given,
-                          None,
-                          author_family,
-                          author_orcid])
-
-    if not entry_saveframe['_Entry_author'].empty:
-        for row in entry_saveframe['_Entry_author'].get_tag(['_Entry_author.Given_name',
-                                                             '_Entry_author.Middle_initials',
-                                                             '_Entry_author.Family_name',
-                                                             '_Entry_author.ORCID']):
-            assert isinstance(row, list)
-            author_loop.add_data(row)
-
-    author_loop.add_missing_tags(all_tags=True, schema=schema)
-    author_loop.sort_tags(schema=schema)
-    entry_saveframe['_Entry_author'] = author_loop
-
-    contact_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch()
-    contact_loop.add_tag(['_Contact_person.ID',
-                          '_Contact_person.Given_name',
-                          '_Contact_person.Middle_initials',
-                          '_Contact_person.Family_name',
-                          '_Contact_person.ORCID',
-                          '_Contact_person.Email_address',
-                          '_Contact_person.Role',
-                          '_Contact_person.Organization_type'])
-    contact_loop.add_data([1,
-                           author_given,
-                           None,
-                           author_family,
-                           author_orcid,
-                           author_email,
-                           schema.schema['_contact_person.role']['default value'],
-                           schema.schema['_contact_person.organization_type']['default value']])
-    # Merge the uploaded data
-    if not entry_saveframe['_Contact_person'].empty:
-        for pos, row in enumerate(entry_saveframe['_Contact_person'].get_tag(['_Contact_person.Given_name',
-                                                                              '_Contact_person.Middle_initials',
-                                                                              '_Contact_person.Family_name',
-                                                                              '_Contact_person.ORCID',
-                                                                              '_Contact_person.Email_address',
-                                                                              '_Contact_person.Role',
-                                                                              '_Contact_person.Organization_type'])):
-            assert isinstance(row, list)
-            row.insert(0, pos + 2)
-            contact_loop.add_data(row)
-    else:
-        contact_loop.add_data([2, None, None, None, None, None, 'responsible scientist', 'academic'])
-    contact_loop.add_missing_tags(all_tags=True, schema=schema)
-    contact_loop.sort_tags(schema=schema)
-    entry_saveframe['_Contact_person'] = contact_loop
+            contact_loop.data[0][contact_loop.tag_index('ORCID')] = author_orcid
+            contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
+            contact_loop.data[0][contact_loop.tag_index('Family_name')] = author_family
 
     # Set the loops to have at least one row of data
     for saveframe in entry_template:
