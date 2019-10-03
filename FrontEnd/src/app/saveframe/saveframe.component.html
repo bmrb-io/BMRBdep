@@ -15,7 +15,9 @@
                     <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
                         <a class="header-text" [title]="saveframe.schemaValues['group_view_help']">
                             {{saveframe.tags[0].schemaValues['ADIT category view name']}}
-                        </a>
+                          <mat-icon routerLink="/help/molecular-assembly" *ngIf="saveframe.category == 'assembly'"
+                                    class="pointer" title="Molecular assembly help">help_outline
+                          </mat-icon></a>
                     </th>
                     <th>
                         <div class="right-float">
