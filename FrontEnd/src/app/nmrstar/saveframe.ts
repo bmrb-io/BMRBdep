@@ -391,6 +391,35 @@ export class Saveframe {
   /* Special rules that aren't in the dictionary */
   specialRules(): void {
 
+    // Validate some various things in the entity
+    if (this.category === 'entity') {
+      const polymerType = this.getTag('Polymer_type');
+      const polymerCode = this.getTag('Polymer_seq_one_letter_code');
+      const entityDetails = this.getTag('Details');
+      const nonstandardMonomer = this.getTag('Nstd_monomer');
+
+      // There must be an X in the sequence
+      if (nonstandardMonomer.value === 'yes' && (!polymerCode.value.toUpperCase().includes('X'))) {
+        polymerCode.valid = false;
+        polymerCode.validationMessage = 'You specified there is a non-standard monomer, but didn\'t indicate it in the sequence' +
+          ' using an \'X\'';
+      }
+
+      // There must be details if there is a non-standard monomer
+      if (nonstandardMonomer.value === 'yes' && checkValueIsNull(entityDetails.value)) {
+        entityDetails.valid = false;
+        entityDetails.validationMessage = 'You specified there is a non-standard monomer, but didn\'t provide any details.';
+      }
+
+      // If polymer type is not one of the standard three, require more details
+      if ((!checkValueIsNull(polymerType.value)) && checkValueIsNull(entityDetails.value) &&
+        (!['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].includes(polymerType.value))) {
+        entityDetails.valid = false;
+        entityDetails.validationMessage = 'You specified a polymer type that requires more details.';
+      }
+
+    }
+
     // Check that at least one chemical shift reference is present
     if (this.category === 'chem_shift_reference') {
       let allNo = true;
