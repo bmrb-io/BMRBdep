@@ -170,6 +170,7 @@ class DepositionRepo:
         # Insert the loops for residue sequences
         for entity in final_entry.get_saveframes_by_category('entity'):
             polymer_code: str = entity['Polymer_seq_one_letter_code'][0]
+            polymer_type: str = entity['Polymer_type'][0]
             if polymer_code and polymer_code is not None and polymer_code != '.':
                 polymer_code = polymer_code.strip().replace('\n', '')
                 comp_loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
@@ -179,8 +180,18 @@ class DepositionRepo:
                                    '_Entity_comp_index.Comp_label',
                                    '_Entity_comp_index.Entry_ID',
                                    '_Entity_comp_index.Entity_ID'])
-                for x, residue in enumerate(polymer_code):
-                    comp_loop.data.append([x+1, None, residue_mappings.get(residue, 'X'), None, None, None])
+
+                # For simple DNA, RNA, and proteins
+                if polymer_type in residue_mappings:
+                    for x, residue in enumerate(polymer_code):
+                        comp_loop.data.append([x+1, None, residue_mappings[polymer_type].get(residue, 'X'), None, None,
+                                               None])
+
+                # If it is something else, it needs to be manually annotated
+                else:
+                    for x, residue in enumerate(polymer_code):
+                        comp_loop.data.append([x+1, None, 'WILL_BE_MANUALLY_ANNOTATED', None, None, None])
+
                 entity.add_loop(comp_loop)
 
                 polymer_loop = pynmrstar.Loop.from_scratch('_Entity_poly_seq')
@@ -190,8 +201,15 @@ class DepositionRepo:
                                       '_Entity_poly_seq.Comp_index_ID',
                                       '_Entity_poly_seq.Entry_ID',
                                       '_Entity_poly_seq.Entity_ID'])
-                for x, residue in enumerate(polymer_code):
-                    polymer_loop.data.append([None, residue_mappings.get(residue, 'X'), x+1, x+1, None, None])
+                # For simple DNA, RNA, and proteins
+                if polymer_type in residue_mappings:
+                    for x, residue in enumerate(polymer_code):
+                        polymer_loop.data.append([None, residue_mappings[polymer_type].get(residue, 'X'), x+1, x+1,
+                                                  None, None])
+                # If it is something else, it needs to be manually annotated
+                else:
+                    for x, residue in enumerate(polymer_code):
+                        polymer_loop.data.append([x + 1, None, 'WILL_BE_MANUALLY_ANNOTATED', None, None, None])
                 entity.add_loop(polymer_loop)
 
         # Calculate the values needed to insert into ETS
