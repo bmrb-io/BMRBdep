@@ -190,7 +190,7 @@ class DepositionRepo:
                 # If it is something else, it needs to be manually annotated
                 else:
                     for x, residue in enumerate(polymer_code):
-                        comp_loop.data.append([x+1, None, 'WILL_BE_MANUALLY_ANNOTATED', None, None, None])
+                        comp_loop.data.append([x+1, None, 'X', None, None, None])
 
                 entity.add_loop(comp_loop)
 
@@ -209,7 +209,7 @@ class DepositionRepo:
                 # If it is something else, it needs to be manually annotated
                 else:
                     for x, residue in enumerate(polymer_code):
-                        polymer_loop.data.append([x + 1, None, 'WILL_BE_MANUALLY_ANNOTATED', None, None, None])
+                        polymer_loop.data.append([x + 1, None, 'X', None, None, None])
                 entity.add_loop(polymer_loop)
 
         # Calculate the values needed to insert into ETS
