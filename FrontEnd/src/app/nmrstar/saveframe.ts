@@ -408,8 +408,8 @@ export class Saveframe {
       // There must a non-standard monomer if X in residue sequence
       if (polymerCode.value.toUpperCase().includes('X') && (nonstandardMonomer.value !== 'yes')) {
         nonstandardMonomer.valid = false;
-        nonstandardMonomer.validationMessage = 'You specified there is a non-standard monomer with x/X in the polymer sequence, so this tag' +
-          ' must be \'yes\'.';
+        nonstandardMonomer.validationMessage = 'You specified there is a non-standard monomer with x/X in the polymer sequence, so this ' +
+          'tag must be \'yes\'.';
       }
 
       // There must be details if there is a non-standard monomer
