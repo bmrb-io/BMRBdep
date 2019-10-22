@@ -153,6 +153,9 @@ class DepositionRepo:
                 # Set the "Experiment_name" tag from the "Experiment_ID" tag
                 if 'Experiment_ID' in loop.tags:
                     name_tag_index = loop.tag_index('Experiment_name')
+                    if name_tag_index is None:
+                        loop.add_tag('Experiment_name', update_data=True)
+                        name_tag_index = loop.tag_index('Experiment_name')
                     id_tag_index = loop.tag_index('Experiment_ID')
                     for row in loop.data:
                         if row[id_tag_index] in experiment_names:

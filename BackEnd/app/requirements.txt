@@ -7,7 +7,7 @@ Flask-Mail==0.9.1
 # For fetching BMRB entries to create new entries from
 requests==2.21.0
 # For working with BMRB entries
-git+git://github.com/uwbmrb/pynmrstar.git@v3.0.beta3
+git+git://github.com/uwbmrb/pynmrstar.git@v3.0.beta4
 # The following two are for email validation
 git+git://github.com/uwbmrb/validate_email.git@4f3c8544af83d9e8ef56c44ba0a5a5ea12e7182d
 dnspython==1.16.0
