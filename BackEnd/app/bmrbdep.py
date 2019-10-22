@@ -526,13 +526,11 @@ def deposit_entry(uuid) -> Response:
     with depositions.DepositionRepo(uuid) as repo:
         bmrb_num = repo.deposit(final_entry)
 
-        # Ask them to confirm their e-mail
+        # Send out the e-mails
         contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                           ['Given_name', 'Family_name', 'Email_address'])]
-        if repo.metadata['author_email'] not in contact_emails:
-            raise RequestError('At least one contact person must have the email of the original deposition creator.')
         message = Message("Your entry has been deposited!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
