@@ -537,8 +537,8 @@ def deposit_entry(uuid) -> Response:
                        'deposition contents for reference. You may also use this file to start a new deposition. ' \
                        'You will hear from our annotators in the next few days. Please note that any data files that ' \
                        'you uploaded will be manually integrated into the final NMR-STAR file by the BMRB annotators ' \
-                       '- their contents are not included in the NMR-STAR file attached to this e-mail. Deposited ' \
-                       'data files: %s' % (bmrb_num, repo.get_data_file_list())
+                       '- their contents are not included in the NMR-STAR file attached to this e-mail.<br><br>' \
+                       'Deposited data files: %s' % (bmrb_num, repo.get_data_file_list())
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
 
