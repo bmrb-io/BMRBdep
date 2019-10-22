@@ -173,7 +173,7 @@ export class ApiService implements OnDestroy {
         }
 
         this.entrySubject.next(loadedEntry);
-        this.saveEntry(false);
+        this.saveEntry(true);
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
