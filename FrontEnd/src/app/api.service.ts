@@ -161,17 +161,27 @@ export class ApiService implements OnDestroy {
         const loadedEntry: Entry = entryFromJSON(jsonData);
 
         // Verify that the NMR-STAR matches the uploaded files
+        let filesOutOfSync = false;
         if ('data_files' in jsonData) {
           const files: Array<string> = jsonData['data_files'];
           for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;
+              filesOutOfSync = true;
             }
           }
         }
 
         this.entrySubject.next(loadedEntry);
-        this.saveEntry(true);
+        this.saveEntry(false);
+
+        // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
+        if (filesOutOfSync) {
+          console.warn('Files detected as uploaded which are not present in NMR-STAR. Triggering re-save.');
+          loadedEntry.updateUploadedData();
+          loadedEntry.refresh();
+          this.saveEntry(false);
+        }
       },
       error => this.handleError(error)
     );
