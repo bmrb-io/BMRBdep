@@ -110,6 +110,9 @@ class DepositionRepo:
         self.raise_write_errors()
         if not self.metadata['email_validated']:
             raise RequestError('You must validate your e-mail before deposition.')
+        contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
+        if self.metadata['author_email'] not in contact_emails:
+            raise RequestError('At least one contact person must have the email of the original deposition creator.')
         existing_entry_id = self.get_entry().entry_id
 
         if existing_entry_id != final_entry.entry_id:
