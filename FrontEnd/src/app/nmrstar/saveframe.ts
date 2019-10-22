@@ -1,6 +1,6 @@
 import {Entry} from './entry';
 import {Loop} from './loop';
-import {checkTagIsRequired, checkValueIsNull, cleanValue} from './nmrstar';
+import {checkTagIsRequired, checkValueIsNull, cleanValue, isMixedCase} from './nmrstar';
 import {LoopTag, SaveframeTag, Tag} from './tag';
 import {sprintf} from 'sprintf-js';
 
@@ -429,10 +429,6 @@ export class Saveframe {
         (!['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].includes(polymerType.value))) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified a polymer type that requires more details.';
-      }
-
-      function isMixedCase(str) {
-        return str.toUpperCase() !== str && str.toLowerCase() !== str;
       }
 
       // If there are lower case letters, insist on non-standard tag

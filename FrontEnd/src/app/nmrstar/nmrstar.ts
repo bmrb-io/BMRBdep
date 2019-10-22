@@ -55,3 +55,7 @@ export function download(filename, printableObject): void {
   element.click();
   document.body.removeChild(element);
 }
+
+export function isMixedCase(str) {
+  return str.toUpperCase() !== str && str.toLowerCase() !== str;
+}
