@@ -70,7 +70,7 @@ def schema_emitter(validate_mode=False, small_molecule=False):
 
     last_schema_version = None
 
-    for commit in repo.iter_commits('development'):
+    for commit in repo.iter_commits('nmr-star-development'):
         next_schema = load_schemas(commit, validate_mode=validate_mode, small_molecule=small_molecule)
         if next_schema is None:
             continue
@@ -318,7 +318,12 @@ if __name__ == "__main__":
         if not options.full:
             sys.exit(0)
 
-    repo.git.checkout('development')
+    # Determine which branch to check out based on what version of git we're using
+    this_repo = Repo(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+    branch = this_repo.active_branch
+    dictionary_branches = {'development': 'nmr-star-development', 'master': 'nmr-star-production'}
+
+    repo.git.checkout(dictionary_branches.get(branch.name, 'nmr-star-development'))
 
     # Load the data types
     data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
