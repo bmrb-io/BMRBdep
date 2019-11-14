@@ -21,9 +21,9 @@
 
             <mat-form-field>
                 <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
-                    <mat-option value="new">New deposition from scratch</mat-option>
-                    <mat-option value="bmrb_id">Begin a deposition from an existing and released BMRB entry</mat-option>
-                    <mat-option value="file">Begin a deposition by uploading an NMR-STAR file (version 3.x)</mat-option>
+                    <mat-option value="new">Begin a new deposition (with NMR data upload)</mat-option>
+                    <mat-option value="bmrb_id">Begin a new deposition from an existing and released BMRB entry</mat-option>
+                    <mat-option value="file">Pre-populate an entire deposition by uploading a full NMR-STAR file (version 3.x)</mat-option>
                 </mat-select>
                 <mat-error *ngIf="sessionType.invalid">Please select a deposition type.</mat-error>
             </mat-form-field>
