@@ -161,6 +161,11 @@ class DepositionRepo:
                         if row[id_tag_index] in experiment_names:
                             row[name_tag_index] = experiment_names[row[id_tag_index]]
 
+            # Calculate the tag _Assembly.Number_of_components
+            if saveframe.category == 'assembly':
+                saveframe.add_tag('_Assembly.Number_of_components', len(saveframe['_Entity_assembly'].data),
+                                  update=True)
+
         # Tweak the middle initials
         for loop_cat in [final_entry.get_loops_by_category(x) for x in
                          ['_Contact_person', '_Entry_author', '_Citation_author']]:
