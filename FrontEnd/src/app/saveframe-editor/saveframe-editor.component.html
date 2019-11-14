@@ -1,6 +1,7 @@
 <div *ngIf="entry">
     <div class="main-content" *ngIf="saveframes.length > 0; else missing">
         <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
+        <p [innerHTML]="saveframes[0].schemaValues['group_view_help']"></p>
         <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].previousCategory"
            [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">Previous section</a>
         <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].nextCategory ; else final_review_top"
