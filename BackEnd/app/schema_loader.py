@@ -328,9 +328,9 @@ if __name__ == "__main__":
     # Load the data types
     data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
 
-    one_overwritten = False
     try:
         for sm in [True, False]:
+            one_overwritten = False
             if sm:
                 print("Loading small molecule schemas.")
             else:
