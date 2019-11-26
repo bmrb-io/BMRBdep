@@ -72,3 +72,5 @@ else
     echo "cd /websites/bmrbdep/html; rm -fv /websites/bmrbdep/html/*; tar -xzvf /tmp/release.tgz" | ssh wedell@manta
     echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /websites/bmrbdep/configuration.json:/opt/wsgi/configuration.json -v /bmrbdep/depositions:/opt/wsgi/depositions pike.bmrb.wisc.edu:5000/bmrbdep" | ssh manta
 fi
+
+echo "Don't forget to update the schema version in the remote configuration if necessary."
