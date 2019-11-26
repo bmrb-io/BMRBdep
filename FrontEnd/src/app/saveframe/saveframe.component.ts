@@ -38,6 +38,16 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     this.subscription$.unsubscribe();
   }
 
+
+  helpClick(activeTag: SaveframeTag, el: HTMLElement) {
+    if (this.activeTag !== activeTag) {
+      this.activeTag = activeTag;
+      setTimeout(() => {el.scrollIntoView(false); }, 1);
+    } else {
+      this.activeTag = null;
+    }
+  }
+
   /* A saveframe-level change has happened. Save the changes and
      tell the parent view to refresh */
   processChange(): void {
