@@ -306,7 +306,7 @@ if __name__ == "__main__":
         Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
     repo = Repo(dictionary_dir)
     repo.remotes.origin.pull()
-    most_recent_commit = repo.commit
+    most_recent_commit = repo.commit()
 
     # Quit early if there aren't any new commits
     last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
