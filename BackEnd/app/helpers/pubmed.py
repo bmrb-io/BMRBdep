@@ -57,7 +57,10 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
 
     citation_saveframe["Status"] = "published"
     citation_saveframe["Type"] = "journal"
-    citation_saveframe['_Citation_author'] = author_loop
+    if '_Citation_author' in citation_saveframe:
+        citation_saveframe['_Citation_author'] = author_loop
+    else:
+        citation_saveframe.add_loop(author_loop)
 
     try:
         # Figure out the authors
