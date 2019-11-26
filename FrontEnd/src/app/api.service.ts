@@ -334,7 +334,7 @@ export class ApiService implements OnDestroy {
           this.messagesService.clearMessage();
           resolve(jsonData['deposition_id']);
         }, error => {
-          if (error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
+          if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
             reject('Invalid e-mail');
           }
           this.handleError(error);
@@ -402,7 +402,7 @@ export class ApiService implements OnDestroy {
   }
 
   handleError(error: HttpErrorResponse): Observable<null> | null {
-    if (error.error) {
+    if (error.error && error.error.error) {
       this.messagesService.sendMessage(new Message(error.error.error, MessageType.ErrorMessage, 15000));
     } else {
       this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
