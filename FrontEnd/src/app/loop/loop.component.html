@@ -17,7 +17,7 @@
                 <th></th>
                 <ng-container *ngFor='let sampleTag of loop.data[0]; let col = index'>
                     <th *ngIf="loop.displayTags[col] == 'Y' || (loop.displayTags[col] == 'N' && loop.parent.parent.showAll)"
-                        class="tag-header" (click)="activeTag = (activeTag != sampleTag ? sampleTag : null)"
+                        class="tag-header" (click)="helpClick(sampleTag, tag_info_box)"
                         [title]="sampleTag.schemaValues['Interface']">{{sampleTag.schemaValues['Prompt']}}
                         <span *ngIf="loop.displayTags[col] == 'Y'" class="mandatory">*</span>
                     </th>
@@ -57,11 +57,13 @@
         </table>
     </div>
 
-    <div *ngIf='activeTag' class='tag-info-box'>
-        <b>{{activeTag.schemaValues['Prompt']}}</b>
-        <p>{{activeTag.schemaValues['Interface']}}</p>
-        <p *ngIf="activeTag.schemaValues['Example'] != '?'"><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>
-        <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
-        <p *ngIf="activeTag.validationMessage" class="mandatory">{{activeTag.validationMessage}}</p>
+    <div #tag_info_box>
+      <div *ngIf='activeTag' class='tag-info-box'>
+          <b>{{activeTag.schemaValues['Prompt']}}</b>
+          <p>{{activeTag.schemaValues['Interface']}}</p>
+          <p *ngIf="activeTag.schemaValues['Example'] != '?'"><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>
+          <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
+          <p *ngIf="activeTag.validationMessage" class="mandatory">{{activeTag.validationMessage}}</p>
+      </div>
     </div>
 </div>

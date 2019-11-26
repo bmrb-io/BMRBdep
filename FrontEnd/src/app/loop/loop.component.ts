@@ -54,6 +54,15 @@ export class LoopComponent implements OnInit, AfterViewChecked {
     this.api.saveEntry();
   }
 
+  helpClick(activeTag: LoopTag, el: HTMLElement) {
+    if (this.activeTag !== activeTag) {
+      this.activeTag = activeTag;
+      setTimeout(() => {el.scrollIntoView(false); }, 1);
+    } else {
+      this.activeTag = null;
+    }
+  }
+
   log() {
     console.log(this.loop);
   }

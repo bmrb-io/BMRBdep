@@ -61,13 +61,13 @@
                         <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag-description"
                             [title]="saveframeTag.schemaValues['Interface']"
                             [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
-                            (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
+                            (click)="helpClick(saveframeTag, tag_info_box)">
                         </td>
                         <ng-template #non_mandatory>
                             <td class="tag-description"
                                 [title]="saveframeTag.schemaValues['Interface']"
                                 [innerHTML]="saveframeTag.schemaValues['Prompt']"
-                                (click)="activeTag = (activeTag != saveframeTag ? saveframeTag : null)">
+                                (click)="helpClick(saveframeTag, tag_info_box)">
                             </td>
                         </ng-template>
                         <td [ngClass]="{'invisible': true, 'invalid': !saveframeTag.valid}">
@@ -78,13 +78,15 @@
                 </tbody>
             </table>
 
-            <div *ngIf='activeTag' class='tag-info-box'>
-                <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
-                <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
-                <p *ngIf="activeTag.schemaValues['Example'] != '?'"
-                   [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
-                <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
-                <p *ngIf='activeTag.validationMessage' class='mandatory'>{{activeTag.validationMessage}}</p>
+            <div #tag_info_box>
+              <div *ngIf='activeTag' class='tag-info-box'>
+                  <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
+                  <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
+                  <p *ngIf="activeTag.schemaValues['Example'] != '?'"
+                     [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
+                  <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
+                  <p *ngIf='activeTag.validationMessage' class='mandatory'>{{activeTag.validationMessage}}</p>
+              </div>
             </div>
 
             <ng-container *ngFor='let loop of saveframe.loops'>
