@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# Standard libraries
 import csv
 import io
 import optparse
@@ -10,13 +9,11 @@ import sys
 import zlib
 from io import StringIO
 
-# Installed modules
 import pynmrstar
 import simplejson as json
-
-# Local modules
-from common import root_dir
 from git import Git, Repo, GitCommandError
+
+from common import root_dir
 
 data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      'Coupling_constants': 'coupling_constants',
@@ -318,12 +315,8 @@ if __name__ == "__main__":
         if not options.full:
             sys.exit(0)
 
-    # Determine which branch to check out based on what version of git we're using
-    this_repo = Repo(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
-    branch = this_repo.active_branch
-    dictionary_branches = {'development': 'nmr-star-development', 'master': 'nmr-star-production'}
-
-    repo.git.checkout(dictionary_branches.get(branch.name, 'nmr-star-development'))
+    # Check out the development branch
+    repo.git.checkout('nmr-star-development')
 
     # Load the data types
     data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
