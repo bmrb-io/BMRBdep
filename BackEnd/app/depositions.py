@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 
-# Standard libraries
-import os
 import json
-from typing import Optional, List
-from datetime import date, datetime
-from dateutil.relativedelta import relativedelta
-
-# Installed modules
-import flask
 import logging
-import unidecode
-import pynmrstar
-import psycopg2
+import os
+from datetime import date, datetime
+from typing import Optional, List
 
-from git import Repo, CacheError
+import flask
+import psycopg2
+import pynmrstar
+import unidecode
+from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
+from git import Repo, CacheError
+from helpers.pubmed import update_citation_with_pubmed
 
 # Local modules
 from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release, get_schema
@@ -132,6 +130,10 @@ class DepositionRepo:
             experiment_names = dict(final_entry.get_loops_by_category('_Experiment')[0].get_tag(['id', 'name']))
         except IndexError:
             pass
+
+        # Assign the PubMed ID
+        for citation in final_entry.get_saveframes_by_category('citations'):
+            update_citation_with_pubmed(citation, schema=schema)
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
