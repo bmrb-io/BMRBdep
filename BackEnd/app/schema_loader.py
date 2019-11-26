@@ -247,7 +247,7 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     # Check for outdated overrides
     if validate_mode:
         for override in result['overrides']['values']:
-            if override[0] != "*" and override[0] not in result['tags']['values']:
+            if override[0] != "*" and override[0] not in result['tags']['values'] and not sm:
                 print("Override specifies invalid tag: %s" % override[0])
 
     sf_category_info = get_dict(get_file("adit_cat_grp_o.csv", rev),
@@ -272,7 +272,7 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
             try:
                 result['tags']['values'][saveframe.name].append(enums)
             except KeyError:
-                if validate_mode:
+                if validate_mode and not sm:
                     print("Enumeration for non-existent tag: %s" % saveframe.name)
 
     except ValueError as e:
@@ -305,8 +305,8 @@ if __name__ == "__main__":
     if not os.path.exists(dictionary_dir):
         Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
     repo = Repo(dictionary_dir)
-    o = repo.remotes.origin
-    most_recent_commit = o.pull()[0].commit
+    repo.remotes.origin.pull()
+    most_recent_commit = repo.commit
 
     # Quit early if there aren't any new commits
     last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
@@ -359,7 +359,7 @@ if __name__ == "__main__":
                 print("Set schema: %s" % schema[0])
                 if not options.full:
                     # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
-                    if schema[0] == "3.2.1.31":
+                    if schema[0] == "3.2.1.42":
                         break
 
         # Write out the commit at the end to ensure success
