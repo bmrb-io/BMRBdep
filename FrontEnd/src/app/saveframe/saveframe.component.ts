@@ -42,7 +42,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   helpClick(activeTag: SaveframeTag, el: HTMLElement) {
     if (this.activeTag !== activeTag) {
       this.activeTag = activeTag;
-      setTimeout(() => {el.scrollIntoView(false); }, 1);
+      setTimeout(() => {el.scrollIntoView(false); }, 5);
     } else {
       this.activeTag = null;
     }
