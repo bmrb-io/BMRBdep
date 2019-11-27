@@ -2,10 +2,9 @@
 
 import os
 import zlib
-import simplejson as json
 from typing import Union, TextIO
 
-# Load the configuration file
+import simplejson as json
 import werkzeug.utils
 
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
