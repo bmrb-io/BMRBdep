@@ -13,10 +13,9 @@ import unidecode
 from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
-from helpers.pubmed import update_citation_with_pubmed
 
-# Local modules
 from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release, get_schema
+from helpers.pubmed import update_citation_with_pubmed
 
 if not os.path.exists(configuration['repo_path']):
     try:
