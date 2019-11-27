@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
 
-# Standard libraries
-import os
-import logging
 import datetime
+import logging
+import os
 import re
 import traceback
 from io import BytesIO
-from uuid import uuid4
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
+from uuid import uuid4
 
-# Installed modules
-import requests
 import pynmrstar
+import requests
 import simplejson as json
-from validate_email import validate_email
 from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
-from itsdangerous import URLSafeSerializer, BadSignature
-
-# Flask related modules
-from flask_mail import Mail, Message
-from werkzeug.datastructures import FileStorage
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeSerializer, BadSignature
+from validate_email import validate_email
+from werkzeug.datastructures import FileStorage
 
-# Local modules
 import depositions
 from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename, get_release
 
