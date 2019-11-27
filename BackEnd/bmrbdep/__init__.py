@@ -21,8 +21,9 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from validate_email import validate_email
 from werkzeug.datastructures import FileStorage
 
-import depositions
-from common import ServerError, RequestError, configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep import depositions
+from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.exceptions import ServerError, RequestError
 
 # Set up the flask application
 application = Flask(__name__)

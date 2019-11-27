@@ -7,7 +7,7 @@ if [[ ! -d "${SCRIPT_DIR}/BackEnd/env" ]] || [[ "$1" == "-force" ]]; then
   python3 -m venv "${SCRIPT_DIR}"/BackEnd/env
   source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
   pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
-  pip3 install -r "${SCRIPT_DIR}"/BackEnd/app/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
+  pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
   deactivate
 fi
 
@@ -34,9 +34,9 @@ if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]] || [[ "$1" =
   deactivate_node
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/configuration.json" ]]; then
-  echo "No configuration file found. Copying example configuration file (which will work for local testing) to ${SCRIPT_DIR}/BackEnd/app/configuration.json. You should edit this file before deployment." | tee -a "${SCRIPT_DIR}"/installation.log
-  cp "${SCRIPT_DIR}"/BackEnd/app/example_config.json "${SCRIPT_DIR}"/BackEnd/app/configuration.json
+if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json" ]]; then
+  echo "No configuration file found. Copying example configuration file (which will work for local testing) to ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json. You should edit this file before deployment." | tee -a "${SCRIPT_DIR}"/installation.log
+  cp "${SCRIPT_DIR}"/BackEnd/bmrbdep/example_config.json "${SCRIPT_DIR}"/BackEnd/bmrbdep/configuration.json
 fi
 
 if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/schema_data/last_commit" ]] || [[ "$1" == "-force" ]]; then
