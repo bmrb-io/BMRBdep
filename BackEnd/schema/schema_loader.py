@@ -308,8 +308,12 @@ if __name__ == "__main__":
     repo.remotes.origin.pull()
     most_recent_commit = repo.commit()
 
+    schema_dir = os.path.join(root_dir, "schema_data")
+    if not os.path.exists(schema_dir):
+        os.mkdir(schema_dir)
+
     # Quit early if there aren't any new commits
-    last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
+    last_commit_file = os.path.join(schema_dir, 'last_commit')
     if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit) and \
             not options.force and not options.full:
         print('Schemas already up to date according to git commit stored.')
@@ -331,11 +335,11 @@ if __name__ == "__main__":
             for schema in schema_emitter(validate_mode=options.validate, small_molecule=sm):
 
                 if sm:
-                    web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '-sm.json.zlib')
-                    xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '-sm.xml')
+                    web_schema_location = os.path.join(schema_dir, schema[0] + '-sm.json.zlib')
+                    xml_schema_location = os.path.join(schema_dir, schema[0] + '-sm.xml')
                 else:
-                    web_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.json.zlib')
-                    xml_schema_location = os.path.join(root_dir, 'schema_data', schema[0] + '.xml')
+                    web_schema_location = os.path.join(schema_dir, schema[0] + '.json.zlib')
+                    xml_schema_location = os.path.join(schema_dir, schema[0] + '.xml')
 
                 if os.path.exists(web_schema_location):
                     if one_overwritten and not options.full:
