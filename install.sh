@@ -14,7 +14,6 @@ fi
 if [[ ! -d "${SCRIPT_DIR}/FrontEnd/node_env" ]] || [[ "$1" == "-force" ]]; then
   echo "node environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
   source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
-  pip3 install nodeenv==1.3.3 | tee -a "${SCRIPT_DIR}"/installation.log
   python3 -m nodeenv "${SCRIPT_DIR}"/FrontEnd/node_env | tee -a "${SCRIPT_DIR}"/installation.log
   deactivate
   source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
