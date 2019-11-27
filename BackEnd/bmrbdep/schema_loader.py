@@ -297,6 +297,8 @@ if __name__ == "__main__":
                          help="Create all schemas, not just the most recent one.")
     optparser.add_option("--validate", action="store_true", dest="validate", default=False,
                          help="Validate the schemas as they are loaded.")
+    optparser.add_option("--force", action="store_true", dest="force", default=False,
+                         help="Always generate at least the most recent schema, regardless of the commit file.")
     # Options, parse 'em
     (options, cmd_input) = optparser.parse_args()
 
@@ -313,10 +315,10 @@ if __name__ == "__main__":
 
     # Quit early if there aren't any new commits
     last_commit_file = os.path.join(root_dir, "schema_data", 'last_commit')
-    if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit):
+    if os.path.exists(last_commit_file) and open(last_commit_file, 'r').read() == str(most_recent_commit) and \
+            not options.force and not options.full:
         print('Schemas already up to date according to git commit stored.')
-        if not options.full:
-            sys.exit(0)
+        sys.exit(0)
 
     # Check out the development branch
     repo.git.checkout('nmr-star-development')
