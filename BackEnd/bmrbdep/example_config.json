@@ -19,7 +19,7 @@
       "client_secret": "CHANGE_ME",
       "client_id": "CHANGE_ME"
     },
-    "schema_version": "3.2.1.42",
+    "schema_version": "3.2.1.43",
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
     "secret_key": "CHANGE_ME",
