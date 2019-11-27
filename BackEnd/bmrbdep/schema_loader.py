@@ -13,7 +13,7 @@ import pynmrstar
 import simplejson as json
 from git import Git, Repo, GitCommandError
 
-from common import root_dir
+root_dir: str = os.path.dirname(os.path.realpath(__file__))
 
 data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      'Coupling_constants': 'coupling_constants',
@@ -85,7 +85,8 @@ def get_file(file_name, commit):
         if ("Path '" + file_name + "' does not exist") in str(err):
             file_name = 'NMR-STAR/internal_106_distribution/%s' % file_name
             try:
-                file_contents = StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
+                file_contents = StringIO(
+                    '\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
             except GitCommandError:
                 return None
         else:
@@ -95,7 +96,6 @@ def get_file(file_name, commit):
 
 
 def get_main_schema(commit, small_molecule=False):
-
     try:
         xmlschem_ann = csv.reader(get_file("xlschem_ann.csv", commit))
     except GitCommandError:
@@ -145,12 +145,17 @@ def get_data_file_types(rev, validate_mode=False):
     else:
         enabled_types_file = csv.reader(enabled_types_file)
 
-    pynmrstar.ALLOW_V2_ENTRIES = True
-    types_description = get_file('adit_interface_dict.txt', rev)
+    types_description = get_file('adit_interface_dict.txt', rev).read()
     if types_description is None:
         return None
     else:
-        types_description = pynmrstar.Entry.from_string(types_description.read())
+        # This is hacky, but should be temporary
+        types_description = types_description.replace("_Tag", "_record.Tag ")
+        types_description = types_description.replace("_Category", "_record.Category ")
+        types_description = types_description.replace("_Description", "_record.Description ")
+        types_description = types_description.replace("_Adit_item_view_name", "_record.Adit_item_view_name ")
+        types_description = types_description.replace("_Example", "_loop_example.Example ")
+        types_description = pynmrstar.Entry.from_string(types_description)
 
     interview_list = []
     data_mapping = {}
@@ -158,8 +163,8 @@ def get_data_file_types(rev, validate_mode=False):
     for data_type in enabled_types_file:
         try:
             sf = types_description[data_type[1]]
-            type_description = sf['_Adit_item_view_name'][0].strip()
-            interview_tag = pynmrstar._format_tag(sf['_Tag'][0])
+            type_description = sf['Adit_item_view_name'][0].strip()
+            interview_tag = pynmrstar.utils.format_tag(sf['Tag'][0])
             # Try to get the data mapping from the dictionary if possible
             if len(data_type) > 2:
                 if data_type[2] == "?":
@@ -168,7 +173,7 @@ def get_data_file_types(rev, validate_mode=False):
                     sf_category = data_type[2]
             else:
                 sf_category = data_type_mapping.get(interview_tag, None)
-            description = sf['_Description'][0]
+            description = sf['Description'][0]
 
             if interview_tag not in data_mapping:
                 data_mapping[interview_tag] = [type_description, [sf_category], interview_tag, description]
@@ -185,7 +190,7 @@ def get_data_file_types(rev, validate_mode=False):
 
 def get_dict(fob, headers, number_fields, skip):
     """ Returns a dictionary with 'key' and 'value' set to point to the
-    headers and the values."""
+      headers and the values."""
 
     csv_reader = csv.reader(fob)
     all_headers = next(csv_reader)
@@ -227,22 +232,22 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     if not override:
         return None
     result['overrides'] = get_dict(override,
-                                ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
-                                 'Override value', 'Order of operation'],
-                                ['Order of operation'],
-                                1)
+                                   ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
+                                    'Override value', 'Order of operation'],
+                                   ['Order of operation'],
+                                   1)
 
     result['supergroup_descriptions'] = get_dict(get_file('adit_super_grp_o.csv', rev),
-                                              ['super_group_ID', 'super_group_name', 'Description'],
-                                              ['super_group_ID'],
-                                              2)
+                                                 ['super_group_ID', 'super_group_name', 'Description'],
+                                                 ['super_group_ID'],
+                                                 2)
 
     result['category_supergroups'] = get_dict(get_file("adit_cat_grp_o.csv", rev),
-                                           ['category_super_group', 'saveframe_category', 'mandatory_number',
-                                            'allowed_user_defined_framecode', 'category_group_view_name',
-                                            'group_view_help', 'category_super_group_ID'],
-                                           ['mandatory_number', 'category_super_group_ID'],
-                                           2)
+                                              ['category_super_group', 'saveframe_category', 'mandatory_number',
+                                               'allowed_user_defined_framecode', 'category_group_view_name',
+                                               'group_view_help', 'category_super_group_ID'],
+                                              ['mandatory_number', 'category_super_group_ID'],
+                                              2)
 
     # Check for outdated overrides
     if validate_mode:
@@ -263,23 +268,21 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     # Load the enumerations
     try:
         enumerations = get_file('enumerations.txt', rev).read()
-        enumerations = enumerations.replace('\x00', '').replace('\xd5', '')
         enumerations = re.sub('_Revision_date.*', '', enumerations)
-        pynmrstar.ALLOW_V2_ENTRIES = True
+        # This makes it not choke on the fact there are no tags
+        enumerations = enumerations.replace("loop_", "_dummy.dummy dummy loop_")
         enum_entry = pynmrstar.Entry.from_string(enumerations)
         for saveframe in enum_entry:
-            enums = [x.replace("$", ",") for x in saveframe[0].get_data_by_tag('_item_enumeration_value')[0]]
+            enums = [x.replace("$", ",") for x in saveframe['_Item_enumeration'].get_tag('Value')]
             try:
                 result['tags']['values'][saveframe.name].append(enums)
             except KeyError:
                 if validate_mode and not sm:
                     print("Enumeration for non-existent tag: %s" % saveframe.name)
 
-    except ValueError as e:
+    except pynmrstar.exceptions.ParsingError as e:
         if validate_mode:
             print("Invalid enum file in version %s: %s" % (result['version'], str(e)))
-    finally:
-        pynmrstar.ALLOW_V2_ENTRIES = False
 
     result['file_upload_types'] = get_data_file_types(rev, validate_mode=validate_mode)
 
@@ -359,7 +362,7 @@ if __name__ == "__main__":
                 print("Set schema: %s" % schema[0])
                 if not options.full:
                     # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
-                    if schema[0] == "3.2.1.42":
+                    if schema[0] == "3.2.1.43":
                         break
 
         # Write out the commit at the end to ensure success
