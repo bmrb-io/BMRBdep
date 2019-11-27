@@ -145,17 +145,11 @@ def get_data_file_types(rev, validate_mode=False):
     else:
         enabled_types_file = csv.reader(enabled_types_file)
 
-    types_description = get_file('adit_interface_dict.txt', rev).read()
+    types_description = get_file('adit_interface_dict.txt', rev)
     if types_description is None:
         return None
     else:
-        # This is hacky, but should be temporary
-        types_description = types_description.replace("_Tag", "_record.Tag ")
-        types_description = types_description.replace("_Category", "_record.Category ")
-        types_description = types_description.replace("_Description", "_record.Description ")
-        types_description = types_description.replace("_Adit_item_view_name", "_record.Adit_item_view_name ")
-        types_description = types_description.replace("_Example", "_loop_example.Example ")
-        types_description = pynmrstar.Entry.from_string(types_description)
+        types_description = pynmrstar.Entry.from_string(types_description.read())
 
     interview_list = []
     data_mapping = {}
@@ -268,11 +262,13 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     # Load the enumerations
     try:
         enumerations = get_file('enumerations.txt', rev).read()
-        enumerations = re.sub('_Revision_date.*', '', enumerations)
         # This makes it not choke on the fact there are no tags
         enumerations = enumerations.replace("loop_", "_dummy.dummy dummy loop_")
         enum_entry = pynmrstar.Entry.from_string(enumerations)
         for saveframe in enum_entry:
+            # Skip the initial saveframe
+            if '_Item_enumeration' not in saveframe:
+                continue
             enums = [x.replace("$", ",") for x in saveframe['_Item_enumeration'].get_tag('Value')]
             try:
                 result['tags']['values'][saveframe.name].append(enums)
