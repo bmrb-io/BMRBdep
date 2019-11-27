@@ -39,18 +39,9 @@ if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/configuration.json" ]]; then
   cp "${SCRIPT_DIR}"/BackEnd/app/example_config.json "${SCRIPT_DIR}"/BackEnd/app/configuration.json
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/BackEnd/app/schema_data/last_commit" ]] || [[ "$1" == "-force" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/schema_data/last_commit" ]] || [[ "$1" == "-force" ]]; then
+  source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
   echo "Schemas not found. Generating local cache of schema versions... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-
-  if [[ ! -d "${SCRIPT_DIR}/BackEnd/schema_venv" ]]; then
-    echo "No schema_venv found. Generating special environment for schema loader... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    python3 -m venv "${SCRIPT_DIR}"/BackEnd/schema_venv
-    source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
-    pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
-    pip3 install -r "${SCRIPT_DIR}"/BackEnd/app/schema_requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
-  else
-    source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
-  fi
-  "${SCRIPT_DIR}"/BackEnd/app/schema_loader.py 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
+  "${SCRIPT_DIR}"/BackEnd/bmrbdep/schema_loader.py 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
   deactivate
 fi
