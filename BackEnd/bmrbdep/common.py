@@ -24,12 +24,19 @@ residue_mappings = {'polypeptide(L)': {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 
 def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]:
     """ Return the schema from disk. """
 
+    # When running locally
+    schema_dir = os.path.join(root_dir, '..', 'schema', 'schema_data')
+    if not os.path.exists(schema_dir):
+        schema_dir = os.path.join(root_dir, '..', 'schema_data')
+        if not os.path.exists(schema_dir):
+            raise IOError("No schema directory found.")
+
     try:
         if schema_format == "json":
-            with open(os.path.join('/opt/wsgi/schema_data', version + '.json.zlib'), 'rb') as schema_file:
+            with open(os.path.join(root_dir, '..', 'schema', 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
                 schema = json.loads(zlib.decompress(schema_file.read()).decode())
         elif schema_format == "xml":
-            return open(os.path.join('/opt/wsgi/schema_data', version + '.xml'), 'r')
+            return open(os.path.join(root_dir, '..', 'schema', 'schema_data', version + '.xml'), 'r')
         else:
             raise ServerError('Attempted to load invalid schema type.')
     except IOError:
