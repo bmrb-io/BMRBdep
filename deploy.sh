@@ -19,8 +19,8 @@ fi
 
 
 echo "Getting newest schema."
-source "${SCRIPT_DIR}"/BackEnd/schema_venv/bin/activate
-if ! "${SCRIPT_DIR}"/BackEnd/app/schema_loader.py; then
+source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
+if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
   echo "Schema loader failed, quitting."
   exit
 fi
@@ -47,7 +47,7 @@ function parse_git_branch() {
 function parse_git_hash() {
   git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
 }
-echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/app/version.txt
+echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/version.txt
 
 echo "Building docker instance..."
 if ! "${SCRIPT_DIR}"/build_docker.sh production.conf; then
