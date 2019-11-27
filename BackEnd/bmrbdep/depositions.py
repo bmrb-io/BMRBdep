@@ -14,8 +14,10 @@ from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from common import ServerError, RequestError, configuration, secure_filename, residue_mappings, get_release, get_schema
-from helpers.pubmed import update_citation_with_pubmed
+from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release,\
+  get_schema
+from bmrbdep.exceptions import ServerError, RequestError
+from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
 if not os.path.exists(configuration['repo_path']):
     try:
