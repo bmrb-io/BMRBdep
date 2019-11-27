@@ -49,13 +49,30 @@ if [[ "$1" == "--update" ]]; then
 fi
 
 if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]] || [[ "$1" == "--update" ]]; then
-  echo "Creating git release file..." | tee -a "${SCRIPT_DIR}"/installation.log
+  echo "Creating angular git version file for front end..." | tee -a "${SCRIPT_DIR}"/installation.log
   source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
   cd "${SCRIPT_DIR}"/FrontEnd/ || exit 3
   npm run prebuild.prod | tee -a "${SCRIPT_DIR}"/installation.log
   cd - || exit 4
   deactivate_node
 fi
+
+# https://gist.github.com/dciccale/5560837
+function parse_git_dirty() {
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null; [[ $? -eq 1 ]] && echo "*"
+}
+function parse_git_branch() {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+}
+function parse_git_hash() {
+  git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
+}
+
+if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/version.txt" ]] || [[ "$1" == "--update" ]]; then
+  echo "Creating text version file for backend..." | tee -a "${SCRIPT_DIR}"/installation.log
+  echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/version.txt
+fi
+
 
 if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json" ]]; then
   echo "No configuration file found. Copying example configuration file (which will work for local testing) to ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json. You should edit this file before deployment." | tee -a "${SCRIPT_DIR}"/installation.log
