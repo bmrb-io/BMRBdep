@@ -26,10 +26,10 @@ def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]
 
     try:
         if schema_format == "json":
-            with open(os.path.join(root_dir, 'schema_data', version + '.json.zlib'), 'rb') as schema_file:
+            with open(os.path.join('/opt/wsgi/schema_data', version + '.json.zlib'), 'rb') as schema_file:
                 schema = json.loads(zlib.decompress(schema_file.read()).decode())
         elif schema_format == "xml":
-            return open(os.path.join(root_dir, 'schema_data', version + '.xml'), 'r')
+            return open(os.path.join('/opt/wsgi/schema_data', version + '.xml'), 'r')
         else:
             raise ServerError('Attempted to load invalid schema type.')
     except IOError:

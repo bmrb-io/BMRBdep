@@ -79,9 +79,9 @@ if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json" ]]; then
   cp "${SCRIPT_DIR}"/BackEnd/bmrbdep/example_config.json "${SCRIPT_DIR}"/BackEnd/bmrbdep/configuration.json
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/schema_data/last_commit" ]] || [[ "$1" == "--update" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/BackEnd/schema/schema_data/last_commit" ]] || [[ "$1" == "--update" ]]; then
   source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
   echo "Generating/updating schemas..." | tee -a "${SCRIPT_DIR}"/installation.log
-  "${SCRIPT_DIR}"/BackEnd/bmrbdep/schema_loader.py --force 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
+  "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py --force 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
   deactivate
 fi

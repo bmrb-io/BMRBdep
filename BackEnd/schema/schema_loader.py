@@ -4,7 +4,6 @@ import csv
 import io
 import optparse
 import os
-import re
 import sys
 import zlib
 from io import StringIO
@@ -299,7 +298,7 @@ if __name__ == "__main__":
     (options, cmd_input) = optparser.parse_args()
 
     # Do some standard initialization
-    dt_path = os.path.join(root_dir, "schema_data", "data_types.csv")
+    dt_path = os.path.join(root_dir, "data_types.csv")
     dictionary_dir = os.path.join(root_dir, 'nmr-star-dictionary')
 
     # Pull changes

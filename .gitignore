@@ -45,16 +45,13 @@ Thumbs.db
 
 __pycache__
 package-lock.json
-/BackEnd/depositions/
-/BackEnd/bmrbdep/nmr-star-dictionary/
 configuration.json
 env/
-/BackEnd/schema_env/
+nmr-star-dictionary
+schema_data
 /installation.log
 /FrontEnd/dist
 /FrontEnd/src/environments/versions.ts
 /BackEnd/bmrbdep/version.txt
 .mypy_cache
-schema_venv
-schema_data
 orcid.py
