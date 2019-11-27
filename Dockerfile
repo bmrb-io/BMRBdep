@@ -21,8 +21,8 @@ RUN apk update && \
 COPY ./BackEnd/bmrbdep/requirements.txt /opt/wsgi/
 RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
 
-COPY ./BackEnd/bmrbdep /opt/wsgi/
-COPY ./BackEnd/schema/schema_data /opt/wsgi/schema_data/
+COPY ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
+COPY ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
 COPY ./FrontEnd/dist /opt/wsgi/html
 
 ARG configfile
