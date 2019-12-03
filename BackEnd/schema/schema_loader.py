@@ -263,7 +263,7 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     for values in get_dict(get_file("adit_category_desc.csv", rev), ['category', 'Description', 'category type'],
                            [], 2)['values']:
         if values[0] not in category_defined and values[0] != "?" and values[1] != 'NOT AVAILABLE' and \
-                values[2] == 'category_group':
+                values[2] == 'item_category':
             result['saveframes']['values'][values[0]] = [None, 0, False, values[1]]
 
     # Load the enumerations
