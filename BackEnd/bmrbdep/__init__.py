@@ -68,10 +68,10 @@ else:
 
 # Set up the logger
 if configuration['debug']:
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s')
     logging.getLogger().setLevel('INFO')
 else:
     logging.getLogger().setLevel('WARNING')
-
 
 # Set up error handling
 @application.errorhandler(ServerError)
