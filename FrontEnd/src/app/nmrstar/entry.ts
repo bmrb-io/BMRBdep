@@ -352,9 +352,7 @@ export class Entry {
                 const conditionalTag = saveframe.tagDict[rule['Tag']];
                 // Set the tag to the override rule
                 if (!conditionalTag) {
-                  if (environment.debug) {
-                    console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
-                  }
+                  console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
                 } else {
                   conditionalTag.display = rule['Override view value'];
                 }
