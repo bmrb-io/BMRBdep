@@ -54,9 +54,7 @@ export class MessagesService {
     });
 
     // Log messages to the console if in development mode
-    if (environment.debug) {
-      console.log('Sent message: ', message);
-    }
+    console.log('Sent message: ', message);
   }
 
   clearMessage() {

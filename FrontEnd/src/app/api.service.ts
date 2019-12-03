@@ -407,7 +407,7 @@ export class ApiService implements OnDestroy {
     } else {
       this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
     }
-    if (environment.debug) {
+    if (!environment.production) {
       throw error;
     }
 
