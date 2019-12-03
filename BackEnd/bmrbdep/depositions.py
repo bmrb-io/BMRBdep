@@ -67,8 +67,9 @@ class DepositionRepo:
 
         if self._initialize:
             self._repo = Repo.init(self._entry_dir)
-            self._repo.config_writer().set_value("user", "name", "BMRBDep").release()
-            self._repo.config_writer().set_value("user", "email", "bmrbhelp@bmrb.wisc.edu").release()
+            with self._repo.config_writer() as config:
+                config.set_value("user", "name", "BMRBDep")
+                config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
         else:
             self._lock_object = FileLock(self._lock_path, timeout=10)
             self._lock_object.acquire()
