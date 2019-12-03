@@ -391,9 +391,6 @@ def new_deposition() -> Response:
         sample_conditions['Val'] = [None, None, '1', None]
         sample_conditions['Val_units'] = ['K', 'pH', 'atm', 'M']
 
-    author_given = None
-    author_family = None
-
     entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
 
     # Just add a single row to the entry author loop
