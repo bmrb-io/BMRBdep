@@ -69,7 +69,7 @@ export class Loop {
 
     // Add default values if a loop exists that the schema can't handle
     if (!this.schemaValues) {
-      console.warn('Loop without category description:', this);
+      console.warn('Loop without category description:', this.category);
       this.schemaValues = {
         'ADIT replicable': false,
         'category_group_view_name': 'Unknown loop category.',
