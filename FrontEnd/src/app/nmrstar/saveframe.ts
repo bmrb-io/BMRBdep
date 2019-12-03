@@ -49,8 +49,9 @@ export class Saveframe {
     }
     // Add default values if a saveframe exists that the schema can't handle
     if (!this.schemaValues) {
+      console.warn('Saveframe without category description:', this);
       this.schemaValues = {
-        'ADIT replicable': 'N',
+        'ADIT replicable': false,
         'category_group_view_name': 'Unknown saveframe category.',
         'group_view_help': 'Unknown category - no help available.',
         'mandatory_number': 0
