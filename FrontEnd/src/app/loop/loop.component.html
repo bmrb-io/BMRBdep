@@ -6,7 +6,7 @@
             </colgroup>
             <thead>
             <tr (contextmenu)="log()">
-                <th colspan=999>
+                <th colspan=999 [title]="loop.schemaValues['group_view_help']">
                     {{loop.data[0][0].schemaValues['ADIT category view name']}}
                     <button mat-raised-button *ngIf="loop.category == '_Citation_author' && loop.empty"
                             (click)="copyAuthors()" color="accent">Copy authors from 'Entry information'

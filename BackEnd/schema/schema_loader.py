@@ -255,8 +255,16 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
                                 2)
 
     result['saveframes'] = {'headers': sf_category_info['headers'][1:], 'values': {}}
+    category_defined = {}
     for sfo in sf_category_info['values']:
         result['saveframes']['values'][sfo[0]] = sfo[1:]
+        category_defined[sfo[0]] = True
+
+    for values in get_dict(get_file("adit_category_desc.csv", rev), ['category', 'Description', 'category type'],
+                           [], 2)['values']:
+        if values[0] not in category_defined and values[0] != "?" and values[1] != 'NOT AVAILABLE' and \
+                values[2] == 'category_group':
+            result['saveframes']['values'][values[0]] = [None, 0, False, values[1]]
 
     # Load the enumerations
     try:
@@ -361,10 +369,11 @@ if __name__ == "__main__":
 
                 highest_schema = schema[0]
                 print("Set schema: %s" % schema[0])
-                if not options.full:
-                    # Make schemas at least up to the oldest one in use (check depositions manually before updating!)
-                    if schema[0] == "3.2.1.43":
-                        break
+                # Make schemas at least up to the oldest one this code can handle
+                #  Be careful when updating this that no active depositions require older versions - if so, make
+                #   sure to preserve the dictionaries created by the older loaders
+                if schema[0] == "3.2.1.44":
+                    break
 
         # Write out the commit at the end to ensure success
         open(last_commit_file, 'w').write(str(most_recent_commit))

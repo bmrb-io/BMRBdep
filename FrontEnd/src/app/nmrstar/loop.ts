@@ -8,7 +8,7 @@ export class Loop {
   tags: string[];
   data: LoopTag[][];
   parent: Saveframe;
-  schemaValues: {}[];
+  schemaValues: {};
   display: string;
   displayTags: string[];
   valid: boolean;
@@ -21,7 +21,7 @@ export class Loop {
     for (const row of this.data) {
       const outputRow = [];
       for (const item of row) {
-        if ((!item.value) || (item.value === '')) {
+        if (checkValueIsNull(item.value)) {
           outputRow.push('.');
         } else {
           outputRow.push(item.value);
@@ -37,7 +37,7 @@ export class Loop {
     this.category = category;
     this.tags = tags;
     this.parent = parent;
-    this.schemaValues = [];
+    this.schemaValues = {};
     this.display = 'H';
     this.displayTags = new Array(tags.length).fill('H');
     this.valid = true;
@@ -63,8 +63,19 @@ export class Loop {
       this.data.push(row);
     }
 
-    for (const tag of this.tags) {
-      this.schemaValues.push(this.parent.parent.schema.getTag(this.category + '.' + tag));
+    if (this.parent.parent.schema) {
+      this.schemaValues = this.parent.parent.schema.saveframeSchema[this.category.substr(1)];
+    }
+
+    // Add default values if a loop exists that the schema can't handle
+    if (!this.schemaValues) {
+      console.warn('Loop without category description:', this);
+      this.schemaValues = {
+        'ADIT replicable': false,
+        'category_group_view_name': 'Unknown loop category.',
+        'group_view_help': 'Unknown category - no help available.',
+        'mandatory_number': 0
+      };
     }
   }
 
