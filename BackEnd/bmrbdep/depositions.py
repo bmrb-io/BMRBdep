@@ -42,7 +42,6 @@ class DepositionRepo:
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         self._lock_path: str = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
-        self._lock_object: Optional[FileLock] = None
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
@@ -54,26 +53,25 @@ class DepositionRepo:
                 os.mkdir(os.path.join(self._entry_dir, '.git'))
                 os.mkdir(os.path.join(self._entry_dir, 'data_files'))
 
+                self._repo = Repo.init(self._entry_dir)
+                with self._repo.config_writer() as config:
+                    config.set_value("user", "name", "BMRBDep")
+                    config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
+
+        # Create the lock object
+        self._lock_object: FileLock = FileLock(self._lock_path, timeout=10)
+
+        if not self._initialize:
+            self._repo = Repo(self._entry_dir)
+
     def __enter__(self):
         """ Get a session cookie to use for future requests. """
 
-        # Get the lock before doing anything in the directory
-        self._lock_object = FileLock(self._lock_path, timeout=10)
         try:
             self._lock_object.acquire()
         except Timeout:
             raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
                               ' request is already in progress.')
-
-        if self._initialize:
-            self._repo = Repo.init(self._entry_dir)
-            with self._repo.config_writer() as config:
-                config.set_value("user", "name", "BMRBDep")
-                config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
-        else:
-            self._lock_object = FileLock(self._lock_path, timeout=10)
-            self._lock_object.acquire()
-            self._repo = Repo(self._entry_dir)
 
         return self
 
