@@ -41,7 +41,15 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
         root = ET.fromstring(req.text)
     except ET.ParseError:
         logging.exception('Could not get the information for the PubMed ID!')
-        citation_saveframe.add_tag('PubMed_API_Error', req.text)
+        citation_saveframe.add_tag('Note_to_annotator', "API Error: %s" % req.text)
+        return
+    for error in root.getiterator('ERROR'):
+        if 'ID list is empty' in error.text:
+            logging.warning("Invalid or not yet released PubMed ID. Cannot update citation saveframe.")
+            citation_saveframe.add_tag('Note_to_annotator', 'Invalid or not yet released PubMed ID')
+        else:
+            logging.exception('PubMed API threw exception: %s' % error.text)
+            citation_saveframe.add_tag('Note_to_annotator', "API Error: %s" % error.text)
         return
 
     # We will fill a new loop with the author info
