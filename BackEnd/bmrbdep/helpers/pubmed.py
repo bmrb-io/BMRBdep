@@ -41,8 +41,7 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
         root = ET.fromstring(req.text)
     except ET.ParseError:
         logging.exception('Could not get the information for the PubMed ID!')
-        citation_saveframe.add_tag('Details', '%s\n\nAn error occurred when fetching citation information: %s' %
-                                   (citation_saveframe['Details'][0], req.text), update=True)
+        citation_saveframe.add_tag('PubMed_API_Error', req.text)
         return
 
     # We will fill a new loop with the author info
