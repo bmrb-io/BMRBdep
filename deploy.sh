@@ -69,8 +69,8 @@ sudo docker push pike.bmrb.wisc.edu:5000/bmrbdep
 if [[ $1 == "production" ]]; then
     echo "Deploying Angular..."
     echo "cd /websites/bmrbdep/bmrbdep_shared/html; rm -fv /websites/bmrbdep/bmrbdep_shared/html/*; tar -xzvf /tmp/release.tgz" | ssh web@blenny
-    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@blenny
-    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@herring
+    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/bmrbdep/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@blenny
+    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/bmrbdep/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@herring
 else
     echo "Deploying Angular..."
     echo "cd /websites/bmrbdep/html; rm -fv /websites/bmrbdep/html/*; tar -xzvf /tmp/release.tgz" | ssh web@manta
