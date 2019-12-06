@@ -133,7 +133,8 @@ class DepositionRepo:
 
         # Assign the PubMed ID
         for citation in final_entry.get_saveframes_by_category('citations'):
-            update_citation_with_pubmed(citation, schema=schema)
+            if citation['PubMed_ID'] and citation['PubMed_ID'] != ".":
+                update_citation_with_pubmed(citation, schema=schema)
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
