@@ -3,7 +3,6 @@ import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
-import {environment} from '../../environments/environment';
 
 class SuperCategoryInfo {
   superCategory: string;
@@ -340,7 +339,7 @@ export class Entry {
           // Check that the rule is valid
           if (saveframe.tagDict[rule['Conditional tag']] === undefined) {
             console.warn('Dictionary over-ride rule specifies non-existent conditional tag: ' + rule['Conditional tag'], rule);
-          // See if the rule fires
+            // See if the rule fires
           } else if (rule['Regex'].test(saveframe.tagDict[rule['Conditional tag']].value)) {
 
             // First see if the rule applies to saveframe-level tag

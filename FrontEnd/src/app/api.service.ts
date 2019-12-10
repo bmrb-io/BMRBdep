@@ -60,7 +60,7 @@ export class ApiService implements OnDestroy {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('help') < 0 && !this.cachedEntry) {
               this.subscription$.unsubscribe();
-              router.navigate(['/']);
+              router.navigate(['/']).then();
             }
           }
         }
@@ -74,7 +74,7 @@ export class ApiService implements OnDestroy {
       const savedID = localStorage.getItem('entryID');
       if (savedID && this.cachedEntry && savedID !== this.cachedEntry.entryID) {
         this.entrySubject.next(null);
-        this.router.navigate(['/']);
+        this.router.navigate(['/']).then();
         this.messagesService.sendMessage(new Message('You were signed out on this tab because you loaded a different' +
           ' deposition in another tab.', MessageType.NotificationMessage, 60000));
       }
@@ -368,7 +368,7 @@ export class ApiService implements OnDestroy {
 
         this.messagesService.sendMessage(new Message('Submission accepted!',
           MessageType.NotificationMessage, 15000));
-        this.router.navigate(['/entry']);
+        this.router.navigate(['/entry']).then();
         resolve(jsonData['status']);
       }, error => {
         this.handleError(error);

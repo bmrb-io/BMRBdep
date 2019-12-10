@@ -93,7 +93,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, this.skipEmailValidation, fileElement,
       bootstrapID).then(
       deposition_id => {
-        this.router.navigate(['/entry', 'load', deposition_id]);
+        this.router.navigate(['/entry', 'load', deposition_id]).then();
       }, error => {
         if (error === 'Invalid e-mail') {
           this.emailValidationError = true;
