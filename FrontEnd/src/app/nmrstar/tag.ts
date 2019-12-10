@@ -129,7 +129,7 @@ export class Tag {
 
   }
 
-  updateTagStatus(): void {
+  updateTagStatus(setDisabled= true): void {
 
     /* Check that the tag is valid
     * 1) Matches the data type regex
@@ -141,6 +141,11 @@ export class Tag {
     if (!checkValueIsNull(this.value)) {
       this.value = this.value.replace(/[^\x00-\x7F]/g, '?');
     } */
+
+    // Set tag enabled/disabled status based on the status of the entry
+    if (setDisabled) {
+      this.disabled = this.getEntry().deposited;
+    }
 
     let matchedPointer = false;
 

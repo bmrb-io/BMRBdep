@@ -579,11 +579,9 @@ export class Saveframe {
               }
             }
           }
-
-          referenceLoop.refresh();
         }
       }
-      referenceLoop.refresh();
+      referenceLoop.refresh(false);
     }
   }
 }
