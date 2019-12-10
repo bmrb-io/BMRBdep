@@ -214,13 +214,8 @@ export class Tag {
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
           this.enums = new Set();
-          const parent = this;
-          enumerationSet.forEach(function (item) {
-            parent.enums.add(item);
-          });
-          for (const item of temp) {
-            this.enums.add(item);
-          }
+          enumerationSet.forEach(item => this.enums.add(item));
+          temp.forEach(item => this.enums.add(item));
         }
       }
 
