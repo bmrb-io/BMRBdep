@@ -1,5 +1,6 @@
 import {sprintf} from 'sprintf-js';
 import {nullTags} from './definitions';
+import {Entry} from './entry';
 
 export function cleanValue(value): string {
 
@@ -46,7 +47,7 @@ export function checkTagIsRequired(tag) {
   return alwaysDisplay.indexOf(tag.name.toLowerCase()) >= 0;
 }
 
-export function download(filename, printableObject): void {
+export function download(filename, printableObject: Entry): void {
   const element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printableObject.print()));
   element.setAttribute('download', filename);

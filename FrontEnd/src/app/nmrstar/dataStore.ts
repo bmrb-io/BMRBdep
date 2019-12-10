@@ -33,7 +33,7 @@ export class DataFileStore {
 
   addFile(filename: string = null, selected: {} = []): DataFile {
 
-    let dataFile = null;
+    let dataFile;
 
     // File already exists
     if (this.dataFileMap[filename]) {
