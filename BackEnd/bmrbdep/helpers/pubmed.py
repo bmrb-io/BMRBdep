@@ -29,9 +29,13 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
                                 schema: pynmrstar.Schema = None):
     """ Modifies the citation saveframe passed in to add in information loaded from PubMed. """
 
+    pubmed_id = citation_saveframe.get_tag('PubMed_ID')[0]
+
+    if not pubmed_id or pubmed_id == ".":
+        return
+
     # Get whatever schema will be used for these actions
     schema = pynmrstar.utils.get_schema(schema)
-    pubmed_id = citation_saveframe.get_tag('PubMed_ID')[0]
 
     # Get the XML
     req = requests.get("https://www.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=%s"
