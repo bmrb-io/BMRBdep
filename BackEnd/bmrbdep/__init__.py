@@ -5,7 +5,6 @@ import logging
 import os
 import re
 import traceback
-from io import BytesIO
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
@@ -559,7 +558,7 @@ def file_operations(uuid, filename: str) -> Response:
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(BytesIO(repo.get_file(filename, root=False)),
+            return send_file(repo.get_file(filename, root=False),
                              attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
