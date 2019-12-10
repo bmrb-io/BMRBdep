@@ -465,6 +465,7 @@ export class Saveframe {
 
 
       // Update the chemical shift reference loop to be valid based on the chem shift reference saveframe
+      const referenceLoop = this.getLoopByPrefix('_Chem_shift_ref');
       const updateTags = ['_Chem_shift_reference.Proton_shifts_flag',
         '_Chem_shift_reference.Carbon_shifts_flag',
         '_Chem_shift_reference.Nitrogen_shifts_flag',
@@ -501,8 +502,6 @@ export class Saveframe {
             atomName = 'P';
             shiftRatio = '0.404808636';
           }
-
-          const referenceLoop = tag.getParentSaveframe().getLoopByPrefix('_Chem_shift_ref');
           const atomNameCol = referenceLoop.tags.indexOf('Atom_type');
           const atomNumberCol = referenceLoop.tags.indexOf('Atom_isotope_number');
 
@@ -584,6 +583,7 @@ export class Saveframe {
           referenceLoop.refresh();
         }
       }
+      referenceLoop.refresh();
     }
   }
 }
