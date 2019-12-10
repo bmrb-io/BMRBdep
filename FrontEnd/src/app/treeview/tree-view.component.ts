@@ -3,8 +3,7 @@ import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
-import {Subscription} from 'rxjs';
-import {combineLatest} from 'rxjs/internal/observable/combineLatest';
+import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 @Component({
@@ -48,7 +47,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
             parent.page = 'new';
           }
         }
-
       })
     ).subscribe();
 
