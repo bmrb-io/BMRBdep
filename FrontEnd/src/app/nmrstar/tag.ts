@@ -41,7 +41,7 @@ export class Tag {
         'BMRB data type': 'any', 'Nullable': true,
         'Prompt': 'Tag not in dictionary', 'Interface': 'Tag not in dictionary',
         'default value': '?', 'Example': '?', 'ADIT category view name': 'Missing',
-        'User full view': 'Y', 'Foreign Table': null, 'Sf pointer': 'N'
+        'User full view': 'H', 'Foreign Table': null, 'Sf pointer': 'N'
       };
       // Don't show internal tags
       if (this.name.startsWith('_')) {
