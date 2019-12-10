@@ -1,7 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
-import {checkValueIsNull} from '../nmrstar/nmrstar';
 
 @Component({
   selector: 'app-tag',
@@ -11,7 +10,7 @@ import {checkValueIsNull} from '../nmrstar/nmrstar';
 export class TagComponent implements OnInit {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
-  storedValue: string;
+  filteredOptions: string[];
 
   public height: number;
 
@@ -22,11 +21,13 @@ export class TagComponent implements OnInit {
     if (this.tag.interfaceType === 'text') {
       this.recalculateHeight();
     }
-    if (this.tag.schemaValues['default value'] !== '?') {
-      this.storedValue = this.tag.schemaValues['default value'];
-    } else {
-      this.storedValue = '';
+    if (this.tag.interfaceType === 'open_enum') {
+      this.filteredOptions = Array.from(this.tag.enums);
     }
+  }
+
+  private filter() {
+    this.filteredOptions = Array.from(this.tag.enums).filter(option => option.toLowerCase().includes(this.tag.value.toLowerCase()));
   }
 
   getRow() {
@@ -49,32 +50,6 @@ export class TagComponent implements OnInit {
   validateTag(): void {
     this.tag.getEntry().refresh();
     this.api.saveEntry();
-  }
-
-  storeValue(): void {
-    if (!checkValueIsNull(this.tag.value)) {
-      this.storedValue = this.tag.value;
-      this.tag.value = null;
-    }
-  }
-
-  restoreValue(): void {
-    if (checkValueIsNull(this.tag.value)) {
-      this.tag.value = this.storedValue;
-    } else {
-      if (this.tag.value !== this.storedValue || this.tag.value === this.tag.schemaValues['default value']) {
-        this.storedValue = this.tag.value;
-        this.validateTag();
-      }
-    }
-  }
-
-  checkDelete(key): void {
-    // This checks if they have pressed the delete/backspace key on an open enum - if so we must clear the stored value
-    if (['Backspace', 'Delete'].includes(key)) {
-      this.storedValue = '';
-      this.validateTag();
-    }
   }
 
 }

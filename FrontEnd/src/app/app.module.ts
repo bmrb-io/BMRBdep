@@ -48,6 +48,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatAutocompleteModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -93,7 +94,9 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     SlidingBarModule,
     MatDialogModule,
     MatRadioModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatAutocompleteModule,
+    MatAutocompleteModule
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent]
