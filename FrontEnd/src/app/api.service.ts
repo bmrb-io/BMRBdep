@@ -363,8 +363,8 @@ export class ApiService implements OnDestroy {
       this.http.post(apiEndPoint, formData).subscribe(jsonData => {
         // Trigger everything watching the entry to see that it changed - because "deposited" changed
         this.cachedEntry.deposited = true;
+        this.cachedEntry.refresh();
         this.saveEntry(true);
-        this.entrySubject.next(this.cachedEntry);
 
         this.messagesService.sendMessage(new Message('Submission accepted!',
           MessageType.NotificationMessage, 15000));

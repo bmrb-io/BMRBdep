@@ -1,7 +1,6 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
-import {Subscription} from 'rxjs';
 import {checkValueIsNull} from '../nmrstar/nmrstar';
 
 @Component({
@@ -9,11 +8,10 @@ import {checkValueIsNull} from '../nmrstar/nmrstar';
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss']
 })
-export class TagComponent implements OnInit, OnDestroy {
+export class TagComponent implements OnInit {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
   storedValue: string;
-  subscription$: Subscription;
 
   public height: number;
 
@@ -28,17 +26,6 @@ export class TagComponent implements OnInit, OnDestroy {
       this.storedValue = this.tag.schemaValues['default value'];
     } else {
       this.storedValue = '';
-    }
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      if (entry && entry.deposited) {
-        this.tag.disabled = true;
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.subscription$) {
-      this.subscription$.unsubscribe();
     }
   }
 

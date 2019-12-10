@@ -209,12 +209,12 @@ export class Loop {
     return this.empty;
   }
 
-  refresh(): void {
+  refresh(setDisabled= true): void {
 
     // Update the child data tags
     for (const row of this.data) {
       for (const item of row) {
-        item.updateTagStatus();
+        item.updateTagStatus(setDisabled);
       }
     }
 
