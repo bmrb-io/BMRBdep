@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from datetime import date, datetime
-from typing import Optional, List
+from typing import Optional, List, BinaryIO
 
 import flask
 import psycopg2
@@ -94,7 +94,7 @@ class DepositionRepo:
         """ Return the metadata dictionary. """
 
         if not self._live_metadata:
-            self._live_metadata = json.loads(self.get_file('submission_info.json'))
+            self._live_metadata = json.loads(self.get_file('submission_info.json').read())
             self._original_metadata = self._live_metadata.copy()
         return self._live_metadata
 
@@ -379,14 +379,14 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, filename: str, root: bool = True) -> bytes:
+    def get_file(self, filename: str, root: bool = True) -> BinaryIO:
         """ Returns the current version of a file from the repo. """
 
         secured_filename: str = secure_filename(filename)
         if not root:
             secured_filename = os.path.join('data_files', secured_filename)
         try:
-            return open(os.path.join(self._entry_dir, secured_filename), "rb").read()
+            return open(os.path.join(self._entry_dir, secured_filename), "rb")
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
 
