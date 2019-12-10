@@ -428,7 +428,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         self._modified_files = True
 
-        return filename
+        return secured_filename
 
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
