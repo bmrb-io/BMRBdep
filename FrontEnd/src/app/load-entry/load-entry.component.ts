@@ -29,16 +29,16 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
         if (entry && entry.entryID === params['entry']) {
           if (entry.emailValidated) {
             if (entry.deposited) {
-              this.router.navigate(['/entry']);
+              this.router.navigate(['/entry']).then();
             } else {
               if (entry.firstIncompleteCategory) {
-                this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]);
+                this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
               } else {
-                this.router.navigate(['/entry/', 'review']);
+                this.router.navigate(['/entry/', 'review']).then();
               }
             }
           } else {
-            this.router.navigate(['/entry', 'pending-verification']);
+            this.router.navigate(['/entry', 'pending-verification']).then();
           }
         }
       });

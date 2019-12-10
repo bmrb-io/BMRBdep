@@ -60,7 +60,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
 
     // If there are no saveframes of the category we are trying to display, reroute
     if (nextCategory && this.saveframes.length === 0) {
-      this.router.navigate(['/entry', 'saveframe', nextCategory]);
+      this.router.navigate(['/entry', 'saveframe', nextCategory]).then();
     }
 
     this.entry.updateCategories();
