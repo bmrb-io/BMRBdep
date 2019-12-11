@@ -31,10 +31,13 @@
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             [placeholder]="tag.schemaValues['default value']"
             (change)="validateTag()"
-            [type]="tag.dataType"
-            [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
             [title]="tag.validationMessage"
             [disabled]="tag.disabled">
+  <!--
+     Those don't play nicely with our validation
+    [type]="tag.dataType"
+    [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
+            -->
 </label>
 
 <label *ngIf="tag.interfaceType == 'closed_enum'">
