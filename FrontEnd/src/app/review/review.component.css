@@ -6,3 +6,7 @@
 .left-pad {
   margin-left: 1em;
 }
+
+mat-form-field {
+  width: 100%;
+}
