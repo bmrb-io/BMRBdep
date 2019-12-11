@@ -23,6 +23,6 @@ RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
 COPY ./wsgi.conf /opt/wsgi/wsgi.conf
 COPY ./bmrbdep/ /opt/wsgi/bmrbdep/
 COPY ./schema_data/ /opt/wsgi/schema_data/
-COPY ./dist /opt/wsgi/html
+COPY ./dist/ /opt/wsgi/dist/
 
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf" ]

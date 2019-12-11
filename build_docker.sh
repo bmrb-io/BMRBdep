@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Check if the initial setups need to happen
 "${SCRIPT_DIR}"/install.sh
 
+echo "Removing existing local docker image"
 sudo docker stop bmrbdep
 sudo docker rm bmrbdep
 
@@ -22,7 +23,7 @@ if [[ $# -eq 0 ]]; then
   echo "Running in development mode."
   sudo docker run -d --name bmrbdep -p 4444:9001 --restart=always -v /opt/wsgi/depositions:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
 else
-  if ! sudo docker build --build-arg configfile="$1" -t bmrbdep ${SCRIPT_DIR}/docker_build; then
+  if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile --build-arg configfile="$1" -t bmrbdep ${SCRIPT_DIR}/docker_build; then
     echo "Docker build failed."
     exit 3
   fi

@@ -119,7 +119,7 @@ def send_local_file(filename: str = None) -> Response:
         filename = "index.html"
 
     no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'dist')
-    container_path = os.path.join(root_dir, 'html')
+    container_path = os.path.join(root_dir, '..', 'dist')
     if os.path.exists(no_container_path):
         return send_from_directory(no_container_path, filename)
     elif os.path.exists(container_path):
