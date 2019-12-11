@@ -113,19 +113,21 @@ def handle_other_errors(exception: Exception):
 
 
 @application.route('/')
-@application.route('/<filename>')
+@application.route('/<path:filename>', methods=['GET'])
 def send_local_file(filename: str = None) -> Response:
     if filename is None:
         filename = "index.html"
 
-    no_container_path = os.path.join(root_dir, '..', '..', 'FrontEnd', 'dist')
-    container_path = os.path.join(root_dir, '..', 'dist')
-    if os.path.exists(no_container_path):
-        return send_from_directory(no_container_path, filename)
-    elif os.path.exists(container_path):
-        return send_from_directory(container_path, filename)
-    else:
+    angular_path: str = os.path.join(root_dir, '..', '..', 'FrontEnd', 'dist')
+    if not os.path.exists(angular_path):
+        angular_path = os.path.join(root_dir, '..', 'dist')
+    if not os.path.exists(angular_path):
         return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ')
+
+    if not os.path.exists(os.path.join(angular_path, filename)):
+        filename = 'index.html'
+
+    return send_from_directory(angular_path, filename)
 
 
 @application.route('/deposition/<uuid:uuid>/check-valid')
