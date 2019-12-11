@@ -6,6 +6,7 @@ import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
+import {FormControl} from '@angular/forms';
 
 @Component({
   selector: 'app-review',
@@ -13,10 +14,10 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./review.component.css']
 })
 export class ReviewComponent implements OnInit, OnDestroy {
-
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   entry: Entry;
   subscription$: Subscription;
+  messageControl = new FormControl('');
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
@@ -47,7 +48,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
     this.dialogRef.afterClosed().subscribe(result => {
       if (result) {
         // Submit the entry!
-        this.api.depositEntry().then();
+        this.api.depositEntry(this.messageControl.value).then();
       }
       this.dialogRef = null;
     });
