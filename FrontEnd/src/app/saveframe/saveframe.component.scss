@@ -4,15 +4,6 @@
   color: mat-color($custom-theme-warn, darker);
 }
 
-.left-margin {
-  margin-left: .25em;
-}
-
-.tag-description {
-  font-weight: bold;
-  cursor: help;
-}
-
 .invisible {
   background-color: white;
   padding: 1px;
@@ -21,6 +12,15 @@
 
 .invalid {
   background-color: mat-color($custom-theme-warn, lighter);
+}
+
+.left-margin {
+  margin-left: .25em;
+}
+
+.tag-description {
+  font-weight: bold;
+  cursor: help;
 }
 
 .tag-info-box {
@@ -73,4 +73,4 @@ td {
   color: black;
   border: 1px solid mat-color($custom-theme-primary, darker);
   padding: 0 0.25em;
-} 
+}
