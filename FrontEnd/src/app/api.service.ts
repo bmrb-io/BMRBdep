@@ -10,6 +10,7 @@ import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
+import {checkValueIsNull} from './nmrstar/nmrstar';
 
 @Injectable({
   providedIn: 'root'
@@ -257,7 +258,7 @@ export class ApiService implements OnDestroy {
     }
   }
 
-  newSupportRequest(comment: string): Promise<any> {
+  newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request'): Promise<any> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
@@ -276,7 +277,7 @@ export class ApiService implements OnDestroy {
         'requester': {
           'name': userName
         },
-        'subject': 'BMRBdep Support Request',
+        'subject': subject,
         'comment': {
           'body': comment
         },
@@ -343,12 +344,16 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  depositEntry(): Promise<boolean> {
+  depositEntry(feedback: string = null): Promise<boolean> {
 
     if (!this.cachedEntry.valid) {
       this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
         MessageType.ErrorMessage, 15000));
       return;
+    }
+
+    if (!checkValueIsNull(feedback)) {
+      this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
     }
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;

@@ -17,6 +17,11 @@
                     </ng-container>
                 </ng-container>
             </mat-nav-list>
+          <mat-form-field *ngIf="entry.valid" class="content-box" color="accent">
+            <label>
+              <input matInput placeholder="Do you have any feedback on the BMRBdep system?" [formControl]="messageControl">
+            </label>
+          </mat-form-field>
         </mat-card-content>
         <mat-card-actions>
             <button mat-raised-button class="saveframe-button" [disabled]="!entry.valid" color="accent"
