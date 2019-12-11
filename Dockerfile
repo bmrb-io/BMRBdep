@@ -15,18 +15,14 @@ RUN apk update && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache && \
-    mkdir /opt/wsgi/schema_data/ && \
     cd /opt/wsgi && chown -R uwsgi:uwsgi .
 
-COPY ./BackEnd/bmrbdep/requirements.txt /opt/wsgi/
+COPY ./bmrbdep/requirements.txt /opt/wsgi/
 RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
 
-COPY ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
-COPY ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
-COPY ./FrontEnd/dist /opt/wsgi/html
+COPY ./wsgi.conf /opt/wsgi/wsgi.conf
+COPY ./bmrbdep/ /opt/wsgi/bmrbdep/
+COPY ./schema_data/ /opt/wsgi/schema_data/
+COPY ./dist /opt/wsgi/html
 
-ARG configfile
-ENV configfile=${configfile:-./development.conf}
-COPY ${configfile} /opt/wsgi/wsgi.conf
-
-CMD [ "uwsgi", "--ini", "/opt/wsgi/wsgi.conf" ]
+CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf" ]

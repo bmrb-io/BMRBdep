@@ -55,3 +55,4 @@ schema_data
 /BackEnd/bmrbdep/version.txt
 .mypy_cache
 orcid.py
+/docker_build
