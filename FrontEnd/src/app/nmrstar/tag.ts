@@ -77,7 +77,11 @@ export class Tag {
       if (this.schemaValues['Enumeration ties'] === '19') {
         this.interfaceType = 'closed_enum';
       } else {
-        this.interfaceType = 'open_enum';
+        if (this.schemaValues['Item enumeration closed'] === 'Y') {
+          this.interfaceType = 'closed_enum';
+        } else {
+          this.interfaceType = 'open_enum';
+        }
       }
     } else if (dt === 'yes_no') {
       this.interfaceType = 'yes_no';
