@@ -35,6 +35,9 @@ export class Tag {
       this.enums = this.schemaValues['enumerations'] ? new Set(this.schemaValues['enumerations']) : new Set();
       this.display = this.schemaValues['User full view'];
     } else {
+      if (this.name !== '_Deleted' ) {
+        console.warn('Tag exists in entry but not in schema!', this.fullyQualifiedTagName);
+      }
       this.schemaValues = {
         'Regex': new RegExp('^' + schema.dataTypes['any'] + '$'),
         'Tag': name + '.' + value, 'SFCategory': '?',
