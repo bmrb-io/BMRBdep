@@ -71,19 +71,16 @@
 </label>
 
 <ng-container *ngIf="tag.interfaceType == 'open_enum'">
-
-  <mat-form-field class="open-enum">
-    <label>
-      <input matInput
-             [(ngModel)]="tag.value"
-             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-             (change)="validateTag()"
-             (ngModelChange)="filter()"
-             [title]="tag.validationMessage"
-             [disabled]="tag.disabled"
-             [matAutocomplete]="auto">
-    </label>
-  </mat-form-field>
+  <label>
+    <input matInput
+           [(ngModel)]="tag.value"
+           [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+           (change)="validateTag()"
+           (ngModelChange)="filter()"
+           [title]="tag.validationMessage"
+           [disabled]="tag.disabled"
+           [matAutocomplete]="auto">
+  </label>
 
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()">
     <mat-option *ngFor="let option of filteredOptions" [value]="option">{{option}}</mat-option>
