@@ -41,33 +41,32 @@
 </label>
 
 <label *ngIf="tag.interfaceType == 'closed_enum'">
-    <select [(ngModel)]="tag.value"
-            [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-            (change)="validateTag()"
-            [title]="tag.validationMessage"
-            [disabled]="tag.disabled">
-        <option *ngIf="tag.value && !tag.enums.has(tag.value)" disabled [value]="tag.value">{{tag.value}} -
-            Error: {{tag.validationMessage}}</option>
-        <ng-container *ngFor="let val of tag.enums">
-            <option *ngIf="!(!tag.valid && tag.value == val); else invalid_selection" [value]="val"
-                    [ngClass]="{'type-error': !tag.valid}">{{val}}</option>
-            <ng-template #invalid_selection>
-                <option disabled [value]="val">{{tag.value}} - Error: {{tag.validationMessage}}</option>
-            </ng-template>
-        </ng-container>
-    </select>
+  <mat-select [(ngModel)]="tag.value"
+              [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+              (ngModelChange)="validateTag()"
+              [title]="tag.validationMessage"
+              [disabled]="tag.disabled">
+    <mat-option *ngIf="tag.value && !tag.enums.has(tag.value)" disabled [value]="tag.value">{{tag.value}} -
+      Error: {{tag.validationMessage}}</mat-option>
+    <ng-container *ngFor="let val of tag.enums">
+      <mat-option *ngIf="!(!tag.valid && tag.value == val); else invalid_selection" [value]="val"
+                  [ngClass]="{'type-error': !tag.valid}">{{val}}</mat-option>
+      <ng-template #invalid_selection>
+        <mat-option disabled [value]="val">{{tag.value}} - Error: {{tag.validationMessage}}</mat-option>
+      </ng-template>
+    </ng-container>
+  </mat-select>
 </label>
 
 <label *ngIf="tag.interfaceType == 'sf_pointer' || tag.interfaceType == 'experiment_pointer'">
-    <select [(ngModel)]="tag.value"
+    <mat-select [(ngModel)]="tag.value"
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (ngModelChange)="validateTag()"
             [title]="tag.validationMessage"
             [disabled]="tag.disabled">
-
-        <option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
-                [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</option>
-    </select>
+        <mat-option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
+                [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</mat-option>
+    </mat-select>
 </label>
 
 <ng-container *ngIf="tag.interfaceType == 'open_enum'">
