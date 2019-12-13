@@ -149,6 +149,9 @@ export class Tag {
     if (setDisabled) {
       this.disabled = this.getEntry().deposited;
     }
+    if (this.name === 'ID') {
+      this.disabled = true;
+    }
 
     let matchedPointer = false;
 
