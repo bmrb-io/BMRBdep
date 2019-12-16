@@ -5,6 +5,7 @@ import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
 import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-tree-view',
@@ -22,7 +23,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   constructor(private api: ApiService,
               private router: Router,
               private route: ActivatedRoute) {
-    this.developerMode = false;
+    this.developerMode = !environment.production;
     this.page = '?';
   }
 
@@ -63,13 +64,24 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     download(name, printable_object);
   }
 
+  endSession(): void {
+    this.api.clearDeposition();
+    this.sessionEnd.emit(true);
+  }
+
   logEntry(): void {
     console.log(this.entry);
   }
 
-  endSession(): void {
-    this.api.clearDeposition();
-    this.sessionEnd.emit(true);
+  timeRefresh(): void {
+    const iterations = 50;
+    // tslint:disable-next-line:no-console
+    console.time('Refresh');
+    for (let i = 0; i < iterations; i++ ) {
+      this.entry.refresh();
+    }
+    // tslint:disable-next-line:no-console
+    console.timeEnd('Refresh');
   }
 
   refresh(): void {
