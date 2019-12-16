@@ -82,20 +82,25 @@
                        routerLink="/contact-us" id="contact-us">
                         <h2 matLine>Contact us</h2>
                     </a>
-
-                    <div *ngIf="developerMode">
-                        <mat-list-item
-                                (click)='download(entry.entryID + ".str", entry)'>Download entry
-                        </mat-list-item>
-                        <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
-                        <mat-list-item>
-                            <mat-slide-toggle [(ngModel)]="entry.showAll"
-                                              (ngModelChange)="entry.updateCategories()"
-                                              color="#CBDBFF">Display non-mandatory tags
-                            </mat-slide-toggle>
-                        </mat-list-item>
-                    </div>
                 </div>
+
+              <mat-divider *ngIf="developerMode"></mat-divider>
+              <div *ngIf="developerMode">
+                <div>
+                  <h3 matLine>Developer options</h3>
+
+                  <mat-list-item (click)='download(entry.entryID + ".str", entry)'>Download entry
+                  </mat-list-item>
+                  <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
+                  <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
+                  <mat-list-item>
+                    <mat-slide-toggle [(ngModel)]="entry.showAll"
+                                      (ngModelChange)="entry.updateCategories()"
+                                      color="#CBDBFF">Display non-mandatory tags
+                    </mat-slide-toggle>
+                  </mat-list-item>
+                </div>
+              </div>
             </mat-nav-list>
         </mat-card-content>
     </mat-card>
