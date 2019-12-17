@@ -4,6 +4,7 @@ import {ApiService} from '../api.service';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-welcome',
@@ -16,12 +17,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   subscription$: Subscription;
   skipEmailValidation: boolean;
   emailValidationError: boolean;
+  env: object;
 
   constructor(private router: Router,
               public api: ApiService) {
     this.entry = null;
     this.skipEmailValidation = false;
     this.emailValidationError = false;
+    this.env = environment;
   }
 
   sessionType = new FormControl('', [Validators.required]);
@@ -32,6 +35,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   depositionNickname = new FormControl('', [Validators.required]);
   authorORCID = new FormControl('', [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
   bootstrapID = new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+$/)]);
+  depositionType = new FormControl('macromolecule');
 
   createDepositionForm: FormGroup = new FormGroup({
     sessionType: this.sessionType,
@@ -90,8 +94,8 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, this.skipEmailValidation, fileElement,
-      bootstrapID).then(
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, this.depositionType.value, f.value.authorORCID,
+      this.skipEmailValidation, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then();
       }, error => {
