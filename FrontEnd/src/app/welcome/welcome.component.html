@@ -28,6 +28,13 @@
                 <mat-error *ngIf="sessionType.invalid">Please select a deposition type.</mat-error>
             </mat-form-field>
 
+          <mat-form-field *ngIf="!env.production">
+            <mat-select [formControl]="depositionType" placeholder="Select server type" required>
+              <mat-option value="macromolecule">Macromolecule deposition</mat-option>
+              <mat-option value="small molecule">Small molecule deposition</mat-option>
+            </mat-select>
+          </mat-form-field>
+
             <mat-form-field>
                 <label>
                     <input matInput

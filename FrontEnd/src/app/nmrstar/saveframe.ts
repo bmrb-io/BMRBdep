@@ -400,40 +400,40 @@ export class Saveframe {
       const nonstandardMonomer = this.getTag('Nstd_monomer');
 
       // There must be an X in the sequence if non-standard monomer selected
-      if (nonstandardMonomer.value === 'yes' && (!polymerCode.value.toUpperCase().includes('X'))) {
+      if (nonstandardMonomer && nonstandardMonomer.value === 'yes' && (!polymerCode.value.toUpperCase().includes('X'))) {
         polymerCode.valid = false;
         polymerCode.validationMessage = 'You specified there is a non-standard monomer, but didn\'t indicate it in the sequence' +
           ' using an \'X\'';
       }
 
       // There must a non-standard monomer if X in residue sequence
-      if (polymerCode.value.toUpperCase().includes('X') && (nonstandardMonomer.value !== 'yes')) {
+      if (polymerCode && polymerCode.value.toUpperCase().includes('X') && (nonstandardMonomer.value !== 'yes')) {
         nonstandardMonomer.valid = false;
         nonstandardMonomer.validationMessage = 'You specified there is a non-standard monomer with x/X in the polymer sequence, so this ' +
           'tag must be \'yes\'.';
       }
 
       // There must be details if there is a non-standard monomer
-      if (nonstandardMonomer.value === 'yes' && checkValueIsNull(entityDetails.value)) {
+      if (nonstandardMonomer && nonstandardMonomer.value === 'yes' && checkValueIsNull(entityDetails.value)) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified there is a non-standard monomer, but didn\'t provide any details.';
       }
 
       // There must be details if there is a non-standard residue code
-      if (polymerCode.value.toUpperCase().includes('X') && checkValueIsNull(entityDetails.value)) {
+      if (polymerCode && polymerCode.value.toUpperCase().includes('X') && checkValueIsNull(entityDetails.value)) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified there is a non-standard monomer, but didn\'t provide any details.';
       }
 
       // If polymer type is not one of the standard three, require more details
-      if ((!checkValueIsNull(polymerType.value)) && checkValueIsNull(entityDetails.value) &&
+      if (polymerType && (!checkValueIsNull(polymerType.value)) && checkValueIsNull(entityDetails.value) &&
         (!['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].includes(polymerType.value))) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified a polymer type that requires more details.';
       }
 
       // If there are lower case letters, insist on non-standard tag
-      if (isMixedCase(polymerCode.value) && nonstandardMonomer.value !== 'yes') {
+      if (polymerCode && isMixedCase(polymerCode.value) && nonstandardMonomer.value !== 'yes') {
         polymerCode.valid = false;
         polymerCode.validationMessage = 'Please use all upper or all lower case characters for standard residues. For non-standard ' +
           'residues, please indicate the non-standard residue using an x/X and provide details in the \'Other comments\' box.';
