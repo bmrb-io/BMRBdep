@@ -299,6 +299,7 @@ export class ApiService implements OnDestroy {
 
   newDeposition(authorEmail: string,
                 depositionNickname: string,
+                depositionType: string,
                 orcid: string = null,
                 skipEmailValidation: boolean = false,
                 file: File = null,
@@ -310,6 +311,7 @@ export class ApiService implements OnDestroy {
     const body = new FormData();
     body.append('email', authorEmail);
     body.append('deposition_nickname', depositionNickname);
+    body.append('deposition_type', depositionType);
     if (skipEmailValidation) {
       body.append('skip_validation', 'true');
     }

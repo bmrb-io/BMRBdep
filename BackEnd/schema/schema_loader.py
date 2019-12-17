@@ -116,7 +116,7 @@ def get_main_schema(commit, small_molecule=False):
     header_idx = {x: whole_schema[0].index(x) for x in cc}
     header_idx_list = [whole_schema[0].index(x) for x in cc]
 
-    res = {'version': version,
+    res = {'version': version if not small_molecule else version + "-sm",
            'tags': {'headers': cc + ['enumerations'], 'values': {}},
            }
 
@@ -342,12 +342,8 @@ if __name__ == "__main__":
                 print("Loading macromolecule schemas.")
             for schema in schema_emitter(validate_mode=options.validate, small_molecule=sm):
 
-                if sm:
-                    web_schema_location = os.path.join(schema_dir, schema[0] + '-sm.json.zlib')
-                    xml_schema_location = os.path.join(schema_dir, schema[0] + '-sm.xml')
-                else:
-                    web_schema_location = os.path.join(schema_dir, schema[0] + '.json.zlib')
-                    xml_schema_location = os.path.join(schema_dir, schema[0] + '.xml')
+                web_schema_location = os.path.join(schema_dir, schema[0] + '.json.zlib')
+                xml_schema_location = os.path.join(schema_dir, schema[0] + '.xml')
 
                 if os.path.exists(web_schema_location):
                     if one_overwritten and not options.full:
@@ -372,7 +368,7 @@ if __name__ == "__main__":
                 # Make schemas at least up to the oldest one this code can handle
                 #  Be careful when updating this that no active depositions require older versions - if so, make
                 #   sure to preserve the dictionaries created by the older loaders
-                if schema[0] == "3.2.1.44":
+                if schema[0] == "3.2.1.44" or "3.2.1.44-sm":
                     break
 
         # Write out the commit at the end to ensure success
