@@ -268,10 +268,11 @@ def new_deposition() -> Response:
     # Create the deposition
     deposition_id = str(uuid4())
     schema_name = configuration['schema_version']
-    if request_info.get('deposition_type', 'macromolecule'):
+    if request_info.get('deposition_type', 'macromolecule') == "small molecule":
         schema_name += "-sm"
     schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(schema_name, schema_format='xml'))
-    json_schema: dict = get_schema(configuration['schema_version'])
+    json_schema: dict = get_schema(schema_name)
+    print(schema_name, schema.version, json_schema['version'])
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
