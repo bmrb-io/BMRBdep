@@ -30,6 +30,6 @@ textarea {
   min-width: 100%;
 }
 
-::ng-deep .mat-option, ::ng-deep .mat-select-content, ::ng-deep .mat-option-text{
-  max-width: 3000px !important;
+::ng-deep .mat-option{
+  max-width: 3000px;
 }
