@@ -2,6 +2,7 @@
 
 import csv
 import io
+import logging
 import optparse
 import os
 import sys
@@ -61,13 +62,13 @@ data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      }
 
 
-def schema_emitter(validate_mode=False, small_molecule=False):
+def schema_emitter(small_molecule=False):
     """ Yields all the schemas in the SVN repo. """
 
     last_schema_version = None
 
     for commit in repo.iter_commits('nmr-star-development'):
-        next_schema = load_schemas(commit, validate_mode=validate_mode, small_molecule=small_molecule)
+        next_schema = load_schemas(commit, small_molecule=small_molecule)
         if next_schema is None:
             continue
         if next_schema[0] != last_schema_version:
@@ -104,6 +105,10 @@ def get_main_schema(commit, small_molecule=False):
     whole_schema = [next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann)]
     version = whole_schema[3][3]
 
+    if small_molecule:
+        version += "-sm"
+        whole_schema[3][3] = version
+
     cc = ['Tag', 'Tag category', 'SFCategory', 'BMRB data type', 'Prompt', 'Interface',
           'default value', 'Example', 'User full view',
           'Foreign Table', 'Sf pointer', 'Item enumerated', 'Item enumeration closed', 'ADIT category view name',
@@ -116,7 +121,7 @@ def get_main_schema(commit, small_molecule=False):
     header_idx = {x: whole_schema[0].index(x) for x in cc}
     header_idx_list = [whole_schema[0].index(x) for x in cc]
 
-    res = {'version': version if not small_molecule else version + "-sm",
+    res = {'version': version,
            'tags': {'headers': cc + ['enumerations'], 'values': {}},
            }
 
@@ -132,7 +137,7 @@ def get_main_schema(commit, small_molecule=False):
     return res, whole_schema
 
 
-def get_data_file_types(rev, validate_mode=False):
+def get_data_file_types(rev):
     """ Returns the list of enabled data file [description, sf_category, entry_interview.tag_name. """
 
     try:
@@ -174,8 +179,7 @@ def get_data_file_types(rev, validate_mode=False):
             else:
                 data_mapping[interview_tag][1].append(sf_category)
         except Exception as e:
-            if validate_mode:
-                print('Something went wrong when loading the data types mapping.', repr(e))
+            logging.warning('Something went wrong when loading the data types mapping.', repr(e))
             continue
 
     return [data_mapping[x] for x in interview_list]
@@ -207,12 +211,12 @@ def get_dict(fob, headers, number_fields, skip):
                 else:
                     row[i] = 0
             except ValueError:
-                print(row)
+                logging.critical('Failed to convert a field to a number as specified.')
 
     return {'headers': headers, 'values': values}
 
 
-def load_schemas(rev, validate_mode=False, small_molecule=False):
+def load_schemas(rev, small_molecule=False):
     # Load the schemas into the DB
 
     result, xl_schema = get_main_schema(rev, small_molecule=small_molecule)
@@ -224,11 +228,20 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
     override = get_file("adit_man_over.csv", rev)
     if not override:
         return None
-    result['overrides'] = get_dict(override,
-                                   ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
-                                    'Override value', 'Order of operation'],
-                                   ['Order of operation'],
-                                   1)
+
+    # Don't include overrides for tags that don't exist
+    overrides = get_dict(override, ['Tag', 'Sf category', 'Tag category', 'Conditional tag', 'Override view value',
+                                    'Override value', 'Order of operation'], ['Order of operation'], 1)
+
+    cleaned = []
+    for row in overrides['values']:
+        if row[0] != "*" and row[0] not in result['tags']['values']:
+            if not small_molecule:
+                logging.info("Skipping override for non-existent tag: %s" % row[0])
+        else:
+            cleaned.append(row)
+    overrides['values'] = cleaned
+    result['overrides'] = overrides
 
     result['supergroup_descriptions'] = get_dict(get_file('adit_super_grp_o.csv', rev),
                                                  ['super_group_ID', 'super_group_name', 'Description'],
@@ -241,12 +254,6 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
                                                'group_view_help', 'category_super_group_ID'],
                                               ['mandatory_number', 'category_super_group_ID'],
                                               2)
-
-    # Check for outdated overrides
-    if validate_mode:
-        for override in result['overrides']['values']:
-            if override[0] != "*" and override[0] not in result['tags']['values'] and not sm:
-                print("Override specifies invalid tag: %s" % override[0])
 
     sf_category_info = get_dict(get_file("adit_cat_grp_o.csv", rev),
                                 ['saveframe_category', 'category_group_view_name', 'mandatory_number',
@@ -280,14 +287,13 @@ def load_schemas(rev, validate_mode=False, small_molecule=False):
             try:
                 result['tags']['values'][saveframe.name].append(enums)
             except KeyError:
-                if validate_mode and not sm:
-                    print("Enumeration for non-existent tag: %s" % saveframe.name)
+                if not sm:
+                    logging.warning("Enumeration for non-existent tag: %s" % saveframe.name)
 
     except pynmrstar.exceptions.ParsingError as e:
-        if validate_mode:
-            print("Invalid enum file in version %s: %s" % (result['version'], str(e)))
+        logging.warning("Invalid enum file in version %s: %s" % (result['version'], str(e)))
 
-    result['file_upload_types'] = get_data_file_types(rev, validate_mode=validate_mode)
+    result['file_upload_types'] = get_data_file_types(rev)
 
     return result['version'], result, xl_schema
 
@@ -298,12 +304,15 @@ if __name__ == "__main__":
     optparser = optparse.OptionParser(description="Create local cache of NMR-STAR schemas.")
     optparser.add_option("--full", action="store_true", dest="full", default=False,
                          help="Create all schemas, not just the most recent one.")
-    optparser.add_option("--validate", action="store_true", dest="validate", default=False,
-                         help="Validate the schemas as they are loaded.")
+    optparser.add_option("--verbose", action="store_true", dest="verbose", default=False,
+                         help="Be verbose.")
     optparser.add_option("--force", action="store_true", dest="force", default=False,
                          help="Always generate at least the most recent schema, regardless of the commit file.")
     # Options, parse 'em
     (options, cmd_input) = optparser.parse_args()
+
+    if options.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     # Do some standard initialization
     dt_path = os.path.join(root_dir, "data_types.csv")
@@ -340,7 +349,7 @@ if __name__ == "__main__":
                 print("Loading small molecule schemas.")
             else:
                 print("Loading macromolecule schemas.")
-            for schema in schema_emitter(validate_mode=options.validate, small_molecule=sm):
+            for schema in schema_emitter(small_molecule=sm):
 
                 web_schema_location = os.path.join(schema_dir, schema[0] + '.json.zlib')
                 xml_schema_location = os.path.join(schema_dir, schema[0] + '.xml')
@@ -368,7 +377,7 @@ if __name__ == "__main__":
                 # Make schemas at least up to the oldest one this code can handle
                 #  Be careful when updating this that no active depositions require older versions - if so, make
                 #   sure to preserve the dictionaries created by the older loaders
-                if schema[0] == "3.2.1.44" or "3.2.1.44-sm":
+                if schema[0] == "3.2.1.44" or schema[0] == "3.2.1.44-sm":
                     break
 
         # Write out the commit at the end to ensure success
