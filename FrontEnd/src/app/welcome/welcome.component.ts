@@ -42,6 +42,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
     authorORCID: this.authorORCID,
+    depositionType: this.depositionType
   });
 
   getEmailErrorMessage(emailForm: FormControl) {
@@ -94,7 +95,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, this.depositionType.value, f.value.authorORCID,
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.depositionType, f.value.authorORCID,
       this.skipEmailValidation, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then();
