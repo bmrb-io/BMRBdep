@@ -239,6 +239,11 @@ def load_schemas(rev, small_molecule=False):
             if not small_molecule:
                 logging.info("Skipping override for non-existent tag: %s" % row[0])
         else:
+            # We currently need the PDB_deposition overrides, but we should update the dictionary overrides
+            # if row[3] == '_Entry_interview.PDB_deposition' or row[3] == '_Entry_interview.BMRB_deposition':
+            #     continue
+            if row[1] == 'entry_interview':
+                continue
             cleaned.append(row)
     overrides['values'] = cleaned
     result['overrides'] = overrides
