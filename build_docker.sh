@@ -12,7 +12,7 @@ sudo docker rm bmrbdep
 # We're going to make a special directory with just the docker build context
 mkdir -p ${SCRIPT_DIR}/docker_build/
 rm -rf ${SCRIPT_DIR}/docker_build/*
-cp -r ${SCRIPT_DIR}/wsgi.conf ${SCRIPT_DIR}/BackEnd/bmrbdep ${SCRIPT_DIR}/BackEnd/schema/schema_data ${SCRIPT_DIR}/FrontEnd/dist ${SCRIPT_DIR}/docker_build
+cp -rp ${SCRIPT_DIR}/wsgi.conf ${SCRIPT_DIR}/BackEnd/bmrbdep ${SCRIPT_DIR}/BackEnd/schema/schema_data ${SCRIPT_DIR}/FrontEnd/dist ${SCRIPT_DIR}/docker_build
 find ${SCRIPT_DIR}/docker_build -name __pycache__ -print0 | xargs -0 rm -rf
 
 if [[ $# -eq 0 ]]; then
