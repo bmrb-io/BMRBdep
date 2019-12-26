@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 from datetime import date, datetime
 from typing import Optional, List, BinaryIO
 
@@ -14,8 +15,8 @@ from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release,\
-  get_schema
+from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, \
+    get_schema
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
@@ -225,6 +226,24 @@ class DepositionRepo:
                     for x, residue in enumerate(polymer_code):
                         polymer_loop.data.append([x + 1, None, 'X', None, None, None])
                 entity.add_loop(polymer_loop)
+
+        # Rename the saveframes
+        for saveframe in final_entry:
+            try:
+                new_name: str = saveframe['Name'][0]
+                if not new_name:
+                    continue
+                new_name = new_name.replace(' ', '_')
+                if new_name[0] == '_':
+                    new_name = new_name[1:]
+                if not new_name:
+                    continue
+                new_name = re.sub('[^_.;:\"&<>(){}\'`~!$%A-Za-z0-9*|+-]+', '_', new_name)
+                final_entry.rename_saveframe(saveframe.name, new_name)
+
+            except KeyError:
+                # Take no action for saveframes that don't have a .Name tag
+                continue
 
         # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
