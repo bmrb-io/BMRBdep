@@ -72,6 +72,7 @@ if configuration['debug']:
 else:
     logging.getLogger().setLevel('WARNING')
 
+
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)
@@ -107,6 +108,11 @@ def handle_other_errors(exception: Exception):
                         "recognized as a local IP:\n%s" %
                         traceback.format_exc(), mimetype="text/plain")
     else:
+        # Send a message to the admin
+        message = Message("An unhandled BMRBDep exception happened!", recipients=configuration['smtp']['admins'])
+        message.html = 'Exception details:\n\n%s' % exception
+        mail.send(message)
+
         response = jsonify({"error": "Server error."})
         response.status_code = 500
         return response
