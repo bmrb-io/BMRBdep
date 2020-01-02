@@ -25,4 +25,4 @@ nodeenv==1.3.3
 # This makes the local flask server faster to reload when editing the code
 watchdog==0.9.0
 # For type checking the project
-mypy>=0.750
+mypy>=0.761
