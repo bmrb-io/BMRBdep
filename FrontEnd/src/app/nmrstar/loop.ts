@@ -147,6 +147,25 @@ export class Loop {
       newLoop.addRow();
     }
 
+    // BusinessRule
+    if (this.category === '_Sample_condition_variable' && clearValues) {
+      const type_col = this.getTagIndex('Type');
+      const units_col = this.getTagIndex('Val_units');
+      const val_col = this.getTagIndex('Val');
+      newLoop.data[0][type_col].value = 'temperature';
+      newLoop.data[0][units_col].value = 'K';
+      newLoop.addRow();
+      newLoop.addRow();
+      newLoop.addRow();
+      newLoop.data[1][type_col].value = 'pH';
+      newLoop.data[1][units_col].value = 'pH';
+      newLoop.data[2][type_col].value = 'pressure';
+      newLoop.data[2][units_col].value = 'atm';
+      newLoop.data[2][val_col].value = '1';
+      newLoop.data[3][type_col].value = 'ionic strength';
+      newLoop.data[3][units_col].value = 'M';
+    }
+
     return newLoop;
   }
 
