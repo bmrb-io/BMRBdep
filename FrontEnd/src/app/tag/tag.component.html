@@ -76,6 +76,7 @@
            [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
            (change)="validateTag()"
            (ngModelChange)="filter()"
+           (focus)="filter()"
            [title]="tag.validationMessage"
            [disabled]="tag.disabled"
            [matAutocomplete]="auto">
