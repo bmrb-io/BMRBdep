@@ -81,6 +81,12 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
 
     logging.warning("A handled exception was thrown! Exception: %s" % exception)
 
+    # Send a message to the admin on ServerError
+    if isinstance(exception, ServerError):
+        message = Message("A BMRBDep ServerException happened!", recipients=configuration['smtp']['admins'])
+        message.html = 'Exception details:\n\n%s' % exception
+        mail.send(message)
+
     response = jsonify(exception.to_dict())
     response.status_code = exception.status_code
     return response
