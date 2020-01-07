@@ -288,7 +288,8 @@ def load_schemas(rev, small_molecule=False):
             # Skip the initial saveframe
             if '_Item_enumeration' not in saveframe:
                 continue
-            enums = [x.replace("$", ",") for x in saveframe['_Item_enumeration'].get_tag('Value')]
+            enums = [(x.replace("$", ","), y.replace("$", ",")) for x, y in
+                     saveframe['_Item_enumeration'].get_tag(['Value', 'Description'])]
             try:
                 result['tags']['values'][saveframe.name].append(enums)
             except KeyError:
