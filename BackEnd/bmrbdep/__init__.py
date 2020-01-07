@@ -84,7 +84,8 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
     # Send a message to the admin on ServerError
     if isinstance(exception, ServerError) and not configuration['debug']:
         message = Message("A BMRBdep ServerException happened!", recipients=configuration['smtp']['admins'])
-        message.html = 'Exception details:\n\n%s' % exception
+        message.html = "Exception raised on request %s %s\n\nValues: %s\n\n%s" %\
+                       (request.method, request.url, request.values, traceback.format_exc())
         mail.send(message)
 
     response = jsonify(exception.to_dict())
@@ -117,7 +118,8 @@ def handle_other_errors(exception: Exception):
         # Send a message to the admin
         if not configuration['debug']:
             message = Message("An unhandled BMRBdep exception happened!", recipients=configuration['smtp']['admins'])
-            message.html = 'Exception details:\n\n%s' % exception
+            message.html = "Exception raised on request %s %s\n\nValues: %s\n\n%s" % \
+                           (request.method, request.url, request.values, traceback.format_exc())
             mail.send(message)
 
         response = jsonify({"error": "Server error."})
