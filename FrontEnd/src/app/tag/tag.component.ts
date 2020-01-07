@@ -10,7 +10,7 @@ import {Tag} from '../nmrstar/tag';
 export class TagComponent implements OnInit {
   @Input() tag: Tag;
   @Input() unique_identifier: string;
-  filteredOptions: string[];
+  filteredOptions: [string, string][];
 
   public height: number;
 
@@ -22,12 +22,20 @@ export class TagComponent implements OnInit {
       this.recalculateHeight();
     }
     if (this.tag.interfaceType === 'open_enum') {
-      this.filteredOptions = Array.from(this.tag.enums);
+      this.filteredOptions = [];
+      for (const singleEnum of this.tag.enums) {
+        this.filteredOptions.push(singleEnum);
+      }
     }
   }
 
   private filter() {
-    this.filteredOptions = Array.from(this.tag.enums).filter(option => option.toLowerCase().includes(this.tag.value.toLowerCase()));
+    this.filteredOptions = [];
+    for (const singleEnum of this.tag.enums) {
+      if (singleEnum[0].toLowerCase().includes(this.tag.value.toLowerCase())) {
+        this.filteredOptions.push(singleEnum);
+      }
+    }
   }
 
   getRow() {

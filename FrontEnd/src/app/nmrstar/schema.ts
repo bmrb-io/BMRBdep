@@ -132,10 +132,18 @@ export class Schema {
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas
     const tagCol = this.tags['headers'].indexOf('Tag');
     const dataTypeCol = this.tags['headers'].indexOf('BMRB data type');
+    const enumCol = this.tags['headers'].indexOf('enumerations');
     for (const schemaTag of Object.keys(this.tags['values'])) {
       const tagSchemaDictionary = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
         if (this.tags['values'][schemaTag][i] != null) {
+          if (i === enumCol) {
+            for (const singleEnum of this.tags['values'][schemaTag][i]) {
+              if (singleEnum[1] === '.') {
+                singleEnum[1] = singleEnum[0];
+              }
+            }
+          }
           if (i === dataTypeCol) {
             tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
             tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];
