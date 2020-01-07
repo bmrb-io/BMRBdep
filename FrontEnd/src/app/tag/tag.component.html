@@ -63,7 +63,7 @@
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (ngModelChange)="validateTag()"
             [title]="tag.validationMessage"
-            [disabled]="tag.disabled">
+            [disabled]="tag.disabled" panelClass="closed_enum_option">
         <mat-option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
                 [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</mat-option>
     </mat-select>
