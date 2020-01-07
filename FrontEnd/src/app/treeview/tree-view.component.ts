@@ -30,7 +30,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     const parent = this;
-    this.subscription$ = combineLatest(this.router.events, this.route.queryParams).pipe(
+    this.subscription$ = combineLatest([this.router.events, this.route.queryParams]).pipe(
       map(() => {
         let r = this.route;
         while (r.firstChild) {
