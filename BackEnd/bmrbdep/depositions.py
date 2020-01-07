@@ -239,7 +239,7 @@ class DepositionRepo:
                 if not new_name:
                     continue
                 new_name = re.sub('[^_.;:\"&<>(){}\'`~!$%A-Za-z0-9*|+-]+', '_', new_name)
-                final_entry.rename_saveframe(saveframe.name, new_name)
+                final_entry.rename_saveframe(saveframe.name, saveframe.name + "_" + new_name)
 
             except KeyError:
                 # Take no action for saveframes that don't have a .Name tag
