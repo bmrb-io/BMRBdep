@@ -30,6 +30,11 @@ textarea {
   min-width: 100%;
 }
 
-::ng-deep .mat-option, ::ng-deep .mat-select-content, ::ng-deep .mat-option-text{
+::ng-deep .closed_enum_option {
+  min-width: calc(100% + 100px) !important;
+}
+
+.mat-option {
+  display: block !important;
   max-width: 3000px !important;
 }
