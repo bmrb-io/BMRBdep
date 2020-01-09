@@ -275,13 +275,13 @@ export class ApiService implements OnDestroy {
     const jsonData = {
       'request': {
         'requester': {
-          'name': userName
+          'name': userName,
+          'email': userEmail
         },
         'subject': subject,
         'comment': {
           'body': comment
-        },
-        'email': userEmail
+        }
       }
     };
 
