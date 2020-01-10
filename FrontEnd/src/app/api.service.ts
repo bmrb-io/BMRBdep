@@ -118,7 +118,7 @@ export class ApiService implements OnDestroy {
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
-        this.cachedEntry.commit = response['commit'];
+        this.cachedEntry.commit.push(response['commit']);
         this.saveEntry(false, true);
       },
       () => {
@@ -240,7 +240,7 @@ export class ApiService implements OnDestroy {
               this.messagesService.sendMessage(new Message('Changes saved.'));
             }
             this.activeSaveRequest = null;
-            this.cachedEntry.commit = response['commit'];
+            this.cachedEntry.commit.push(response['commit']);
             this.cachedEntry.unsaved = false;
             localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
             localStorage.setItem('entryID', this.cachedEntry.entryID);
