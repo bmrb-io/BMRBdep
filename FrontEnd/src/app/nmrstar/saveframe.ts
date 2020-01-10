@@ -70,6 +70,9 @@ export class Saveframe {
   clear(): void {
     // Copy the tags
     for (const tag of this.tags) {
+      if (tag.name === 'Sf_framecode' || tag.name === 'Sf_category' || tag.name === '_Deleted') {
+        continue;
+      }
       tag.value = null;
       if (tag.schemaValues['default value'] !== '?') {
         tag.value = tag.schemaValues['default value'];
