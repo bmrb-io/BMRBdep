@@ -462,11 +462,13 @@ export class Loop {
     const entryFamilyNameCol = entryAuthors.tags.indexOf('Family_name');
     const entryMiddleInitialsCol = entryAuthors.tags.indexOf('Middle_initials');
     const entryFamilyTitleCol = entryAuthors.tags.indexOf('Family_title');
+    const entryOrderCol = entryAuthors.tags.indexOf('Ordinal');
 
     const citationGivenNameCol = this.tags.indexOf('Given_name');
     const citationFamilyNameCol = this.tags.indexOf('Family_name');
     const citationMiddleInitialsCol = this.tags.indexOf('Middle_initials');
     const citationFamilyTitleCol = this.tags.indexOf('Family_title');
+    const citationOrderCol = this.tags.indexOf('Ordinal');
 
     // Copy the data
     for (const row in this.data) {
@@ -475,6 +477,7 @@ export class Loop {
         this.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
         this.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;
         this.data[row][citationFamilyTitleCol].value = entryAuthors.data[row][entryFamilyTitleCol].value;
+        this.data[row][citationOrderCol].value = entryAuthors.data[row][entryOrderCol].value;
       }
     }
   }
