@@ -137,12 +137,24 @@ export class Schema {
       const tagSchemaDictionary = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
         if (this.tags['values'][schemaTag][i] != null) {
-          if (i === enumCol) {
-            for (const singleEnum of this.tags['values'][schemaTag][i]) {
-              if (singleEnum[1] === '.') {
-                singleEnum[1] = singleEnum[0];
+          if (i === enumCol && this.tags['values'][schemaTag][enumCol].length > 0) {
+            for (let pos = 0; pos < this.tags['values'][schemaTag][enumCol].length; pos++) {
+              const singleEnum = this.tags['values'][schemaTag][enumCol][pos];
+
+              // This code upgrades the enum format to the new enum,description format
+              // It can be removed after 6 months (to allow clients caches to have cleared).
+              // Can remove after: 06/01/2020
+              if (typeof singleEnum === 'string' || singleEnum instanceof String) {
+                this.tags['values'][schemaTag][enumCol][pos] = [singleEnum, singleEnum];
+              } else {
+
+
+                if (singleEnum[1] === '.') {
+                  singleEnum[1] = singleEnum[0];
+                }
               }
             }
+
           }
           if (i === dataTypeCol) {
             tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
