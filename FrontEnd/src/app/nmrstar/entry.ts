@@ -117,6 +117,17 @@ export class Entry {
     };
   }
 
+  addCommit(commit: string) {
+    this.commit.push(commit);
+    if (this.commit.length > 15) {
+      this.commit.splice(0, 1);
+    }
+  }
+
+  checkCommit(commit: string) {
+    return this.commit.includes(commit);
+  }
+
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
   addSaveframe(saveframe: Saveframe, position: number = -1, refresh: boolean = true): void {

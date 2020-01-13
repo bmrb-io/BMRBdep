@@ -52,9 +52,21 @@ export class ApiService implements OnDestroy {
       rawJSON['schema'] = schema;
       const entry = entryFromJSON(rawJSON);
       this.entrySubject.next(entry);
-      if (entry.unsaved) {
-        this.saveEntry(false, false);
-      }
+      this.checkLastCommit().then(foundCommit => {
+        if (!foundCommit) {
+          if (entry.unsaved) {
+            this.messagesService.sendMessage(new Message('You have unsaved local changes (perhaps from working offline) but ' +
+              'we must reload your entry due to a change to your deposition that occurred on the server. Unfortunately this means ' +
+              'that your most recent changes may be lost. Please review your entry in entirety before depositing to make sure that it is ' +
+              'up to date.', MessageType.ErrorMessage));
+          }
+          this.loadEntry(entry.entryID, true);
+        } else {
+          if (entry.unsaved) {
+            this.saveEntry(false, false);
+          }
+        }
+      });
     } else {
       this.subscription$ = this.router.events.subscribe(
         event => {
@@ -118,7 +130,7 @@ export class ApiService implements OnDestroy {
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
-        this.cachedEntry.commit.push(response['commit']);
+        this.cachedEntry.addCommit(response['commit']);
         this.saveEntry(false, true);
       },
       () => {
@@ -136,11 +148,24 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  checkValid(): Promise<boolean> {
+  checkValidatedEmail(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
       this.http.get(entryURL).subscribe(response => {
           resolve(response['status']);
+        }, error => {
+          this.handleError(error);
+          reject();
+        }
+      );
+    }));
+  }
+
+  checkLastCommit(): Promise<boolean> {
+    return new Promise(((resolve, reject) => {
+      const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
+      this.http.get(entryURL).subscribe(response => {
+          resolve(this.cachedEntry.checkCommit(response['commit']));
         }, error => {
           this.handleError(error);
           reject();
@@ -188,7 +213,7 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = true): void {
+  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = false): void {
 
     /*
     // If the previous save action is still in progress, cancel it
@@ -240,7 +265,7 @@ export class ApiService implements OnDestroy {
               this.messagesService.sendMessage(new Message('Changes saved.'));
             }
             this.activeSaveRequest = null;
-            this.cachedEntry.commit.push(response['commit']);
+            this.cachedEntry.addCommit(response['commit']);
             this.cachedEntry.unsaved = false;
             localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
             localStorage.setItem('entryID', this.cachedEntry.entryID);
