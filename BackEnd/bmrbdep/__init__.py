@@ -150,7 +150,8 @@ def send_validation_status(uuid) -> Response:
     """ Returns whether or not an entry has been validated. """
 
     with depositions.DepositionRepo(str(uuid)) as repo:
-        return jsonify({'status': repo.metadata['email_validated']})
+        return jsonify({'status': repo.metadata['email_validated'],
+                        'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
@@ -637,8 +638,13 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            if repo.last_commit != entry_json['commit']:
+            # Next two lines can be removed after clients upgrade (06/01/2020)
+            if isinstance(entry_json['commit'], str):
+                entry_json['commit'] = [entry_json['commit']]
+
+            if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
+                    logging.exception('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
@@ -669,6 +675,6 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
-        entry['commit'] = commit
+        entry['commit'] = [commit]
 
         return jsonify(entry)
