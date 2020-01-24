@@ -147,6 +147,25 @@ export class Loop {
       newLoop.addRow();
     }
 
+    // BusinessRule
+    if (this.category === '_Sample_condition_variable' && clearValues) {
+      const type_col = this.getTagIndex('Type');
+      const units_col = this.getTagIndex('Val_units');
+      const val_col = this.getTagIndex('Val');
+      newLoop.data[0][type_col].value = 'temperature';
+      newLoop.data[0][units_col].value = 'K';
+      newLoop.addRow();
+      newLoop.addRow();
+      newLoop.addRow();
+      newLoop.data[1][type_col].value = 'pH';
+      newLoop.data[1][units_col].value = 'pH';
+      newLoop.data[2][type_col].value = 'pressure';
+      newLoop.data[2][units_col].value = 'atm';
+      newLoop.data[2][val_col].value = '1';
+      newLoop.data[3][type_col].value = 'ionic strength';
+      newLoop.data[3][units_col].value = 'M';
+    }
+
     return newLoop;
   }
 
@@ -443,11 +462,13 @@ export class Loop {
     const entryFamilyNameCol = entryAuthors.tags.indexOf('Family_name');
     const entryMiddleInitialsCol = entryAuthors.tags.indexOf('Middle_initials');
     const entryFamilyTitleCol = entryAuthors.tags.indexOf('Family_title');
+    const entryOrderCol = entryAuthors.tags.indexOf('Ordinal');
 
     const citationGivenNameCol = this.tags.indexOf('Given_name');
     const citationFamilyNameCol = this.tags.indexOf('Family_name');
     const citationMiddleInitialsCol = this.tags.indexOf('Middle_initials');
     const citationFamilyTitleCol = this.tags.indexOf('Family_title');
+    const citationOrderCol = this.tags.indexOf('Ordinal');
 
     // Copy the data
     for (const row in this.data) {
@@ -456,6 +477,7 @@ export class Loop {
         this.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
         this.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;
         this.data[row][citationFamilyTitleCol].value = entryAuthors.data[row][entryFamilyTitleCol].value;
+        this.data[row][citationOrderCol].value = entryAuthors.data[row][entryOrderCol].value;
       }
     }
   }

@@ -93,13 +93,13 @@ export class DataFileStore {
     }
   }
 
-  getDataFileNamesByCategory(category: string): Set<string> {
-    const results: Set<string> = new Set();
+  getDataFileNamesByCategory(category: string): Set<[string, string]> {
+    const results: Set<[string, string]> = new Set();
     for (let i = 0; i < this.dataFiles.length; i++) {
       for (let n = 0; n < this.dataFiles[i].control.value.length; n++) {
         for (const specificCategory of this.dataFiles[i].control.value[n][1]) {
           if (specificCategory === category) {
-            results.add(this.dataFiles[i].fileName);
+            results.add([this.dataFiles[i].fileName, this.dataFiles[i].fileName]);
           }
         }
       }

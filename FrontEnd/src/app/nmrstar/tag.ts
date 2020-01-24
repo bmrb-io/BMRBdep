@@ -16,7 +16,7 @@ export class Tag {
   schemaValues: {};
   display: string;
   fullyQualifiedTagName: string;
-  enums: Set<string>;
+  enums: Set<[string, string]>;
   frameLink: Array<[string, string]>;
   parent: Object;
 
@@ -208,7 +208,7 @@ export class Tag {
           this.enums = this.getEntry().dataStore.getDataFileNamesByCategory(this.getParentSaveframe().category);
           // Add a "deselect" option for non-mandatory tags
           if (this.display !== 'Y') {
-            this.enums.add('');
+            this.enums.add(['', '']);
           }
         } else {
           const parentEntry: Entry = this.getEntry();
@@ -240,8 +240,8 @@ export class Tag {
       if (this.enums && this.value) {
         const lowerCaseValue = this.value.toLowerCase();
         for (const singleEnum of Array.from(this.enums)) {
-          if (singleEnum.toLowerCase() === lowerCaseValue) {
-            this.value = singleEnum;
+          if (singleEnum[0].toLowerCase() === lowerCaseValue) {
+            this.value = singleEnum[0];
           }
         }
       }
@@ -302,11 +302,17 @@ export class Tag {
       }
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
-      if (!this.enums.has(this.value)) {
-        if (this.enums.size === 0) {
-          this.valid = false;
-          this.validationMessage = 'There are currently no valid values for this tag.';
-        } else {
+      if (this.enums.size === 0) {
+        this.valid = false;
+        this.validationMessage = 'There are currently no valid values for this tag.';
+      } else {
+        let found = false;
+        this.enums.forEach(item => {
+          if (item[0] === this.value) {
+            found = true;
+          }
+        });
+        if (!found) {
           this.valid = false;
           this.validationMessage = 'Value does not match one of the allowed options.';
         }

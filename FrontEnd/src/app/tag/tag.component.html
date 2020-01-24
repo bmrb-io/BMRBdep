@@ -46,14 +46,11 @@
               (ngModelChange)="validateTag()"
               [title]="tag.validationMessage"
               [disabled]="tag.disabled">
-    <mat-option *ngIf="tag.value && !tag.enums.has(tag.value)" disabled [value]="tag.value">{{tag.value}} -
+    <mat-option *ngIf="tag.value && tag.validationMessage" disabled [value]="tag.value" class="type-error">{{tag.value}} -
       Error: {{tag.validationMessage}}</mat-option>
     <ng-container *ngFor="let val of tag.enums">
-      <mat-option *ngIf="!(!tag.valid && tag.value == val); else invalid_selection" [value]="val"
-                  [ngClass]="{'type-error': !tag.valid}">{{val}}</mat-option>
-      <ng-template #invalid_selection>
-        <mat-option disabled [value]="val">{{tag.value}} - Error: {{tag.validationMessage}}</mat-option>
-      </ng-template>
+      <mat-option *ngIf="tag.value != val[0]" [value]="val[0]" [title]="val[1]">{{val[0]}}</mat-option>
+      <mat-option *ngIf="tag.value == val[0] && !tag.validationMessage" [value]="tag.value" [title]="val[1]">{{tag.value}}</mat-option>
     </ng-container>
   </mat-select>
 </label>
@@ -63,7 +60,7 @@
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (ngModelChange)="validateTag()"
             [title]="tag.validationMessage"
-            [disabled]="tag.disabled">
+            [disabled]="tag.disabled" panelClass="closed_enum_option">
         <mat-option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
                 [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</mat-option>
     </mat-select>
@@ -76,13 +73,14 @@
            [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
            (change)="validateTag()"
            (ngModelChange)="filter()"
+           (focus)="filter()"
            [title]="tag.validationMessage"
            [disabled]="tag.disabled"
            [matAutocomplete]="auto">
   </label>
 
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto">
-    <mat-option *ngFor="let option of filteredOptions" [value]="option">{{option}}</mat-option>
+    <mat-option *ngFor="let option of filteredOptions" [value]="option[0]" [title]="option[1]">{{option[0]}}</mat-option>
   </mat-autocomplete>
 </ng-container>
 

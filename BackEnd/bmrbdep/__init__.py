@@ -72,6 +72,7 @@ if configuration['debug']:
 else:
     logging.getLogger().setLevel('WARNING')
 
+
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)
@@ -79,6 +80,13 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
     """ Handles exceptions we raised ourselves. """
 
     logging.warning("A handled exception was thrown! Exception: %s" % exception)
+
+    # Send a message to the admin on ServerError
+    if isinstance(exception, ServerError) and not configuration['debug']:
+        message = Message("A BMRBdep ServerException happened!", recipients=configuration['smtp']['admins'])
+        message.body = "Exception raised on request %s %s\n\n%s" %\
+                       (request.method, request.url, traceback.format_exc())
+        mail.send(message)
 
     response = jsonify(exception.to_dict())
     response.status_code = exception.status_code
@@ -107,6 +115,13 @@ def handle_other_errors(exception: Exception):
                         "recognized as a local IP:\n%s" %
                         traceback.format_exc(), mimetype="text/plain")
     else:
+        # Send a message to the admin
+        if not configuration['debug']:
+            message = Message("An unhandled BMRBdep exception happened!", recipients=configuration['smtp']['admins'])
+            message.body = "Exception raised on request %s %s\n\n%s" % \
+                           (request.method, request.url, traceback.format_exc())
+            mail.send(message)
+
         response = jsonify({"error": "Server error."})
         response.status_code = 500
         return response
@@ -135,7 +150,8 @@ def send_validation_status(uuid) -> Response:
     """ Returns whether or not an entry has been validated. """
 
     with depositions.DepositionRepo(str(uuid)) as repo:
-        return jsonify({'status': repo.metadata['email_validated']})
+        return jsonify({'status': repo.metadata['email_validated'],
+                        'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
@@ -622,8 +638,13 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            if repo.last_commit != entry_json['commit']:
+            # Next two lines can be removed after clients upgrade (06/01/2020)
+            if isinstance(entry_json['commit'], str):
+                entry_json['commit'] = [entry_json['commit']]
+
+            if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
+                    logging.exception('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
@@ -654,6 +675,6 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
-        entry['commit'] = commit
+        entry['commit'] = [commit]
 
         return jsonify(entry)

@@ -15,8 +15,7 @@ from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, \
-    get_schema
+from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
@@ -239,7 +238,7 @@ class DepositionRepo:
                 if not new_name:
                     continue
                 new_name = re.sub('[^_.;:\"&<>(){}\'`~!$%A-Za-z0-9*|+-]+', '_', new_name)
-                final_entry.rename_saveframe(saveframe.name, new_name)
+                final_entry.rename_saveframe(saveframe.name, saveframe.name + "_" + new_name)
 
             except KeyError:
                 # Take no action for saveframes that don't have a .Name tag
