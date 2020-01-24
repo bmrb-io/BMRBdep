@@ -34,10 +34,10 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
 
         // Check the validation status every 2.5 seconds
         this.subscription$.add(timer(0, 2500).subscribe(() => {
-            parent.api.checkValid().then(status => {
+            parent.api.checkValidatedEmail().then(status => {
                 if (status) {
                     parent.entry.emailValidated = true;
-                    parent.api.saveEntry(true, true);
+                    parent.api.storeEntry(false);
                     if (parent.entry.firstIncompleteCategory) {
                         parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
                     } else {

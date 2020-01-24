@@ -62,7 +62,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.entry.refresh();
-    this.api.saveEntry(false, true);
+    this.api.storeEntry(true);
   }
 
   // At the drag drop area
@@ -105,7 +105,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
             if (event.type === HttpEventType.UploadProgress) {
               dataFile.percent = Math.round(100 * event.loaded / event.total);
             } else if (event instanceof HttpResponse) {
-              this.entry.commit = event.body['commit'];
+              this.entry.addCommit(event.body['commit']);
               dataFile.percent = 100;
               this.entry.dataStore.updateName(dataFile, event.body['filename']);
               if (!event.body['changed']) {
