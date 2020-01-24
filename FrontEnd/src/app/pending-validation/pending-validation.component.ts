@@ -37,7 +37,7 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
             parent.api.checkValidatedEmail().then(status => {
                 if (status) {
                     parent.entry.emailValidated = true;
-                    parent.api.saveEntry(true, true);
+                    parent.api.storeEntry(false);
                     if (parent.entry.firstIncompleteCategory) {
                         parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
                     } else {
