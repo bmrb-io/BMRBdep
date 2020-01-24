@@ -17,14 +17,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   subscription$: Subscription;
   skipEmailValidation: boolean;
   emailValidationError: boolean;
-  env: object;
+  public production;
 
   constructor(private router: Router,
               public api: ApiService) {
     this.entry = null;
     this.skipEmailValidation = false;
     this.emailValidationError = false;
-    this.env = environment;
+    this.production = environment.production;
   }
 
   sessionType = new FormControl('', [Validators.required]);

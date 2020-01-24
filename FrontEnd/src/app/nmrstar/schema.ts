@@ -132,10 +132,30 @@ export class Schema {
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas
     const tagCol = this.tags['headers'].indexOf('Tag');
     const dataTypeCol = this.tags['headers'].indexOf('BMRB data type');
+    const enumCol = this.tags['headers'].indexOf('enumerations');
     for (const schemaTag of Object.keys(this.tags['values'])) {
       const tagSchemaDictionary = {};
       for (let i = 0; i <= this.tags['headers'].length; i++) {
         if (this.tags['values'][schemaTag][i] != null) {
+          if (i === enumCol && this.tags['values'][schemaTag][enumCol].length > 0) {
+            for (let pos = 0; pos < this.tags['values'][schemaTag][enumCol].length; pos++) {
+              const singleEnum = this.tags['values'][schemaTag][enumCol][pos];
+
+              // This code upgrades the enum format to the new enum,description format
+              // It can be removed after 6 months (to allow clients caches to have cleared).
+              // Can remove after: 06/01/2020
+              if (typeof singleEnum === 'string' || singleEnum instanceof String) {
+                this.tags['values'][schemaTag][enumCol][pos] = [singleEnum, singleEnum];
+              } else {
+
+
+                if (singleEnum[1] === '.') {
+                  singleEnum[1] = singleEnum[0];
+                }
+              }
+            }
+
+          }
           if (i === dataTypeCol) {
             tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
             tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];

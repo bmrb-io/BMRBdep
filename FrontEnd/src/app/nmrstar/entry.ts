@@ -49,7 +49,17 @@ export function entryFromJSON(jdata: Object): Entry {
   entry.emailValidated = jdata['email_validated'];
   entry.deposited = jdata['entry_deposited'];
   entry.depositionNickname = jdata['deposition_nickname'];
-  entry.commit = jdata['commit'];
+
+  // This code upgrades the user session to the new commits-as-list format
+  // It can be removed after 6 months (to allow clients caches to have cleared).
+  // Can remove after: 06/01/2020
+  if (typeof jdata['commit'] === 'string' || jdata['commit'] instanceof String) {
+    entry.commit = [jdata['commit']];
+  } else {
+    entry.commit = jdata['commit'];
+  }
+
+
   if ('unsaved' in jdata) {
     entry.unsaved = jdata['unsaved'];
   } else {
@@ -82,7 +92,7 @@ export class Entry {
   deposited: boolean;
   depositionNickname: string;
   firstIncompleteCategory: string;
-  commit: string;
+  commit: Array<string>;
   unsaved: boolean;
 
   constructor(dataName: string) {
@@ -106,6 +116,17 @@ export class Entry {
       deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
       commit: this.commit
     };
+  }
+
+  addCommit(commit: string) {
+    this.commit.push(commit);
+    if (this.commit.length > 15) {
+      this.commit.splice(0, 1);
+    }
+  }
+
+  checkCommit(commit: string) {
+    return this.commit.includes(commit);
   }
 
   /* Add a new saveframe to the saveframe list.

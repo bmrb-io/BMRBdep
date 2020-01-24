@@ -54,7 +54,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     const nextCategory = this.saveframe.nextCategory;
     this.saveframe.parent.refresh();
     this.sfReload.emit(nextCategory);
-    this.api.saveEntry();
+    this.api.storeEntry(true);
   }
 
   deleteSaveframe(): void {
