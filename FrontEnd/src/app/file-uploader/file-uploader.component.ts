@@ -62,7 +62,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.entry.refresh();
-    this.api.saveEntry(false, true);
+    this.api.storeEntry(true);
   }
 
   // At the drag drop area

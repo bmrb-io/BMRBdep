@@ -39,7 +39,7 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   addRow() {
     this.loop.addRow();
     this.loop.parent.parent.refresh();
-    this.api.saveEntry();
+    this.api.storeEntry(true);
     // Reload the country-autofill code
     if (this.loop.category === '_Contact_person') {
       this.changeDetector.detectChanges();
@@ -51,7 +51,7 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   deleteRow(row_id) {
     this.loop.deleteRow(row_id);
     this.loop.parent.parent.refresh();
-    this.api.saveEntry();
+    this.api.storeEntry(true);
   }
 
   helpClick(activeTag: LoopTag, el: HTMLElement) {
@@ -70,6 +70,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   copyAuthors(): void {
     this.loop.copyAuthors();
     this.loop.parent.parent.refresh();
-    this.api.saveEntry();
+    this.api.storeEntry(true);
   }
 }

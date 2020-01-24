@@ -69,7 +69,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
   restoreCategory(category: string): void {
     this.entry.restoreByCategory(category);
     this.entry.refresh();
-    this.api.saveEntry();
+    this.api.storeEntry(true);
     this.reloadSaveframes();
   }
 }
