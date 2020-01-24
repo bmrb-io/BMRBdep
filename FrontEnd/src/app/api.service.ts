@@ -24,9 +24,10 @@ export class ApiService implements OnDestroy {
   private cachedEntry: Entry;
   entrySubject: ReplaySubject<Entry>;
   subscription$: Subscription;
-  entryChangeCheckTimer: NodeJS.Timeout;
-  saveTimer: NodeJS.Timeout;
-  inProgress: boolean;
+  entryChangeCheckTimer;
+  saveTimer;
+  lastChangeTime: number;
+  saveInProgress: boolean;
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -102,13 +103,15 @@ export class ApiService implements OnDestroy {
       }
     }, 100);
 
-    this.inProgress = false;
+    this.lastChangeTime = null;
+    this.saveInProgress = false;
     this.saveTimer = setInterval(() => {
-      console.log('Check if save activating...',  this.cachedEntry.unsaved, this.inProgress);
+      console.log('Check if save activating... Unsaved: ',  this.cachedEntry.unsaved, 'LastChange', this.lastChangeTime,
+        'Progress', this.saveInProgress);
 
       // If there is an active entry, that is old enough to need saving
-      if (this.cachedEntry && this.cachedEntry.unsaved && !this.inProgress) {
-        console.log('Detected change and time has passed.');
+      if (this.cachedEntry && this.cachedEntry.unsaved && this.lastChangeTime !== null && !this.saveInProgress) {
+        console.log('Detected change, time has passed, and no active save.');
         this.saveEntry();
       }
     }, 5000);
@@ -235,26 +238,29 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  storeEntry(dirty: boolean = false, fullSave: boolean = false): void {
+  storeEntry(dirty: boolean = false, fullStore: boolean = false): void {
 
-    console.log('Storing entry...', dirty, fullSave);
+    console.log('Storing entry...', dirty, fullStore);
 
     // Saves an entry locally, and mark it as dirty first if need be
     if (dirty) {
       this.cachedEntry.unsaved = dirty;
+      this.lastChangeTime = getTime();
     }
     localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
     localStorage.setItem('entryID', this.cachedEntry.entryID);
 
     // Save the schema too if this is a full store
-    if (fullSave) {
+    if (fullStore) {
       localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
     }
   }
 
   saveEntry(override: boolean = false): void {
 
-    this.inProgress = true;
+    const saveOriginTime = this.lastChangeTime;
+    this.saveInProgress = true;
+
     const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
     const jsonObject = this.cachedEntry.toJSON();
     if (override) {
@@ -281,18 +287,23 @@ export class ApiService implements OnDestroy {
               this.loadEntry(this.cachedEntry.entryID, true);
             } else if (result === false) {
               this.saveEntry(true);
-            // TODO: Something smarter should happen here
             } else if (result === undefined) {
-              this.storeEntry(true);
+              // Nothing needs to happen here, the next save will trigger the same message
+              // Preserving the clause just to make it clear there is an "escape" condition where the user
+              // doesn't select either option.
             }
+            this.saveInProgress = false;
           });
 
         } else {
           // Commit is successful!
           this.cachedEntry.addCommit(response['commit']);
-          this.cachedEntry.unsaved = false;
-          this.inProgress = false;
-          this.storeEntry();
+          if (saveOriginTime === this.lastChangeTime) {
+            this.cachedEntry.unsaved = false;
+            this.lastChangeTime = null;
+          }
+          this.storeEntry(false, false);
+          this.saveInProgress = false;
         }
       },
       () => {
@@ -301,7 +312,7 @@ export class ApiService implements OnDestroy {
             ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
             ' is restored and the entry can be saved.'));
         }
-        this.inProgress = false;
+        this.saveInProgress = false;
       }
     );
   }
