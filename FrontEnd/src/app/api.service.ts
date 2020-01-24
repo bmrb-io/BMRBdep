@@ -12,15 +12,21 @@ import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
 
+function getTime(): number {
+  return (new Date()).getTime();
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService implements OnDestroy {
 
   private cachedEntry: Entry;
-  private activeSaveRequest: Subscription;
   entrySubject: ReplaySubject<Entry>;
   subscription$: Subscription;
+  entryChangeCheckTimer: NodeJS.Timeout;
+  saveTimer: NodeJS.Timeout;
+  inProgress: boolean;
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -37,7 +43,7 @@ export class ApiService implements OnDestroy {
 
     this.entrySubject = new ReplaySubject<Entry>();
 
-    this.entrySubject.subscribe(entry => {
+    this.subscription$ = this.entrySubject.subscribe(entry => {
       this.cachedEntry = entry;
       if (entry) {
         this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
@@ -62,13 +68,14 @@ export class ApiService implements OnDestroy {
           }
           this.loadEntry(entry.entryID, true);
         } else {
+          // The stored entry is unsaved, so save it now!
           if (entry.unsaved) {
-            this.saveEntry(false, false);
+            this.saveEntry();
           }
         }
       });
     } else {
-      this.subscription$ = this.router.events.subscribe(
+      this.subscription$.add(this.router.events.subscribe(
         event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('help') < 0 && !this.cachedEntry) {
@@ -77,14 +84,16 @@ export class ApiService implements OnDestroy {
             }
           }
         }
-      );
+      ));
     }
 
     // Used to open verification links in same tab
     window.name = 'BMRBdep';
 
-    setInterval(() => {
+    this.entryChangeCheckTimer = setInterval(() => {
       const savedID = localStorage.getItem('entryID');
+
+      // First check that the entry hasn't changed
       if (savedID && this.cachedEntry && savedID !== this.cachedEntry.entryID) {
         this.entrySubject.next(null);
         this.router.navigate(['/']).then();
@@ -92,10 +101,23 @@ export class ApiService implements OnDestroy {
           ' deposition in another tab.', MessageType.NotificationMessage, 60000));
       }
     }, 100);
+
+    this.inProgress = false;
+    this.saveTimer = setInterval(() => {
+      console.log('Check if save activating...',  this.cachedEntry.unsaved, this.inProgress);
+
+      // If there is an active entry, that is old enough to need saving
+      if (this.cachedEntry && this.cachedEntry.unsaved && !this.inProgress) {
+        console.log('Detected change and time has passed.');
+        this.saveEntry();
+      }
+    }, 5000);
   }
 
   ngOnDestroy() {
     this.subscription$.unsubscribe();
+    clearInterval(this.saveTimer);
+    clearInterval(this.entryChangeCheckTimer);
   }
 
   clearDeposition(): void {
@@ -131,7 +153,7 @@ export class ApiService implements OnDestroy {
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
         this.cachedEntry.addCommit(response['commit']);
-        this.saveEntry(false, true);
+        this.storeEntry(true);
       },
       () => {
         // verifyDeleted will be set if they cancel an upload
@@ -199,88 +221,89 @@ export class ApiService implements OnDestroy {
         }
 
         this.entrySubject.next(loadedEntry);
-        this.saveEntry(true);
+        this.storeEntry(false, true);
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
           console.warn('Files detected as uploaded which are not present in NMR-STAR. Triggering re-save.');
           loadedEntry.updateUploadedData();
           loadedEntry.refresh();
-          this.saveEntry(false);
+          this.saveEntry();
         }
       },
       error => this.handleError(error)
     );
   }
 
-  saveEntry(initialSave: boolean = false, skipMessage: boolean = true, override: boolean = false): void {
+  storeEntry(dirty: boolean = false, fullSave: boolean = false): void {
 
-    /*
-    // If the previous save action is still in progress, cancel it
-    if (this.activeSaveRequest) {
-      this.activeSaveRequest.unsubscribe();
-    }*/
+    console.log('Storing entry...', dirty, fullSave);
 
-    if (initialSave) {
-      localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
-      localStorage.setItem('entryID', this.cachedEntry.entryID);
+    // Saves an entry locally, and mark it as dirty first if need be
+    if (dirty) {
+      this.cachedEntry.unsaved = dirty;
     }
     localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
+    localStorage.setItem('entryID', this.cachedEntry.entryID);
 
-    // Save to remote server if we haven't just loaded the entry
-    if (!initialSave) {
-      const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-      const jsonObject = this.cachedEntry.toJSON();
-      if (override) {
-        jsonObject['force'] = true;
-      }
-      this.activeSaveRequest = this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe(
-        response => {
-          if ('error' in response && response['error'] === 'reload') {
-
-            this.cachedEntry.unsaved = true;
-            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-              disableClose: false
-            });
-
-            dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
-              ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
-              'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
-              'unsure, load changes from the server.) Note that you should only edit one deposition at a time, in one tab.';
-            dialogRef.componentInstance.proceedMessage = 'Load changes from server';
-            dialogRef.componentInstance.cancelMessage = 'Push changes to server';
-
-            dialogRef.afterClosed().subscribe(result => {
-              if (result) {
-                this.loadEntry(this.cachedEntry.entryID, true);
-              } else if (result === false) {
-                this.saveEntry(false, false, true);
-              } else if (result === undefined) {
-                this.cachedEntry.unsaved = true;
-              }
-            });
-
-          } else {
-            if (!skipMessage) {
-              this.messagesService.sendMessage(new Message('Changes saved.'));
-            }
-            this.activeSaveRequest = null;
-            this.cachedEntry.addCommit(response['commit']);
-            this.cachedEntry.unsaved = false;
-            localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
-            localStorage.setItem('entryID', this.cachedEntry.entryID);
-          }
-        },
-        () => {
-          if (!this.cachedEntry.unsaved) {
-            this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
-              ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
-              ' is restored and the entry can be saved.'));
-          }
-          this.cachedEntry.unsaved = true;
-        }
-      );
+    // Save the schema too if this is a full store
+    if (fullSave) {
+      localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
     }
+  }
+
+  saveEntry(override: boolean = false): void {
+
+    this.inProgress = true;
+    const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
+    const jsonObject = this.cachedEntry.toJSON();
+    if (override) {
+      jsonObject['force'] = true;
+    }
+    this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe(
+      response => {
+        if ('error' in response && response['error'] === 'reload') {
+
+          this.cachedEntry.unsaved = true;
+          const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            disableClose: false
+          });
+
+          dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
+            ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
+            'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
+            'unsure, load changes from the server.) Note that you should only edit one deposition at a time, in one tab.';
+          dialogRef.componentInstance.proceedMessage = 'Load changes from server';
+          dialogRef.componentInstance.cancelMessage = 'Push changes to server';
+
+          dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+              this.loadEntry(this.cachedEntry.entryID, true);
+            } else if (result === false) {
+              this.saveEntry(true);
+            // TODO: Something smarter should happen here
+            } else if (result === undefined) {
+              this.storeEntry(true);
+            }
+          });
+
+        } else {
+          // Commit is successful!
+          this.cachedEntry.addCommit(response['commit']);
+          this.cachedEntry.unsaved = false;
+          this.inProgress = false;
+          this.storeEntry();
+        }
+      },
+      () => {
+        if (!this.cachedEntry.unsaved) {
+          this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
+            ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
+            ' is restored and the entry can be saved.'));
+        }
+        this.inProgress = false;
+      }
+    );
   }
 
   newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request'): Promise<any> {
@@ -396,7 +419,7 @@ export class ApiService implements OnDestroy {
         // Trigger everything watching the entry to see that it changed - because "deposited" changed
         this.cachedEntry.deposited = true;
         this.cachedEntry.refresh();
-        this.saveEntry(true);
+        this.storeEntry();
 
         this.messagesService.sendMessage(new Message('Submission accepted!',
           MessageType.NotificationMessage, 15000));
