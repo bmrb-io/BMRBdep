@@ -106,12 +106,8 @@ export class ApiService implements OnDestroy {
     this.lastChangeTime = null;
     this.saveInProgress = false;
     this.saveTimer = setInterval(() => {
-      console.log('Check if save activating... Unsaved: ',  this.cachedEntry.unsaved, 'LastChange', this.lastChangeTime,
-        'Progress', this.saveInProgress);
-
       // If there is an active entry, that is old enough to need saving
       if (this.cachedEntry && this.cachedEntry.unsaved && this.lastChangeTime !== null && !this.saveInProgress) {
-        console.log('Detected change, time has passed, and no active save.');
         this.saveEntry();
       }
     }, 5000);
