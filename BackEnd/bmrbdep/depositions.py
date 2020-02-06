@@ -226,24 +226,6 @@ class DepositionRepo:
                         polymer_loop.data.append([x + 1, None, 'X', None, None, None])
                 entity.add_loop(polymer_loop)
 
-        # Rename the saveframes
-        for saveframe in final_entry:
-            try:
-                new_name: str = saveframe['Name'][0]
-                if not new_name:
-                    continue
-                new_name = new_name.replace(' ', '_')
-                if new_name[0] == '_':
-                    new_name = new_name[1:]
-                if not new_name:
-                    continue
-                new_name = re.sub('[^_.;:\"&<>(){}\'`~!$%A-Za-z0-9*|+-]+', '_', new_name)
-                final_entry.rename_saveframe(saveframe.name, saveframe.name + "_" + new_name)
-
-            except KeyError:
-                # Take no action for saveframes that don't have a .Name tag
-                continue
-
         # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
         today_date: datetime = datetime.now()
