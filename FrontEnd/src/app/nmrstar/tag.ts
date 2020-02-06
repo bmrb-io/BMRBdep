@@ -176,6 +176,9 @@ export class Tag {
           sampleName = 'No sample selected';
         } else {
           sampleName = sampleFrame.tagDict['_Sample.Name'].value;
+          if (checkValueIsNull(sampleName)) {
+            sampleName = 'Section not yet named: ' + sampleFrame.getTag('Sf_framecode').value;
+          }
         }
 
         const sampleConditionsFrame: Saveframe = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1));
@@ -184,6 +187,9 @@ export class Tag {
           sampleConditionsName = 'No sample conditions selected';
         } else {
           sampleConditionsName = sampleConditionsFrame.tagDict['_Sample_condition_list.Name'].value;
+          if (checkValueIsNull(sampleConditionsName)) {
+            sampleConditionsName = 'Section not yet named: ' + sampleConditionsFrame.getTag('Sf_framecode').value;
+          }
         }
 
         this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
