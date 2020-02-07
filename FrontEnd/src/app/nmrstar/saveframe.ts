@@ -88,10 +88,12 @@ export class Saveframe {
 
   delete() {
     this.getTag('_Deleted').value = 'yes';
+    this.deleted = true;
   }
 
   restore() {
     this.getTag('_Deleted').value = 'no';
+    this.deleted = false;
   }
 
   duplicate(clearValues: boolean = false): Saveframe {
