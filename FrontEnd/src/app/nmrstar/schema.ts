@@ -157,8 +157,13 @@ export class Schema {
 
           }
           if (i === dataTypeCol) {
-            tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
             tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];
+            if (tagSchemaDictionary['BMRB data type'] === 'line' || tagSchemaDictionary['BMRB data type'] === 'text') {
+              tagSchemaDictionary['Regex'] = NotNullChecker;
+            } else {
+              tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
+            }
+
           } else {
             tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
           }
