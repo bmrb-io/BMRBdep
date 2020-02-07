@@ -236,8 +236,6 @@ export class ApiService implements OnDestroy {
 
   storeEntry(dirty: boolean = false, fullStore: boolean = false): void {
 
-    console.log('Storing entry...', dirty, fullStore);
-
     // Saves an entry locally, and mark it as dirty first if need be
     if (dirty) {
       this.cachedEntry.unsaved = dirty;
