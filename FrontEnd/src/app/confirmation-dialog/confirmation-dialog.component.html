@@ -1,6 +1,15 @@
 <h1 mat-dialog-title>Confirm Action</h1>
-<div mat-dialog-content>{{confirmMessage}}</div>
+<div mat-dialog-content>
+  <p>{{confirmMessage}}</p>
+  <mat-form-field *ngIf="inputBoxText != null">
+    <mat-label>{{inputBoxText}}</mat-label>
+    <label>
+      <input matInput [(ngModel)]="name" required>
+    </label>
+  </mat-form-field>
+</div>
 <div mat-dialog-actions>
-    <button mat-raised-button color="primary" (click)="dialogRef.close(true)">{{proceedMessage}}</button>
-    <button mat-raised-button color="accent" (click)="dialogRef.close(false)">{{cancelMessage}}</button>
+  <button mat-raised-button color="primary" (click)="dialogRef.close(true)"
+          [disabled]="inputBoxText != null && !name">{{proceedMessage}}</button>
+  <button mat-raised-button color="accent" (click)="dialogRef.close(false)">{{cancelMessage}}</button>
 </div>
