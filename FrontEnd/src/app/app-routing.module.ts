@@ -9,7 +9,7 @@ import {RestoreComponent} from './restore/restore.component';
 import {MolecularSystemComponent} from './molecular-system/molecular-system.component';
 import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 import {LoadEntryComponent} from './load-entry/load-entry.component';
-import {ContactUsComponent} from './contact-us/contact-us.component';
+import {SupportComponent} from './support/support-component';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
@@ -20,7 +20,7 @@ const routes: Routes = [
   {path: 'entry/restore', component: RestoreComponent},
   {path: 'entry/pending-verification', component: PendingValidationComponent},
   {path: 'help/molecular-assembly', component: MolecularSystemComponent},
-  {path: 'contact-us', component: ContactUsComponent}
+  {path: 'support', component: SupportComponent}
 ];
 
 @NgModule({
