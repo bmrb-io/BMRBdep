@@ -21,7 +21,9 @@
             </div>
         </div>
         <div class="content-box">
-            <h2>Start a new deposition</h2>
+            <h2>Start a new deposition
+              <mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>
+            </h2>
 
             <mat-form-field>
                 <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
@@ -132,8 +134,7 @@
         <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
             deposition.</p>
         <p>If you have lost that e-mail, please
-            <a mat-raised-button href="mailto:bmrbhelp@bmrb.wisc.edu?subject=Lost access to BMRBdep session"
-               color="primary">contact us.</a>
+            <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
         </p>
     </div>
 </div>

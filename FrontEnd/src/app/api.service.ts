@@ -79,7 +79,8 @@ export class ApiService implements OnDestroy {
       this.subscription$.add(this.router.events.subscribe(
         event => {
           if (event instanceof NavigationEnd) {
-            if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('help') < 0 && !this.cachedEntry) {
+            if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
+              && !this.cachedEntry) {
               this.subscription$.unsubscribe();
               router.navigate(['/']).then();
             }
@@ -197,7 +198,7 @@ export class ApiService implements OnDestroy {
 
 
   cloneDeposition() {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, { disableClose: false});
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
     dialogRef.componentInstance.confirmMessage = 'This will create a new deposition pre-filled with all of the data from the current' +
       ' deposition, except any uploaded data files. Are you sure you want to proceed?';
     dialogRef.componentInstance.proceedMessage = 'Yes, create new deposition';
@@ -333,19 +334,25 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request'): Promise<any> {
+  newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
-    const contactLoop: Loop = this.cachedEntry.getLoopsByCategory('_Contact_person')[0];
-    const userEmail = contactLoop.data[0][contactLoop.tags.indexOf('Email_address')].value;
-    let userName = contactLoop.data[0][contactLoop.tags.indexOf('Given_name')].value + ' ' +
-      contactLoop.data[0][contactLoop.tags.indexOf('Family_name')].value;
-    if (userName.length < 2) {
-      userName = 'Unknown User';
+    let userName = 'Unknown User';
+    if (this.cachedEntry) {
+      const contactLoop: Loop = this.cachedEntry.getLoopsByCategory('_Contact_person')[0];
+      userEmail = contactLoop.data[0][contactLoop.tags.indexOf('Email_address')].value;
+      userName = contactLoop.data[0][contactLoop.tags.indexOf('Given_name')].value + ' ' +
+        contactLoop.data[0][contactLoop.tags.indexOf('Family_name')].value;
+      if (userName.length < 2) {
+        userName = 'Unknown User';
+      }
+      comment = `${comment}\n\nDeposition ID: ${this.cachedEntry.entryID}`;
+    } else {
+      if (!userEmail) {
+        throw new Error('Invalid function use. Please provide user e-mail if no active deposition session.');
+      }
     }
-
-    comment = `${comment}\n\nDeposition ID: ${this.cachedEntry.entryID}`;
 
     const jsonData = {
       'request': {
