@@ -447,7 +447,7 @@ export class Saveframe {
     }
 
     // Check that at least one chemical shift reference is present
-    if (this.category === 'chem_shift_reference') {
+    if (this.category === 'chem_shift_reference' && !this.parent.deposited) {
       let allNo = true;
       const tagsToCheck = ['_Chem_shift_reference.Proton_shifts_flag',
         '_Chem_shift_reference.Carbon_shifts_flag',
