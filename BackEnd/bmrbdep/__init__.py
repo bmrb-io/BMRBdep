@@ -288,7 +288,6 @@ def new_deposition() -> Response:
         schema_name += "-sm"
     schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(schema_name, schema_format='xml'))
     json_schema: dict = get_schema(schema_name)
-    print(schema_name, schema.version, json_schema['version'])
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
