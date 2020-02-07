@@ -25,7 +25,7 @@
         width: 100%;
       }
     }
-    div:first-child {
+    div:first-child, div:nth-child(2) {
       padding-right: 1em;
     }
   }

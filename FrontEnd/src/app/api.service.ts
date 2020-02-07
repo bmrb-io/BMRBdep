@@ -195,6 +195,28 @@ export class ApiService implements OnDestroy {
     }));
   }
 
+
+  cloneDeposition() {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, { disableClose: false});
+    dialogRef.componentInstance.confirmMessage = 'This will create a new deposition pre-filled with all of the data from the current' +
+      ' deposition, except any uploaded data files. Are you sure you want to proceed?';
+    dialogRef.componentInstance.proceedMessage = 'Yes, create new deposition';
+    dialogRef.componentInstance.cancelMessage = 'No, cancel';
+    dialogRef.componentInstance.inputBoxText = 'Enter a nickname for the new deposition';
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const formData = new FormData();
+        formData.append('deposition_nickname', dialogRef.componentInstance.name);
+
+        const duplicateURL = `${environment.serverURL}/${this.cachedEntry.entryID}/duplicate`;
+        this.http.post(duplicateURL, formData).subscribe(jsonData => {
+          this.router.navigate(['/entry', 'load', jsonData['deposition_id']]).then();
+        });
+      }
+    });
+  }
+
   loadEntry(entryID: string, skipMessage: boolean = false): void {
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
