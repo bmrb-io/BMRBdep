@@ -79,7 +79,7 @@
            [matAutocomplete]="auto">
   </label>
 
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto">
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto" class="closed_enum_option">
     <mat-option *ngFor="let option of filteredOptions" [value]="option[0]" [title]="option[1]">{{option[0]}}</mat-option>
   </mat-autocomplete>
 </ng-container>
