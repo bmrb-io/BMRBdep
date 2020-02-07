@@ -3,7 +3,6 @@
 import json
 import logging
 import os
-import re
 from datetime import date, datetime
 from typing import Optional, List, BinaryIO
 

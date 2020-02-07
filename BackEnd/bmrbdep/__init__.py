@@ -25,6 +25,8 @@ from bmrbdep.common import configuration, get_schema, root_dir, secure_filename,
 from bmrbdep.exceptions import ServerError, RequestError
 
 # Set up the flask application
+from bmrbdep.helpers.star_tools import merge_entries
+
 application = Flask(__name__)
 
 # Set debug if running from command line
@@ -59,10 +61,13 @@ else:
     logging.warning("Could not set up SMTP logger because the configuration"
                     " was not specified.")
 
+
     class MockMail:
         @staticmethod
         def send(message):
             logging.info('Would have sent e-mail:\n%s', message.html)
+
+
     mail = MockMail()
 
 # Set up the logger
@@ -74,8 +79,8 @@ else:
 
 
 # Set up error handling
-@application.errorhandler(ServerError)
-@application.errorhandler(RequestError)
+# @application.errorhandler(ServerError)
+# @application.errorhandler(RequestError)
 def handle_our_errors(exception: Union[ServerError, RequestError]):
     """ Handles exceptions we raised ourselves. """
 
@@ -84,7 +89,7 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
     # Send a message to the admin on ServerError
     if isinstance(exception, ServerError) and not configuration['debug']:
         message = Message("A BMRBdep ServerException happened!", recipients=configuration['smtp']['admins'])
-        message.body = "Exception raised on request %s %s\n\n%s" %\
+        message.body = "Exception raised on request %s %s\n\n%s" % \
                        (request.method, request.url, traceback.format_exc())
         mail.send(message)
 
@@ -215,6 +220,48 @@ def validate_user(token: str):
     return redirect('/entry/load/%s' % deposition_id, code=302)
 
 
+@application.route('/deposition/<uuid:uuid>/duplicate', methods=('POST',))
+def duplicate_deposition(uuid) -> Response:
+    """ Starts a new deposition from an existing deposition. """
+
+    request_info: Dict[str, Any] = request.form
+
+    # Create the deposition
+    deposition_id = str(uuid4())
+    schema_name = configuration['schema_version']
+    if request_info.get('deposition_type', 'macromolecule') == "small molecule":
+        schema_name += "-sm"
+    schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(schema_name, schema_format='xml'))
+    json_schema: dict = get_schema(schema_name)
+    entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
+                                                                    default_values=True, schema=schema)
+
+    with depositions.DepositionRepo(uuid) as repo:
+        merge_entries(entry_template, repo.get_entry(), schema)
+
+        with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
+            new_repo._live_metadata = {'deposition_id': deposition_id,
+                                       'author_email': repo.metadata['author_email'],
+                                       'author_orcid': repo.metadata['author_orcid'],
+                                       'last_ip': request.environ['REMOTE_ADDR'],
+                                       'deposition_origination': {'request': dict(request.headers),
+                                                                  'ip': request.environ['REMOTE_ADDR']},
+                                       'email_validated': repo.metadata['email_validated'],
+                                       'schema_version': schema.version,
+                                       'entry_deposited': False,
+                                       'server_version_at_creation': get_release(),
+                                       'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                                       'deposition_nickname': request_info['deposition_nickname'],
+                                       'deposition_from_file': False,
+                                       'deposition_cloned_from': str(uuid)
+                                       }
+            new_repo.write_entry(entry_template)
+            repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
+
+    return jsonify({'deposition_id': deposition_id})
+
+
 @application.route('/deposition/new', methods=('POST',))
 def new_deposition() -> Response:
     """ Starts a new deposition. """
@@ -291,84 +338,9 @@ def new_deposition() -> Response:
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
-    def sort_saveframes(l):
-        """ Sort the given iterable in the way that humans expect.
-
-        Via: https://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python"""
-
-        def convert(text):
-            return int(text) if text.isdigit() else text
-
-        def alphanum_key(key):
-            return [convert(c) for c in re.split('([0-9]+)', key.name)]
-
-        return sorted(l, key=alphanum_key)
-
     # Merge the entries
     if uploaded_entry:
-        # Rename the saveframes in the uploaded entry before merging them
-        for category in uploaded_entry.category_list:
-            for x, saveframe in enumerate(sort_saveframes(uploaded_entry.get_saveframes_by_category(category))):
-                # Set the "Name" tag if it isn't already set
-                if (saveframe.tag_prefix + '.name').lower() in schema.schema:
-                    try:
-                        saveframe.add_tag('Name', saveframe['sf_framecode'][0].replace("_", " "), update=False)
-                    except ValueError:
-                        pass
-                new_name = "%s_%s" % (saveframe.category, x + 1)
-                if saveframe.name != new_name:
-                    uploaded_entry.rename_saveframe(saveframe.name, new_name)
-
-    # Merge the entries
-    if uploaded_entry:
-        for category in uploaded_entry.category_list:
-            delete_saveframes = entry_template.get_saveframes_by_category(category)
-            for saveframe in delete_saveframes:
-                if saveframe.category == "entry_interview":
-                    continue
-                del entry_template[saveframe]
-            for saveframe in uploaded_entry.get_saveframes_by_category(category):
-                # Don't copy over the entry interview at all
-                if saveframe.category == "entry_interview":
-                    continue
-                new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name, entry_id=deposition_id,
-                                                                  default_values=True, schema=schema, all_tags=True)
-                frame_prefix_lower = saveframe.tag_prefix.lower()
-
-                # Don't copy the tags from entry_information
-                if saveframe.category != "entry_information":
-                    for tag in saveframe.tags:
-                        lower_tag = tag[0].lower()
-                        if lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
-                                             'original_nmr_star_version', 'atomic_coordinate_file_name',
-                                             'atomic_coordinate_file_syntax', 'constraint_file_name']:
-                            fqtn = frame_prefix_lower + '.' + lower_tag
-                            if fqtn in schema.schema:
-                                new_saveframe.add_tag(tag[0], tag[1], update=True)
-
-                for loop in saveframe.loops:
-                    # Don't copy the experimental data loops
-                    if loop.category == "_Upload_data" in loop.tags:
-                        continue
-                    lower_tags = [_.lower() for _ in loop.tags]
-                    tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
-                    filtered_original_loop = loop.filter(tags_to_pull)
-                    filtered_original_loop.add_missing_tags(schema=schema, all_tags=True)
-                    new_saveframe[filtered_original_loop.category] = filtered_original_loop
-
-                entry_template.add_saveframe(new_saveframe)
-
-        # Strip off any loop Entry_ID tags from the original entry
-        for saveframe in entry_template.frame_list:
-            for loop in saveframe:
-                for tag in loop.tags:
-                    fqtn = (loop.category + "." + tag).lower()
-                    try:
-                        tag_schema = schema.schema[fqtn]
-                        if tag_schema['Natural foreign key'] == '_Entry.ID':
-                            loop[tag] = [None] * len(loop[tag])
-                    except KeyError:
-                        pass
+        merge_entries(entry_template, uploaded_entry, schema)
 
     # Calculate the uploaded file types, if they upload a file
     if uploaded_entry and not entry_bootstrap:
@@ -543,7 +515,7 @@ def deposit_entry(uuid) -> Response:
         contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
-                          ['Given_name', 'Family_name', 'Email_address'])]
+                            ['Given_name', 'Family_name', 'Email_address'])]
         message = Message("Your entry has been deposited!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
