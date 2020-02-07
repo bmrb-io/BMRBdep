@@ -29,7 +29,7 @@ import {RestoreComponent} from './restore/restore.component'; // Saving/loading 
 
 // From https://github.com/mika-el/angular-loading-page
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
-import {ContactUsComponent} from './contact-us/contact-us.component';
+import {SupportComponent} from './support/support-component';
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -69,7 +69,7 @@ import {MatAutocompleteModule} from '@angular/material';
     PendingValidationComponent,
     LoadEntryComponent,
     ConfirmationDialogComponent,
-    ContactUsComponent,
+    SupportComponent,
   ],
   imports: [
     BrowserModule,
