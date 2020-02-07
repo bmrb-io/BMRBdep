@@ -7,11 +7,15 @@
                 <div>
                     <a mat-raised-button color="primary"
                        [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">
-                        Click here to return to your deposition</a>
+                        Return to your deposition</a>
+                </div>
+                <div>
+                  <a mat-raised-button color="primary" (click)="api.cloneDeposition()">
+                    Clone deposition</a>
                 </div>
                 <div>
                     <button mat-raised-button color="primary" (click)="api.clearDeposition()">
-                        Click here to end your session for this deposition
+                        End your session for this deposition
                     </button>
                 </div>
             </div>
