@@ -14,10 +14,10 @@
         BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
       </span>
             <span *ngIf="!entry" class="title-center">BMRBdep</span>
-            <span class="title-right" routerLink="/" (click)="clearEntry()">End session</span>
+            <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
         </ng-container>
 
-        <span *ngIf="!entry" class="title-center">BMRBdep Home</span>
+      <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRBdep Home</span>
 
     </mat-toolbar-row>
     <mat-toolbar-row class="loading-bar-holder">
