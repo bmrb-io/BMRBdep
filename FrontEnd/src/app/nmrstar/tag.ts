@@ -177,7 +177,7 @@ export class Tag {
         } else {
           sampleName = sampleFrame.tagDict['_Sample.Name'].value;
           if (checkValueIsNull(sampleName)) {
-            sampleName = 'Section not yet named: ' + sampleFrame.getTag('Sf_framecode').value;
+            sampleName = sampleFrame.getTag('Sf_framecode').value +  + ' (Unnamed)';
           }
         }
 
@@ -188,7 +188,7 @@ export class Tag {
         } else {
           sampleConditionsName = sampleConditionsFrame.tagDict['_Sample_condition_list.Name'].value;
           if (checkValueIsNull(sampleConditionsName)) {
-            sampleConditionsName = 'Section not yet named: ' + sampleConditionsFrame.getTag('Sf_framecode').value;
+            sampleConditionsName = sampleConditionsFrame.getTag('Sf_framecode').value + ' (Unnamed)';
           }
         }
 
@@ -267,7 +267,7 @@ export class Tag {
           displayName = nameTag.value;
         }
         if (checkValueIsNull(displayName)) {
-          displayName = 'Section not yet named: ' + sf.name;
+          displayName = sf.name + ' (Unnamed)';
         }
 
         this.frameLink.push(['$' + sf.name, displayName]);
