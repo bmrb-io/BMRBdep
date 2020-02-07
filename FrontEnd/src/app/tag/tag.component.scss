@@ -33,3 +33,7 @@ textarea {
 ::ng-deep .mat-option{
   max-width: 3000px;
 }
+
+::ng-deep  .closed_enum_option {
+  min-width: calc(100% + 2em) !important;
+}
