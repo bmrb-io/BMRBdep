@@ -131,8 +131,6 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   deleteFile(fileName: string): void {
     if (fileName in this.uploadSubscriptionDict$) {
-      this.messagesService.sendMessage(new Message('Cancelling upload...', MessageType.NotificationMessage,
-        15000));
       this.uploadSubscriptionDict$[fileName].unsubscribe();
       this.api.deleteFile(fileName, true);
     } else {
