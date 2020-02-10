@@ -3,11 +3,10 @@ import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 
+// Our components
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {WelcomeComponent} from './welcome/welcome.component';
-
-// For the deposition mode
 import {TagComponent} from './tag/tag.component';
 import {LoopComponent} from './loop/loop.component';
 import {SaveframeComponent} from './saveframe/saveframe.component';
@@ -20,16 +19,14 @@ import {MolecularSystemComponent} from './molecular-system/molecular-system.comp
 import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
-
-
-// For the view only mode
 import {LoopViewComponent} from './view_mode/loop/loop-view.component';
 import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.component';
 import {RestoreComponent} from './restore/restore.component'; // Saving/loading bar
+import {SupportComponent} from './support/support-component';
 
 // From https://github.com/mika-el/angular-loading-page
+// When able, change to: https://github.com/aitboudad/ngx-loading-bar
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
-import {SupportComponent} from './support/support-component';
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
