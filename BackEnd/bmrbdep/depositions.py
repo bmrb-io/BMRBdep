@@ -394,13 +394,17 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         return os.listdir(os.path.join(self._entry_dir, 'data_files'))
 
-    def delete_data_file(self, filename: str) -> None:
+    def delete_data_file(self, filename: str) -> bool:
         """ Delete a data file by name."""
 
         self.raise_write_errors()
         secured_filename = secure_filename(filename)
-        os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
+        try:
+            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
+        except FileNotFoundError:
+            return False
         self._modified_files = True
+        return True
 
     def raise_write_errors(self):
         """ Raises an error if the entry may not be edited. This could happen if it is already deposited, or the email
