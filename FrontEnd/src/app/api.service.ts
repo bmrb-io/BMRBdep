@@ -281,7 +281,7 @@ export class ApiService implements OnDestroy {
     }
   }
 
-  saveEntry(override: boolean = false): void {
+  saveEntry(override: boolean = true): void {
 
     const saveOriginTime = this.lastChangeTime;
     this.saveInProgress = true;
