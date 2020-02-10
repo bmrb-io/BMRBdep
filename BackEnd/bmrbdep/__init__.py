@@ -555,8 +555,8 @@ def file_operations(uuid, filename: str) -> Response:
                              attachment_filename=secure_filename(filename))
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
-            repo.delete_data_file(filename)
-            repo.commit('Deleted file %s' % filename)
+            if repo.delete_data_file(filename):
+                repo.commit('Deleted file %s' % filename)
         return jsonify({'commit': repo.last_commit})
     else:
         raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')
