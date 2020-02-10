@@ -53,8 +53,15 @@ export class ApiService implements OnDestroy {
       }
     });
 
-    const rawJSON = JSON.parse(localStorage.getItem('entry'));
-    const schema = JSON.parse(localStorage.getItem('schema'));
+    let rawJSON, schema;
+    try {
+      rawJSON = JSON.parse(localStorage.getItem('entry'));
+      schema = JSON.parse(localStorage.getItem('schema'));
+    } catch (err) {
+      console.error('Invalid cached entry!');
+      rawJSON = null;
+      schema = null;
+    }
     if (rawJSON !== null && schema !== null) {
       rawJSON['schema'] = schema;
       const entry = entryFromJSON(rawJSON);
@@ -264,8 +271,10 @@ export class ApiService implements OnDestroy {
       this.cachedEntry.unsaved = dirty;
       this.lastChangeTime = getTime();
     }
-    localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
-    localStorage.setItem('entryID', this.cachedEntry.entryID);
+    if (this.cachedEntry) {
+      localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
+      localStorage.setItem('entryID', this.cachedEntry.entryID);
+    }
 
     // Save the schema too if this is a full store
     if (fullStore) {
