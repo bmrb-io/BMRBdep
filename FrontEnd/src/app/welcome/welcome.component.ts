@@ -13,7 +13,7 @@ import {environment} from '../../environments/environment';
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   entry: Entry;
-  @ViewChild('inputFile', { static: false }) fileUploadElement: ElementRef;
+  @ViewChild('inputFile') fileUploadElement: ElementRef;
   subscription$: Subscription;
   skipEmailValidation: boolean;
   emailValidationError: boolean;
