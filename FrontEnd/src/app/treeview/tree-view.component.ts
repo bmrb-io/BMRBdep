@@ -87,7 +87,10 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   refresh(): void {
     this.api.loadEntry(this.entry.entryID, true);
     this.entry.refresh();
-    this.api.storeEntry(false, true);
+    this.api.storeEntry(false);
+    localStorage.setItem('entry', JSON.stringify(this.entry));
+    localStorage.setItem('entryID', this.entry.entryID);
+    localStorage.setItem('schema', JSON.stringify(this.entry.schema));
   }
 
   scrollSideNav(): void {
