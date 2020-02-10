@@ -250,7 +250,9 @@ export class ApiService implements OnDestroy {
         }
 
         this.entrySubject.next(loadedEntry);
-        this.storeEntry(false, true);
+        localStorage.setItem('entry', JSON.stringify(loadedEntry));
+        localStorage.setItem('entryID', loadedEntry.entryID);
+        localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
@@ -264,21 +266,18 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  storeEntry(dirty: boolean = false, fullStore: boolean = false): void {
+  storeEntry(dirty: boolean = false): void {
 
-    // Saves an entry locally, and mark it as dirty first if need be
-    if (dirty) {
-      this.cachedEntry.unsaved = dirty;
-      this.lastChangeTime = getTime();
-    }
     if (this.cachedEntry) {
+      // Saves an entry locally, and mark it as dirty first if need be
+      if (dirty) {
+        this.cachedEntry.unsaved = dirty;
+        this.lastChangeTime = getTime();
+      }
       localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
       localStorage.setItem('entryID', this.cachedEntry.entryID);
-    }
-
-    // Save the schema too if this is a full store
-    if (fullStore) {
-      localStorage.setItem('schema', JSON.stringify(this.cachedEntry.schema));
+    } else {
+      console.error('Asked to storeEntry, but no entry cached!');
     }
   }
 
@@ -328,7 +327,7 @@ export class ApiService implements OnDestroy {
             this.cachedEntry.unsaved = false;
             this.lastChangeTime = null;
           }
-          this.storeEntry(false, false);
+          this.storeEntry(false);
           this.saveInProgress = false;
         }
       },
