@@ -15,7 +15,7 @@ import {Subscription} from 'rxjs';
 export class FileUploaderComponent implements OnInit, OnDestroy {
 
   @Input() entry: Entry;
-  @ViewChild('inputFile', { static: false }) fileUploadElement: ElementRef;
+  @ViewChild('inputFile') fileUploadElement: ElementRef;
   serverURL: String = null;
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};

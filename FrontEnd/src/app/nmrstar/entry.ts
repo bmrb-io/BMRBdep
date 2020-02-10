@@ -54,11 +54,10 @@ export function entryFromJSON(jdata: Object): Entry {
   // It can be removed after 6 months (to allow clients caches to have cleared).
   // Can remove after: 06/01/2020
   if (typeof jdata['commit'] === 'string' || jdata['commit'] instanceof String) {
-    entry.commit = [jdata['commit']];
+    entry.commit = [jdata['commit'] as string];
   } else {
     entry.commit = jdata['commit'];
   }
-
 
   if ('unsaved' in jdata) {
     entry.unsaved = jdata['unsaved'];
