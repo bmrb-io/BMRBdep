@@ -1,5 +1,9 @@
 <div>
-    <h1>Welcome to BMRBdep!</h1>
+    <h1>Welcome to BMRBdep!
+      <span class="right-float">
+        <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
+      </span>
+    </h1>
     <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
         <div class="content-box resume-box" *ngIf="entry && !entry.deposited">
             <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
@@ -22,13 +26,8 @@
         </div>
         <div class="content-box">
             <h2>Start a new deposition
-              <mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>
-
-              <span class="right-float">
-                <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
-              </span>
+              <!--<mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>-->
             </h2>
-
 
             <mat-form-field>
                 <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
