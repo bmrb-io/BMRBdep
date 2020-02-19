@@ -314,10 +314,11 @@ class DepositionRepo:
             insert_query = """
 INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
                       contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
-                      restart_id, last_updated)
+                      restart_id, last_updated, nmr_dep_code)
   VALUES (nextval('depnum_seq'), %(bmrbnum)s, %(status)s, %(submission_date)s, %(accession_date)s, %(onhold_status)s,
                              %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
-                             %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s)"""
+                             %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s,
+                             %(restart_id)s)"""
             cur.execute(insert_query, params)
             log_sql = """
 INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
