@@ -336,7 +336,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
                 fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
                 try:
                     tag_schema = schema.schema[fqtn]
-                    if tag_schema['Natural foreign key'] == '_Entry.ID':
+                    if tag_schema['entryIdFlg'] == 'Y':
                         tag[1] = bmrbnum
                 except KeyError:
                     pass
@@ -346,7 +346,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
                     fqtn = (loop.category + "." + tag).lower()
                     try:
                         tag_schema = schema.schema[fqtn]
-                        if tag_schema['Natural foreign key'] == '_Entry.ID':
+                        if tag_schema['entryIdFlg'] == 'Y':
                             loop[tag] = [bmrbnum] * len(loop[tag])
                     except KeyError:
                         pass
