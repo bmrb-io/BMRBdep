@@ -249,7 +249,12 @@ class DepositionRepo:
                   'restart_id': final_entry.entry_id
                   }
 
-        release_status: str = final_entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
+        # Dep_release_code_nmr_exptl was wrongly used in place of Release_request in dictionary versions < 3.2.8.1
+        try:
+            release_status: str = final_entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
+        except (KeyError, ValueError):
+            release_status = final_entry['entry_information_1']['Release_request'][0].upper()
+
         if release_status == 'RELEASE NOW':
             params['onhold_status'] = today_date.strftime("%m/%d/%y")
         elif release_status == 'HOLD FOR 4 WEEKS':
