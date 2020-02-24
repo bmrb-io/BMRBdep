@@ -79,3 +79,38 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
                         loop[tag] = [None] * len(loop[tag])
                 except KeyError:
                     pass
+
+
+def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Schema) -> None:
+    """ Generates an entity saveframe for each chem comp saveframe. """
+
+    need_linking = []
+
+    linked_items = entry.get_tag('_Entity_assembly.Entity_label')
+    for linked_item in linked_items:
+        # Remove the '$' from the beginning of the tag
+        linked_saveframe = entry.get_saveframe_by_name(linked_item[1:])
+        if linked_saveframe.category == 'chem_comp':
+            need_linking.append(linked_saveframe)
+
+    next_entity: int = max([int(x.name.split('_')[-1]) for x in entry.get_saveframes_by_category('entity')]) + 1
+    for saveframe in need_linking:
+        new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
+                                                       all_tags=False, entry_id=entry.entry_id)
+        new_entity['Name'] = saveframe['Name'][0]
+        new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
+        new_entity['Type'] = 'non-polymer'
+        new_entity['Ambiguous_conformational_states'] = 'no'
+        new_entity['Nstd_chirality'] = 'no'
+        new_entity['Nstd_linkage'] = 'no'
+        new_entity['Thiol_state'] = 'not available'
+        new_entity.add_missing_tags(schema=schema)
+
+        comp_index_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
+        comp_index_loop.add_tag(['ID', 'Comp_ID', 'Comp_label', 'Entry_ID'])
+        comp_index_loop.add_data([1, saveframe['ID'][0], '$' + saveframe['Sf_framecode'][0], entry.entry_id])
+        comp_index_loop.add_missing_tags(schema=schema)
+        new_entity['_Entity_comp_index'] = comp_index_loop
+
+        entry.add_saveframe(new_entity)
+        next_entity += 1
