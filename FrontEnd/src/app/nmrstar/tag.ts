@@ -254,7 +254,14 @@ export class Tag {
 
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
-      const framesOfCategory: Saveframe[] = this.getEntry().getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+      const parentEntry = this.getEntry();
+      let framesOfCategory: Saveframe[] = parentEntry.getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+
+      /* Special rules that aren't in the dictionary
+      * This ensures that the assembly allows selecting a chem_comp. */
+      if (this.fullyQualifiedTagName === '_Entity_assembly.Entity_label') {
+        framesOfCategory = framesOfCategory.concat(parentEntry.getSaveframesByPrefix('_Chem_comp'));
+      }
 
       this.frameLink = [];
       for (const sf of framesOfCategory) {
