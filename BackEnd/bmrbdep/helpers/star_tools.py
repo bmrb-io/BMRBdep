@@ -97,6 +97,7 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
     for saveframe in need_linking:
         new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
                                                        all_tags=False, entry_id=entry.entry_id)
+        new_entity.loops = []
         new_entity['Name'] = saveframe['Name'][0]
         new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
         new_entity['Details'] = saveframe['Details'][0]
