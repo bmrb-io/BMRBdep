@@ -99,6 +99,7 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
                                                        all_tags=False, entry_id=entry.entry_id)
         new_entity['Name'] = saveframe['Name'][0]
         new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
+        new_entity['Details'] = saveframe['Details'][0]
         new_entity['Type'] = 'non-polymer'
         new_entity['Ambiguous_conformational_states'] = 'no'
         new_entity['Nstd_chirality'] = 'no'
