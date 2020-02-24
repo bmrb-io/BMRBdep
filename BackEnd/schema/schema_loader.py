@@ -194,13 +194,13 @@ def get_dict(fob, headers, number_fields, skip):
     for x in range(skip):
         next(csv_reader)
 
-    def skip_end():
+    def skip_end_and_comments():
         for csv_row in csv_reader:
-            if csv_row[0] != "TBL_END" and csv_row[0]:
+            if len(csv_row) > 1 and csv_row[0] != "TBL_END" and csv_row[0].strip()[0] != '#':
                 yield csv_row
 
     columns = [all_headers.index(x) for x in headers]
-    values = [[row[x].replace("$", ",") for x in columns] for row in skip_end()]
+    values = [[row[x].replace("$", ",") for x in columns] for row in skip_end_and_comments()]
 
     number_fields = [headers.index(x) for x in number_fields]
     for row in values:
