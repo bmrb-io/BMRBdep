@@ -109,7 +109,7 @@ export class Saveframe {
     // Copy the tags
     for (const tag of this.tags) {
       if (clearValues) {
-        const newTag = newFrame.addTag(tag.name, null);
+        const newTag = newFrame.addTag(tag.name, '');
         if (newTag.schemaValues['default value'] !== '?') {
           newTag.value = newTag.schemaValues['default value'];
         }
@@ -117,12 +117,13 @@ export class Saveframe {
         newFrame.addTag(tag.name, tag.value);
       }
     }
-    // Set the framecode and category regardless of clearValues argument
+    // Set the framecode, category, and deleted tags regardless of clearValues argument
     newFrame.getTag('Sf_framecode').value = frameName;
     newFrame.getTag('Sf_category').value = this.category;
+    newFrame.getTag('_Deleted').value = 'no';
     // New saveframes should always require entering the label
     if (newFrame.getTag('Name')) {
-      newFrame.getTag('Name').value = null;
+      newFrame.getTag('Name').value = '';
     }
 
     // Copy the loops
