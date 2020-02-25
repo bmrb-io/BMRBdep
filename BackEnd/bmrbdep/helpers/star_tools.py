@@ -93,8 +93,10 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
         if linked_saveframe.category == 'chem_comp':
             need_linking.append(linked_saveframe)
 
+    entity_assembly_loop = entry.get_loops_by_category('_Entity_assembly')[0]
+
     next_entity: int = max([int(x.name.split('_')[-1]) for x in entry.get_saveframes_by_category('entity')]) + 1
-    for saveframe in need_linking:
+    for x, saveframe in enumerate(need_linking):
         if 'PDB_code' in saveframe and saveframe['PDB_code']:
             try:
                 chemcomp_entry = pynmrstar.Entry.from_database('chemcomp_' + saveframe['PDB_code'][0].upper())
@@ -109,13 +111,13 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
             if 'details' in saveframe:
                 chemcomp_saveframe['Details'] = saveframe['Details'][0]
 
-            entity_saveframe = chemcomp_entry.get_saveframes_by_category('entity')[0]
-            entity_saveframe['Paramagnetic'] = saveframe['Paramagnetic'][0]
+            new_entity = chemcomp_entry.get_saveframes_by_category('entity')[0]
+            new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
 
             # Replace the existing saveframes with the new ones (first rename, to preserve the links)
             entry.rename_saveframe(saveframe.name, chemcomp_saveframe.name)
             entry[saveframe.name] = chemcomp_saveframe
-            entry.add_saveframe(entity_saveframe)
+            entry.add_saveframe(new_entity)
 
         else:
             new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
@@ -138,3 +140,8 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
 
             entry.add_saveframe(new_entity)
             next_entity += 1
+
+        # Update the entity_assembly loop to point to the entity rather than the chem_comp
+        entity_list = entity_assembly_loop['Entity_label']
+        entity_list[x] = "$" + new_entity.name
+        entity_assembly_loop['Entity_label'] = entity_list
