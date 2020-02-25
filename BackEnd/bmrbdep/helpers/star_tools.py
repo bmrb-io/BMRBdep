@@ -95,24 +95,46 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
 
     next_entity: int = max([int(x.name.split('_')[-1]) for x in entry.get_saveframes_by_category('entity')]) + 1
     for saveframe in need_linking:
-        new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
-                                                       all_tags=False, entry_id=entry.entry_id)
-        new_entity.loops = []
-        new_entity['Name'] = saveframe['Name'][0]
-        new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
-        new_entity['Details'] = saveframe['Details'][0]
-        new_entity['Type'] = 'non-polymer'
-        new_entity['Ambiguous_conformational_states'] = 'no'
-        new_entity['Nstd_chirality'] = 'no'
-        new_entity['Nstd_linkage'] = 'no'
-        new_entity['Thiol_state'] = 'not available'
-        new_entity.add_missing_tags(schema=schema)
+        if 'PDB_code' in saveframe and saveframe['PDB_code']:
+            try:
+                chemcomp_entry = pynmrstar.Entry.from_database('chemcomp_' + saveframe['PDB_code'][0].upper())
+            except IOError:
+                saveframe['Note_to_annotator'] = 'Attempted to automatically look up the chem_comp and entity' \
+                                                 ' from the PDB_code, but it isn\'t valid. Please rectify.'
+                continue
 
-        comp_index_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
-        comp_index_loop.add_tag(['ID', 'Comp_ID', 'Comp_label', 'Entry_ID'])
-        comp_index_loop.add_data([1, saveframe['ID'][0], '$' + saveframe['Sf_framecode'][0], entry.entry_id])
-        comp_index_loop.add_missing_tags(schema=schema)
-        new_entity['_Entity_comp_index'] = comp_index_loop
+            chemcomp_saveframe = chemcomp_entry.get_saveframes_by_category('chem_comp')[0]
+            chemcomp_saveframe['Paramagnetic'] = saveframe['Paramagnetic'][0]
+            chemcomp_saveframe['Aromatic'] = saveframe['Aromatic'][0]
+            if 'details' in saveframe:
+                chemcomp_saveframe['Details'] = saveframe['Details'][0]
 
-        entry.add_saveframe(new_entity)
-        next_entity += 1
+            entity_saveframe = chemcomp_entry.get_saveframes_by_category('entity')[0]
+            entity_saveframe['Paramagnetic'] = saveframe['Paramagnetic'][0]
+
+            # Replace the existing saveframes with the new ones (first rename, to preserve the links)
+            entry.rename_saveframe(saveframe.name, chemcomp_saveframe.name)
+            entry[saveframe.name] = chemcomp_saveframe
+            entry.add_saveframe(entity_saveframe)
+
+        else:
+            new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
+                                                           all_tags=False, entry_id=entry.entry_id)
+            new_entity.loops = []
+            new_entity['Name'] = saveframe['Name'][0]
+            new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
+            new_entity['Type'] = 'non-polymer'
+            new_entity['Ambiguous_conformational_states'] = 'no'
+            new_entity['Nstd_chirality'] = 'no'
+            new_entity['Nstd_linkage'] = 'no'
+            new_entity['Thiol_state'] = 'not available'
+            new_entity.add_missing_tags(schema=schema)
+
+            comp_index_loop: pynmrstar.Loop = pynmrstar.Loop.from_scratch('_Entity_comp_index')
+            comp_index_loop.add_tag(['ID', 'Comp_ID', 'Comp_label', 'Entry_ID'])
+            comp_index_loop.add_data([1, saveframe['ID'][0], '$' + saveframe['Sf_framecode'][0], entry.entry_id])
+            comp_index_loop.add_missing_tags(schema=schema)
+            new_entity['_Entity_comp_index'] = comp_index_loop
+
+            entry.add_saveframe(new_entity)
+            next_entity += 1
