@@ -364,16 +364,15 @@ export class Entry {
 
             // First see if the rule applies to saveframe-level tag
             if (rule['Tag category'] === saveframe.tagPrefix) {
-              if (rule['Override view value'] === 'O') {
-                // Set the tag to whatever its dictionary value was
-                saveframe.tagDict[rule['Tag']].display = saveframe.tagDict[rule['Tag']].schemaValues['User full view'];
+
+              const tag = saveframe.tagDict[rule['Tag']];
+              if (!tag) {
+                console.warn('Dictionary override rule specifies non-existent tag:', rule['Tag'], rule);
               } else {
-                const conditionalTag = saveframe.tagDict[rule['Tag']];
-                // Set the tag to the override rule
-                if (!conditionalTag) {
-                  console.warn('Dictionary over-ride rule specifies non-existent tag:', rule['Tag'], rule);
+                if (rule['Override view value'] === 'O') {
+                  tag.display = saveframe.tagDict[rule['Tag']].schemaValues['User full view'];
                 } else {
-                  conditionalTag.display = rule['Override view value'];
+                  tag.display = rule['Override view value'];
                 }
               }
               // See if the rule applies to a child loop
