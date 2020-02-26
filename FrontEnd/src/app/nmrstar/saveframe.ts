@@ -218,6 +218,7 @@ export class Saveframe {
   }
 
   // Sets the visibility of all tags in the saveframe
+  // Note that this is trusting that the rule actually applies to this saveframe
   setVisibility(rule): void {
 
     // Make sure this is a rule for the saveframe and not a rule for a child loop
@@ -237,7 +238,7 @@ export class Saveframe {
           this.tagDict[rule['Tag']].display = this.tagDict[rule['Tag']].schemaValues['User full view'];
         } else {
           if (this.tagDict[rule['Tag']] === undefined) {
-            console.warn('Dictionary over-ride rule specifies non-existent tag: ' + rule['Conditional tag'], rule);
+            console.warn('Dictionary override rule specifies non-existent tag: ' + rule['Conditional tag'], rule);
           } else {
             this.tagDict[rule['Tag']].display = rule['Override view value'];
           }
