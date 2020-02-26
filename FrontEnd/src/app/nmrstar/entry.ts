@@ -358,7 +358,7 @@ export class Entry {
         if (rule['Conditional tag prefix'] === saveframe.tagPrefix) {
           // Check that the rule is valid
           if (saveframe.tagDict[rule['Conditional tag']] === undefined) {
-            console.warn('Dictionary over-ride rule specifies non-existent conditional tag: ' + rule['Conditional tag'], rule);
+            console.warn('Dictionary override rule specifies non-existent conditional tag: ' + rule['Conditional tag'], rule);
             // See if the rule fires
           } else if (rule['Regex'].test(saveframe.tagDict[rule['Conditional tag']].value)) {
 
@@ -406,7 +406,7 @@ export class Entry {
                   if (row[tagCol] && rule['Regex'].test(row[tagCol].value)) {
                     if (rule['Tag category'] === loop.category) {
                       if (row[applyCol] === undefined) {
-                        console.warn('Dictionary over-ride rule specifies non-existent tag: ' + rule['Tag'], rule);
+                        console.warn('Dictionary override rule specifies non-existent tag: ' + rule['Tag'], rule);
                       } else {
                         row[applyCol].display = rule['Override view value'];
                       }
