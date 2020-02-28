@@ -1,10 +1,10 @@
 <div class="main-content">
     <mat-card>
         <mat-card-header>
-            <mat-card-title *ngIf="!entry.valid">You are viewing all sections of your deposition that still need to be
+            <mat-card-title *ngIf="!(entry.valid && entry.emailValidated)">You are viewing all sections of your deposition that still need to be
                 completed.
             </mat-card-title>
-            <mat-card-title *ngIf="entry.valid">Your deposition is ready to submit.</mat-card-title>
+            <mat-card-title *ngIf="entry.valid && entry.emailValidated">Your deposition is ready to submit.</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <mat-nav-list>
@@ -16,15 +16,17 @@
                         </p>
                     </ng-container>
                 </ng-container>
+              <a *ngIf="!entry.emailValidated" mat-raised-button [routerLink]="['/entry', 'pending-verification']" color="accent">
+                Verify Email Address</a>
             </mat-nav-list>
-          <mat-form-field *ngIf="entry.valid" class="content-box" color="accent">
+          <mat-form-field *ngIf="entry.valid && entry.emailValidated" class="content-box" color="accent">
             <label>
               <input matInput placeholder="Do you have any feedback on the BMRBdep system?" [formControl]="messageControl">
             </label>
           </mat-form-field>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-raised-button class="saveframe-button" [disabled]="!entry.valid" color="accent"
+            <button mat-raised-button class="saveframe-button" [disabled]="!(entry.valid && entry.emailValidated)" color="accent"
                     (click)="submitEntry()">Submit deposition to BMRB
             </button>
             <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
