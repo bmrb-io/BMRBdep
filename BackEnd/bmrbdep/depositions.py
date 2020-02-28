@@ -197,6 +197,19 @@ class DepositionRepo:
                     if first_initial_index and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
 
+        # Delete the chemcomps if there is no ligand
+        try:
+            organic_count = int(final_entry.get_tag('Assembly.Organic_ligands')[0])
+        except (ValueError, IndexError):
+            organic_count = 1
+        try:
+            metal_count = int(final_entry.get_tag('Assembly.Metal_ions')[0])
+        except (ValueError, IndexError):
+            metal_count = 1
+        if metal_count + organic_count == 0:
+            for saveframe in final_entry.get_saveframes_by_category('chem_comp'):
+                del final_entry[saveframe]
+
         # Insert the loops for residue sequences
         for entity in final_entry.get_saveframes_by_category('entity'):
             polymer_code: str = entity['Polymer_seq_one_letter_code'][0]
