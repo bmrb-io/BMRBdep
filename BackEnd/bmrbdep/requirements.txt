@@ -1,17 +1,17 @@
 # Flask related
-wheel==0.33.6
+wheel==0.34.2
 flask==1.1.1
 simplejson==3.17.0
 flask-cors==3.0.8
 Flask-Mail==0.9.1
 # For fetching BMRB entries to create new entries from
-requests==2.22.0
+requests==2.23.0
 # For working with BMRB entries
-git+git://github.com/uwbmrb/pynmrstar.git@v3.0.beta5
+git+git://github.com/uwbmrb/pynmrstar.git@b7ad7bd1de6ab251d777451cbbae3573e8d6bebf
 # The following two are for email validation
 git+git://github.com/uwbmrb/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
 # For managing depositions
-gitpython==3.0.5
+gitpython==3.1.0
 filelock==3.0.12
 python-dateutil==2.8.1
 # For putting entries in ETS
@@ -21,8 +21,8 @@ Unidecode==1.1.1
 
 ## Development related
 # This is for installing node locally
-nodeenv==1.3.3
+nodeenv==1.3.5
 # This makes the local flask server faster to reload when editing the code
-watchdog==0.9.0
+watchdog==0.10.2
 # For type checking the project
 mypy>=0.761
