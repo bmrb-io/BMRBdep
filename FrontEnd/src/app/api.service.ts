@@ -447,10 +447,6 @@ export class ApiService implements OnDestroy {
       return;
     }
 
-    if (!checkValueIsNull(feedback)) {
-      this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
-    }
-
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
 
     const formData = new FormData();
@@ -461,6 +457,10 @@ export class ApiService implements OnDestroy {
 
     return new Promise(((resolve, reject) => {
       this.http.post(apiEndPoint, formData).subscribe(jsonData => {
+        if (!checkValueIsNull(feedback)) {
+          this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
+        }
+
         // Trigger everything watching the entry to see that it changed - because "deposited" changed
         this.cachedEntry.deposited = true;
         this.cachedEntry.refresh();
