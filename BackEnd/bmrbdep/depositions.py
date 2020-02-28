@@ -37,18 +37,31 @@ class DepositionRepo:
         self._repo: Repo
         self._uuid = uuid
         self._initialize: bool = initialize
-        self._entry_dir: str = os.path.join(configuration['repo_path'], str(self._uuid))
         self._modified_files: bool = False
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
-        self._lock_path: str = os.path.join(configuration['repo_path'], str(uuid), '.git', 'api.lock')
+        uuids = str(uuid)
+        self._lock_path: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids, '.git', 'api.lock')
+        self._entry_dir: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids)
+
+        # To transition, first check the old entry path
+        # TODO: Remove this after the transition to the new path structure
+        if os.path.exists(os.path.join(configuration['repo_path'], uuids)):
+            self._entry_dir = os.path.join(configuration['repo_path'], uuids)
+            self._lock_path: str = os.path.join(configuration['repo_path'], uuid, '.git', 'api.lock')
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
             if not self._initialize:
                 raise RequestError('No deposition with that ID exists!', status_code=404)
             else:
-                # Create the entry directory
+                # Create the entry directory (and parent folders, where needed)
+                first_parent = os.path.join(configuration['repo_path'], uuids[0])
+                if not os.path.exists(first_parent):
+                    os.mkdir(first_parent)
+                second_parent = os.path.join(configuration['repo_path'], uuids[0], uuids[1])
+                if not os.path.exists(second_parent):
+                    os.mkdir(second_parent)
                 os.mkdir(self._entry_dir)
                 os.mkdir(os.path.join(self._entry_dir, '.git'))
                 os.mkdir(os.path.join(self._entry_dir, 'data_files'))
