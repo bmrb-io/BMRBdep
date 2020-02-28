@@ -16,7 +16,8 @@ from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeSerializer, BadSignature
+from itsdangerous import URLSafeSerializer
+from itsdangerous.exc import BadData
 from validate_email import validate_email
 from werkzeug.datastructures import FileStorage
 
@@ -79,8 +80,8 @@ else:
 
 
 # Set up error handling
-# @application.errorhandler(ServerError)
-# @application.errorhandler(RequestError)
+@application.errorhandler(ServerError)
+@application.errorhandler(RequestError)
 def handle_our_errors(exception: Union[ServerError, RequestError]):
     """ Handles exceptions we raised ourselves. """
 
@@ -209,7 +210,7 @@ def validate_user(token: str):
     try:
         deposition_data = serializer.loads(token)
         deposition_id = deposition_data['deposition_id']
-    except (BadSignature, KeyError, TypeError):
+    except (BadData, KeyError, TypeError):
         raise RequestError('Invalid e-mail validation token. Please request a new e-mail validation message.')
 
     with depositions.DepositionRepo(deposition_id) as repo:
