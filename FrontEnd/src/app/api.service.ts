@@ -426,6 +426,7 @@ export class ApiService implements OnDestroy {
 
       this.http.post(apiEndPoint, body, options)
         .subscribe(jsonData => {
+          this.clearDeposition();
           this.sidenavService.open().then();
           this.messagesService.clearMessage();
           resolve(jsonData['deposition_id']);
