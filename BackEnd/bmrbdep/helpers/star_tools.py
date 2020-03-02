@@ -97,7 +97,7 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
 
     next_entity: int = max([int(x.name.split('_')[-1]) for x in entry.get_saveframes_by_category('entity')]) + 1
     for x, saveframe in enumerate(need_linking):
-        if 'PDB_code' in saveframe and saveframe['PDB_code']:
+        if 'PDB_code' in saveframe and saveframe['PDB_code'][0]:
             try:
                 chemcomp_entry = pynmrstar.Entry.from_database('chemcomp_' + saveframe['PDB_code'][0].upper())
             except IOError:
@@ -136,7 +136,9 @@ def generate_entity_from_chemcomp(entry: pynmrstar.Entry, schema: pynmrstar.Sche
             comp_index_loop.add_tag(['ID', 'Comp_ID', 'Comp_label', 'Entry_ID'])
             comp_index_loop.add_data([1, saveframe['ID'][0], '$' + saveframe['Sf_framecode'][0], entry.entry_id])
             comp_index_loop.add_missing_tags(schema=schema)
-            new_entity['_Entity_comp_index'] = comp_index_loop
+            if '_Entity_comp_index' in new_entity:
+                del new_entity['_Entity_comp_index']
+            new_entity.add_loop(comp_index_loop)
 
             entry.add_saveframe(new_entity)
             next_entity += 1
