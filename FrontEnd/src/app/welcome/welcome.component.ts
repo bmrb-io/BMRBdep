@@ -52,7 +52,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
   getBootstrapErrorMessage(bootstrapForm: FormControl) {
     return bootstrapForm.hasError('required') ? 'You must enter the ID of an existing entry.' :
-      bootstrapForm.hasError('pattern') ? 'Not a valid BMRB ID.' : '';
+      bootstrapForm.hasError('pattern') ? 'Not a valid BMRB ID. BMRB IDs consist only of numbers. (For example: 15000)' : '';
   }
 
   ngOnInit() {
