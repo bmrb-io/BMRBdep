@@ -314,11 +314,6 @@ def new_deposition() -> Response:
                                    " that your e-mail is correct, please select the 'My e-mail is correct' checkbox "
                                    "and click to start a new deposition again." %
                                    (author_email[author_email.index("@") + 1:]))
-            elif not validate_email(author_email, verify=True, sending_email='webmaster@bmrb.wisc.edu', smtp_timeout=3):
-                raise RequestError("The e-mail you provided is invalid. That e-mail address does not exist at that "
-                                   "server. (Do you have a typo in the e-mail address before the @?) If you are certain"
-                                   " that your e-mail is correct, please select the 'My e-mail is correct' checkbox "
-                                   "and click to start a new deposition again.")
         except Timeout:
             raise RequestError("The e-mail you provided is invalid. There was no response when attempting to connect "
                                "to the server at %s. If you are certain that your e-mail is correct, please select the"
