@@ -3,7 +3,6 @@
 import datetime
 import logging
 import os
-import re
 import traceback
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
@@ -439,7 +438,7 @@ def new_deposition() -> Response:
                 loop.data = []
 
                 iterations: int = 1
-                if "Experiment_ID" in loop.tags:
+                if "Experiment_ID" in loop.tags or loop.category == '_Sample_component':
                     iterations = 3
 
                 for x in range(1, iterations + 1):
@@ -470,7 +469,7 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': configuration['debug'],
+                        'email_validated': False,
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
