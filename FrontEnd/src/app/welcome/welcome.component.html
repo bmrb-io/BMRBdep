@@ -5,7 +5,7 @@
       </span>
     </h1>
     <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
-        <div class="content-box resume-box" *ngIf="entry && !entry.deposited">
+        <div class="content-box resume-box" *ngIf="entry">
             <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
             <div>
                 <div>
