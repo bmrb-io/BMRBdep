@@ -52,7 +52,10 @@
  **/
 // import 'web-animations-js';  // Run `npm install --save web-animations-js`.
 
-
+/**
+ * This will allow you to use .includes on an array
+ */
+// import 'core-js/modules/es.array.includes';
 
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
