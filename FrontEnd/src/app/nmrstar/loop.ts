@@ -165,6 +165,11 @@ export class Loop {
       newLoop.data[3][type_col].value = 'ionic strength';
       newLoop.data[3][units_col].value = 'M';
     }
+    // BusinessRule
+    if (this.category === '_Sample_component' && clearValues) {
+      newLoop.addRow();
+      newLoop.addRow();
+    }
 
     return newLoop;
   }
