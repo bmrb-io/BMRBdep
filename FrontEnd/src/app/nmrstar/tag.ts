@@ -35,7 +35,7 @@ export class Tag {
       this.enums = this.schemaValues['enumerations'] ? new Set(this.schemaValues['enumerations']) : new Set();
       this.display = this.schemaValues['User full view'];
     } else {
-      if (this.name !== '_Deleted' ) {
+      if (this.name !== '_Deleted') {
         console.warn('Tag exists in entry but not in schema!', this.fullyQualifiedTagName);
       }
       this.schemaValues = {
@@ -136,7 +136,7 @@ export class Tag {
 
   }
 
-  updateTagStatus(setDisabled= true): void {
+  updateTagStatus(setDisabled = true): void {
 
     /* Check that the tag is valid
     * 1) Matches the data type regex
@@ -177,7 +177,7 @@ export class Tag {
         } else {
           sampleName = sampleFrame.tagDict['_Sample.Name'].value;
           if (checkValueIsNull(sampleName)) {
-            sampleName = sampleFrame.getTag('Sf_framecode').value +  + ' (Unnamed)';
+            sampleName = sampleFrame.getTag('Sf_framecode').value + +' (Unnamed)';
           }
         }
 
@@ -255,12 +255,18 @@ export class Tag {
     } else if (this.schemaValues['Sf pointer'] === 'Y') {
       // Show this tag as a closed enum
       const parentEntry = this.getEntry();
-      let framesOfCategory: Saveframe[] = parentEntry.getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
+      const framesOfCategory: Saveframe[] = parentEntry.getSaveframesByPrefix('_' + this.schemaValues['Foreign Table']);
 
       /* Special rules that aren't in the dictionary
       * This ensures that the assembly allows selecting a chem_comp. */
       if (this.fullyQualifiedTagName === '_Entity_assembly.Entity_label') {
-        framesOfCategory = framesOfCategory.concat(parentEntry.getSaveframesByPrefix('_Chem_comp'));
+        // Check that the chem comp isn't deleted
+        const chemComps = parentEntry.getSaveframesByPrefix('_Chem_comp');
+        for (const chemComp of chemComps) {
+          if (!chemComp.deleted) {
+            framesOfCategory.push();
+          }
+        }
       }
 
       this.frameLink = [];
