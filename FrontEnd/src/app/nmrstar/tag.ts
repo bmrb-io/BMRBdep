@@ -264,7 +264,7 @@ export class Tag {
         const chemComps = parentEntry.getSaveframesByPrefix('_Chem_comp');
         for (const chemComp of chemComps) {
           if (!chemComp.deleted) {
-            framesOfCategory.push();
+            framesOfCategory.push(chemComp);
           }
         }
       }
