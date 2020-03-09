@@ -125,7 +125,7 @@ export class Entry {
   }
 
   checkCommit(commit: string) {
-    return this.commit.includes(commit);
+    return this.commit.indexOf(commit) >= 0;
   }
 
   /* Add a new saveframe to the saveframe list.
