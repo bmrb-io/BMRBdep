@@ -200,11 +200,11 @@ class DepositionRepo:
         # Delete the chemcomps if there is no ligand
         try:
             organic_count = int(final_entry.get_tag('Assembly.Organic_ligands')[0])
-        except (ValueError, IndexError):
+        except (ValueError, IndexError, TypeError):
             organic_count = 1
         try:
             metal_count = int(final_entry.get_tag('Assembly.Metal_ions')[0])
-        except (ValueError, IndexError):
+        except (ValueError, IndexError, TypeError):
             metal_count = 1
         if metal_count + organic_count == 0:
             for saveframe in final_entry.get_saveframes_by_category('chem_comp'):
