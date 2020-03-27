@@ -415,8 +415,14 @@ def new_deposition() -> Response:
                 else:
                     application.logger.exception('An error occurred while contacting the ORCID server.')
             orcid_json = r.json()
-            author_given = orcid_json['person']['name']['given-names']['value']
-            author_family = orcid_json['person']['name']['family-name']['value']
+            try:
+                author_given = orcid_json['person']['name']['given-names']['value']
+            except TypeError:
+                author_given = None
+            try:
+                author_family = orcid_json['person']['name']['family-name']['value']
+            except TypeError:
+                author_family = None
 
             contact_loop.data[0][contact_loop.tag_index('ORCID')] = author_orcid
             contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
