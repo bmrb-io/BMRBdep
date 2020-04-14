@@ -401,7 +401,8 @@ def new_deposition() -> Response:
 
     # Look up information based on the ORCID
     if author_orcid:
-        if 'orcid' not in configuration:
+        contact_loop.data[0][contact_loop.tag_index('ORCID')] = author_orcid
+        if 'orcid' not in configuration or configuration['orcid']['bearer'] == 'CHANGEME':
             logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
         else:
             r = requests.get(configuration['orcid']['url'] % author_orcid,
@@ -412,19 +413,18 @@ def new_deposition() -> Response:
                     raise RequestError('Invalid ORCID!')
                 else:
                     application.logger.exception('An error occurred while contacting the ORCID server.')
-            orcid_json = r.json()
-            try:
-                author_given = orcid_json['person']['name']['given-names']['value']
-            except TypeError:
-                author_given = None
-            try:
-                author_family = orcid_json['person']['name']['family-name']['value']
-            except TypeError:
-                author_family = None
-
-            contact_loop.data[0][contact_loop.tag_index('ORCID')] = author_orcid
-            contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
-            contact_loop.data[0][contact_loop.tag_index('Family_name')] = author_family
+            else:
+                orcid_json = r.json()
+                try:
+                    author_given = orcid_json['person']['name']['given-names']['value']
+                except (TypeError, KeyError):
+                    author_given = None
+                try:
+                    author_family = orcid_json['person']['name']['family-name']['value']
+                except (TypeError, KeyError):
+                    author_family = None
+                contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
+                contact_loop.data[0][contact_loop.tag_index('Family_name')] = author_family
 
     # Set the loops to have at least one row of data
     for saveframe in entry_template:
