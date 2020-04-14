@@ -366,9 +366,9 @@ def new_deposition() -> Response:
     entry_template.normalize(schema=schema)
 
     # Set the entry information tags
-    entry_information: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
-    entry_information['NMR_STAR_version'] = schema.version
-    entry_information['Original_NMR_STAR_version'] = schema.version
+    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
+    entry_saveframe['NMR_STAR_version'] = schema.version
+    entry_saveframe['Original_NMR_STAR_version'] = schema.version
 
     # Suggest some default sample conditions
     sample_conditions: pynmrstar.Loop = entry_template.get_loops_by_category('_Sample_condition_variable')[0]
@@ -377,8 +377,6 @@ def new_deposition() -> Response:
         sample_conditions['Type'] = ['temperature', 'pH', 'pressure', 'ionic strength']
         sample_conditions['Val'] = [None, None, '1', None]
         sample_conditions['Val_units'] = ['K', 'pH', 'atm', 'M']
-
-    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category("entry_information")[0]
 
     # Just add a single row to the entry author loop
     author_loop: pynmrstar.Loop = entry_saveframe['_Entry_author']
