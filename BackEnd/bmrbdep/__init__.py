@@ -262,6 +262,112 @@ def duplicate_deposition(uuid) -> Response:
     return jsonify({'deposition_id': deposition_id})
 
 
+@application.route('/deposition/newmicro', methods=('POST',))
+def new_deposition_micro() -> Response:
+    """ Starts a new micro deposition. """
+
+    request_info: Dict[str, Any] = request.form
+
+    if not request_info or 'email' not in request_info:
+        raise RequestError("Must specify user e-mail to start a session.")
+
+    if 'deposition_nickname' not in request_info:
+        raise RequestError("Must specify a nickname for the deposition.")
+
+    author_email: str = request_info['email']
+    author_orcid: Optional[str] = request_info.get('orcid')
+    if not author_orcid:
+        author_orcid = None
+
+    # Create the deposition
+    deposition_id = str(uuid4())
+    schema_name = configuration['schema_version']
+    schema: pynmrstar.Schema = pynmrstar.Schema(get_schema(schema_name, schema_format='xml'))
+    json_schema: dict = get_schema(schema_name)
+    entry_template: pynmrstar.Entry = pynmrstar.Entry.from_scratch(deposition_id)
+    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('entry_interview', entry_id=deposition_id,
+                                                                   all_tags=True, default_values=True, schema=schema))
+    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('deposited_data_files', entry_id=deposition_id,
+                                                                   all_tags=True, default_values=True, schema=schema))
+    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('entry_information', entry_id=deposition_id,
+                                                                   all_tags=True, default_values=True, schema=schema))
+    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('citations', entry_id=deposition_id, all_tags=False,
+                                                                   default_values=True, schema=schema))
+
+    # Set the entry information tags
+    entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
+    entry_saveframe['NMR_STAR_version'] = schema.version
+    entry_saveframe['Original_NMR_STAR_version'] = schema.version
+    entry_saveframe['Title'] = request_info.get('deposition_nickname')
+
+    # Modify the contact_loop as needed
+    contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
+    contact_loop.data.insert(0, ['.'] * len(contact_loop.tags))
+    contact_loop.data[0][contact_loop.tag_index('Email_address')] = author_email
+
+    # Look up information based on the ORCID
+    if author_orcid:
+        contact_loop.data[0][contact_loop.tag_index('ORCID')] = author_orcid
+        if 'orcid' not in configuration or configuration['orcid']['bearer'] == 'CHANGEME':
+            logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
+        else:
+            r = requests.get(configuration['orcid']['url'] % author_orcid,
+                             headers={"Accept": "application/json",
+                                      'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            if not r.ok:
+                if r.status_code == 404:
+                    raise RequestError('Invalid ORCID!')
+                else:
+                    application.logger.exception('An error occurred while contacting the ORCID server.')
+            else:
+                orcid_json = r.json()
+                try:
+                    author_given = orcid_json['person']['name']['given-names']['value']
+                except (TypeError, KeyError):
+                    author_given = None
+                try:
+                    author_family = orcid_json['person']['name']['family-name']['value']
+                except (TypeError, KeyError):
+                    author_family = None
+                contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
+                contact_loop.data[0][contact_loop.tag_index('Family_name')] = author_family
+
+    #
+    # citation = request_info.get('citation')
+    # if citation:
+    #     if "doi" in citation:
+    #         entry_template.get_saveframes_by_category('citations')[0]['DOI'] = request_info.get('citation')
+    #     else:
+    #         entry_template.get_saveframes_by_category('citations')[0]['Title'] = request_info.get('citation')
+
+    entry_meta: dict = {'deposition_id': deposition_id,
+                        'author_email': author_email,
+                        'author_orcid': author_orcid,
+                        'last_ip': request.environ['REMOTE_ADDR'],
+                        'deposition_origination': {'request': dict(request.headers),
+                                                   'ip': request.environ['REMOTE_ADDR']},
+                        'email_validated': True,
+                        'schema_version': schema.version,
+                        'entry_deposited': False,
+                        'server_version_at_creation': get_release(),
+                        'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                        'deposition_nickname': request_info['deposition_nickname'],
+                        'deposition_from_file': False}
+
+    # Initialize the repo
+    with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
+        # Manually set the metadata during object creation - never should be done this way elsewhere
+        repo._live_metadata = entry_meta
+        repo.write_entry(entry_template)
+        repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+        repo.commit("Entry created.")
+
+    # Send the validation e-mail
+    send_validation_email(deposition_id)
+
+    return jsonify({'deposition_id': deposition_id})
+
+
 @application.route('/deposition/new', methods=('POST',))
 def new_deposition() -> Response:
     """ Starts a new deposition. """
