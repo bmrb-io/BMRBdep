@@ -14,6 +14,7 @@ import simplejson as json
 from git import Git, Repo, GitCommandError
 
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
+repo_branch = 'bmrbig-development'
 
 data_type_mapping = {'Assigned_chem_shifts': 'assigned_chemical_shifts',
                      'Coupling_constants': 'coupling_constants',
@@ -67,7 +68,7 @@ def schema_emitter(small_molecule=False):
 
     last_schema_version = None
 
-    for commit in repo.iter_commits('nmr-star-development'):
+    for commit in repo.iter_commits(repo_branch):
         next_schema = load_schemas(commit, small_molecule=small_molecule)
         if next_schema is None:
             continue
@@ -343,7 +344,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # Check out the development branch
-    repo.git.checkout('nmr-star-development')
+    repo.git.checkout(repo_branch)
 
     # Load the data types
     data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
@@ -352,7 +353,7 @@ if __name__ == "__main__":
         for sm in [True, False]:
             one_overwritten = False
             if sm:
-                print("Loading small molecule schemas.")
+                continue
             else:
                 print("Loading macromolecule schemas.")
             for schema in schema_emitter(small_molecule=sm):
