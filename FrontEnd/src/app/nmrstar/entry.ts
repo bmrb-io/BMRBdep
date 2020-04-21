@@ -73,7 +73,6 @@ export function entryFromJSON(jdata: Object): Entry {
   entry.regenerateDataStore(); // This must come before the refresh, because the tags require knowing what data files are available
   entry.updateUploadedData(); // This makes sure the Entry.xxx tags are set properly, if they started with an uploaded data file
   entry.refresh();
-  entry.showAll = false;
   return entry;
 }
 

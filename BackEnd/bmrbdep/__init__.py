@@ -289,16 +289,22 @@ def new_deposition_micro() -> Response:
                                                                    all_tags=True, default_values=True, schema=schema))
     entry_template.add_saveframe(pynmrstar.Saveframe.from_template('deposited_data_files', entry_id=deposition_id,
                                                                    all_tags=True, default_values=True, schema=schema))
-    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('entry_information', entry_id=deposition_id,
-                                                                   all_tags=True, default_values=True, schema=schema))
-    entry_template.add_saveframe(pynmrstar.Saveframe.from_template('citations', entry_id=deposition_id, all_tags=False,
-                                                                   default_values=True, schema=schema))
+    entry_saveframe: pynmrstar.Saveframe = pynmrstar.Saveframe.from_template('entry_information',
+                                                                             entry_id=deposition_id,
+                                                                             all_tags=True, default_values=True,
+                                                                             schema=schema)
+    citation_saveframe: pynmrstar.Saveframe = pynmrstar.Saveframe.from_template('citations', entry_id=deposition_id,
+                                                                                all_tags=True,
+                                                                                default_values=True, schema=schema)
+    entry_template.add_saveframe(entry_saveframe)
+    entry_template.add_saveframe(citation_saveframe)
 
     # Set the entry information tags
     entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
     entry_saveframe['NMR_STAR_version'] = schema.version
     entry_saveframe['Original_NMR_STAR_version'] = schema.version
     entry_saveframe['Title'] = request_info.get('deposition_nickname')
+    citation_saveframe['Title'] = request_info.get('deposition_nickname')
 
     # Modify the contact_loop as needed
     contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
@@ -332,13 +338,24 @@ def new_deposition_micro() -> Response:
                 contact_loop.data[0][contact_loop.tag_index('Given_name')] = author_given
                 contact_loop.data[0][contact_loop.tag_index('Family_name')] = author_family
 
-    #
-    # citation = request_info.get('citation')
-    # if citation:
-    #     if "doi" in citation:
-    #         entry_template.get_saveframes_by_category('citations')[0]['DOI'] = request_info.get('citation')
-    #     else:
-    #         entry_template.get_saveframes_by_category('citations')[0]['Title'] = request_info.get('citation')
+    # Set the loops to have at least one row of data
+    for saveframe in entry_template:
+
+        # Add a "deleted" tag to use to track deletion status
+        saveframe.add_tag('_Deleted', 'no')
+
+        for loop in saveframe:
+            if not loop.data:
+                row_data = []
+                for tag in loop.tags:
+                    fqtn = (loop.category + '.' + tag).lower()
+                    if tag == "ID":
+                        row_data.append(1)
+                    elif schema.schema[fqtn]['default value'] not in ["?", '']:
+                        row_data.append(schema.schema[fqtn]['default value'])
+                    else:
+                        row_data.append('.')
+                loop.data = [row_data]
 
     entry_meta: dict = {'deposition_id': deposition_id,
                         'author_email': author_email,
