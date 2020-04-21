@@ -149,9 +149,6 @@ class DepositionRepo:
             if citation['PubMed_ID'] and citation['PubMed_ID'] != ".":
                 update_citation_with_pubmed(citation, schema=schema)
 
-        # Generate any necessary entities from chemcomps
-        generate_entity_from_chemcomp(final_entry, schema=schema)
-
         for saveframe in final_entry:
             # Remove all unicode from the entry
             for tag in saveframe.tag_iterator():
@@ -298,7 +295,7 @@ class DepositionRepo:
         elif release_status == 'HOLD FOR PUBLICATION':
             params['onhold_status'] = 'Pub'
         else:
-            raise ServerError('Invalid release code.')
+            pass
 
         contact_loop: pynmrstar.Loop = final_entry.get_loops_by_category("_Contact_Person")[0]
         params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
