@@ -63,18 +63,13 @@ if ! "${SCRIPT_DIR}"/build_docker.sh production.conf; then
 fi
 
 echo "Deploying docker instance..."
-sudo docker tag bmrbdep pike.bmrb.wisc.edu:5000/bmrbdep
-sudo docker push pike.bmrb.wisc.edu:5000/bmrbdep
+sudo docker tag bmrbig pike.bmrb.wisc.edu:5000/bmrbig
+sudo docker push pike.bmrb.wisc.edu:5000/bmrbig
 
-if [[ $1 == "production" ]]; then
-    echo "Deploying Angular..."
-    echo "cd /websites/bmrbdep/bmrbdep_shared/html; rm -fv /websites/bmrbdep/bmrbdep_shared/html/*; tar -xzvf /tmp/release.tgz" | ssh web@blenny
-    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/bmrbdep/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@blenny
-    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /depositions:/opt/wsgi/depositions -v /websites/bmrbdep/bmrbdep_shared/configuration.json:/opt/wsgi/bmrbdep/configuration.json pike.bmrb.wisc.edu:5000/bmrbdep" | ssh web@herring
-else
-    echo "Deploying Angular..."
-    echo "cd /websites/bmrbdep/html; rm -fv /websites/bmrbdep/html/*; tar -xzvf /tmp/release.tgz" | ssh web@manta
-    echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbdep; sudo docker stop bmrbdep; sudo docker rm bmrbdep; sudo docker run -d --name bmrbdep -p 9000:9000 --restart=always -v /websites/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json -v /bmrbdep/depositions:/opt/wsgi/depositions pike.bmrb.wisc.edu:5000/bmrbdep" | ssh manta
-fi
+
+echo "Deploying Angular..."
+#echo "cd /websites/bmrbdep/html; rm -fv /websites/bmrbdep/html/*; tar -xzvf /tmp/release.tgz" | ssh web@manta
+echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbig; sudo docker stop bmrbig; sudo docker rm bmrbig; sudo docker run -d --name bmrbig -p 9005:9000 --restart=always -v /websites/bmrbig/configuration.json:/opt/wsgi/bmrbdep/configuration.json -v /websites/bmrbig/depositions:/opt/wsgi/depositions pike.bmrb.wisc.edu:5000/bmrbig" | ssh blenny
+
 
 echo "Don't forget to update the schema version in the remote configuration if necessary."
