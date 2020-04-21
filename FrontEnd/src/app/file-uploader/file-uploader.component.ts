@@ -6,6 +6,7 @@ import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {type} from 'os';
 
 @Component({
   selector: 'app-file-uploader',
@@ -70,7 +71,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   onDropFile(event: DragEvent) {
     event.preventDefault();
     if (this.entry && !this.entry.deposited) {
-      this.uploadFile(event.dataTransfer.files);
+      this.uploadFile(event.dataTransfer.items);
     }
   }
 
@@ -84,7 +85,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   // At the file input element
   // (change)="selectFile($event)"
   selectFile(event) {
-    this.uploadFile(event.target.files);
+    this.uploadFile(event.dataTransfer.items);
     this.fileUploadElement.nativeElement.value = '';
   }
 
@@ -92,11 +93,33 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     console.log(this.entry.getLoopsByCategory('_Upload_data')[0]);
   }
 
-  uploadFile(files: FileList) {
+
+  traverseFileTree(item, path) {
+    const parent = this;
+    path = path || '';
+    if (item.isFile) {
+      // Get file
+      item.file(function (file) {
+        console.log('File:', path + file.name);
+      });
+    } else if (item.isDirectory) {
+      // Get folder contents
+      const dirReader = item.createReader();
+      dirReader.readEntries(function (entries) {
+        for (let i = 0; i < entries.length; i++) {
+          parent.traverseFileTree(entries[i], path + item.name + '/');
+        }
+      });
+    }
+  }
+
+  uploadFile(files) {
 
     let closure = files.length;
 
     for (let i = 0; i < files.length; i++) {
+      this.traverseFileTree(files[i].webkitGetAsEntry(), undefined);
+
       const dataFile = this.entry.dataStore.addFile(files[i].name);
 
       this.uploadSubscriptionDict$[files[i].name] = this.api.uploadFile(files[i])
