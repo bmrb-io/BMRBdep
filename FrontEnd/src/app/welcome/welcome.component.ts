@@ -30,7 +30,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   ]);
   depositionNickname = new FormControl('', [Validators.required]);
   authorORCID = new FormControl('', [Validators.required, Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
-  citation = new FormControl('');
   sessionVisibility = new FormControl('', [Validators.required]);
 
   createDepositionForm: FormGroup = new FormGroup({
