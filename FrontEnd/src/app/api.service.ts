@@ -389,6 +389,40 @@ export class ApiService implements OnDestroy {
     });
   }
 
+  newMicroDeposition(authorEmail: string,
+                depositionNickname: string,
+                orcid: string = null): Promise<string> {
+    const apiEndPoint = `${environment.serverURL}/newmicro`;
+    this.messagesService.sendMessage(new Message('Creating deposition...',
+      MessageType.NotificationMessage, 0));
+
+    const body = new FormData();
+    body.append('email', authorEmail);
+    body.append('deposition_nickname', depositionNickname);
+    body.append('orcid', orcid);
+
+    const options = {
+      params: new HttpParams(),
+      reportProgress: true,
+    };
+
+    return new Promise((resolve, reject) => {
+
+      this.http.post(apiEndPoint, body, options)
+        .subscribe(jsonData => {
+          this.clearDeposition();
+          this.messagesService.clearMessage();
+          resolve(jsonData['deposition_id']);
+        }, error => {
+          if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
+            reject('Invalid e-mail');
+          }
+          this.handleError(error);
+          reject(error);
+        });
+    });
+  }
+
   newDeposition(authorEmail: string,
                 depositionNickname: string,
                 depositionType: string,
