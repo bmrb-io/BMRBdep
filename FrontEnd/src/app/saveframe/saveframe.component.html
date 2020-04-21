@@ -21,7 +21,7 @@
                     </th>
                     <th>
                         <div class="right-float">
-                            <button mat-raised-button class="saveframe-button"
+                            <!--<button mat-raised-button class="saveframe-button"
                                     *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
                                     (click)='saveframe.duplicate(); processChange()' color="accent"
                                     [disabled]="saveframe.parent.deposited">Duplicate
@@ -35,7 +35,7 @@
                                     *ngIf="saveframe.saveframesInCategory > saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
                                     (click)='deleteSaveframe()' color="accent"
                                     [disabled]="saveframe.parent.deposited">Delete
-                            </button>
+                            </button>-->
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="!saveframe.deleted"
                                     (click)='clearSaveframe()' color="accent"

@@ -493,7 +493,7 @@ export class ApiService implements OnDestroy {
     return new Promise(((resolve, reject) => {
       this.http.post(apiEndPoint, formData).subscribe(jsonData => {
         if (!checkValueIsNull(feedback)) {
-          this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
+          this.newSupportRequest(feedback, 'BMRbig Feedback Message').then();
         }
 
         // Trigger everything watching the entry to see that it changed - because "deposited" changed
