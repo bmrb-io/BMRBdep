@@ -8,16 +8,16 @@
         </div>
         <ng-container *ngIf="entry">
       <span *ngIf="entry && !entry.deposited" class="title-center">
-        BMRBdep - Deposition '{{entry.depositionNickname}}' in progress
+        BMRbig - Deposition '{{entry.depositionNickname}}' in progress
       </span>
             <span *ngIf="entry && entry.deposited" class="title-center">
-        BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
+        BMRbig - Deposition '{{entry.depositionNickname}}' completed and deposited
       </span>
-            <span *ngIf="!entry" class="title-center">BMRBdep</span>
+            <span *ngIf="!entry" class="title-center">BMRbig</span>
             <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
         </ng-container>
 
-      <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRBdep Home</span>
+      <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRbig Home</span>
 
     </mat-toolbar-row>
     <mat-toolbar-row class="loading-bar-holder">
