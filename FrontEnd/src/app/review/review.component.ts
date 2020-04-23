@@ -19,7 +19,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
   subscription$: Subscription;
   messageControl = new FormControl('');
 
-  constructor(private api: ApiService,
+  constructor(public api: ApiService,
               private messagesService: MessagesService,
               private location: Location,
               private dialog: MatDialog) {
