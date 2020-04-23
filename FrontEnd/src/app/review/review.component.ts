@@ -42,7 +42,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
       disableClose: false
     });
     this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to deposit the entry '${this.entry.depositionNickname}'?` +
-      ' No changes are allowed after deposition via the BMRBdep interface. (You may continue to communicate changes after deposition via ' +
+      ' No changes are allowed after deposition via the BMRBbig interface. (You may continue to communicate changes after deposition via ' +
       ' the BMRB annotator assigned to your deposition, or by contacting bmrbhelp@bmrb.wisc.edu".)';
     this.dialogRef.componentInstance.proceedMessage = 'Deposit';
 
