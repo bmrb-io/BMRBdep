@@ -17,6 +17,9 @@ def _sort_saveframes(sort_list: list) -> list:
 
 
 def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Entry, new_schema: pynmrstar.Schema):
+
+    existing_entry.normalize()
+
     # Rename the saveframes in the uploaded entry before merging them
     for category in existing_entry.category_list:
         for x, saveframe in enumerate(_sort_saveframes(existing_entry.get_saveframes_by_category(category))):
