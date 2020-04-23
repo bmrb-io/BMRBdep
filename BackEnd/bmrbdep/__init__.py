@@ -22,6 +22,7 @@ from werkzeug.datastructures import FileStorage
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 
 # Set up the flask application
@@ -160,12 +161,15 @@ def send_validation_status(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
-def send_validation_email(uuid) -> Response:
+def send_validation_email(uuid, repo_object: Optional[DepositionRepo]) -> Response:
     """ Sends the validation e-mail. """
 
     uuid = str(uuid)
 
-    with depositions.DepositionRepo(uuid) as repo:
+    if not repo_object:
+        repo_object = depositions.DepositionRepo(uuid)
+
+    with repo_object as repo:
         # Already validated, don't re-send the email
         if repo.metadata['email_validated']:
             return jsonify({'status': 'validated'})
@@ -258,6 +262,8 @@ def duplicate_deposition(uuid) -> Response:
             new_repo.write_entry(entry_template)
             repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
+
+            send_validation_email(deposition_id, repo)
 
     return jsonify({'deposition_id': deposition_id})
 
@@ -493,8 +499,8 @@ def new_deposition() -> Response:
                                                                    str(uploaded_entry).encode())
         repo.commit("Entry created.")
 
-    # Send the validation e-mail
-    send_validation_email(deposition_id)
+        # Send the validation e-mail
+        send_validation_email(deposition_id, repo)
 
     return jsonify({'deposition_id': deposition_id})
 
