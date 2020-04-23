@@ -6,6 +6,8 @@ import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-file-uploader',
@@ -20,10 +22,12 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};
   subscription$: Subscription;
+  private dialogRef: MatDialogRef<ConfirmationDialogComponent>;
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private dialog: MatDialog) {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
   }
@@ -137,11 +141,22 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
   deleteFile(fileName: string): void {
-    if (fileName in this.uploadSubscriptionDict$) {
-      this.uploadSubscriptionDict$[fileName].unsubscribe();
-      this.api.deleteFile(fileName, true);
-    } else {
-      this.api.deleteFile(fileName);
-    }
+
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the file '${fileName}'?`;
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (fileName in this.uploadSubscriptionDict$) {
+          this.uploadSubscriptionDict$[fileName].unsubscribe();
+          this.api.deleteFile(fileName, true);
+        } else {
+          this.api.deleteFile(fileName);
+        }
+      }
+      this.dialogRef = null;
+    });
   }
 }
