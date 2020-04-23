@@ -101,7 +101,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     let closure = files.length;
 
     for (let i = 0; i < files.length; i++) {
-      if (!files[i].type) {
+      if (!files[i].size) {
         this.messagesService.sendMessage(new Message(`It appears that you attempted to upload one or more folders.
         At the current time, uploading folders is not possible, only uploading one or more files. Please tar or zip up your
         directory and then upload it.`,
