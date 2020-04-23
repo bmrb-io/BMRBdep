@@ -49,9 +49,9 @@ export class ApiService implements OnDestroy {
     this.subscription$ = this.entrySubject.subscribe(entry => {
       this.cachedEntry = entry;
       if (entry) {
-        this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
+        this.titleService.setTitle(`BMRbig: ${entry.depositionNickname}`);
       } else {
-        this.titleService.setTitle('BMRBdep');
+        this.titleService.setTitle('BMRbig');
       }
     });
 
@@ -99,7 +99,7 @@ export class ApiService implements OnDestroy {
     }
 
     // Used to open verification links in same tab
-    window.name = 'BMRBdep';
+    window.name = 'BMRbig';
 
     this.entryChangeCheckTimer = setInterval(() => {
       const savedID = localStorage.getItem('entryID');
@@ -344,7 +344,7 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
+  newSupportRequest(comment: string, subject: string = 'BMRBbig Support Request', userEmail: string = null): Promise<any> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
