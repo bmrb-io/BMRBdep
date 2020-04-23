@@ -168,7 +168,38 @@ def send_validation_email(uuid) -> Response:
     with depositions.DepositionRepo(uuid) as repo:
         # Already validated, don't re-send the email
         if repo.metadata['email_validated']:
+            # Ask them to confirm their e-mail
+            confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
+                                      repo.metadata['deposition_nickname'],
+                                      recipients=[repo.metadata['author_email']],
+                                      reply_to=configuration['smtp']['reply_to_address'])
+            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+
+            confirm_message.html = """
+            Thank you for your deposition '%s' created %s (UTC).
+            <br><br>
+            To return to this deposition, click <a href="%s" target="BMRBDep">here</a>.
+            <br><br>
+            If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
+            share this e-mail with will have access to the full contents of your in-progress deposition and can make
+            changes to it.
+
+            If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
+            leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
+            computer could access your in-process deposition.
+            <br><br>
+            Thank you,
+            <br>
+            BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
+                                 url_for('validate_user', token=token, _external=True))
+
+            mail.send(confirm_message)
+
+
+
             return jsonify({'status': 'validated'})
+
+
         # Ask them to confirm their e-mail
         confirm_message = Message("Please validate your e-mail address for BMRBDep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
