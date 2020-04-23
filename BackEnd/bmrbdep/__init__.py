@@ -161,7 +161,7 @@ def send_validation_status(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
-def send_validation_email(uuid, repo_object: Optional[DepositionRepo]) -> Response:
+def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) -> Response:
     """ Sends the validation e-mail. """
 
     uuid = str(uuid)
