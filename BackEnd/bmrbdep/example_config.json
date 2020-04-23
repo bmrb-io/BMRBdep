@@ -23,5 +23,6 @@
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
     "secret_key": "CHANGE_ME",
-    "repo_path": "/tmp/depositions"
+    "repo_path": "/tmp/depositions",
+    "output_path": "/tmp/released"
 }
