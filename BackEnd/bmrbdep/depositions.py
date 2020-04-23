@@ -271,37 +271,19 @@ class DepositionRepo:
                   'submission_date': today_str,
                   'accession_date': today_str,
                   'last_updated': today_str,
-                  'molecular_system': final_entry['entry_information_1']['Title'][0],
-                  'onhold_status': 'Pub',
+                  'molecular_system': entry_saveframe['Title'][0],
+                  'onhold_status': 'RELEASE NOW',
                   'restart_id': final_entry.entry_id
                   }
-
-        # Dep_release_code_nmr_exptl was wrongly used in place of Release_request in dictionary versions < 3.2.8.1
-        try:
-            release_status: str = final_entry['entry_information_1']['Dep_release_code_nmr_exptl'][0].upper()
-        except (KeyError, ValueError):
-            release_status = final_entry['entry_information_1']['Release_request'][0].upper()
-
-        if release_status == 'RELEASE NOW':
-            params['onhold_status'] = today_date.strftime("%m/%d/%y")
-        elif release_status == 'HOLD FOR 4 WEEKS':
-            params['onhold_status'] = (today_date + relativedelta(weeks=4)).strftime("%m/%d/%y")
-        elif release_status == 'HOLD FOR 8 WEEKS':
-            params['onhold_status'] = (today_date + relativedelta(weeks=+8)).strftime("%m/%d/%y")
-        elif release_status == 'HOLD FOR 6 MONTHS':
-            params['onhold_status'] = (today_date + relativedelta(months=+6)).strftime("%m/%d/%y")
-        elif release_status == 'HOLD FOR 1 YEAR':
-            params['onhold_status'] = (today_date + relativedelta(years=+1)).strftime("%m/%d/%y")
-        elif release_status == 'HOLD FOR PUBLICATION':
-            params['onhold_status'] = 'Pub'
-        else:
-            pass
 
         contact_loop: pynmrstar.Loop = final_entry.get_loops_by_category("_Contact_Person")[0]
         params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
         contact_people = [', '.join(x) for x in contact_loop.get_tag(['Family_name', 'Given_name'])]
         params['contact_person1'] = contact_people[0]
-        params['contact_person2'] = contact_people[1]
+        try:
+            params['contact_person2'] = contact_people[1]
+        except IndexError:
+            params['contact_person2'] = contact_people[0]
 
         ranges = configuration['ets']['deposition_ranges']
         if len(ranges) == 0:
