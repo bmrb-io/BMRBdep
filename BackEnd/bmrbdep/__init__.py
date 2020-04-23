@@ -169,7 +169,7 @@ def send_validation_email(uuid) -> Response:
         # Already validated, don't re-send the email
         if repo.metadata['email_validated']:
             # Ask them to confirm their e-mail
-            confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
+            confirm_message = Message("Entry reference for BMRbig deposition '%s'." %
                                       repo.metadata['deposition_nickname'],
                                       recipients=[repo.metadata['author_email']],
                                       reply_to=configuration['smtp']['reply_to_address'])
@@ -178,7 +178,7 @@ def send_validation_email(uuid) -> Response:
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
             <br><br>
-            To return to this deposition, click <a href="%s" target="BMRBDep">here</a>.
+            To return to this deposition, click <a href="%s" target="BMRbig">here</a>.
             <br><br>
             If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
             share this e-mail with will have access to the full contents of your in-progress deposition and can make
@@ -190,7 +190,7 @@ def send_validation_email(uuid) -> Response:
             <br><br>
             Thank you,
             <br>
-            BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
+            BMRbig System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                                  url_for('validate_user', token=token, _external=True))
 
             mail.send(confirm_message)
@@ -201,7 +201,7 @@ def send_validation_email(uuid) -> Response:
 
 
         # Ask them to confirm their e-mail
-        confirm_message = Message("Please validate your e-mail address for BMRBDep deposition '%s'." %
+        confirm_message = Message("Please validate your e-mail address for BMRbig deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
                                   reply_to=configuration['smtp']['reply_to_address'])
@@ -210,7 +210,7 @@ def send_validation_email(uuid) -> Response:
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
-Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to 
+Please click <a href="%s" target="BMRbig">here</a> to validate your e-mail for this session. This is required to 
 proceed. You can also use this link to return to your deposition later if you close the page before
 it is complete.
 <br><br>
@@ -224,7 +224,7 @@ computer could access your in-process deposition.
 <br><br>
 Thank you,
 <br>
-BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
+BMRbig System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                      url_for('validate_user', token=token, _external=True))
 
         mail.send(confirm_message)
@@ -445,9 +445,9 @@ def deposit_entry(uuid) -> Response:
 
         # Send a message to the annotators
         if not configuration['debug']:
-            message = Message("BMRBdep: BMRB entry %s has been deposited." % bmrb_num,
+            message = Message("BMRbig: BMRB entry %s has been deposited." % bmrb_num,
                               recipients=[configuration['smtp']['annotator_address']])
-            message.body = '''The following new entry has been deposited via BMRBdep:
+            message.body = '''The following new entry has been deposited via BMRbig:
 
 restart id:            %s
 bmrb accession number: %s
