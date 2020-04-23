@@ -434,7 +434,7 @@ def deposit_entry(uuid) -> Response:
                             ['Given_name', 'Family_name', 'Email_address'])]
         message = Message("Your entry has been deposited!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
-        message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
+        message.html = 'Thank you for your deposition! Your assigned BMRbig ID is %s. We have attached a copy of the ' \
                        'deposition contents for reference. You may also use this file to start a new deposition. ' \
                        'You will hear from our annotators in the next few days. Please note that any data files that ' \
                        'you uploaded will be manually integrated into the final NMR-STAR file by the BMRB annotators ' \
