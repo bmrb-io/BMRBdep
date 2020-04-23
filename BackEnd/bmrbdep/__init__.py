@@ -455,7 +455,7 @@ bmrb accession number: %s
 title: %s
 
 contact persons: %s
-''' % (uuid, bmrb_num, final_entry['entry_information_1']['Title'][0], contact_full)
+''' % (uuid, bmrb_num, final_entry.get_saveframes_by_category('entry_information')[0]['Title'][0], contact_full)
         mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
