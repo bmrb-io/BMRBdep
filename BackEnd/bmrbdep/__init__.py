@@ -334,8 +334,9 @@ def new_deposition_micro() -> Response:
     entry_saveframe: pynmrstar.Saveframe = entry_template.get_saveframes_by_category('entry_information')[0]
     entry_saveframe['NMR_STAR_version'] = schema.version
     entry_saveframe['Original_NMR_STAR_version'] = schema.version
-    entry_saveframe['Title'] = request_info.get('deposition_nickname')
-    citation_saveframe['Title'] = request_info.get('deposition_nickname')
+    entry_saveframe['Title'] = request_info['deposition_nickname']
+    entry_saveframe['Release_privacy'] = request_info['session_validity']
+    citation_saveframe['Title'] = request_info['deposition_nickname']
 
     # Modify the contact_loop as needed
     contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
