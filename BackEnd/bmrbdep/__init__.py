@@ -287,7 +287,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_cloned_from': str(uuid)
                                        }
             new_repo.write_entry(entry_template)
-            repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            new_repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
 
     return jsonify({'deposition_id': deposition_id})
