@@ -12,7 +12,7 @@ import pynmrstar
 import requests
 import simplejson as json
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
-from flask_autoindex import AutoIndex
+from flask_autoindex import AutoIndexBlueprint
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeSerializer
 from itsdangerous.exc import BadData
@@ -25,7 +25,7 @@ from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
-files_index = AutoIndex(application, configuration['output_path'], add_url_rules=False)
+#files_index = AutoIndex(application, configuration['output_path'], add_url_rules=False)
 
 # Set debug if running from command line
 if application.debug or configuration['debug']:
@@ -130,10 +130,15 @@ def handle_other_errors(exception: Exception):
         return response
 
 
-@application.route('/released')
-@application.route('/released/<path:path>')
-def released(path='.'):
-    return files_index.render_autoindex(path)
+#@application.route('/released')
+#@application.route('/released/<path:path>')
+#def released(path='.'):
+#    return files_index.render_autoindex(path)
+
+from flask import Blueprint
+auto_bp = Blueprint('auto_bp', __name__)
+AutoIndexBlueprint(auto_bp, browse_root=configuration['output_path'])
+application.register_blueprint(auto_bp, url_prefix='/released')
 
 
 @application.route('/')
@@ -441,7 +446,7 @@ def deposit_entry(uuid) -> Response:
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = f'''Thank you for your deposition! Your assigned BMRbig ID is {bmrb_num}. We have attached a 
 copy of the deposition contents for reference. Once we have reviewed your data, it will be visible 
-<a href="{url_for("released", path=str(bmrb_num), _external=True)}">here</a><br><br>
+<a href="{url_for("released", path=str(bmrb_num), _external=True)}">here</a>.<br><br>
 Deposited data files: {repo.get_data_file_list()}'''
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
