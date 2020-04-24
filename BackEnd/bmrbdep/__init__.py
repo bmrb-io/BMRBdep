@@ -394,7 +394,7 @@ def new_deposition_micro() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': True,
+                        'email_validated': False,
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
