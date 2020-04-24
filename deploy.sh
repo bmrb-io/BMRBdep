@@ -69,7 +69,7 @@ sudo docker push pike.bmrb.wisc.edu:5000/bmrbig
 
 echo "Deploying Angular..."
 #echo "cd /websites/bmrbdep/html; rm -fv /websites/bmrbdep/html/*; tar -xzvf /tmp/release.tgz" | ssh web@manta
-echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbig; sudo docker stop bmrbig; sudo docker rm bmrbig; sudo docker run -d --name bmrbig -p 9005:9000 --restart=always -v /websites/bmrbig/configuration.json:/opt/wsgi/bmrbdep/configuration.json -v /websites/bmrbig/depositions:/opt/wsgi/depositions pike.bmrb.wisc.edu:5000/bmrbig" | ssh blenny
+echo "sudo docker pull pike.bmrb.wisc.edu:5000/bmrbig; sudo docker stop bmrbig; sudo docker rm bmrbig; sudo docker run -d --name bmrbig -p 9007:9000 --restart=always -v /websites/bmrbig/configuration.json:/opt/wsgi/bmrbdep/configuration.json -v /websites/bmrbig/depositions:/opt/wsgi/depositions -v /websites/bmrbig/released:/opt/wsgi/released pike.bmrb.wisc.edu:5000/bmrbig" | ssh web@blenny
 
 
 echo "Don't forget to update the schema version in the remote configuration if necessary."
