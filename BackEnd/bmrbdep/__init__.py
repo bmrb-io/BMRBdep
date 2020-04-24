@@ -449,7 +449,7 @@ def deposit_entry(uuid) -> Response:
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = f'''Thank you for your deposition! Your assigned BMRbig ID is {bmrb_num}. We have attached a 
 copy of the deposition contents for reference. Once we have reviewed your data, it will be visible 
-<a href="{url_for("released", path=str(bmrb_num), _external=True)}">here</a>.<br><br>
+<a href="{url_for("released", entry_id=bmrb_num, _external=True)}">here</a>.<br><br>
 Deposited data files: {repo.get_data_file_list()}'''
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
