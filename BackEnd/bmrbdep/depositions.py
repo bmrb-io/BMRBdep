@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import sqlite3
 from datetime import date, datetime
 from typing import Optional, List, BinaryIO
 
@@ -283,76 +284,58 @@ class DepositionRepo:
         try:
             params['contact_person2'] = contact_people[1]
         except IndexError:
-            params['contact_person2'] = contact_people[0]
+            params['contact_person2'] = None
 
-        ranges = configuration['ets']['deposition_ranges']
-        if len(ranges) == 0:
-            raise ServerError('Server configuration error.')
+        # Make sqlite database for now
+        database_path = os.path.join(configuration['repo_path'], 'depositions.sqlite3')
+        if not os.path.exists(database_path):
+            with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
+                cur = conn.cursor()
+                cur.execute("""
+    CREATE TABLE entrylog (bmrbnum INTEGER PRIMARY KEY AUTOINCREMENT,
+                           restart_id TEXT UNIQUE,
+                           author_email TEXT,
+                           submission_date DATE,
+                           contact_person1 TEXT,
+                           contact_person2 TEXT,
+                           molecular_system TEXT);""")
+                cur.execute("CREATE INDEX restart_ids on entrylog (restart_id);")
+                conn.commit()
 
-        try:
-            conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
-                                    database=configuration['ets']['database'])
+        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
             cur = conn.cursor()
-        except psycopg2.OperationalError:
-            logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
-            raise ServerError('Could not connect to entry tracking system. Please contact us.')
-
-        try:
-            # Determine which bmrbnum to use - one range at a time
-            bmrbnum: Optional[int] = None
-            for id_range in ranges:
-                # Get the existing IDs from ETS
-                bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
-                cur.execute(bmrb_sql, [id_range[0], id_range[1]])
-
-                # Calculate the list of valid IDs
-                existing_ids: set = set([_[0] for _ in cur.fetchall()])
-                ids_in_range: set = set(range(id_range[0], id_range[1]))
-                assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
-
-                # A valid ID has been found in this range
-                if len(assignable_ids) > 0:
-                    bmrbnum = assignable_ids[0]
-                    break
-                else:
-                    logging.warning('No valid IDs found in range %d to %d. Continuing to next range...' %
-                                    (id_range[0], id_range[1]))
-
-            if not bmrbnum:
-                logging.exception('No valid IDs remaining in any of the ranges!')
-                raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
-
-            params['bmrbnum'] = bmrbnum
 
             # Create the deposition record
             insert_query = """
-INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
-                      contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
-                      restart_id, last_updated, nmr_dep_code)
-  VALUES (nextval('depnum_seq'), %(bmrbnum)s, %(status)s, %(submission_date)s, %(accession_date)s, %(onhold_status)s,
-                             %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
-                             %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s,
-                             %(restart_id)s)"""
-            cur.execute(insert_query, params)
-            log_sql = """
-INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
-  VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
-            cur.execute(log_sql)
-            conn.commit()
-        except psycopg2.IntegrityError:
-            logging.exception('Could not assign the chosen BMRB ID - it was already assigned.')
-            conn.rollback()
-            raise ServerError('Could not create deposition. Please try again.')
+INSERT INTO entrylog (submission_date, molecular_system, contact_person1, contact_person2, author_email,
+                      restart_id, author_email)
+VALUES (?, ?, ?, ?, ?, ?, ?)"""
+
+            try:
+                cur.execute(insert_query, [params['submission_date'], params['molecular_system'],
+                                           params['contact_person1'], params['contact_person2'],
+                                           params['author_email'], params['restart_id'],
+                                           params['author_email']])
+                conn.commit()
+                cur.execute("SELECT bmrbnum FROM entrylog WHERE restart_id = ?", [params['restart_id']])
+                final_entry.entry_id = cur.fetchone()[0]
+            except sqlite3.IntegrityError:
+                logging.exception('This entry has already been deposited!')
+                conn.rollback()
+                raise ServerError('This entry has already been deposited! Please contact us.')
+            except sqlite3.Error:
+                logging.exception('Could not assign an ID in the database!')
+                conn.rollback()
+                raise ServerError('Could not create deposition. Please try again.')
 
         # Assign the BMRB ID in all the appropriate places in the entry
-        final_entry.entry_id = bmrbnum
         for saveframe in final_entry.frame_list:
             for tag in saveframe.tags:
                 fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
                 try:
                     tag_schema = schema.schema[fqtn]
                     if tag_schema['entryIdFlg'] == 'Y':
-                        tag[1] = bmrbnum
+                        tag[1] = final_entry.entry_id
                 except KeyError:
                     pass
 
@@ -362,21 +345,21 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
                     try:
                         tag_schema = schema.schema[fqtn]
                         if tag_schema['entryIdFlg'] == 'Y':
-                            loop[tag] = [bmrbnum] * len(loop[tag])
+                            loop[tag] = [final_entry.entry_id] * len(loop[tag])
                     except KeyError:
                         pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(bmrbnum)
+        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(final_entry.entry_id)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
         self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
-        self.metadata['bmrbnum'] = bmrbnum
+        self.metadata['bmrbnum'] = final_entry.entry_id
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
 
         # Return the assigned BMRB ID
-        return bmrbnum
+        return final_entry.entry_id
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
