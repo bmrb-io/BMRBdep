@@ -358,6 +358,18 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
 
+        # Data out
+        entry_saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        if entry_saveframe['Release_privacy'][0] == 'public':
+            output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
+            os.mkdir(output_dir)
+            contact_loop = entry_saveframe['_Contact_person']
+            del entry_saveframe['_Contact_person']
+            final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
+            entry_saveframe.add_loop(contact_loop)
+            for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
+                os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+
         # Return the assigned BMRB ID
         return final_entry.entry_id
 

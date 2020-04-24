@@ -36,6 +36,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
     authorORCID: this.authorORCID,
+    sessionVisibility: this.sessionVisibility
   });
 
   getEmailErrorMessage(emailForm: FormControl) {
@@ -60,7 +61,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newMicroDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID).then(
+    this.api.newMicroDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, f.value.sessionVisibility).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
           location.reload();

@@ -390,8 +390,9 @@ export class ApiService implements OnDestroy {
   }
 
   newMicroDeposition(authorEmail: string,
-                depositionNickname: string,
-                orcid: string = null): Promise<string> {
+                     depositionNickname: string,
+                     orcid: string,
+                     sessionValidity: string): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/newmicro`;
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
@@ -400,6 +401,7 @@ export class ApiService implements OnDestroy {
     body.append('email', authorEmail);
     body.append('deposition_nickname', depositionNickname);
     body.append('orcid', orcid);
+    body.append('session_validity', sessionValidity);
 
     const options = {
       params: new HttpParams(),
