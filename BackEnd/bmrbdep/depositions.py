@@ -5,20 +5,18 @@ import logging
 import os
 import sqlite3
 from datetime import date, datetime
-from typing import Optional, List, BinaryIO
+from shutil import copy
+from typing import List, BinaryIO
 
 import flask
-import psycopg2
 import pynmrstar
 import unidecode
-from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
 from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
-from bmrbdep.helpers.star_tools import generate_entity_from_chemcomp
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -368,7 +366,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
             final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
             entry_saveframe.add_loop(contact_loop)
             for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
-                os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+                try:
+                    os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+                except OSError:
+                    copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
 
         # Return the assigned BMRB ID
         return final_entry.entry_id
