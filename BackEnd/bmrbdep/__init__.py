@@ -12,7 +12,6 @@ import pynmrstar
 import requests
 import simplejson as json
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
-from flask_autoindex import AutoIndexBlueprint
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeSerializer
 from itsdangerous.exc import BadData
@@ -130,15 +129,19 @@ def handle_other_errors(exception: Exception):
         return response
 
 
-#@application.route('/released')
-#@application.route('/released/<path:path>')
-#def released(path='.'):
-#    return files_index.render_autoindex(path)
+@application.route('/released/<int:entry_id>')
+@application.route('/released/<int:entry_id>/<file_name>')
+def released(entry_id: int, file_name=None):
+    if file_name:
+        return send_from_directory(os.path.join(configuration['output_path'], str(entry_id)), file_name)
 
-from flask import Blueprint
-auto_bp = Blueprint('auto_bp', __name__)
-AutoIndexBlueprint(auto_bp, browse_root=configuration['output_path'])
-application.register_blueprint(auto_bp, url_prefix='/released')
+    full_path = os.path.join(configuration['output_path'], str(entry_id))
+    if not os.path.exists(full_path):
+        return "Invalid entry ID."
+    files = [f'<a href="{url_for("released", entry_id=entry_id, file_name=f)}">{f}</a>' for f in os.listdir(full_path)]
+    if len(files) == 0:
+        return "Invalid entry ID."
+    return "<br>".join(files)
 
 
 @application.route('/')
