@@ -18,8 +18,6 @@ python-dateutil==2.8.1
 psycopg2-binary==2.8.4
 # For stripping unicode
 Unidecode==1.1.1
-# For the directory viewer
-flask-autoindex==0.6.6
 
 ## Development related
 # This is for installing node locally
