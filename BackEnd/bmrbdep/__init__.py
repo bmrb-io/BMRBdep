@@ -334,7 +334,7 @@ def new_deposition() -> Response:
             raise RequestError('Invalid entry ID specified. No such entry exists, or is released.')
         entry_bootstrap = True
 
-    author_email: str = request_info.get('email', '')
+    author_email: str = request_info.get('email', '').lower()
     author_orcid: Optional[str] = request_info.get('orcid')
     if not author_orcid:
         author_orcid = None
