@@ -317,7 +317,7 @@ def new_deposition_micro() -> Response:
     if 'deposition_nickname' not in request_info:
         raise RequestError("Must specify a nickname for the deposition.")
 
-    author_email: str = request_info['email']
+    author_email: str = request_info['email'].lower()
     author_orcid: Optional[str] = request_info.get('orcid')
     if not author_orcid:
         author_orcid = None
