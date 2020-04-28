@@ -344,7 +344,7 @@ export class ApiService implements OnDestroy {
     );
   }
 
-  newSupportRequest(comment: string, subject: string = 'BMRBbig Support Request', userEmail: string = null): Promise<any> {
+  newSupportRequest(comment: string, subject: string = 'BMRbig Support Request', userEmail: string = null): Promise<any> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
