@@ -462,7 +462,7 @@ Deposited data files: {repo.get_data_file_list()}'''
             message.body = '''The following new entry has been deposited via BMRbig:
 
 restart id:            %s
-bmrb accession number: %s
+BMRbig accession number: test-%s
 
 title: %s
 
