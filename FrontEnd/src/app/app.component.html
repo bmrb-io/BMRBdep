@@ -2,7 +2,7 @@
     <mat-toolbar-row>
         <div *ngIf="entry"
              (click)="sidenav.toggle(); treeView.scrollSideNav()"
-             class="valign-center">
+             class="valign-center" matTooltip="Toggle the navigation menu.">
             <mat-icon>menu</mat-icon>
             <span style="vertical-align: bottom">Menu</span>
         </div>
@@ -14,7 +14,9 @@
         BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
       </span>
             <span *ngIf="!entry" class="title-center">BMRBdep</span>
-            <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
+            <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
+                  matTooltip="Log out from this deposition. You can resume it later by following the link sent to
+your email when you created the deposition.">End session</span>
         </ng-container>
 
       <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRBdep Home</span>

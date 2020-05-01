@@ -3,9 +3,13 @@
         <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
         <p [innerHTML]="saveframes[0].schemaValues['group_view_help']"></p>
         <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].previousCategory"
-           [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">Previous section</a>
+           [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
+           matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
+jump between sections by clicking on the 'Menu' button on the top left.">Previous section</a>
         <a mat-raised-button class="saveframe-button" *ngIf="saveframes[0].nextCategory ; else final_review_top"
-           [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">Next section</a>
+           [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
+           matTooltip="Navigate to the next section. Note you may also open the navigation menu to
+jump between sections by clicking on the 'Menu' button on the top left.">Next section</a>
         <ng-template #final_review_top>
             <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
                color="accent"> Review deposition</a>
@@ -18,11 +22,15 @@
         <div *ngIf="this.saveframes.length">
             <a mat-raised-button class="saveframe-button"
                *ngIf="saveframes[0].previousCategory"
-               [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent">
+               [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
+               matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
+jump between sections by clicking on the 'Menu' button on the top left.">
                 Previous section</a>
             <a mat-raised-button class="saveframe-button"
                *ngIf="saveframes[0].nextCategory; else final_review_bottom"
-               [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent">
+               [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
+               matTooltip="Navigate to the next section. Note you may also open the navigation menu to
+jump between sections by clicking on the 'Menu' button on the top left.">
                 Next section</a>
             <ng-template #final_review_bottom>
                 <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
