@@ -205,7 +205,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
 
 
         # Ask them to confirm their e-mail
-        confirm_message = Message("Please validate your e-mail address for BMRBDep deposition '%s'." %
+        confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
                                   reply_to=configuration['smtp']['reply_to_address'])
