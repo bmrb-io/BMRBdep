@@ -11,16 +11,21 @@
             <div>
                 <div>
                     <a mat-raised-button color="primary"
-                       [routerLink]="['/entry', 'pending-verification']">
-                        Return to your deposition</a>
+                       [routerLink]="['/entry', 'pending-verification']"
+                       matTooltip="Return to the first uncompleted section of the current deposition.">
+                       Return to your deposition</a>
                 </div>
               <!--
                 <div>
-                  <a mat-raised-button color="primary" (click)="api.cloneDeposition()">
+                  <a mat-raised-button color="primary"
+                     matTooltip="Create a new deposition with the same contents as the currently
+active deposition." (click)="api.cloneDeposition()">
                     Clone deposition</a>
                 </div>-->
                 <div>
-                    <button mat-raised-button color="primary" (click)="api.clearDeposition()">
+                    <button mat-raised-button color="primary" (click)="api.clearDeposition()"
+                            matTooltip="Log out from this deposition. You can resume it later by following the link sent to
+your email when you created the deposition.">
                         End your session for this deposition
                     </button>
                 </div>
