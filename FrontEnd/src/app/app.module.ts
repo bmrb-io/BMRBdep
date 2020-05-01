@@ -47,6 +47,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {SidenavService} from './sidenav.service';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -94,7 +95,7 @@ import {SidenavService} from './sidenav.service';
     MatRadioModule,
     MatCheckboxModule,
     MatAutocompleteModule,
-    MatAutocompleteModule
+    MatTooltipModule
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent],
