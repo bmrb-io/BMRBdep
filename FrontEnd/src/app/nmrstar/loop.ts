@@ -451,6 +451,8 @@ export class Loop {
     if (this.category === '_Contact_person') {
       const emailID = this.tags.indexOf('Email_address');
       this.data[0][emailID].disabled = true;
+      const orcID = this.tags.indexOf('ORCID');
+      this.data[0][orcID].disabled = true;
     }
   }
 
