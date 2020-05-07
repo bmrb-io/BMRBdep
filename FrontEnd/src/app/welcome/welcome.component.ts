@@ -36,7 +36,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
     authorORCID: this.authorORCID,
-    sessionVisibility: this.sessionVisibility
   });
 
   getEmailErrorMessage(emailForm: FormControl) {
