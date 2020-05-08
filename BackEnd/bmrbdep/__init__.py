@@ -459,8 +459,11 @@ Deposited data files: {repo.get_data_file_list()}'''
 
         # Send a message to the annotators
         if not configuration['debug']:
-            message = Message("BMRbig: BMRB entry %s has been deposited." % bmrb_num,
-                              recipients=[configuration['smtp']['annotator_address']])
+            if isinstance(configuration['smtp']['annotator_address'], list):
+                send_to = configuration['smtp']['annotator_address']
+            else:
+                send_to = [configuration['smtp']['annotator_address']]
+            message = Message("BMRbig: BMRB entry %s has been deposited." % bmrb_num, recipients=send_to)
             message.body = '''The following new entry has been deposited via BMRbig:
 
 restart id:            %s
