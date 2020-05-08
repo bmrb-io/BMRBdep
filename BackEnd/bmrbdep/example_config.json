@@ -7,7 +7,7 @@
     },
     "smtp": {
         "admins": ["wedell@bmrb.wisc.edu"],
-        "server": "mail",
+        "server": "CHANGE_ME",
         "from_address": "bmrbhelp@bmrb.wisc.edu",
         "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
         "annotator_address": "annotators@lists.bmrb.wisc.edu"
@@ -19,7 +19,7 @@
       "client_secret": "CHANGE_ME",
       "client_id": "CHANGE_ME"
     },
-    "schema_version": "3.2.1.43",
+    "schema_version": "3.2..0.1-BMRbig",
     "debug": true,
     "local-ips": ["127.0.0.1", "144.92.167", "::1"],
     "secret_key": "CHANGE_ME",
