@@ -5,7 +5,7 @@
 
 export const environment = {
   production: false,
-  serverURL: 'http://localhost:9000/deposition',
+  serverURL: 'http://localhost:5000/deposition',
   contactEmail: 'support@bmrb.zendesk.com',
   supportURL: 'https://bmrb.zendesk.com/api/v2/requests.json'
 };
