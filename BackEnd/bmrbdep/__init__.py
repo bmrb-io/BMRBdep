@@ -224,7 +224,7 @@ def send_validation_email(uuid) -> Response:
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
-Please click <a href="%s" target="BMRbig">here</a> to validate your e-mail for this session. This is required to 
+Please click <a href="%s" target="BMRbig">here</a> to validate your e-mail for this session. This is required to
 proceed. You can also use this link to return to your deposition later if you close the page before
 it is complete.
 <br><br>
@@ -307,7 +307,7 @@ def duplicate_deposition(uuid) -> Response:
     return jsonify({'deposition_id': deposition_id})
 
 
-@application.route('/deposition/newmicro', methods=('POST',))
+@application.route('/deposition/new', methods=('POST',))
 def new_deposition_micro() -> Response:
     """ Starts a new micro deposition. """
 
@@ -450,7 +450,7 @@ def deposit_entry(uuid) -> Response:
         message = Message("Your entry has been deposited!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = f'''Thank you for your deposition! Your assigned BMRbig ID is test-{bmrb_num}. This is a
-test-only ID, and will not be preserved permanently. We have attached a 
+test-only ID, and will not be preserved permanently. We have attached a
 copy of the deposition contents for reference. If you have marked your submission as public,
 it will be visible <a href="{url_for("released", entry_id=bmrb_num, _external=True)}">here</a>.<br><br>
 Deposited data files: {repo.get_data_file_list()}'''
