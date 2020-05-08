@@ -349,7 +349,7 @@ def new_deposition_micro() -> Response:
     entry_saveframe['NMR_STAR_version'] = schema.version
     entry_saveframe['Original_NMR_STAR_version'] = schema.version
     entry_saveframe['Title'] = request_info['deposition_nickname']
-    entry_saveframe['Release_privacy'] = request_info['session_validity']
+    entry_saveframe['Release_privacy'] = request_info.get('session_validity', 'public')
     citation_saveframe['Title'] = request_info['deposition_nickname']
 
     # Modify the contact_loop as needed
