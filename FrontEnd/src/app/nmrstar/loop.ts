@@ -421,31 +421,34 @@ export class Loop {
     if (this.category === '_Citation_author') {
       this.empty = this.checkEmpty();
     }
-    // If this is the contact person loop, an extra check is needed
-    if (this.category === '_Contact_person') {
-      let valid = false;
-      const roleTags: LoopTag[] = [];
 
-      // Check for a PI
-      for (const row of this.data) {
-        for (const item of row) {
-          if (item.name === 'Role') {
-            if (item.value === 'principal investigator') {
-              valid = true;
-            }
-            roleTags.push(item);
-          }
-        }
-      }
 
-      if (!valid) {
-        this.valid = false;
-        for (const tag of roleTags) {
-          tag.valid = false;
-          tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
-        }
-      }
-    }
+
+    // // If this is the contact person loop, an extra check is needed
+    // if (this.category === '_Contact_person') {
+    //   let valid = false;
+    //   const roleTags: LoopTag[] = [];
+    //
+    //   // Check for a PI
+    //   for (const row of this.data) {
+    //     for (const item of row) {
+    //       if (item.name === 'Role') {
+    //         if (item.value === 'principal investigator') {
+    //           valid = true;
+    //         }
+    //         roleTags.push(item);
+    //       }
+    //     }
+    //   }
+    //
+    //   if (!valid) {
+    //     this.valid = false;
+    //     for (const tag of roleTags) {
+    //       tag.valid = false;
+    //       tag.validationMessage = 'Each deposition must have at least one person with the role \'Principal Investigator\'.';
+    //     }
+    //   }
+    // }
 
     // Lock the first data row author email for contact person
     if (this.category === '_Contact_person') {
