@@ -393,7 +393,7 @@ export class ApiService implements OnDestroy {
                      depositionNickname: string,
                      orcid: string,
                      sessionValidity: string): Promise<string> {
-    const apiEndPoint = `${environment.serverURL}/newmicro`;
+    const apiEndPoint = `${environment.serverURL}/new`;
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
 
