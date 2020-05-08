@@ -17,7 +17,7 @@ from git import Repo, CacheError
 from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
-from bmrbdep.helpers.star_tools import generate_entity_from_chemcomp
+from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -150,7 +150,7 @@ class DepositionRepo:
                 update_citation_with_pubmed(citation, schema=schema)
 
         # Generate any necessary entities from chemcomps
-        generate_entity_from_chemcomp(final_entry, schema=schema)
+        upgrade_chemcomps_and_create_entities_where_needed(final_entry, schema=schema)
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
