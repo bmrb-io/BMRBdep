@@ -124,7 +124,9 @@ def handle_other_errors(exception: Exception):
                            (request.method, request.url, traceback.format_exc())
             mail.send(message)
 
-        response = jsonify({"error": "Server error."})
+        response = jsonify({"error": "An exception has been triggered on the BMRBdep server. This error has been sent "
+                                     "to BMRB staff to investigate. If you were attempting to deposit when this error "
+                                     "occurred, expect us to reach out to you within one business day."})
         response.status_code = 500
         return response
 
