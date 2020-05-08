@@ -33,7 +33,7 @@
             <h5 *ngIf="api.saveInProgress || entry.unsaved">You cannot deposit until you have finished uploading the data files / metadata changes. Please wait
             for the deposition system to stop displaying a progress bar at the top of the page before continuing.</h5>
             <button mat-raised-button class="saveframe-button" [disabled]="!(entry.valid && entry.emailValidated && !api.saveInProgress && !entry.unsaved)" color="accent"
-                    (click)="submitEntry()">Submit deposition to BMRB
+                    (click)="submitEntry()">Upload to BMRB
             </button>
             <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
         </mat-card-actions>
