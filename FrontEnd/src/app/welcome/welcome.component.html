@@ -1,19 +1,20 @@
 <div>
-    <h1>Welcome to BMRbig! Note that BMRbig is in <b>alpha</b> form. You may find bugs! If so, please report
-      them using the "Support" button in the entry menu.
-      <span class="right-float">
-        <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
-      </span>
-    </h1>
+    <!--<span class="right-float">
+      <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
+    </span>-->
+
     <div class="content-box">
       <p>BMRbig is a BMRB project designed to accommodate the acquisition of diverse data (not just
          NMR data) beyond the types currently curated and annotated by BMRB. The goal being to provide a service for
          depositing the majority of the primary data that underpins the study of a biological system.
-         Deposition in BMRbig  is simpler than deposition in BMRB, but serves as a potential intermediate step toward
+         Deposition in BMRbig is simpler than deposition in BMRB, but serves as a potential intermediate step toward
          a full BMRB deposition. Data submissions to BMRbig will be write only, although submissions may be augmented
          in the future.  The expectation is that data deposited in BMRbig will become publicly accessible, within 6
-         months or less of the time of deposition. BMRbig will provide persistent
-         links to deposited data.​ </p>
+         months or less of the time of deposition. BMRbig will provide persistent links to deposited data.​</p>
+      <p>BMRbig IDs are separate from BMRB IDs and are <b>not equivalent</b>. To switch to the BMRBdep deposition system
+      which assigns complete BMRB IDs, please proceed to <a href="https://betadeposit.bmrb.wisc.edu">BMRBdep</a>.</p>
+      <h3>Note that BMRbig is in <b>alpha</b> form. You may find bugs! If so, please report
+        them using the "Support" button in the entry menu.</h3>
     </div>
     <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
         <div class="content-box resume-box" *ngIf="entry">

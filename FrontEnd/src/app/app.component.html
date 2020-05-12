@@ -7,19 +7,22 @@
             <span style="vertical-align: bottom">Menu</span>
         </div>
         <ng-container *ngIf="entry">
-      <span *ngIf="entry && !entry.deposited" class="title-center">
-        BMRbig - Deposition '{{entry.depositionNickname}}' in progress
-      </span>
-            <span *ngIf="entry && entry.deposited" class="title-center">
-        BMRbig - Deposition '{{entry.depositionNickname}}' completed and deposited
-      </span>
-            <span *ngIf="!entry" class="title-center"
+          <span *ngIf="entry && !entry.deposited" class="title-center">
+            BMRbig - Deposition '{{entry.depositionNickname}}' in progress
+          </span>
+          <span *ngIf="entry && entry.deposited" class="title-center">
+            BMRbig - Deposition '{{entry.depositionNickname}}' completed and deposited
+          </span>
+          <span *ngIf="!entry" class="title-center"
                   matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">BMRbig</span>
-            <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
+          <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
         </ng-container>
 
-      <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRbig Home</span>
+      <span *ngIf="!entry" class="title-center pointer bmrb" routerLink="/">BMRbig Home</span>
+      <a href="http://www.bmrb.wisc.edu" *ngIf="!entry" class="title-right pointer">
+        <img src="/assets/images/logo_bmrb.svg" alt="BMRB logo" width="50px" height="50px" />
+      </a>
 
     </mat-toolbar-row>
     <mat-toolbar-row class="loading-bar-holder">
