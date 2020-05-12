@@ -38,6 +38,6 @@ The main difference in production mode is that errors are not logged to the cons
 experimental "small molecule" deposition type is hidden.
 
 1. Follow all the steps above.
-2. Change the `debug` value in the configuration file to `false`.
+2. Change the `debug` value in the configuration file to `false`. This turns on e-mail validation.
 3. Deploy docker by running `./build_docker.sh production` rather than `./build_docker.sh`.
 (This will replace the previous docker instance from step 5 above.)

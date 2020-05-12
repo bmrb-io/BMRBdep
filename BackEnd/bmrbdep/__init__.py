@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import socket
 import traceback
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
@@ -200,10 +201,13 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
             BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
                                  url_for('validate_user', token=token, _external=True))
 
-            mail.send(confirm_message)
-
-
-
+            try:
+                mail.send(confirm_message)
+            except socket.gaierror:
+                if configuration['debug']:
+                    logging.warning('Invalid SMTP server configured!')
+                else:
+                    raise ServerError('Server is mis-configured, please contact the administrator.')
             return jsonify({'status': 'validated'})
 
 
@@ -508,7 +512,7 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': False,
+                        'email_validated': configuration['debug'],
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
