@@ -2,12 +2,14 @@
 
 A basic installation of the BMRBdep server is very straightforward. These are the steps:
 
+### Development/debugging environment
+
 1. Ensure that you have [docker](https://www.docker.com/) installed and running on the server you will use to host BMRBdep.
 2. Navigate to the folder where you want the BMRBdep server files to exist, and run
  `git clone https://github.com/uwbmrb/BMRBdep.git` and then `cd BMRBdep`.
 3. Set up the local environment (create virtual environments for the server and create a
  default configuration file) by running `./install.sh`
-4. Update the configuration file located at `BackEnd/configuration.json` to have the appropriate values.
+4. Update the configuration file located at `BackEnd/bmrbdep/configuration.json` to have the appropriate values.
    * Mandatory sections to update
      * `repo_path` variable which will define where depositions are stored on disk
      * `secret_key` must be set to a randomly generated value. See instructions in the configuration file.
@@ -17,7 +19,21 @@ A basic installation of the BMRBdep server is very straightforward. These are th
      * `ETS` section. Please use a 'test ETS' database while testing that the server is installed correctly.
    * Sections which you will need to update before production use
      * `orcid` - You can get an API key for the ORCID API [here](https://orcid.org/organizations/integrators/API).
-5. Build and launch docker container by running `./build_docker.sh`
+   * Other notes
+     * `local-ips` - This will cause the server to return a full stack trace rather than a basic error
+      if your IP address is in the `local-ips` list. Only enter IPs for development machines,
+      or end users may see stack traces. 
+5. Build and launch a development environment docker container by running `./build_docker.sh`
 6. If everything has went well, you should be able to connect to the server running the BMRBdep docker
 container on port 9001. If you don't see the server running there, and there were not any command line
 errors, check the docker error log using `sudo docker logs bmrbdep`.
+
+### Upgrading to production
+
+The main difference in production mode is that errors are not logged to the console, and the
+experimental "small molecule" deposition type is hidden.
+
+1. Follow all the steps above.
+2. Change the `debug` value in the configuration file to `false`.
+3. Deploy docker by running `./build_docker.sh production` rather than `./build_docker.sh`.
+(This will replace the previous docker instance from step 5 above.)
