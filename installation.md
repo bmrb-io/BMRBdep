@@ -4,7 +4,11 @@ A basic installation of the BMRBdep server is very straightforward. These are th
 
 ### Development/debugging environment
 
-1. Ensure that you have [docker](https://www.docker.com/) installed and running on the server you will use to host BMRBdep.
+1. Ensure that you have [docker](https://www.docker.com/) installed and running on the server you will
+ use to host BMRBdep. Ensure that you also have the `venv` and `pip` python modules installed on your
+  system. On a package that uses the apt package manager, `sudo apt install python3-venv python3-pip`
+  should install these dependencies. For a system that uses the yum package manager,
+  `yum install python3-virtualenv python3-pip` should  install these dependencies.
 2. Navigate to the folder where you want the BMRBdep server files to exist, and run
  `git clone https://github.com/uwbmrb/BMRBdep.git` and then `cd BMRBdep`.
 3. Set up the local environment (create virtual environments for the server and create a
