@@ -7,5 +7,6 @@ Relevant links:
 * [Server requirements](FrontEnd/specification/requirements.md)
 * [Development timeline](FrontEnd/specification/timeline.md)
 * [Historical ADIT-NMR documents](FrontEnd/specification/macromolecular_system/ADIT-documents)
+* [Configuring a BMRBdep server])(installation.md)
 
 To report a bug with the system, please visit [the github issues page](https://github.com/uwbmrb/BMRBDep/issues)
