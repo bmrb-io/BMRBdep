@@ -31,7 +31,7 @@ else
 fi
 
 echo "Copying the web files into place..."
-cd dist && tar -czvf ../release.tgz ./* .htaccess && scp ../release.tgz web@${HOST}:/tmp/ && cd .. && rm -rfv release.tgz && cd "${SCRIPT_DIR}" || exit 3
+cd FrontEnd/dist && tar -czvf ../release.tgz ./* .htaccess && scp ../release.tgz web@${HOST}:/tmp/ && cd .. && rm -rfv release.tgz && cd "${SCRIPT_DIR}" || exit 3
 
 echo "Deploying docker instance..."
 sudo docker tag bmrbdep pike.bmrb.wisc.edu:5000/bmrbdep
