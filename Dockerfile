@@ -17,12 +17,12 @@ RUN apk update && \
     rm -r /root/.cache && \
     cd /opt/wsgi && chown -R uwsgi:uwsgi .
 
-COPY ./bmrbdep/requirements.txt /opt/wsgi/
+COPY ./BackEnd/bmrbdep/requirements.txt /opt/wsgi/
 RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
 
 COPY ./wsgi.conf /opt/wsgi/wsgi.conf
-COPY ./bmrbdep/ /opt/wsgi/bmrbdep/
-COPY ./schema_data/ /opt/wsgi/schema_data/
-COPY ./dist/ /opt/wsgi/dist/
+COPY ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
+COPY ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
+COPY ./FrontEnd/dist/ /opt/wsgi/dist/
 
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf" ]

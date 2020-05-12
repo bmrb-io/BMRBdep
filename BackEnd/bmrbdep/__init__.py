@@ -38,6 +38,7 @@ if application.debug or configuration['debug']:
     CORS(application)
 
 application.secret_key = configuration['secret_key']
+assert application.secret_key != "CHANGE_ME"
 
 # Set up the mail interface
 application.config.update(
