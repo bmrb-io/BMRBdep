@@ -14,7 +14,7 @@
     "admins": [
       "wedell@bmrb.wisc.edu"
     ],
-    "server": "mail",
+    "server": "CHANGE_ME",
     "from_address": "bmrbhelp@bmrb.wisc.edu",
     "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
     "annotator_address": "annotators@lists.bmrb.wisc.edu"
