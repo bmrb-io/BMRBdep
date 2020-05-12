@@ -10,7 +10,9 @@ A basic installation of the BMRBdep server is very straightforward. These are th
 4. Update the configuration file located at `BackEnd/configuration.json` to have the appropriate values.
    * Mandatory sections to update
      * `repo_path` variable which will define where depositions are stored on disk
-     * `secret_key` must be set to a randomly generated value. See instructions in the configuration file
+     * `secret_key` must be set to a randomly generated value. See instructions in the configuration file.
+     Do not change this once the server is live for production, or existing validation e-mails will cease
+     working!
      * `smtp` section
      * `ETS` section. Please use a 'test ETS' database while testing that the server is installed correctly.
    * Sections which you will need to update before production use

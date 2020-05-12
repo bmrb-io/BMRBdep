@@ -5,13 +5,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Check if the initial setups need to happen
 "${SCRIPT_DIR}"/install.sh
 
+secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
+if [[ ${secret_key} == "CHANGE_ME" ]]; then
+  echo 'Please change the secret key in the configuration first!'
+  exit 1
+fi
 
 echo "Getting newest schema."
 (
 source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
 if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
   echo "Schema loader failed, quitting."
-  exit
+  exit 2
 fi
 )
 
@@ -22,12 +27,12 @@ cd "${SCRIPT_DIR}"/FrontEnd || exit 2
 if [[ $1 == "production" ]]; then
   if ! npm run build.prod; then
     echo "Angular build failed, quitting."
-    exit
+    exit 3
   fi
 else
   if ! ng build --configuration devprod; then
     echo "Angular build failed, quitting."
-    exit
+    exit 3
   fi
 fi
 )
@@ -52,10 +57,10 @@ sudo docker rm bmrbdep
 echo "Building the Docker container..."
 if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbdep .; then
     echo "Docker build failed."
-    exit 2
+    exit 4
 fi
 
-deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep repo_path | cut -f4 -d\")
+deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
 
 if [[ $1 != "production" ]]; then
   echo "Starting the docker container locally."
