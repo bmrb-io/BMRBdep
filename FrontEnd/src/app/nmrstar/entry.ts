@@ -426,7 +426,12 @@ export class Entry {
                 } else {
                   for (const conditionalRow of loop.data) {
                     if (rule['Regex'].test(conditionalRow[conditionalIndex].value)) {
-                      loop.parent.getLoopByPrefix(rule['Tag category']).setVisibility(rule);
+                      const applyToLoop = rule['Tag category'];
+                      if (!applyToLoop) {
+                        console.warn('Dictionary override rule specifies non-existent tag: ' + rule['Tag'], rule);
+                      } else {
+                        loop.parent.getLoopByPrefix(rule['Tag category']).setVisibility(rule);
+                      }
                       break;
                     }
                   }
