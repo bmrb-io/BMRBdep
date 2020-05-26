@@ -449,14 +449,17 @@ def new_deposition() -> Response:
         if 'orcid' not in configuration or configuration['orcid']['bearer'] == 'CHANGEME':
             logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
         else:
-            r = requests.get(configuration['orcid']['url'] % author_orcid,
-                             headers={"Accept": "application/json",
-                                      'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            try:
+                r = requests.get(configuration['orcid']['url'] % author_orcid,
+                                 headers={"Accept": "application/json",
+                                          'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+                raise ServerError('An error occurred while contacting the ORCID server.')
             if not r.ok:
                 if r.status_code == 404:
                     raise RequestError('Invalid ORCID!')
                 else:
-                    application.logger.exception('An error occurred while contacting the ORCID server.')
+                    raise ServerError('An error occurred while contacting the ORCID server.')
             else:
                 orcid_json = r.json()
                 try:
