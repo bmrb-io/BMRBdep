@@ -458,17 +458,18 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         if filename != 'submission_info.json':
             self.raise_write_errors()
 
-        secured_filename: str = secure_filename(filename)
-        file_path: str = secured_filename
+        #secured_filename: str = secure_filename(filename)
+        file_path: str = filename
         if not root:
-            file_path = os.path.join('data_files', secured_filename)
+            file_path = os.path.join('data_files', file_path)
 
+        print(os.path.join(self._entry_dir, file_path))
         with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
             fo.write(data)
 
         self._modified_files = True
 
-        return secured_filename
+        return file_path
 
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """

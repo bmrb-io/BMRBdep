@@ -65,7 +65,9 @@
         </td>
         <td class="drag-td" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
             <div class="drag-box">
-                <div class="drag-text" *ngIf="!entry.deposited">Or drag and drop files here</div>
+                <div class="drag-text" *ngIf="!entry.deposited">Or drag and drop files here. (Dragging entire
+                  directories works on Firefox and Chrome, but not Safari. In Safari, you may upload a list of
+                  files, but not an entire directory.</div>
             </div>
         </td>
     </tr>

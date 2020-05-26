@@ -566,16 +566,18 @@ def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
     file_obj: Optional[FileStorage] = request.files.get('file', None)
+    path: str = os.path.abspath(request.form.get('path', ''))
+    full_name = os.path.join(path, file_obj.filename)
 
     if not file_obj or not file_obj.filename:
         raise RequestError('No file uploaded!')
 
     # Store a data file
     with depositions.DepositionRepo(uuid) as repo:
-        filename = repo.write_file(file_obj.filename, file_obj.read())
+        filename = repo.write_file(full_name, file_obj.read())
 
         # Update the entry data
-        if repo.commit("User uploaded file: %s" % filename):
+        if repo.commit("User uploaded file: %s" % full_name):
             return jsonify({'filename': filename, 'changed': True,
                             'commit': repo.last_commit})
         else:

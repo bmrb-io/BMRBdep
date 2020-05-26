@@ -21,12 +21,14 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};
   subscription$: Subscription;
+  public activeUploads;
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
               private route: ActivatedRoute) {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
+    this.activeUploads = 0;
   }
 
   ngOnInit() {
@@ -67,25 +69,25 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
   // At the drag drop area
-  // (drop)="onDropFile($event)"
-  onDropFile(event: DragEvent) {
-    event.preventDefault();
-    if (this.entry && !this.entry.deposited) {
-      this.uploadFile(event.dataTransfer.items);
-    }
-  }
-
-  // At the drag drop area
   // (dragover)="onDragOverFile($event)"
   onDragOverFile(event) {
     event.stopPropagation();
     event.preventDefault();
   }
 
+  // At the drag drop area
+  // (drop)="onDropFile($event)"
+  onDropFile(event: DragEvent) {
+    event.preventDefault();
+    if (this.entry && !this.entry.deposited) {
+      this.processUploadEventAndUpload(event);
+    }
+  }
+
   // At the file input element
   // (change)="selectFile($event)"
   selectFile(event) {
-    this.uploadFile(event.dataTransfer.items);
+    this.processUploadEventAndUpload(event);
     this.fileUploadElement.nativeElement.value = '';
   }
 
@@ -93,63 +95,88 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     console.log(this.entry.getLoopsByCategory('_Upload_data')[0]);
   }
 
+  processUploadEventAndUpload(event: DragEvent) {
+    if (typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
+      typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function') {
+      console.log('I need fallback, giving up.');
+      return;
+    }
+
+    for (let i = 0; i < event.dataTransfer.items.length; i++) {
+      try {
+        this.traverseFileTree(event.dataTransfer.items[i].webkitGetAsEntry(), undefined);
+      } catch {
+        this.traverseFileTree(event.dataTransfer.items[i].getAsEntry(), undefined);
+      }
+    }
+
+    //this.uploadFiles(files);
+  }
+
 
   traverseFileTree(item, path) {
+    // This takes a list of File or Directory items, and recursively explores the directories, adding all files
+    //  within them for upload.
+
+    let files = [];
     const parent = this;
     path = path || '';
+
     if (item.isFile) {
       // Get file
       item.file(function (file) {
-        console.log('File:', path + file.name);
+        console.log('File:', path + file.name, item);
+        //files.push([file, path]);
+        parent.uploadFile(file, path);
       });
     } else if (item.isDirectory) {
       // Get folder contents
       const dirReader = item.createReader();
       dirReader.readEntries(function (entries) {
         for (let i = 0; i < entries.length; i++) {
-          parent.traverseFileTree(entries[i], path + item.name + '/');
+          files = files.concat(parent.traverseFileTree(entries[i], path + item.name + '/'));
         }
       });
     }
+    return files;
   }
 
-  uploadFile(files) {
+  uploadFile(file, path) {
 
-    let closure = files.length;
+    const fullName = path + file.name;
 
-    for (let i = 0; i < files.length; i++) {
-      this.traverseFileTree(files[i].webkitGetAsEntry(), undefined);
+    const dataFile = this.entry.dataStore.addFile(fullName);
 
-      const dataFile = this.entry.dataStore.addFile(files[i].name);
-
-      this.uploadSubscriptionDict$[files[i].name] = this.api.uploadFile(files[i])
-        .subscribe(
-          event => {
-            if (event.type === HttpEventType.UploadProgress) {
-              dataFile.percent = Math.round(100 * event.loaded / event.total);
-            } else if (event instanceof HttpResponse) {
-              this.entry.addCommit(event.body['commit']);
-              dataFile.percent = 100;
-              this.entry.dataStore.updateName(dataFile, event.body['filename']);
-              if (!event.body['changed']) {
-                this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+    this.activeUploads += 1;
+    this.uploadSubscriptionDict$[fullName] = this.api.uploadFile(file, path)
+      .subscribe(
+        event => {
+          if (event.type === HttpEventType.UploadProgress) {
+            dataFile.percent = Math.round(100 * event.loaded / event.total);
+          } else if (event instanceof HttpResponse) {
+            this.entry.addCommit(event.body['commit']);
+            dataFile.percent = 100;
+            this.entry.dataStore.updateName(dataFile, event.body['filename']);
+            if (!event.body['changed']) {
+              this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
-              }
-            }
-          },
-          () => {
-            this.entry.dataStore.deleteFile(dataFile.fileName);
-            this.messagesService.sendMessage(new Message('Failed to upload file. Do you have an internet connection?',
-              MessageType.ErrorMessage, 15000));
-          },
-          () => {
-            closure -= 1;
-            if (closure === 0) {
-              this.updateAndSaveDataFiles();
             }
           }
-        );
-    }
+        },
+        () => {
+          this.entry.dataStore.deleteFile(dataFile.fileName);
+          this.messagesService.sendMessage(new Message(`Failed to upload file ${dataFile.fileName}, please retry.`,
+            MessageType.ErrorMessage, 15000));
+          this.activeUploads -= 1;
+        },
+        () => {
+          this.activeUploads -= 1;
+          if (this.activeUploads === 0) {
+            this.updateAndSaveDataFiles();
+          }
+        }
+      );
+
   }
 
   deleteFile(fileName: string): void {
