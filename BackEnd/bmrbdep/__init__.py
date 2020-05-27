@@ -299,6 +299,9 @@ def duplicate_deposition(uuid) -> Response:
                                        }
             new_repo.write_entry(entry_template)
             new_repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            # Delete data files when cloning
+            for file_ in new_repo.get_data_file_list():
+                new_repo.delete_data_file(file_)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
 
             send_validation_email(deposition_id, repo)
