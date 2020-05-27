@@ -11,7 +11,6 @@ from uuid import uuid4
 import pynmrstar
 import requests
 import simplejson as json
-import werkzeug
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeSerializer
@@ -42,8 +41,6 @@ application.config.update(
     MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
 )
 mail = Mail(application)
-
-application = werkzeug.contrib.fixers.ProxyFit(application)
 
 # Set up the SMTP error handler
 if configuration['smtp'].get('server') != 'CHANGE_ME':
