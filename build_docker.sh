@@ -62,7 +62,5 @@ fi
 
 deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
 
-if [[ $1 != "production" ]]; then
-  echo "Starting the docker container locally."
-  sudo docker run -d --name bmrbdep -p 9001:9001 --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
-fi
+echo "Starting the docker container locally."
+sudo docker run -d --name bmrbdep -p 9001:9001 --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
