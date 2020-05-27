@@ -63,4 +63,4 @@ fi
 deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
 
 echo "Starting the docker container locally."
-sudo docker run -d --name bmrbdep -p 9001:9001 --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
+sudo docker run -d --name bmrbdep -p 9001:9001 -p 9000:9000 --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
