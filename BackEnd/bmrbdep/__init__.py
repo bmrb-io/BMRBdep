@@ -156,7 +156,8 @@ def send_local_file(filename: str = None) -> Response:
     if not os.path.exists(angular_path):
         angular_path = os.path.join(root_dir, '..', 'dist')
     if not os.path.exists(angular_path):
-        return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ')
+        return Response(f'Broken installation. The Angular HTML/JS/CSS files are missing from the docker container: '
+                        f'{angular_path} ')
 
     if not os.path.exists(os.path.join(angular_path, filename)):
         filename = 'index.html'
