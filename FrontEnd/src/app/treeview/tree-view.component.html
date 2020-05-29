@@ -2,7 +2,7 @@
 
     <mat-card class="nav-card">
         <mat-card-title (dblclick)="developerMode=true;logEntry()">
-            Deposition "{{entry.depositionNickname}}" Navigation
+            Upload "{{entry.depositionNickname}}" Navigation
         </mat-card-title>
         <mat-card-content>
 
@@ -42,7 +42,7 @@
 
                 <mat-divider></mat-divider>
                 <div>
-                    <h3 matLine>Deposition options</h3>
+                    <h3 matLine>Upload options</h3>
 
                     <a mat-list-item [ngClass]="{'active': page=='pending-verification'}" *ngIf="!entry.emailValidated"
                        routerLink="/entry/pending-verification" id="pending-verification" matTooltip="Complete the e-mail
@@ -54,7 +54,7 @@ validation step.">
                        routerLink="/" id="new"
                        matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
 deposition to a new deposition if your other deposition is very similar.">
-                        <h2 matLine>Create new deposition</h2>
+                        <h2 matLine>Create new upload</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='restore'}"
@@ -66,7 +66,7 @@ deposition to a new deposition if your other deposition is very similar.">
 
                     <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
                        routerLink="/entry" id="entry" matTooltip="Review entire deposition.">
-                        <h2 matLine>View full deposition</h2>
+                        <h2 matLine>View full upload</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Deposit entry to the BMRB." id="review"
@@ -75,7 +75,7 @@ deposition to a new deposition if your other deposition is very similar.">
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
                         <span *ngIf="entry.valid" class="cdk-visually-hidden">Completed</span>
-                        <h2 matLine>Deposit current entry</h2>
+                        <h2 matLine>Upload current entry</h2>
                     </a>
 
                     <a mat-list-item routerLink="/" (click)="endSession()"
