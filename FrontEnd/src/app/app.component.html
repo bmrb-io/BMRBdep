@@ -8,10 +8,10 @@
         </div>
         <ng-container *ngIf="entry">
           <span *ngIf="entry && !entry.deposited" class="title-center">
-            BMRbig - Deposition '{{entry.depositionNickname}}' in progress
+            BMRbig - Upload '{{entry.depositionNickname}}' in progress
           </span>
           <span *ngIf="entry && entry.deposited" class="title-center">
-            BMRbig - Deposition '{{entry.depositionNickname}}' completed and deposited
+            BMRbig - Upload '{{entry.depositionNickname}}' completed
           </span>
           <span *ngIf="!entry" class="title-center"
                   matTooltip="Log out from this deposition. You can resume it later by following the link sent to
