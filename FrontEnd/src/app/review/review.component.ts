@@ -41,10 +41,9 @@ export class ReviewComponent implements OnInit, OnDestroy {
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
-    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to deposit the entry '${this.entry.depositionNickname}'?` +
-      ' No changes are allowed after deposition via the BMRbig interface. (You may continue to communicate changes after deposition via ' +
-      ' the BMRB annotator assigned to your deposition, or by contacting bmrbhelp@bmrb.wisc.edu".)';
-    this.dialogRef.componentInstance.proceedMessage = 'Deposit';
+    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to upload the entry '${this.entry.depositionNickname}'?` +
+      ' No changes are allowed after upload via the BMRbig interface.';
+    this.dialogRef.componentInstance.proceedMessage = 'Upload';
 
     this.dialogRef.afterClosed().subscribe(result => {
       if (result) {
