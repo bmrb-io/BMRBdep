@@ -48,6 +48,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {SidenavService} from './sidenav.service';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import { DataViewerComponent } from './data-viewer/data-viewer.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +70,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     LoadEntryComponent,
     ConfirmationDialogComponent,
     SupportComponent,
+    DataViewerComponent,
   ],
   imports: [
     BrowserModule,
