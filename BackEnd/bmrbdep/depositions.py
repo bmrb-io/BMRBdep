@@ -154,7 +154,7 @@ class DepositionRepo:
         entry_citation_doi = final_entry.get_tag('Entry.Citation_DOI')
         if entry_citation_doi:
             citation = final_entry.get_saveframes_by_category('citations')[0]
-            citation['DOI'] = entry_citation_doi
+            citation['DOI'] = entry_citation_doi[0]
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
