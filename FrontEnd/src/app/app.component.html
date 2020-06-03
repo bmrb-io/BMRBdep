@@ -19,12 +19,12 @@ your email when you created the deposition.">BMRbig</span>
           <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
         </ng-container>
 
-      <span *ngIf="!entry" class="title-center pointer">
+      <div *ngIf="!entry" class="title-center pointer">
         <a href="http://www.bmrb.wisc.edu" *ngIf="!entry" class="title-right pointer">
           <img src="/assets/images/BMRbig_logo_new.png" alt="BMRB logo"
-               style="padding-top: 10px; height: 70px"/>
+               style="padding-top: 10px; height: 90px"/>
         </a>
-      </span>
+      </div>
 
     </mat-toolbar-row>
     <mat-toolbar-row class="loading-bar-holder">
