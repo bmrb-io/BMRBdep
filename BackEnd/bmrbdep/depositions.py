@@ -354,7 +354,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
     def release_entry(self) -> None:
         """" Actually release the entry. """
 
-        final_entry = self.get_entry()
+        final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
 
         output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
         try:
