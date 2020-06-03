@@ -326,7 +326,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
                                            params['author_email']])
                 conn.commit()
                 cur.execute("SELECT bmrbnum FROM entrylog WHERE restart_id = ?", [params['restart_id']])
-                final_entry.entry_id = 'bmrbig' + cur.fetchone()[0]
+                final_entry.entry_id = 'bmrbig' + str(cur.fetchone()[0])
             except sqlite3.IntegrityError:
                 logging.exception('This entry has already been deposited!')
                 conn.rollback()
