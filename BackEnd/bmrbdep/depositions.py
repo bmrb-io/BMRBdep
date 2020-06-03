@@ -261,7 +261,6 @@ class DepositionRepo:
 
         # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
-        today_date: datetime = datetime.now()
 
         # Set the accession and submission date
         entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
@@ -343,24 +342,35 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         self.commit('Deposition submitted!')
 
         # Data out
-        entry_saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
-        if entry_saveframe['Release_privacy'][0] == 'public':
-            output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
-            os.mkdir(output_dir)
-            entry_saveframe['Original_release_date'] = today_str
-            entry_saveframe['Last_release_date'] = today_str
-            contact_loop = entry_saveframe['_Contact_person']
-            del entry_saveframe['_Contact_person']
-            final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
-            entry_saveframe.add_loop(contact_loop)
-            for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
-                try:
-                    os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-                except OSError:
-                    copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        if entry_saveframe['Release_request'][0] == 'Release now':
+            self.release_entry()
 
         # Return the assigned BMRB ID
         return final_entry.entry_id
+
+    def release_entry(self) -> None:
+        """" Actually release the entry. """
+
+        final_entry = self.get_entry()
+
+        output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
+        try:
+            os.mkdir(output_dir)
+        except FileExistsError:
+            pass
+        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        today_str: str = date.today().isoformat()
+        entry_saveframe['Original_release_date'] = today_str
+        entry_saveframe['Last_release_date'] = today_str
+        contact_loop = entry_saveframe['_Contact_person']
+        del entry_saveframe['_Contact_person']
+        final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
+        entry_saveframe.add_loop(contact_loop)
+        for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
+            try:
+                os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+            except OSError:
+                copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
