@@ -52,8 +52,8 @@ validation step.">
 
                     <a mat-list-item [ngClass]="{'active': page=='new'}"
                        routerLink="/" id="new"
-                       matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
-deposition to a new deposition if your other deposition is very similar.">
+                       matTooltip="End this upload session and create a new upload. Optionally 'clone' this
+upload to a new deposition if your other upload is very similar.">
                         <h2 matLine>Create new upload</h2>
                     </a>
 
@@ -65,11 +65,11 @@ deposition to a new deposition if your other deposition is very similar.">
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
-                       routerLink="/entry" id="entry" matTooltip="Review entire deposition.">
+                       routerLink="/entry" id="entry" matTooltip="Review entire upload.">
                         <h2 matLine>View full upload</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Deposit entry to the BMRB." id="review"
+                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to the BMRB." id="review"
                        routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
@@ -79,8 +79,8 @@ deposition to a new deposition if your other deposition is very similar.">
                     </a>
 
                     <a mat-list-item routerLink="/" (click)="endSession()"
-                       matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">
+                       matTooltip="Log out from this upload. You can resume it later by following the link sent to
+your email when you created the upload.">
                         <h2 matLine>End session</h2>
                     </a>
 
