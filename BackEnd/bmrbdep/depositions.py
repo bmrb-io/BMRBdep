@@ -40,6 +40,7 @@ class DepositionRepo:
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         uuids = str(uuid)
+        print(uuids)
         self._lock_path: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids, '.git', 'api.lock')
         self._entry_dir: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids)
 
@@ -144,9 +145,16 @@ class DepositionRepo:
             pass
 
         # Assign the PubMed ID
-        for citation in final_entry.get_saveframes_by_category('citations'):
-            if citation['PubMed_ID'] and citation['PubMed_ID'] != ".":
+        entry_pubmed_id = final_entry.get_tag('Entry.Citation_PubMed_ID')
+        if entry_pubmed_id:
+            citation = final_entry.get_saveframes_by_category('citations')[0]
+            citation['PubMed_ID'] = entry_pubmed_id[0]
+            if citation['PubMed_ID'] not in pynmrstar.definitions.NULL_VALUES:
                 update_citation_with_pubmed(citation, schema=schema)
+        entry_citation_doi = final_entry.get_tag('Entry.Citation_DOI')
+        if entry_citation_doi:
+            citation = final_entry.get_saveframes_by_category('citations')[0]
+            citation['DOI'] = entry_citation_doi
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
