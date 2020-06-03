@@ -146,15 +146,18 @@ class DepositionRepo:
 
         # Assign the PubMed ID
         entry_pubmed_id = final_entry.get_tag('Entry.Citation_PubMed_ID')
-        if entry_pubmed_id:
-            citation = final_entry.get_saveframes_by_category('citations')[0]
-            citation['PubMed_ID'] = entry_pubmed_id[0]
-            if citation['PubMed_ID'] not in pynmrstar.definitions.NULL_VALUES:
-                update_citation_with_pubmed(citation, schema=schema)
         entry_citation_doi = final_entry.get_tag('Entry.Citation_DOI')
-        if entry_citation_doi:
-            citation = final_entry.get_saveframes_by_category('citations')[0]
-            citation['DOI'] = entry_citation_doi[0]
+
+        if (entry_pubmed_id and entry_pubmed_id[0] not in pynmrstar.definitions.NULL_VALUES) or \
+           (entry_citation_doi and entry_citation_doi[0] not in pynmrstar.definitions.NULL_VALUES):
+            citation = pynmrstar.Saveframe.from_template('citations', schema=schema)
+            final_entry.add_saveframe(citation)
+            if entry_pubmed_id:
+                citation['PubMed_ID'] = entry_pubmed_id[0]
+                if citation['PubMed_ID'] not in pynmrstar.definitions.NULL_VALUES:
+                    update_citation_with_pubmed(citation, schema=schema)
+            if entry_citation_doi:
+                citation['DOI'] = entry_citation_doi[0]
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
