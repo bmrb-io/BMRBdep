@@ -22,6 +22,7 @@ const routes: Routes = [
   {path: 'entry/pending-verification', component: PendingValidationComponent},
   {path: 'help/molecular-assembly', component: MolecularSystemComponent},
   {path: 'support', component: SupportComponent},
+  {path: 'released', component: DataViewerComponent},
   {path: 'released/:entry', component: DataViewerComponent}
 ];
 
