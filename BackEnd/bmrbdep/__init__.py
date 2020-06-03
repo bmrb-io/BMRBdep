@@ -215,17 +215,17 @@ def send_validation_email(uuid) -> Response:
             token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
             confirm_message.html = """
-            Thank you for your deposition '%s' created %s (UTC).
+            Thank you for your upload '%s' created %s (UTC).
             <br><br>
-            To return to this deposition, click <a href="%s" target="BMRbig">here</a>.
+            To return to this upload, click <a href="%s" target="BMRbig">here</a>.
             <br><br>
             If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
-            share this e-mail with will have access to the full contents of your in-progress deposition and can make
+            share this e-mail with will have access to the full contents of your in-progress upload and can make
             changes to it.
 
             If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
             leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
-            computer could access your in-process deposition.
+            computer could access your in-process upload.
             <br><br>
             Thank you,
             <br>
@@ -234,32 +234,30 @@ def send_validation_email(uuid) -> Response:
 
             mail.send(confirm_message)
 
-
-
             return jsonify({'status': 'validated'})
 
 
         # Ask them to confirm their e-mail
-        confirm_message = Message("Please validate your e-mail address for BMRbig deposition '%s'." %
+        confirm_message = Message("Please validate your e-mail address for BMRbig upload '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
                                   reply_to=configuration['smtp']['reply_to_address'])
         token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
         confirm_message.html = """
-Thank you for your deposition '%s' created %s (UTC).
+Thank you for your upload '%s' created %s (UTC).
 <br><br>
 Please click <a href="%s" target="BMRbig">here</a> to validate your e-mail for this session. This is required to
-proceed. You can also use this link to return to your deposition later if you close the page before
+proceed. You can also use this link to return to your upload later if you close the page before
 it is complete.
 <br><br>
 If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
-share this e-mail with will have access to the full contents of your in-progress deposition and can make
+share this e-mail with will have access to the full contents of your in-progress upload and can make
 changes to it.
 
 If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
 leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
-computer could access your in-process deposition.
+computer could access your in-process upload.
 <br><br>
 Thank you,
 <br>
