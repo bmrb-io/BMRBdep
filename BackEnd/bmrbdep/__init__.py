@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import sqlite3
 import traceback
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
@@ -131,19 +132,42 @@ def handle_other_errors(exception: Exception):
         return response
 
 
-@application.route('/released/<int:entry_id>')
-@application.route('/released/<int:entry_id>/<file_name>')
-def released(entry_id: int, file_name=None):
-    if file_name:
-        return send_from_directory(os.path.join(configuration['output_path'], str(entry_id)), file_name)
+@application.route('/deposition/released')
+def all_released():
+    with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT bmrbnum, submission_date, molecular_system FROM entrylog", [])
+            return jsonify([{'id': x[0], 'date': x[1], 'title': x[2]} for x in cur])
+        except sqlite3.Error:
+            raise ServerError('Failed to access database!')
 
-    full_path = os.path.join(configuration['output_path'], str(entry_id))
-    if not os.path.exists(full_path):
-        return "Invalid entry ID."
-    files = [f'<a href="{url_for("released", entry_id=entry_id, file_name=f)}">{f}</a>' for f in os.listdir(full_path)]
-    if len(files) == 0:
-        return "Invalid entry ID."
-    return "<br>".join(files)
+
+@application.route('/deposition/released/<string:entry_id>')
+@application.route('/deposition/released/<string:entry_id>/<file_name>')
+def released(entry_id: str, file_name=None):
+
+    directory_path = os.path.join(configuration['output_path'], str(entry_id))
+    if not os.path.exists(directory_path):
+        raise RequestError("Invalid entry ID. Entry either doesn't exist or hasn't yet been released.")
+    if file_name:
+        if os.path.exists(os.path.join(directory_path, file_name)):
+            return send_from_directory(directory_path, file_name)
+        else:
+            raise RequestError("No such file!")
+
+    entry = pynmrstar.Entry.from_file(os.path.join(directory_path, f"{entry_id}.str"))
+    available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
+    file_data = {}
+    for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
+        if name in file_data:
+            file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
+        else:
+            file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
+    files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f,
+              'type': file_data[f]} for f in file_data.keys()]
+
+    return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
 
 
 @application.route('/')
