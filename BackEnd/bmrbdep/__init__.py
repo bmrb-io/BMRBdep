@@ -475,12 +475,11 @@ def deposit_entry(uuid) -> Response:
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                             ['Given_name', 'Family_name', 'Email_address'])]
-        message = Message("Your entry has been deposited!", recipients=contact_emails,
+        message = Message("Your entry has been uploaded!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
-        message.html = f'''Thank you for your deposition! Your assigned BMRbig ID is test-{bmrb_num}. This is a
-test-only ID, and will not be preserved permanently. We have attached a
-copy of the deposition contents for reference. If you have marked your submission as public,
-it will be visible <a href="{url_for("released", entry_id=bmrb_num, _external=True)}">here</a>.<br><br>
+        message.html = f'''Thank you for your upload! Your assigned BMRbig ID is {bmrb_num}. We have attached a
+copy of the deposition contents for reference. If you have marked your submission as for immediate release,
+it will be visible <a href="https://bmrbig.org/released/{bmrb_num}">here</a>.<br><br>
 Deposited data files: {repo.get_data_file_list()}'''
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
@@ -491,16 +490,18 @@ Deposited data files: {repo.get_data_file_list()}'''
                 send_to = configuration['smtp']['annotator_address']
             else:
                 send_to = [configuration['smtp']['annotator_address']]
-            message = Message("BMRbig: BMRB entry %s has been deposited." % bmrb_num, recipients=send_to)
-            message.body = '''The following new entry has been deposited via BMRbig:
+            message = Message("BMRbig: BMRB entry %s has been uploaded." % bmrb_num, recipients=send_to)
+            entry_saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+            message.body = '''The following new entry has been uploaded via BMRbig:
 
-restart id:            %s
-BMRbig accession number: test-%s
+restart id:              %s
+BMRbig accession number: %s
+release status:          %s
 
 title: %s
 
 contact persons: %s
-''' % (uuid, bmrb_num, final_entry.get_saveframes_by_category('entry_information')[0]['Title'][0], contact_full)
+''' % (uuid, bmrb_num, entry_saveframe['Release_request'][0], entry_saveframe['Title'][0], contact_full)
         mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
