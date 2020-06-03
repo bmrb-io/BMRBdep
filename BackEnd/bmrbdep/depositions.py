@@ -334,28 +334,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
                 conn.rollback()
                 raise ServerError('Could not create deposition. Please try again.')
 
-        # Assign the BMRB ID in all the appropriate places in the entry
-        for saveframe in final_entry.frame_list:
-            for tag in saveframe.tags:
-                fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
-                try:
-                    tag_schema = schema.schema[fqtn]
-                    if tag_schema['entryIdFlg'] == 'Y':
-                        tag[1] = final_entry.entry_id
-                except KeyError:
-                    pass
-
-            for loop in saveframe.loops:
-                for tag in loop.tags:
-                    fqtn = (loop.category + "." + tag).lower()
-                    try:
-                        tag_schema = schema.schema[fqtn]
-                        if tag_schema['entryIdFlg'] == 'Y':
-                            loop[tag] = [final_entry.entry_id] * len(loop[tag])
-                    except KeyError:
-                        pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(final_entry.entry_id)
-
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
