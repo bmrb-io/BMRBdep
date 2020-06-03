@@ -347,6 +347,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         if entry_saveframe['Release_privacy'][0] == 'public':
             output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
             os.mkdir(output_dir)
+            entry_saveframe['Original_release_date'] = today_str
+            entry_saveframe['Last_release_date'] = today_str
             contact_loop = entry_saveframe['_Contact_person']
             del entry_saveframe['_Contact_person']
             final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
