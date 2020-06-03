@@ -6,6 +6,10 @@
   text-align: right;
 }
 
+.mat-toolbar-row {
+  height: auto;
+}
+
 .loading-bar-holder {
   height: 4px;
   display: block;
