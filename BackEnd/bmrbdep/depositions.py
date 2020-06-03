@@ -372,26 +372,6 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         # Assign the BMRB ID in all the appropriate places in the entry
         final_entry.entry_id = bmrbnum
-        for saveframe in final_entry.frame_list:
-            for tag in saveframe.tags:
-                fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
-                try:
-                    tag_schema = schema.schema[fqtn]
-                    if tag_schema['entryIdFlg'] == 'Y':
-                        tag[1] = bmrbnum
-                except KeyError:
-                    pass
-
-            for loop in saveframe.loops:
-                for tag in loop.tags:
-                    fqtn = (loop.category + "." + tag).lower()
-                    try:
-                        tag_schema = schema.schema[fqtn]
-                        if tag_schema['entryIdFlg'] == 'Y':
-                            loop[tag] = [bmrbnum] * len(loop[tag])
-                    except KeyError:
-                        pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(bmrbnum)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
