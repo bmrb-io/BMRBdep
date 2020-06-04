@@ -394,7 +394,7 @@ export class ApiService implements OnDestroy {
                      orcid: string,
                      sessionValidity: string): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;
-    this.messagesService.sendMessage(new Message('Creating upload...',
+    this.messagesService.sendMessage(new Message('Configuring upload...',
       MessageType.NotificationMessage, 0));
 
     const body = new FormData();
