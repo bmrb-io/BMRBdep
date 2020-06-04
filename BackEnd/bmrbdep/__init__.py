@@ -280,6 +280,9 @@ def duplicate_deposition(uuid) -> Response:
 
     with depositions.DepositionRepo(uuid) as repo:
         merge_entries(entry_template, repo.get_entry(), schema)
+        # Add a "deleted" tag to use to track deletion status
+        for saveframe in entry_template:
+            saveframe.add_tag('_Deleted', 'no')
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
