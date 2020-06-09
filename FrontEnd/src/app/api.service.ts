@@ -389,10 +389,10 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newMicroDeposition(authorEmail: string,
-                     depositionNickname: string,
-                     orcid: string,
-                     sessionValidity: string): Promise<string> {
+  newDeposition(authorEmail: string,
+                depositionNickname: string,
+                orcid: string,
+                sessionValidity: string): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;
     this.messagesService.sendMessage(new Message('Configuring upload...',
       MessageType.NotificationMessage, 0));
@@ -413,57 +413,6 @@ export class ApiService implements OnDestroy {
       this.http.post(apiEndPoint, body, options)
         .subscribe(jsonData => {
           this.clearDeposition();
-          this.messagesService.clearMessage();
-          resolve(jsonData['deposition_id']);
-        }, error => {
-          if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
-            reject('Invalid e-mail');
-          }
-          this.handleError(error);
-          reject(error);
-        });
-    });
-  }
-
-  newDeposition(authorEmail: string,
-                depositionNickname: string,
-                depositionType: string,
-                orcid: string = null,
-                skipEmailValidation: boolean = false,
-                file: File = null,
-                bootstrapID: string = null): Promise<string> {
-    const apiEndPoint = `${environment.serverURL}/new`;
-    this.messagesService.sendMessage(new Message('Creating deposition...',
-      MessageType.NotificationMessage, 0));
-
-    const body = new FormData();
-    body.append('email', authorEmail);
-    body.append('deposition_nickname', depositionNickname);
-    body.append('deposition_type', depositionType);
-    if (skipEmailValidation) {
-      body.append('skip_validation', 'true');
-    }
-    if (orcid) {
-      body.append('orcid', orcid);
-    }
-    if (file) {
-      body.append('nmrstar_file', file);
-    }
-    if (bootstrapID) {
-      body.append('bootstrapID', bootstrapID);
-    }
-
-    const options = {
-      params: new HttpParams(),
-      reportProgress: true,
-    };
-
-    return new Promise((resolve, reject) => {
-
-      this.http.post(apiEndPoint, body, options)
-        .subscribe(jsonData => {
-          this.clearDeposition();
-          this.sidenavService.open().then();
           this.messagesService.clearMessage();
           resolve(jsonData['deposition_id']);
         }, error => {
