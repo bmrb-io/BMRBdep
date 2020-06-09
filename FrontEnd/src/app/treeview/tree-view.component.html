@@ -68,7 +68,7 @@ validation step.">
                         <h2 matLine>View full upload</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to the BMRB." id="review"
+                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to BMRbig." id="review"
                        routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
