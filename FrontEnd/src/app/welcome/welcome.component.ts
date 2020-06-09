@@ -5,6 +5,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
+import {SidenavService} from '../sidenav.service';
 
 @Component({
   selector: 'app-welcome',
@@ -18,7 +19,8 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   public production;
 
   constructor(private router: Router,
-              public api: ApiService) {
+              public api: ApiService,
+              private sidenavService: SidenavService) {
     this.entry = null;
     this.emailValidationError = false;
     this.production = environment.production;
@@ -63,7 +65,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, 'public').then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
-          location.reload();
+          this.sidenavService.open().then();
         });
       }, error => {
         if (error === 'Invalid e-mail') {
