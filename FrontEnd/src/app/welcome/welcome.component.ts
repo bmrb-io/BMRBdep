@@ -60,7 +60,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     }
 
     this.api.clearDeposition();
-    this.api.newMicroDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, 'public').then(
+    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, 'public').then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
           location.reload();
