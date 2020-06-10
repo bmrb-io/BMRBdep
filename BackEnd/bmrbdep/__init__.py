@@ -384,8 +384,14 @@ def new_deposition() -> Response:
                                                                     default_values=True, schema=schema)
 
     # Merge the entries
+    merge_entries(entry_template, uploaded_entry, schema)
+
+    # Delete the large data loops after merging, if the entry was uploaded and may have them
     if uploaded_entry:
-        merge_entries(entry_template, uploaded_entry, schema)
+        for saveframe in entry_template:
+            for loop in saveframe:
+                if loop.category in ['_Atom_chem_shift', '_Atom_site', '_Gen_dist_constraint']:
+                    loop.data = []
 
     # Calculate the uploaded file types, if they upload a file
     if uploaded_entry and not entry_bootstrap:
