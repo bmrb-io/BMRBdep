@@ -10,8 +10,11 @@ export class Files {
 
 export class Entry {
   id: string;
-  date: string;
+  release_date: string;
   title: string;
+  bmrb_id: string;
+  pdb_id: string;
+  doi: string;
 }
 
 @Component({
