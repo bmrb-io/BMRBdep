@@ -272,6 +272,17 @@ class DepositionRepo:
         entry_saveframe['Submission_date'] = today_str
         entry_saveframe['Accession_date'] = today_str
 
+        release_status = entry_saveframe['Release_request'][0]
+        release_date = date.today()
+        if release_status == 'Hold for 4 weeks':
+            release_date = release_date + relativedelta(weeks=4)
+        elif release_status == 'Hold for 8 weeks':
+            release_date = release_date + relativedelta(weeks=8)
+        elif release_status == 'Hold for 6 months':
+            release_date = release_date + relativedelta(months=6)
+        entry_saveframe['Original_release_date'] = release_date.isoformat()
+        entry_saveframe['Last_release_date'] = release_date.isoformat()
+
         # Do final entry normalization
         final_entry.normalize(schema=schema)
 
@@ -316,24 +327,9 @@ class DepositionRepo:
                   'onhold_status': esf['Release_request'][0],
                   'bmrb_id': esf.get_tag('Selected_BMRB_ID')[0] if esf.get_tag('Selected_BMRB_ID') else None,
                   'pdb_id': esf.get_tag('Selected_PDB_ID')[0] if esf.get_tag('Selected_PDB_ID') else None,
-                  'publication_doi': esf.get_tag('Citation_DOI')[0] if esf.get_tag('Citation_DOI') else None
+                  'publication_doi': esf.get_tag('Citation_DOI')[0] if esf.get_tag('Citation_DOI') else None,
+                  'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
                   }
-
-        try:
-            release_date = datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
-        except (IndexError, ValueError, KeyError, TypeError):
-            release_date = None
-            if params['onhold_status'] == 'Release now':
-                release_date = date.today()
-
-        if params['onhold_status'] == 'Hold for 4 weeks':
-            release_date = release_date + relativedelta(weeks=4)
-        elif params['onhold_status'] == 'Hold for 8 weeks':
-            release_date = release_date + relativedelta(weeks=8)
-        elif params['onhold_status'] == 'Hold for 6 months':
-            release_date = release_date + relativedelta(months=6)
-        params['release_date'] = release_date
-        params['released'] = release_date and release_date <= date.today()
 
         with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
             cur = conn.cursor()
@@ -371,9 +367,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         except FileExistsError:
             pass
         entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
-        today_str: str = date.today().isoformat()
-        entry_saveframe['Original_release_date'] = today_str
-        entry_saveframe['Last_release_date'] = today_str
         contact_loop = entry_saveframe['_Contact_person']
         del entry_saveframe['_Contact_person']
         final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
