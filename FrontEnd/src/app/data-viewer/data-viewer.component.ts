@@ -12,6 +12,7 @@ export class Entry {
   id: string;
   release_date: string;
   title: string;
+  author: string;
   bmrb_id: string;
   pdb_id: string;
   doi: string;
