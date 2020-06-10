@@ -87,7 +87,7 @@ export class ApiService implements OnDestroy {
         event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && !this.cachedEntry) {
+              && this.router.url.indexOf('/released') && !this.cachedEntry) {
               this.subscription$.unsubscribe();
               router.navigate(['/']).then();
             }
