@@ -5,6 +5,7 @@ import logging
 import os
 import sqlite3
 import traceback
+from datetime import date
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
@@ -137,8 +138,8 @@ def all_released():
     with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
         cur = conn.cursor()
         try:
-            cur.execute("SELECT bmrbnum, submission_date, molecular_system FROM entrylog", [])
-            return jsonify([{'id': x[0], 'date': x[1], 'title': x[2]} for x in cur])
+            cur.execute("SELECT bmrbig_id, submission_date, title FROM entrylog", [])
+            return jsonify([{'id': x[0], 'date': x[1], 'title': x[2]} for x in cur if x[1] <= date.today()])
         except sqlite3.Error:
             raise ServerError('Failed to access database!')
 
