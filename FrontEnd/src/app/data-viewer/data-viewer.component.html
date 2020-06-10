@@ -36,13 +36,19 @@
       <th>Entry ID</th>
       <th>Title</th>
       <th>Release date</th>
+      <th>Linked BMRB ID</th>
+      <th>Linked PDB ID</th>
+      <th>DOI</th>
     </tr>
     </thead>
     <tbody>
     <tr *ngFor="let record of records">
       <td><a routerLink='{{record.id}}'>BMRbig{{record.id}}</a></td>
       <td>{{record.title}}</td>
-      <td>{{record.date}}</td>
+      <td>{{record.release_date}}</td>
+      <td><a href="http://www.bmrb.wisc.edu/data_library/summary/index.php?bmrbId={{record.bmrb_id}}">{{record.bmrb_id}}</a></td>
+      <td><a href="https://www.wwpdb.org/pdb?id={{record.pdb_id}}">{{record.pdb_id}}</a></td>
+      <td><a href="https://doi.org/{{record.doi}}">{{record.doi}}</a></td>
     </tr>
     </tbody>
   </table>
