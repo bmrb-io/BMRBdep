@@ -6,17 +6,14 @@
       <thead>
       <tr>
         <th>File name</th>
-        <th>File description</th>
       </tr>
       </thead>
       <tbody>
       <tr>
         <td><a href="{{env.serverURL}}/released/{{entry_id}}/{{entry_id}}.str">{{entry_id}}.str</a></td>
-        <td>Entry metadata</td>
       </tr>
       <tr *ngFor="let file of files">
         <td><a href="{{file.path}}">{{file.name}}</a></td>
-        <td>{{file.type.join(", ")}}</td>
       </tr>
       </tbody>
     </table>

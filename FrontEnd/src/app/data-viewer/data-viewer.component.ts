@@ -6,7 +6,6 @@ import {ActivatedRoute} from '@angular/router';
 export class Files {
   name: string;
   path: string;
-  type: Array<string>;
 }
 
 export class Entry {

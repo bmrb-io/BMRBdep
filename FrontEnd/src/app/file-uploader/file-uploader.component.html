@@ -24,7 +24,7 @@
 
     <tr *ngFor="let file of entry.dataStore.dataFiles; let i = index">
         <td><p class="center-text">{{i + 1}}</p></td>
-        <td>
+        <td colspan="2">
             <div class="file-upload">
                 <div *ngIf="file.fileName">
                     <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)"
@@ -40,7 +40,7 @@
                 </mat-progress-bar>
             </div>
         </td>
-        <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
+        <!--<td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
             <div class="file-upload">
                 <mat-form-field>
                     <mat-select (selectionChange)="updateAndSaveDataFiles()" [formControl]="file.control"
@@ -51,7 +51,7 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-        </td>
+        </td>-->
     </tr>
 
     <tr>
