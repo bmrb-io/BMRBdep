@@ -158,15 +158,18 @@ def released(entry_id: str, file_name=None):
             raise RequestError("No such file!")
 
     entry = pynmrstar.Entry.from_file(os.path.join(directory_path, f"{entry_id}.str"))
-    available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
-    file_data = {}
-    for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
-        if name in file_data:
-            file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
-        else:
-            file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
-    files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f,
-              'type': file_data[f]} for f in file_data.keys()]
+
+    # If we want to restore the type display
+    # available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
+    # file_data = {}
+    # for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
+    #     if name in file_data:
+    #         file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
+    #     else:
+    #         file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
+
+    files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
+    files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
 
     return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
 
