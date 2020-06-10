@@ -5,16 +5,18 @@ import logging
 import os
 import sqlite3
 from datetime import date, datetime
-from shutil import copy
+from shutil import copy, SameFileError
 from typing import List, BinaryIO
 
 import flask
 import pynmrstar
 import unidecode
+from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
+from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema, \
+  create_db_if_needed
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
@@ -273,68 +275,8 @@ class DepositionRepo:
         # Do final entry normalization
         final_entry.normalize(schema=schema)
 
-        params = {'source': 'Author',
-                  'submit_type': 'Dep',
-                  'status': 'nd',
-                  'lit_search_required': 'N',
-                  'submission_date': today_str,
-                  'accession_date': today_str,
-                  'last_updated': today_str,
-                  'molecular_system': entry_saveframe['Title'][0],
-                  'onhold_status': 'RELEASE NOW',
-                  'restart_id': final_entry.entry_id
-                  }
-
-        contact_loop: pynmrstar.Loop = final_entry.get_loops_by_category("_Contact_Person")[0]
-        params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
-        contact_people = [', '.join(x) for x in contact_loop.get_tag(['Family_name', 'Given_name'])]
-        params['contact_person1'] = contact_people[0]
-        try:
-            params['contact_person2'] = contact_people[1]
-        except IndexError:
-            params['contact_person2'] = None
-
-        # Make sqlite database for now
-        database_path = os.path.join(configuration['repo_path'], 'depositions.sqlite3')
-        if not os.path.exists(database_path):
-            with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-                cur = conn.cursor()
-                cur.execute("""
-    CREATE TABLE entrylog (bmrbnum INTEGER PRIMARY KEY AUTOINCREMENT,
-                           restart_id TEXT UNIQUE,
-                           author_email TEXT,
-                           submission_date DATE,
-                           contact_person1 TEXT,
-                           contact_person2 TEXT,
-                           molecular_system TEXT);""")
-                cur.execute("CREATE INDEX restart_ids on entrylog (restart_id);")
-                conn.commit()
-
-        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-            cur = conn.cursor()
-
-            # Create the deposition record
-            insert_query = """
-INSERT INTO entrylog (submission_date, molecular_system, contact_person1, contact_person2, author_email,
-                      restart_id, author_email)
-VALUES (?, ?, ?, ?, ?, ?, ?)"""
-
-            try:
-                cur.execute(insert_query, [params['submission_date'], params['molecular_system'],
-                                           params['contact_person1'], params['contact_person2'],
-                                           params['author_email'], params['restart_id'],
-                                           params['author_email']])
-                conn.commit()
-                cur.execute("SELECT bmrbnum FROM entrylog WHERE restart_id = ?", [params['restart_id']])
-                final_entry.entry_id = 'bmrbig' + str(cur.fetchone()[0])
-            except sqlite3.IntegrityError:
-                logging.exception('This entry has already been deposited!')
-                conn.rollback()
-                raise ServerError('This entry has already been deposited! Please contact us.')
-            except sqlite3.Error:
-                logging.exception('Could not assign an ID in the database!')
-                conn.rollback()
-                raise ServerError('Could not create deposition. Please try again.')
+        # Assign our record in the db
+        self.update_db(from_entry=final_entry)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
@@ -351,11 +293,78 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         # Return the assigned BMRB ID
         return final_entry.entry_id
 
+    def update_db(self, from_entry: pynmrstar.Entry = None):
+        """ Update the DB record for this entry, or create one. Assigns the ID in the entry if one is provided.
+
+            If from_entry provided, then load the parameters from the active entry rather than the disk."""
+
+        create_db_if_needed()
+
+        assign = True if from_entry else False
+        if not from_entry:
+            from_entry = self.get_entry()
+
+        esf: pynmrstar.saveframe = from_entry.get_saveframes_by_category('entry_information')[0]
+        submission_date: date = datetime.strptime(esf['Submission_date'][0], "%Y-%m-%d").date()
+        contact_loop: pynmrstar.Loop = from_entry.get_loops_by_category("_Contact_Person")[0]
+
+        params = {'submission_date': submission_date,
+                  'title': esf['Title'][0],
+                  'contact_person1': f"{contact_loop['Family_name'][0]}, {contact_loop['Given_name'][0]}",
+                  'author_email': contact_loop['Email_address'][0],
+                  'restart_id': str(self._uuid),
+                  'onhold_status': esf['Release_request'][0],
+                  'bmrb_id': esf.get_tag('Selected_BMRB_ID')[0] if esf.get_tag('Selected_BMRB_ID') else None,
+                  'pdb_id': esf.get_tag('Selected_PDB_ID')[0] if esf.get_tag('Selected_PDB_ID') else None,
+                  'publication_doi': esf.get_tag('Citation_DOI')[0] if esf.get_tag('Citation_DOI') else None
+                  }
+
+        try:
+            release_date = datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
+        except (IndexError, ValueError, KeyError, TypeError):
+            release_date = None
+            if params['onhold_status'] == 'Release now':
+                release_date = date.today()
+
+        if params['onhold_status'] == 'Hold for 4 weeks':
+            release_date = release_date + relativedelta(weeks=4)
+        elif params['onhold_status'] == 'Hold for 8 weeks':
+            release_date = release_date + relativedelta(weeks=8)
+        elif params['onhold_status'] == 'Hold for 6 months':
+            release_date = release_date + relativedelta(months=6)
+        params['release_date'] = release_date
+        params['released'] = release_date and release_date <= date.today()
+
+        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
+            cur = conn.cursor()
+            # Create the deposition record
+            insert_query = """
+INSERT OR REPLACE INTO entrylog (submission_date, release_date, title, contact_person1,
+author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+
+            try:
+                cur.execute(insert_query, [params['submission_date'], params['release_date'],
+                                           params['title'], params['contact_person1'], params['author_email'],
+                                           params['restart_id'], params['author_email'],
+                                           params['bmrb_id'], params['pdb_id'], params['publication_doi']])
+                conn.commit()
+                if assign:
+                    cur.execute("SELECT bmrbig_id FROM entrylog WHERE restart_id = ?", [params['restart_id']])
+                    from_entry.entry_id = 'bmrbig' + str(cur.fetchone()[0])
+            except sqlite3.IntegrityError:
+                logging.exception('This entry has already been deposited!')
+                conn.rollback()
+                raise ServerError('This entry has already been deposited! Please contact us.')
+            except sqlite3.Error:
+                logging.exception('Could not assign an ID in the database!')
+                conn.rollback()
+                raise ServerError('Could not create deposition. Please try again.')
+
     def release_entry(self) -> None:
         """" Actually release the entry. """
 
         final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
-
         output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
         try:
             os.mkdir(output_dir)
@@ -373,7 +382,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
             try:
                 os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
             except OSError:
-                copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+                try:
+                    copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+                except SameFileError:
+                    # This is good, just means the file was already hardlinked
+                    pass
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
