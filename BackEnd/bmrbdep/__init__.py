@@ -138,9 +138,9 @@ def all_released():
     with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
         cur = conn.cursor()
         try:
-            cur.execute("SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi FROM entrylog", [])
-            return jsonify([{'id': x[0], 'release_date': x[1], 'title': x[2],
-                             'bmrb_id': x[3], 'pdb_id': x[4], 'doi': x[5]} for x in cur if
+            cur.execute("SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi, contact_person1 FROM entrylog", [])
+            return jsonify([{'id': x[0], 'release_date': x[1], 'title': x[2], 'bmrb_id': x[3], 'pdb_id': x[4],
+                             'doi': x[5], 'author': x[6]} for x in cur if
                             datetime.datetime.strptime(x[1], "%Y-%m-%d").date() <= date.today()])
         except sqlite3.Error:
             raise ServerError('Failed to access database!')
