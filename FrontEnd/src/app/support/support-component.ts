@@ -39,7 +39,7 @@ export class SupportComponent implements OnInit, OnDestroy {
   sendRequest() {
     this.api.newSupportRequest(this.messageControl.value, undefined, this.emailControl.value).then(() => {
       this.messageControl.disable();
-      this.notificationMessage = 'Your message has been sent to BMRB support.';
+      this.notificationMessage = 'Your message has been sent to BMRbig support.';
     }, () => {
       this.notificationMessage = 'An error happened when submitting your message. Please try again.';
     });
