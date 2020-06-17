@@ -17,7 +17,7 @@
   margin-bottom: 0 !important;
 }
 
-.tag-input:hover:not([disabled]) {
+.tag-input:hover:not([disabled]):not(.mat-select-disabled) {
   outline: mat-color($custom-theme-primary, darker) solid 1px;
 }
 
