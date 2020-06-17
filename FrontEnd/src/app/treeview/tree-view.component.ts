@@ -24,6 +24,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
               private router: Router,
               private route: ActivatedRoute) {
     this.developerMode = !environment.production;
+    console.log(environment);
     this.page = '?';
   }
 
