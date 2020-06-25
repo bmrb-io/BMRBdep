@@ -384,7 +384,8 @@ def new_deposition() -> Response:
                                                                     default_values=True, schema=schema)
 
     # Merge the entries
-    merge_entries(entry_template, uploaded_entry, schema)
+    if uploaded_entry:
+        merge_entries(entry_template, uploaded_entry, schema)
 
     # Delete the large data loops after merging, if the entry was uploaded and may have them
     if uploaded_entry:
