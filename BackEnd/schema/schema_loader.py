@@ -296,7 +296,7 @@ def load_schemas(rev, small_molecule=False):
                 if not sm:
                     logging.warning("Enumeration for non-existent tag: %s" % saveframe.name)
 
-    except pynmrstar.exceptions.ParsingError as e:
+    except (pynmrstar.exceptions.ParsingError, ValueError) as e:
         logging.warning("Invalid enum file in version %s: %s" % (result['version'], str(e)))
 
     result['file_upload_types'] = get_data_file_types(rev)
