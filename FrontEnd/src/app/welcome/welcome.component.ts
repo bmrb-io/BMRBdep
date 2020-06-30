@@ -102,7 +102,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
           this.sidenavService.open().then();
-          // location.reload()
+          location.reload();
         });
       }, error => {
         if (error === 'Invalid e-mail') {
