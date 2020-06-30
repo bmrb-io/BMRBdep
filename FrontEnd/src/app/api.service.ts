@@ -11,7 +11,6 @@ import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-di
 import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
-import {SidenavService} from './sidenav.service';
 
 function getTime(): number {
   return (new Date()).getTime();
@@ -41,8 +40,7 @@ export class ApiService implements OnDestroy {
               private router: Router,
               private route: ActivatedRoute,
               private titleService: Title,
-              private dialog: MatDialog,
-              private sidenavService: SidenavService) {
+              private dialog: MatDialog) {
 
     this.entrySubject = new ReplaySubject<Entry>();
 
@@ -427,7 +425,6 @@ export class ApiService implements OnDestroy {
       this.http.post(apiEndPoint, body, options)
         .subscribe(jsonData => {
           this.clearDeposition();
-          this.sidenavService.open().then();
           this.messagesService.clearMessage();
           resolve(jsonData['deposition_id']);
         }, error => {

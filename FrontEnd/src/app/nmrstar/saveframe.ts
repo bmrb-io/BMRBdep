@@ -434,7 +434,7 @@ export class Saveframe {
 
       // If polymer type is not one of the standard three, require more details
       if (polymerType && (!checkValueIsNull(polymerType.value)) && checkValueIsNull(entityDetails.value) &&
-        (!['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].includes(polymerType.value))) {
+        (!(['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].indexOf(polymerType.value) >= 0))) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified a polymer type that requires more details.';
       }
