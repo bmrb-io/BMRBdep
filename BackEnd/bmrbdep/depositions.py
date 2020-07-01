@@ -74,7 +74,7 @@ class DepositionRepo:
                     config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
 
         # Create the lock object
-        self._lock_object: FileLock = FileLock(self._lock_path, timeout=10)
+        self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
         if not self._initialize:
             self._repo = Repo(self._entry_dir)
