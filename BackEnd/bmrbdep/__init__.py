@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import socket
 import traceback
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
@@ -22,6 +23,7 @@ from werkzeug.datastructures import FileStorage
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 
 # Set up the flask application
@@ -37,6 +39,7 @@ if application.debug or configuration['debug']:
     CORS(application)
 
 application.secret_key = configuration['secret_key']
+assert application.secret_key != "CHANGE_ME"
 
 # Set up the mail interface
 application.config.update(
@@ -127,7 +130,9 @@ def handle_other_errors(exception: Exception):
                            (request.method, request.url, traceback.format_exc())
             mail.send(message)
 
-        response = jsonify({"error": "Server error."})
+        response = jsonify({"error": "An exception has been triggered on the BMRBdep server. This error has been sent "
+                                     "to BMRB staff to investigate. If you were attempting to deposit when this error "
+                                     "occurred, expect us to reach out to you within one business day."})
         response.status_code = 500
         return response
 
@@ -160,17 +165,54 @@ def send_validation_status(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
-def send_validation_email(uuid) -> Response:
+def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) -> Response:
     """ Sends the validation e-mail. """
 
     uuid = str(uuid)
 
-    with depositions.DepositionRepo(uuid) as repo:
+    if not repo_object:
+        repo_object = depositions.DepositionRepo(uuid)
+
+    with repo_object as repo:
         # Already validated, don't re-send the email
         if repo.metadata['email_validated']:
+            # Ask them to confirm their e-mail
+            confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
+                                      repo.metadata['deposition_nickname'],
+                                      recipients=[repo.metadata['author_email']],
+                                      reply_to=configuration['smtp']['reply_to_address'])
+            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+
+            confirm_message.html = """
+            Thank you for your deposition '%s' created %s (UTC).
+            <br><br>
+            To return to this deposition, click <a href="%s" target="BMRBDep">here</a>.
+            <br><br>
+            If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
+            share this e-mail with will have access to the full contents of your in-progress deposition and can make
+            changes to it.
+
+            If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
+            leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
+            computer could access your in-process deposition.
+            <br><br>
+            Thank you,
+            <br>
+            BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creation_date'],
+                                 url_for('validate_user', token=token, _external=True))
+
+            try:
+                mail.send(confirm_message)
+            except socket.gaierror:
+                if configuration['debug']:
+                    logging.warning('Invalid SMTP server configured!')
+                else:
+                    raise ServerError('Server is mis-configured, please contact the administrator.')
             return jsonify({'status': 'validated'})
+
+
         # Ask them to confirm their e-mail
-        confirm_message = Message("Please validate your e-mail address for BMRBDep deposition '%s'." %
+        confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
                                   reply_to=configuration['smtp']['reply_to_address'])
@@ -238,6 +280,9 @@ def duplicate_deposition(uuid) -> Response:
 
     with depositions.DepositionRepo(uuid) as repo:
         merge_entries(entry_template, repo.get_entry(), schema)
+        # Add a "deleted" tag to use to track deletion status
+        for saveframe in entry_template:
+            saveframe.add_tag('_Deleted', 'no')
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -256,8 +301,13 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_cloned_from': str(uuid)
                                        }
             new_repo.write_entry(entry_template)
-            repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            new_repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            # Delete data files when cloning
+            for file_ in new_repo.get_data_file_list():
+                new_repo.delete_data_file(file_)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
+
+            send_validation_email(deposition_id, repo)
 
     return jsonify({'deposition_id': deposition_id})
 
@@ -297,7 +347,7 @@ def new_deposition() -> Response:
             raise RequestError('Invalid entry ID specified. No such entry exists, or is released.')
         entry_bootstrap = True
 
-    author_email: str = request_info.get('email', '')
+    author_email: str = request_info.get('email', '').lower()
     author_orcid: Optional[str] = request_info.get('orcid')
     if not author_orcid:
         author_orcid = None
@@ -336,6 +386,13 @@ def new_deposition() -> Response:
     # Merge the entries
     if uploaded_entry:
         merge_entries(entry_template, uploaded_entry, schema)
+
+    # Delete the large data loops after merging, if the entry was uploaded and may have them
+    if uploaded_entry:
+        for saveframe in entry_template:
+            for loop in saveframe:
+                if loop.category in ['_Atom_chem_shift', '_Atom_site', '_Gen_dist_constraint']:
+                    loop.data = []
 
     # Calculate the uploaded file types, if they upload a file
     if uploaded_entry and not entry_bootstrap:
@@ -405,14 +462,17 @@ def new_deposition() -> Response:
         if 'orcid' not in configuration or configuration['orcid']['bearer'] == 'CHANGEME':
             logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
         else:
-            r = requests.get(configuration['orcid']['url'] % author_orcid,
-                             headers={"Accept": "application/json",
-                                      'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            try:
+                r = requests.get(configuration['orcid']['url'] % author_orcid,
+                                 headers={"Accept": "application/json",
+                                          'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+                raise ServerError('An error occurred while contacting the ORCID server.')
             if not r.ok:
                 if r.status_code == 404:
                     raise RequestError('Invalid ORCID!')
                 else:
-                    application.logger.exception('An error occurred while contacting the ORCID server.')
+                    raise ServerError('An error occurred while contacting the ORCID server.')
             else:
                 orcid_json = r.json()
                 try:
@@ -468,7 +528,7 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': False,
+                        'email_validated': configuration['debug'],
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
@@ -493,8 +553,8 @@ def new_deposition() -> Response:
                                                                    str(uploaded_entry).encode())
         repo.commit("Entry created.")
 
-    # Send the validation e-mail
-    send_validation_email(deposition_id)
+        # Send the validation e-mail
+        send_validation_email(deposition_id, repo)
 
     return jsonify({'deposition_id': deposition_id})
 
@@ -528,8 +588,11 @@ def deposit_entry(uuid) -> Response:
 
         # Send a message to the annotators
         if not configuration['debug']:
-            message = Message("BMRBdep: BMRB entry %s has been deposited." % bmrb_num,
-                              recipients=[configuration['smtp']['annotator_address']])
+            if isinstance(configuration['smtp']['annotator_address'], list):
+                send_to = configuration['smtp']['annotator_address']
+            else:
+                send_to = [configuration['smtp']['annotator_address']]
+            message = Message("BMRBdep: BMRB entry %s has been deposited." % bmrb_num, recipients=send_to)
             message.body = '''The following new entry has been deposited via BMRBdep:
 
 restart id:            %s

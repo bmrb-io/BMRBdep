@@ -168,6 +168,7 @@ export class Tag {
       const nameTagIndex = experimentLoop.getTagIndex('Name');
       const sampleLabelIndex = experimentLoop.getTagIndex('Sample_label');
       const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label');
+      const spectrometerIndex = experimentLoop.getTagIndex('NMR_spectrometer_label');
 
       for (const row of experimentLoop.data) {
         const sampleFrame = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1));
@@ -192,7 +193,19 @@ export class Tag {
           }
         }
 
-        this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName]);
+        const spectrometerSaveframe: Saveframe = this.getEntry().getSaveframeByName(row[spectrometerIndex].value.slice(1));
+        let spectrometerName: string;
+        if (!spectrometerSaveframe) {
+          spectrometerName = 'No spectrometer selected';
+        } else {
+          spectrometerName = spectrometerSaveframe.tagDict['_NMR_spectrometer.Name'].value;
+          if (checkValueIsNull(spectrometerName)) {
+            spectrometerName = spectrometerSaveframe.getTag('Sf_framecode').value + ' (Unnamed)';
+          }
+        }
+
+        this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName +
+                             ' - ' + spectrometerName]);
 
         // Check the validity of this tag in the process
         if (row[IDIndex].value === this.value) {

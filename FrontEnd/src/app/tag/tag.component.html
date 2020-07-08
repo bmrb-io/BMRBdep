@@ -3,7 +3,7 @@
             [(ngModel)]="tag.value"
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true, 'crs-country': true}"
             (change)="validateTag()"
-            [title]="tag.validationMessage"
+            [matTooltip]="tag.validationMessage"
             [attr.data-region-id]="'state'+getRow()"
             [attr.data-default-value]="tag.value"
             [disabled]="tag.disabled"
@@ -16,7 +16,7 @@
             [(ngModel)]="tag.value"
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (change)="validateTag()"
-            [title]="tag.validationMessage"
+            [matTooltip]="tag.validationMessage"
             [id]="'state'+getRow()"
             [attr.data-default-value]="tag.value"
             [disabled]="tag.disabled"
@@ -31,7 +31,7 @@
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             [placeholder]="tag.schemaValues['default value']"
             (change)="validateTag()"
-            [title]="tag.validationMessage"
+            [matTooltip]="tag.validationMessage"
             [disabled]="tag.disabled">
   <!--
      Those don't play nicely with our validation
@@ -44,13 +44,13 @@
   <mat-select [(ngModel)]="tag.value"
               [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
               (ngModelChange)="validateTag()"
-              [title]="tag.validationMessage"
+              [matTooltip]="tag.validationMessage"
               [disabled]="tag.disabled">
     <mat-option *ngIf="tag.value && tag.validationMessage" disabled [value]="tag.value" class="type-error">{{tag.value}} -
       Error: {{tag.validationMessage}}</mat-option>
     <ng-container *ngFor="let val of tag.enums">
-      <mat-option *ngIf="tag.value != val[0]" [value]="val[0]" [title]="val[1]">{{val[0]}}</mat-option>
-      <mat-option *ngIf="tag.value == val[0] && !tag.validationMessage" [value]="tag.value" [title]="val[1]">{{tag.value}}</mat-option>
+      <mat-option *ngIf="tag.value != val[0]" [value]="val[0]" [matTooltip]="val[1]">{{val[0]}}</mat-option>
+      <mat-option *ngIf="tag.value == val[0] && !tag.validationMessage" [value]="tag.value" [matTooltip]="val[1]">{{tag.value}}</mat-option>
     </ng-container>
   </mat-select>
 </label>
@@ -59,7 +59,7 @@
     <mat-select [(ngModel)]="tag.value"
             [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
             (ngModelChange)="validateTag()"
-            [title]="tag.validationMessage"
+            [matTooltip]="tag.validationMessage"
             [disabled]="tag.disabled" panelClass="closed_enum_option">
         <mat-option *ngFor="let frameLink of tag.frameLink" [value]="frameLink[0]"
                 [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</mat-option>
@@ -74,20 +74,20 @@
            (change)="validateTag()"
            (ngModelChange)="filter()"
            (focus)="filter()"
-           [title]="tag.validationMessage"
+           [matTooltip]="tag.validationMessage"
            [disabled]="tag.disabled"
            [matAutocomplete]="auto">
   </label>
 
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto" class="closed_enum_option">
-    <mat-option *ngFor="let option of filteredOptions" [value]="option[0]" [title]="option[1]">{{option[0]}}</mat-option>
+    <mat-option *ngFor="let option of filteredOptions" [value]="option[0]" [matTooltip]="option[1]">{{option[0]}}</mat-option>
   </mat-autocomplete>
 </ng-container>
 
 
 <ng-container *ngIf="tag.interfaceType == 'yes_no'">
     <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-         [title]="tag.validationMessage">
+         [matTooltip]="tag.validationMessage">
 
         <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled" (change)="validateTag()">
             <mat-radio-button class="first-button" value="yes">Yes</mat-radio-button>
@@ -102,7 +102,7 @@
               [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
               [placeholder]="tag.schemaValues['default value']"
               (change)="validateTag()"
-              [title]="tag.validationMessage"
+              [matTooltip]="tag.validationMessage"
               (ngModelChange)="recalculateHeight()"
               [style.height.em]="height"
               [disabled]="tag.disabled"></textarea>

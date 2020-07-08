@@ -1,27 +1,41 @@
 {
-    "ets": {
-        "user": "CHANGE_ME",
-        "database": "CHANGE_ME",
-        "host": "CHANGE_ME",
-        "deposition_ranges": [[40000, 50000]]
-    },
-    "smtp": {
-        "admins": ["wedell@bmrb.wisc.edu"],
-        "server": "mail",
-        "from_address": "bmrbhelp@bmrb.wisc.edu",
-        "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
-        "annotator_address": "annotators@lists.bmrb.wisc.edu"
-    },
-    "orcid": {
-      "url": "https://pub.orcid.org/v2.1/%s/record",
-      "bearer": "CHANGE_ME",
-      "refresh_token": "CHANGE_ME",
-      "client_secret": "CHANGE_ME",
-      "client_id": "CHANGE_ME"
-    },
-    "schema_version": "3.2.1.43",
-    "debug": true,
-    "local-ips": ["127.0.0.1", "144.92.167", "::1"],
-    "secret_key": "CHANGE_ME",
-    "repo_path": "/tmp/depositions"
+  "ets": {
+    "user": "CHANGE_ME",
+    "database": "CHANGE_ME",
+    "host": "CHANGE_ME",
+    "deposition_ranges": [
+      [
+        40000,
+        50000
+      ]
+    ]
+  },
+  "smtp": {
+    "admins": [
+      "wedell@bmrb.wisc.edu"
+    ],
+    "server": "CHANGE_ME",
+    "from_address": "bmrbhelp@bmrb.wisc.edu",
+    "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
+    "annotator_address": "annotators@lists.bmrb.wisc.edu"
+  },
+  "orcid": {
+    "url": "https://pub.orcid.org/v2.1/%s/record",
+    "bearer": "CHANGE_ME",
+    "refresh_token": "CHANGE_ME",
+    "client_secret": "CHANGE_ME",
+    "client_id": "CHANGE_ME"
+  },
+  "schema_version": "3.2.10.3",
+  "debug": true,
+  "local-ips": [
+    "127.0.0.1",
+    "144.92.167",
+    "::1"
+  ],
+
+  "secret_key_generation_instructions": "To generate a secret key: python -c 'import os; print(os.urandom(16))",
+  "secret_key": "CHANGE_ME",
+
+  "repo_path": "/tmp/depositions"
 }

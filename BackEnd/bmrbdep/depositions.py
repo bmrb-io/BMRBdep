@@ -17,7 +17,7 @@ from git import Repo, CacheError
 from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
-from bmrbdep.helpers.star_tools import generate_entity_from_chemcomp
+from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
 
 if not os.path.exists(configuration['repo_path']):
     try:
@@ -72,7 +72,7 @@ class DepositionRepo:
                     config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
 
         # Create the lock object
-        self._lock_object: FileLock = FileLock(self._lock_path, timeout=10)
+        self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
         if not self._initialize:
             self._repo = Repo(self._entry_dir)
@@ -150,7 +150,7 @@ class DepositionRepo:
                 update_citation_with_pubmed(citation, schema=schema)
 
         # Generate any necessary entities from chemcomps
-        generate_entity_from_chemcomp(final_entry, schema=schema)
+        upgrade_chemcomps_and_create_entities_where_needed(final_entry, schema=schema)
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
@@ -310,43 +310,48 @@ class DepositionRepo:
         if len(ranges) == 0:
             raise ServerError('Server configuration error.')
 
-        try:
-            conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
-                                    database=configuration['ets']['database'])
-            cur = conn.cursor()
-        except psycopg2.OperationalError:
-            logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
-            raise ServerError('Could not connect to entry tracking system. Please contact us.')
-
-        try:
-            # Determine which bmrbnum to use - one range at a time
-            bmrbnum: Optional[int] = None
-            for id_range in ranges:
-                # Get the existing IDs from ETS
-                bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
-                cur.execute(bmrb_sql, [id_range[0], id_range[1]])
-
-                # Calculate the list of valid IDs
-                existing_ids: set = set([_[0] for _ in cur.fetchall()])
-                ids_in_range: set = set(range(id_range[0], id_range[1]))
-                assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
-
-                # A valid ID has been found in this range
-                if len(assignable_ids) > 0:
-                    bmrbnum = assignable_ids[0]
-                    break
-                else:
-                    logging.warning('No valid IDs found in range %d to %d. Continuing to next range...' %
-                                    (id_range[0], id_range[1]))
-
-            if not bmrbnum:
-                logging.exception('No valid IDs remaining in any of the ranges!')
-                raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
-
+        # If they have already deposited, just keep the same BMRB ID
+        bmrbnum = self.metadata.get('bmrbnum', None)
+        if bmrbnum:
             params['bmrbnum'] = bmrbnum
+        else:
+            try:
+                conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
+                                        database=configuration['ets']['database'])
+                cur = conn.cursor()
+            except psycopg2.OperationalError:
+                logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
+                raise ServerError('Could not connect to entry tracking system. Please contact us.')
 
-            # Create the deposition record
-            insert_query = """
+            try:
+                # Determine which bmrbnum to use - one range at a time
+                bmrbnum: Optional[int] = None
+                for id_range in ranges:
+                    # Get the existing IDs from ETS
+                    bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
+                    cur.execute(bmrb_sql, [id_range[0], id_range[1]])
+
+                    # Calculate the list of valid IDs
+                    existing_ids: set = set([_[0] for _ in cur.fetchall()])
+                    ids_in_range: set = set(range(id_range[0], id_range[1]))
+                    assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
+
+                    # A valid ID has been found in this range
+                    if len(assignable_ids) > 0:
+                        bmrbnum = assignable_ids[0]
+                        break
+                    else:
+                        logging.warning('No valid IDs found in range %d to %d. Continuing to next range...' %
+                                        (id_range[0], id_range[1]))
+
+                if not bmrbnum:
+                    logging.exception('No valid IDs remaining in any of the ranges!')
+                    raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
+
+                params['bmrbnum'] = bmrbnum
+
+                # Create the deposition record
+                insert_query = """
 INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, onhold_status, molecular_system,
                       contact_person1, contact_person2, submit_type, source, lit_search_required, author_email,
                       restart_id, last_updated, nmr_dep_code)
@@ -354,39 +359,19 @@ INSERT INTO entrylog (depnum, bmrbnum, status, submission_date, accession_date, 
                              %(molecular_system)s, %(contact_person1)s, %(contact_person2)s, %(submit_type)s,
                              %(source)s, %(lit_search_required)s, %(author_email)s, %(restart_id)s, %(last_updated)s,
                              %(restart_id)s)"""
-            cur.execute(insert_query, params)
-            log_sql = """
+                cur.execute(insert_query, params)
+                log_sql = """
 INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
   VALUES (nextval('logid_seq'),currval('depnum_seq'),'NEW DEPOSITION','nd',1,now(),'')"""
-            cur.execute(log_sql)
-            conn.commit()
-        except psycopg2.IntegrityError:
-            logging.exception('Could not assign the chosen BMRB ID - it was already assigned.')
-            conn.rollback()
-            raise ServerError('Could not create deposition. Please try again.')
+                cur.execute(log_sql)
+                conn.commit()
+            except psycopg2.IntegrityError:
+                logging.exception('Could not assign the chosen BMRB ID - it was already assigned.')
+                conn.rollback()
+                raise ServerError('Could not create deposition. Please try again.')
 
         # Assign the BMRB ID in all the appropriate places in the entry
         final_entry.entry_id = bmrbnum
-        for saveframe in final_entry.frame_list:
-            for tag in saveframe.tags:
-                fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
-                try:
-                    tag_schema = schema.schema[fqtn]
-                    if tag_schema['entryIdFlg'] == 'Y':
-                        tag[1] = bmrbnum
-                except KeyError:
-                    pass
-
-            for loop in saveframe.loops:
-                for tag in loop.tags:
-                    fqtn = (loop.category + "." + tag).lower()
-                    try:
-                        tag_schema = schema.schema[fqtn]
-                        if tag_schema['entryIdFlg'] == 'Y':
-                            loop[tag] = [bmrbnum] * len(loop[tag])
-                    except KeyError:
-                        pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(bmrbnum)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
