@@ -135,13 +135,12 @@ export class ApiService implements OnDestroy {
   }
 
   // file from event.target.files[0]
-  uploadFile(file: File, path: string): Observable<HttpEvent<any>> {
+  uploadFile(file: File): Observable<HttpEvent<any>> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('path', path);
 
     const options = {
       params: new HttpParams(),

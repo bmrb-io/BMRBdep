@@ -607,18 +607,18 @@ contact persons: %s
     return jsonify({'commit': repo.last_commit})
 
 
-@application.route('/deposition/<uuid:uuid>/file/<filename>', methods=('GET', 'DELETE'))
-def file_operations(uuid, filename: str) -> Response:
+@application.route('/deposition/<uuid:uuid>/file/<path:path>', methods=('GET', 'DELETE'))
+def file_operations(uuid, path: str) -> Response:
     """ Either retrieve or delete a file. """
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(filename, root=False),
-                             attachment_filename=secure_filename(filename))
+            return send_file(repo.get_file(path, root=False),
+                             attachment_filename=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
-            if repo.delete_data_file(filename):
-                repo.commit('Deleted file %s' % filename)
+            if repo.delete_data_file(path):
+                repo.commit('Deleted file %s' % path)
         return jsonify({'commit': repo.last_commit})
     else:
         raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')
@@ -629,18 +629,17 @@ def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
     file_obj: Optional[FileStorage] = request.files.get('file', None)
-    path: str = os.path.abspath(request.form.get('path', ''))
-    full_name = os.path.join(path, file_obj.filename)
+    relative_path = file_obj.filename
 
     if not file_obj or not file_obj.filename:
         raise RequestError('No file uploaded!')
 
     # Store a data file
     with depositions.DepositionRepo(uuid) as repo:
-        filename = repo.write_file(full_name, file_obj.read())
+        filename = repo.write_file(relative_path, file_obj.read())
 
         # Update the entry data
-        if repo.commit("User uploaded file: %s" % full_name):
+        if repo.commit("User uploaded file: %s" % relative_path):
             return jsonify({'filename': filename, 'changed': True,
                             'commit': repo.last_commit})
         else:

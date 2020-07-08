@@ -6,7 +6,6 @@ import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
 import {Subscription} from 'rxjs';
-import {type} from 'os';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
@@ -110,15 +109,18 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       try {
         this.traverseFileTree(event.dataTransfer.items[i].webkitGetAsEntry(), undefined);
       } catch {
-        this.traverseFileTree(event.dataTransfer.items[i].getAsEntry(), undefined);
+        try {
+          this.traverseFileTree(event.dataTransfer.items[i].getAsEntry(), undefined);
+        } catch {
+          // Help the compiler not get upset about the current lack of getAsEntry()
+          console.error('In theory, this error state is impossible.');
+        }
       }
     }
-
-    //this.uploadFiles(files);
   }
 
 
-  traverseFileTree(item, path) {
+  traverseFileTree(item, path: string) {
     // This takes a list of File or Directory items, and recursively explores the directories, adding all files
     //  within them for upload.
 
@@ -130,8 +132,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       // Get file
       item.file(function (file) {
         console.log('File:', path + file.name, item);
-        //files.push([file, path]);
-        parent.uploadFile(file, path);
+
+        // Don't upload hidden files, this will just confuse the user
+        if (!file.name.startsWith('.')) {
+          parent.uploadFile(file);
+        }
       });
     } else if (item.isDirectory) {
       // Get folder contents
@@ -145,22 +150,20 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     return files;
   }
 
-  uploadFile(file, path) {
+  uploadFile(file) {
 
-    const fullName = path + file.name;
-
-    const dataFile = this.entry.dataStore.addFile(fullName);
+    const dataFile = this.entry.dataStore.addFile(file.name);
 
     this.activeUploads += 1;
-    this.uploadSubscriptionDict$[fullName] = this.api.uploadFile(file, path)
+    this.uploadSubscriptionDict$[file.name] = this.api.uploadFile(file)
       .subscribe(
         event => {
           if (event.type === HttpEventType.UploadProgress) {
             dataFile.percent = Math.round(100 * event.loaded / event.total);
           } else if (event instanceof HttpResponse) {
-            this.entry.addCommit(event.body['commit']);
+            this.entry.addCommit(event.body['commit'] as string);
             dataFile.percent = 100;
-            this.entry.dataStore.updateName(dataFile, event.body['filename']);
+            this.entry.dataStore.updateName(dataFile, event.body['filename'] as string);
             if (!event.body['changed']) {
               this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
