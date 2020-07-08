@@ -90,7 +90,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   // At the file input element
   // (change)="selectFile($event)"
   selectFile(event) {
-    this.processUploadEventAndUpload(event);
+    this.uploadFiles(event.target.files);
     this.fileUploadElement.nativeElement.value = '';
   }
 
@@ -101,7 +101,8 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   processUploadEventAndUpload(event: DragEvent) {
     if (typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
       typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function') {
-      console.log('I need fallback, giving up.');
+      // Fall back to just uploading the top level files
+      this.uploadFiles(event.dataTransfer.files);
       return;
     }
 
@@ -148,6 +149,20 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       });
     }
     return files;
+  }
+
+  uploadFiles(files: FileList) {
+    for (let i = 0; i < files.length; i++) {
+      if (!files[i].size) {
+        this.messagesService.sendMessage(new Message(`It appears that you attempted to upload one or more folders or zero byte
+        files. At the current time, uploading folders is only supported on modern browsers, and only via "drag and drop". Please either use
+        a newer browser and drag and drop your folder(s), or tar or zip up your directory and then upload it. Uploading multiple files is
+        supported in all browsers.`,
+          MessageType.NotificationMessage));
+        continue;
+      }
+      this.uploadFile(files[i]);
+    }
   }
 
   uploadFile(file) {
