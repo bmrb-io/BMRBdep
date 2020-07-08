@@ -6,6 +6,8 @@ import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-file-uploader',
@@ -92,24 +94,52 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     console.log(this.entry.getLoopsByCategory('_Upload_data')[0]);
   }
 
-  uploadFile(files: FileList) {
+  traverseFileTree(item, path: string) {
+    // This takes a list of File or Directory items, and recursively explores the directories, adding all files
+    //  within them for upload.
 
-    let closure = files.length;
+    let files = [];
+    const parent = this;
+    path = path || '';
 
-    for (let i = 0; i < files.length; i++) {
-      const dataFile = this.entry.dataStore.addFile(files[i].name);
+    if (item.isFile) {
+      // Get file
+      item.file(function (file) {
+        console.log('File:', path + file.name, item);
 
-      this.uploadSubscriptionDict$[files[i].name] = this.api.uploadFile(files[i])
-        .subscribe(
-          event => {
-            if (event.type === HttpEventType.UploadProgress) {
-              dataFile.percent = Math.round(100 * event.loaded / event.total);
-            } else if (event instanceof HttpResponse) {
-              this.entry.addCommit(event.body['commit']);
-              dataFile.percent = 100;
-              this.entry.dataStore.updateName(dataFile, event.body['filename']);
-              if (!event.body['changed']) {
-                this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+        // Don't upload hidden files, this will just confuse the user
+        if (!file.name.startsWith('.')) {
+          parent.uploadFile(file);
+        }
+      });
+    } else if (item.isDirectory) {
+      // Get folder contents
+      const dirReader = item.createReader();
+      dirReader.readEntries(function (entries) {
+        for (let i = 0; i < entries.length; i++) {
+          files = files.concat(parent.traverseFileTree(entries[i], path + item.name + '/'));
+        }
+      });
+    }
+    return files;
+  }
+
+  uploadFile(file) {
+
+    const dataFile = this.entry.dataStore.addFile(file.name);
+
+    this.activeUploads += 1;
+    this.uploadSubscriptionDict$[file.name] = this.api.uploadFile(file)
+      .subscribe(
+        event => {
+          if (event.type === HttpEventType.UploadProgress) {
+            dataFile.percent = Math.round(100 * event.loaded / event.total);
+          } else if (event instanceof HttpResponse) {
+            this.entry.addCommit(event.body['commit'] as string);
+            dataFile.percent = 100;
+            this.entry.dataStore.updateName(dataFile, event.body['filename'] as string);
+            if (!event.body['changed']) {
+              this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
               }
             }
