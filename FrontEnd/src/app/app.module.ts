@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 
 // Our components
 import {AppComponent} from './app.component';
@@ -27,6 +27,9 @@ import {SupportComponent} from './support/support-component';
 // From https://github.com/mika-el/angular-loading-page
 // When able, change to: https://github.com/aitboudad/ngx-loading-bar
 import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+
+// From https://github.com/jfcere/ngx-markdown
+import {MarkdownModule} from 'ngx-markdown';
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -97,7 +100,8 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
     MatRadioModule,
     MatCheckboxModule,
     MatAutocompleteModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MarkdownModule.forRoot({ loader: HttpClient })
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent],
