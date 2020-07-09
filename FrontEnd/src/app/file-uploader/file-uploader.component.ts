@@ -116,9 +116,9 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
             if (event.type === HttpEventType.UploadProgress) {
               dataFile.percent = Math.round(100 * event.loaded / event.total);
             } else if (event instanceof HttpResponse) {
-              this.entry.addCommit(event.body['commit']);
+              this.entry.addCommit(event.body['commit'] as string);
               dataFile.percent = 100;
-              this.entry.dataStore.updateName(dataFile, event.body['filename']);
+              this.entry.dataStore.updateName(dataFile, event.body['filename'] as string);
               if (!event.body['changed']) {
                 this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
