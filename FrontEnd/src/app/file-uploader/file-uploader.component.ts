@@ -111,7 +111,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         this.traverseFileTree(event.dataTransfer.items[i].webkitGetAsEntry(), undefined);
       } catch {
         try {
-          this.traverseFileTree(event.dataTransfer.items[i].getAsEntry(), undefined);
+          this.traverseFileTree((event.dataTransfer.items[i] as any).getAsEntry(), undefined);
         } catch {
           // Help the compiler not get upset about the current lack of getAsEntry()
           console.error('In theory, this error state is impossible.');
