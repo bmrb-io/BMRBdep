@@ -22,12 +22,16 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};
   subscription$: Subscription;
+  public activeUploads;
+  private dialogRef: MatDialogRef<ConfirmationDialogComponent>;
 
   constructor(private api: ApiService,
               private messagesService: MessagesService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private dialog: MatDialog) {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
+    this.activeUploads = 0;
   }
 
   ngOnInit() {
@@ -72,7 +76,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   onDropFile(event: DragEvent) {
     event.preventDefault();
     if (this.entry && !this.entry.deposited) {
-      this.uploadFile(event.dataTransfer.files);
+      this.processUploadEventAndUpload(event);
     }
   }
 
@@ -115,6 +119,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   traverseFileTree(item, path: string) {
     // This takes a list of File or Directory items, and recursively explores the directories, adding all files
@@ -177,30 +182,42 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
             if (!event.body['changed']) {
               this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
-              }
-            }
-          },
-          () => {
-            this.entry.dataStore.deleteFile(dataFile.fileName);
-            this.messagesService.sendMessage(new Message('Failed to upload file. Do you have an internet connection?',
-              MessageType.ErrorMessage, 15000));
-          },
-          () => {
-            closure -= 1;
-            if (closure === 0) {
-              this.updateAndSaveDataFiles();
             }
           }
-        );
-    }
+        },
+        () => {
+          this.entry.dataStore.deleteFile(dataFile.fileName);
+          this.messagesService.sendMessage(new Message(`Failed to upload file ${dataFile.fileName}, please retry.`,
+            MessageType.ErrorMessage, 15000));
+          this.activeUploads -= 1;
+        },
+        () => {
+          this.activeUploads -= 1;
+          if (this.activeUploads === 0) {
+            this.updateAndSaveDataFiles();
+          }
+        }
+      );
+
   }
 
   deleteFile(fileName: string): void {
-    if (fileName in this.uploadSubscriptionDict$) {
-      this.uploadSubscriptionDict$[fileName].unsubscribe();
-      this.api.deleteFile(fileName, true);
-    } else {
-      this.api.deleteFile(fileName);
-    }
+
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the file '${fileName}'?`;
+
+    this.dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (fileName in this.uploadSubscriptionDict$) {
+          this.uploadSubscriptionDict$[fileName].unsubscribe();
+          this.api.deleteFile(fileName, true);
+        } else {
+          this.api.deleteFile(fileName);
+        }
+      }
+      this.dialogRef = null;
+    });
   }
 }
