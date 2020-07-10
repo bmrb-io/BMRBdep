@@ -24,9 +24,8 @@ import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.compo
 import {RestoreComponent} from './restore/restore.component'; // Saving/loading bar
 import {SupportComponent} from './support/support-component';
 
-// From https://github.com/mika-el/angular-loading-page
-// When able, change to: https://github.com/aitboudad/ngx-loading-bar
-import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+// From https://github.com/aitboudad/ngx-loading-bar
+import {LoadingBarHttpClientModule} from '@ngx-loading-bar/http-client';
 
 // From https://github.com/jfcere/ngx-markdown
 import {MarkdownModule} from 'ngx-markdown';
@@ -94,8 +93,7 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
     MatCardModule,
     MatButtonModule,
     MatSnackBarModule,
-    LoadingPageModule,
-    SlidingBarModule,
+    LoadingBarHttpClientModule,
     MatDialogModule,
     MatRadioModule,
     MatCheckboxModule,
