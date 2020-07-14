@@ -2,6 +2,8 @@
   <ng-container *ngIf="files else no_data">
     <h2>Viewing BMRbig entry {{entry_id}}: {{title}}</h2>
 
+    <markdown [src]="env.serverURL + '/released/' + entry_id + '/README.md'"></markdown>
+
     <table class="alternating">
       <thead>
       <tr>
