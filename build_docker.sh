@@ -10,6 +10,9 @@ if [[ ${secret_key} == "CHANGE_ME" ]]; then
   echo 'Please change the secret key in the configuration first!'
   exit 1
 fi
+echo "Removing existing local docker image"
+docker stop bmrbdep
+docker rm bmrbdep
 
 echo "Getting newest schema."
 (
@@ -24,16 +27,9 @@ echo "Compiling angular."
 (
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if [[ $1 == "production" ]]; then
-  if ! npm run build.prod; then
-    echo "Angular build failed, quitting."
-    exit 3
-  fi
-else
-  if ! ng build --configuration devprod; then
-    echo "Angular build failed, quitting."
-    exit 3
-  fi
+if ! npm run build.prod; then
+  echo "Angular build failed, quitting."
+  exit 3
 fi
 )
 
@@ -52,15 +48,14 @@ echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/ve
 
 
 echo "Removing existing local docker image"
-sudo docker stop bmrbig
-sudo docker rm bmrbig
+docker stop bmrbig
+docker rm bmrbig
 
 
 echo "Building the Docker container..."
-if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
+if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
     echo "Docker build failed."
     exit 4
-fi
 
 deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
 
