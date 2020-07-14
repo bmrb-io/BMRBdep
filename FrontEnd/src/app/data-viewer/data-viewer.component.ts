@@ -38,8 +38,13 @@ export class DataViewerComponent implements OnInit {
     this.route.params.subscribe(params => {
       // Entry summary page
       if (params['entry']) {
-        this.getEntryRecord(params['entry']);
-        this.entry_id = params['entry'];
+        let entry: string = params['entry'];
+        // Work if they only supply the number
+        if (!isNaN(+entry)) {
+          entry = 'bmrbig' + entry;
+        }
+        this.getEntryRecord(entry);
+        this.entry_id = entry;
       } else {
         // All entries page
         this.getAllEntries();

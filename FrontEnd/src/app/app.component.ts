@@ -5,6 +5,7 @@ import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {SidenavService} from './sidenav.service';
 import {MatSidenav} from '@angular/material/sidenav';
+import {LoadingBarService} from '@ngx-loading-bar/core';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('sidenav') public sidenav: MatSidenav;
 
   constructor(private api: ApiService,
-              private sidenavService: SidenavService) {
+              private sidenavService: SidenavService,
+              public loader: LoadingBarService) {
     this.sidenav_open = false;
   }
 
