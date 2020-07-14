@@ -56,8 +56,11 @@ echo "Building the Docker container..."
 if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
     echo "Docker build failed."
     exit 4
+fi
 
 deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
+output_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"output_path\" | cut -f4 -d\")
+echo $output_dir
 
 echo "Starting the docker container locally."
-sudo docker run -d --name bmrbig -p 9001:9001 -p 9000:9000 --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbig
+docker run -d --name bmrbig -p 9001:9001 -p 9000:9000 --restart=always -v /bmrbig/depositions:/opt/wsgi/depositions -v /bmrbig/released:/opt/wsgi/released -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbig
