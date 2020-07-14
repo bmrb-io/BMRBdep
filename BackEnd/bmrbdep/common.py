@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import logging
 import os
+import pathlib
 import sqlite3
 import zlib
-from typing import Union, TextIO
+from typing import Union, TextIO, Tuple
 
 import simplejson as json
 import werkzeug.utils
@@ -59,6 +59,21 @@ def secure_filename(filename: str) -> str:
     if not filename:
         raise RequestError('Invalid upload file name. Please rename the file and try again.')
     return filename
+
+
+def secure_full_path(path: str) -> Tuple[str, str]:
+    """ Takes a path, secures each component, reassembles them,
+        and returns (secure_path, secure_file_name)."""
+
+    # This ensures that no hijinks in the file names or issues with OS file names exist
+    joined_path_elements = [secure_filename(_) for _ in pathlib.Path(os.path.dirname(path)).parts if _]
+    if joined_path_elements:
+        file_path = os.path.join(*joined_path_elements)
+    else:
+        file_path = ''
+    file_name: str = secure_filename(os.path.basename(path))
+
+    return file_path, file_name
 
 
 def create_db_if_needed():
