@@ -3,9 +3,7 @@
 import datetime
 import logging
 import os
-import sqlite3
 import traceback
-from datetime import date
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4

@@ -4,9 +4,7 @@ import json
 import logging
 import os
 import pathlib
-import sqlite3
 from datetime import date, datetime
-from shutil import copy, SameFileError
 from typing import List, BinaryIO
 
 import flask
@@ -16,8 +14,8 @@ from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path, \
-    create_db_if_needed
+from bmrbdep.helpers.sqlite import EntryDB
+from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
@@ -309,8 +307,6 @@ class DepositionRepo:
 
             If from_entry provided, then load the parameters from the active entry rather than the disk."""
 
-        create_db_if_needed()
-
         assign = True if from_entry else False
         if not from_entry:
             from_entry = self.get_entry()
@@ -331,31 +327,10 @@ class DepositionRepo:
                   'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
                   }
 
-        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-            cur = conn.cursor()
-            # Create the deposition record
-            insert_query = """
-INSERT OR REPLACE INTO entrylog (submission_date, release_date, title, contact_person1,
-author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-
-            try:
-                cur.execute(insert_query, [params['submission_date'], params['release_date'],
-                                           params['title'], params['contact_person1'], params['author_email'],
-                                           params['restart_id'], params['author_email'],
-                                           params['bmrb_id'], params['pdb_id'], params['publication_doi']])
-                conn.commit()
-                if assign:
-                    cur.execute("SELECT bmrbig_id FROM entrylog WHERE restart_id = ?", [params['restart_id']])
-                    from_entry.entry_id = 'bmrbig' + str(cur.fetchone()[0])
-            except sqlite3.IntegrityError:
-                logging.exception('This entry has already been deposited!')
-                conn.rollback()
-                raise ServerError('This entry has already been deposited! Please contact us.')
-            except sqlite3.Error:
-                logging.exception('Could not assign an ID in the database!')
-                conn.rollback()
-                raise ServerError('Could not create deposition. Please try again.')
+        with EntryDB() as entry_database:
+            entry_id = entry_database.create_or_update_entry_record(params, assign)
+            if assign:
+                from_entry.entry_id = entry_id
 
     def release_entry(self) -> None:
         """" Actually release the entry. """
