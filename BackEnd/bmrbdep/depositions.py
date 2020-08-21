@@ -55,7 +55,7 @@ class DepositionRepo:
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
             if not self._initialize:
-                raise RequestError('No deposition with that ID exists!', status_code=404)
+                raise RequestError('No deposition with that ID exists or has been released!', status_code=404)
             else:
                 # Create the entry directory (and parent folders, where needed)
                 first_parent = os.path.join(configuration['repo_path'], uuids[0])
@@ -361,25 +361,28 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         """" Actually release the entry. """
 
         final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
-        output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
-        try:
-            os.mkdir(output_dir)
-        except FileExistsError:
-            pass
+
         entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
         contact_loop = entry_saveframe['_Contact_person']
         del entry_saveframe['_Contact_person']
-        final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
+
+        # We need to temporarily lie and say we aren't deposited in order to be able to write to this directory
+        self.metadata['entry_deposited'] = False
+        self.write_file(f'{final_entry.entry_id}.str',
+                        final_entry.format(skip_empty_tags=True, skip_empty_loops=True).encode(),
+                        root=False)
+        self.metadata['entry_deposited'] = True
         entry_saveframe.add_loop(contact_loop)
-        for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
-            try:
-                os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-            except OSError:
-                try:
-                    copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-                except SameFileError:
-                    # This is good, just means the file was already hardlinked
-                    pass
+
+        #for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
+        #    try:
+        #        os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        #    except OSError:
+        #        try:
+        #            copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        #        except SameFileError:
+        #            # This is good, just means the file was already hardlinked
+        #            pass
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
