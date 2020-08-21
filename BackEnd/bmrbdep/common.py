@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import pathlib
-import sqlite3
 import zlib
 from typing import Union, TextIO, Tuple
 
@@ -74,30 +73,6 @@ def secure_full_path(path: str) -> Tuple[str, str]:
     file_name: str = secure_filename(os.path.basename(path))
 
     return file_path, file_name
-
-
-def create_db_if_needed():
-    """ Creates the entry DB if needed. """
-
-    database_path = os.path.join(configuration['repo_path'], 'depositions.sqlite3')
-    if not os.path.exists(database_path):
-        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-            cur = conn.cursor()
-            cur.execute("""
-CREATE TABLE entrylog (bmrbig_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       restart_id TEXT UNIQUE,
-                       author_email TEXT,
-                       submission_date DATE,
-                       release_date DATE,
-                       contact_person1 TEXT,
-                       title TEXT,
-                       bmrb_id TEXT,
-                       pdb_id TEXT,
-                       publication_doi TEXT
-                       );""")
-            cur.execute("CREATE INDEX restart_ids on entrylog (restart_id);")
-            conn.commit()
-
 
 def update_entire_database():
     """ Updates all records in the database. """
