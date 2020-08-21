@@ -21,8 +21,10 @@ from werkzeug.datastructures import FileStorage
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 # Set up the flask application
+from bmrbdep.helpers.sqlite import EntryDB
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -135,45 +137,47 @@ def handle_other_errors(exception: Exception):
 
 @application.route('/deposition/released')
 def all_released():
-    with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-        cur = conn.cursor()
-        try:
-            cur.execute("SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi, contact_person1 FROM entrylog", [])
-            return jsonify([{'id': x[0], 'release_date': x[1], 'title': x[2], 'bmrb_id': x[3], 'pdb_id': x[4],
-                             'doi': x[5], 'author': x[6]} for x in cur if
-                            datetime.datetime.strptime(x[1], "%Y-%m-%d").date() <= date.today()])
-        except sqlite3.Error:
-            raise ServerError('Failed to access database!')
+
+    with EntryDB() as entry_database:
+        return jsonify(entry_database.get_released())
 
 
 @application.route('/deposition/released/<string:entry_id>')
 @application.route('/deposition/released/<string:entry_id>/<file_name>')
 def released(entry_id: str, file_name=None):
 
-    directory_path = os.path.join(configuration['output_path'], str(entry_id))
-    if not os.path.exists(directory_path):
-        raise RequestError("Invalid entry ID. Entry either doesn't exist or hasn't yet been released.")
-    if file_name:
-        if os.path.exists(os.path.join(directory_path, file_name)):
-            return send_from_directory(directory_path, file_name)
-        else:
-            raise RequestError("No such file!")
+    # Fix the ID if necessary
+    if entry_id.startswith('bmrbig'):
+        entry_id = int(entry_id.replace('bmrbig', ''))
 
-    entry = pynmrstar.Entry.from_file(os.path.join(directory_path, f"{entry_id}.str"))
+    # Check if the entry is released
+    with EntryDB() as entry_db:
+        restart_id = entry_db.get_id_from_released_entry(entry_id)
+        if not restart_id:
+            raise RequestError("No deposition with that ID exists or has been released!")
 
-    # If we want to restore the type display
-    # available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
-    # file_data = {}
-    # for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
-    #     if name in file_data:
-    #         file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
-    #     else:
-    #         file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
+    with DepositionRepo(restart_id) as deposition_repo:
 
-    files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
-    files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
+        # If they are viewing a particular deposition, send the file they want
+        if file_name:
+            return deposition_repo.get_file(file_name, root=False).read()
 
-    return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
+        # Get the information about the entry
+        entry = deposition_repo.get_entry()
+
+        # If we want to restore the type display
+        # available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
+        # file_data = {}
+        # for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
+        #     if name in file_data:
+        #         file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
+        #     else:
+        #         file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
+
+        files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
+        files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
+
+        return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
 
 
 @application.route('/')
