@@ -53,11 +53,21 @@ CREATE TABLE entrylog (bmrbig_id INTEGER PRIMARY KEY AUTOINCREMENT,
     def create_or_update_entry_record(self, params, assign):
         """ If assign is provided, will return the newly created ID."""
 
-        sql = """
+        if assign:
+            sql = """
 INSERT OR REPLACE INTO entrylog (submission_date, release_date, title, contact_person1,
 author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-        args = [params['submission_date'], params['release_date'],
+            args = [params['submission_date'], params['release_date'],
+                    params['title'], params['contact_person1'], params['author_email'],
+                    params['restart_id'], params['author_email'],
+                    params['bmrb_id'], params['pdb_id'], params['publication_doi']]
+        else:
+            sql = """
+    INSERT OR REPLACE INTO entrylog (bmrbig_id, submission_date, release_date, title, contact_person1,
+    author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        args = [params['bmrbig_id'], params['submission_date'], params['release_date'],
                 params['title'], params['contact_person1'], params['author_email'],
                 params['restart_id'], params['author_email'],
                 params['bmrb_id'], params['pdb_id'], params['publication_doi']]
