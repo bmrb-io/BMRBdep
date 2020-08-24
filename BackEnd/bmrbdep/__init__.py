@@ -158,7 +158,8 @@ def released(entry_id: str, file_name=None):
 
         # If they are viewing a particular deposition, send the file they want
         if file_name:
-            return deposition_repo.get_file(file_name, root=False).read()
+            path, file = deposition_repo.get_file_path(file_name, root=False)
+            return send_from_directory(path, file)
 
         # Get the information about the entry
         entry = deposition_repo.get_entry()
@@ -618,3 +619,17 @@ def fetch_or_store_deposition(uuid):
         entry['commit'] = [commit]
 
         return jsonify(entry)
+
+
+@application.route('/refresh')
+def re_release_entries():
+    """ Re-releases all entries. """
+
+    with EntryDB() as entry_db:
+        all_entries = [x['restart_id'] for x in entry_db.get_released()]
+        for entry in all_entries:
+            with DepositionRepo(entry) as deposition_repo:
+                deposition_repo.update_db()
+                deposition_repo.release_entry()
+
+    return jsonify(True)

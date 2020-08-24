@@ -309,21 +309,28 @@ class DepositionRepo:
 
         assign = True if from_entry else False
         if not from_entry:
-            from_entry = self.get_entry()
+            from_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str'))
 
         esf: pynmrstar.saveframe = from_entry.get_saveframes_by_category('entry_information')[0]
-        submission_date: date = datetime.strptime(esf['Submission_date'][0], "%Y-%m-%d").date()
         contact_loop: pynmrstar.Loop = from_entry.get_loops_by_category("_Contact_Person")[0]
 
-        params = {'submission_date': submission_date,
-                  'title': esf['Title'][0],
+        def provisional_get_tag(tag):
+            tag = esf.get_tag(tag)
+            if not tag:
+                return None
+            if tag[0] in pynmrstar.definitions.NULL_VALUES:
+                return None
+            return tag[0]
+
+        params = {'title': esf['Title'][0],
                   'contact_person1': f"{contact_loop['Family_name'][0]}, {contact_loop['Given_name'][0]}",
                   'author_email': contact_loop['Email_address'][0],
                   'restart_id': str(self._uuid),
                   'onhold_status': esf['Release_request'][0],
-                  'bmrb_id': esf.get_tag('Selected_BMRB_ID')[0] if esf.get_tag('Selected_BMRB_ID') else None,
-                  'pdb_id': esf.get_tag('Selected_PDB_ID')[0] if esf.get_tag('Selected_PDB_ID') else None,
-                  'publication_doi': esf.get_tag('Citation_DOI')[0] if esf.get_tag('Citation_DOI') else None,
+                  'bmrb_id': provisional_get_tag('Selected_BMRB_ID'),
+                  'pdb_id': provisional_get_tag('Selected_PDB_ID'),
+                  'publication_doi': provisional_get_tag('Citation_DOI'),
+                  'submission_date': datetime.strptime(esf['Submission_date'][0], "%Y-%m-%d").date(),
                   'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
                   }
 
@@ -375,19 +382,25 @@ class DepositionRepo:
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, path: str, root: bool = True) -> BinaryIO:
-        """ Returns the current version of a file from the repo. """
+    def get_file_path(self, path: str, root: bool = False) -> (str, str):
+        """ Returns the path a file is in, and the file name."""
 
         secured_path, secured_filename = secure_full_path(path)
         if not secured_filename:
             raise RequestError('Cannot access directories, just files.')
         try:
             if root:
-                return open(os.path.join(self._entry_dir, secured_filename), "rb")
+                return os.path.join(self._entry_dir), secured_filename
             else:
-                return open(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename), 'rb')
+                return os.path.join(self._entry_dir, 'data_files', secured_path), secured_filename
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
+
+    def get_file(self, path: str, root: bool = True) -> BinaryIO:
+        """ Returns the current version of a file from the repo. """
+
+        path, file_name = self.get_file_path(path, root)
+        return open(os.path.join(path, file_name), 'rb')
 
     def get_data_file_list(self) -> List[str]:
         """ Returns the list of data files associated with this deposition. """

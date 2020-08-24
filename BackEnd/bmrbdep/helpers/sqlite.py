@@ -79,10 +79,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             raise bmrbdep.ServerError('Could not create deposition. Please try again.')
 
     def get_released(self) -> List[Dict[str, any]]:
-        sql = "SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi, contact_person1 FROM entrylog"
+        sql = "SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi, contact_person1, " \
+              "restart_id FROM entrylog"
         res = self._run_command(sql, [])
         return [{'id': x[0], 'release_date': x[1], 'title': x[2], 'bmrb_id': x[3], 'pdb_id': x[4],
-                 'doi': x[5], 'author': x[6]} for x in res if
+                 'doi': x[5], 'author': x[6], 'restart_id': x[7]} for x in res if
                 datetime.datetime.strptime(x[1], "%Y-%m-%d").date() <= datetime.date.today()]
 
     def get_id_from_released_entry(self, bmrbbig_id: int) -> Union[bool, Dict[str, any]]:
