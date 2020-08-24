@@ -1,0 +1,42 @@
+@import "../../custom-theme.scss";
+
+div {
+  margin-left: .5em;
+  margin-right: .5em;
+}
+
+/* Use these to style tables nicely */
+table.alternating tr:nth-child(even) {
+  background-color: mat-color($custom-theme-primary, lighter);
+}
+
+table.alternating tr:nth-child(odd) {
+  background-color: #FFFFFF;
+}
+
+table.alternating td{
+  padding: 0.25em;
+  text-align: left;
+  vertical-align: top;
+}
+
+table.alternating {
+  width: 100%;
+}
+
+table.alternating th {
+  padding: 0.25em;
+  font-size: 130%;
+  text-align: left;
+  background-color: mat-color($custom-theme-primary, lighter);
+}
+
+table.alternating tfoot {
+  font-size: 110%;
+  background-color: mat-color($custom-theme-primary, lighter);
+}
+
+table.alternating tr:hover {
+  border: 1px solid #C8C8C8;
+  background: #EDEDED;
+}

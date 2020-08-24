@@ -4,13 +4,12 @@
     </span>-->
 
     <div class="content-box">
-      <p>BMRbig is a BMRB project designed to accommodate the acquisition of diverse data (not just
-         NMR data) beyond the types currently curated and annotated by BMRB. The goal being to provide a service for
-         depositing the majority of the primary data that underpins the study of a biological system.
-         Deposition in BMRbig is simpler than deposition in BMRB, but serves as a potential intermediate step toward
-         a full BMRB deposition. Data submissions to BMRbig will be write only, although submissions may be augmented
-         in the future.  The expectation is that data deposited in BMRbig will become publicly accessible, within 6
-         months or less of the time of deposition. BMRbig will provide persistent links to deposited data.​</p>
+      <p>BMRbig is a BMRB project designed to accommodate the acquisition of diverse data (not just NMR data)
+        beyond the types currently curated and annotated by BMRB. Uploading to BMRbig is simpler than deposition
+        in BMRB, but serves as a potential intermediate step toward a full BMRB deposition. Data uploads to
+        BMRbig will be “write once”, although submissions may be augmented at a later time. The expectation
+        is that data uploaded to BMRbig will become publicly accessible, within 6 months or less of the time
+        of upload. BMRbig will provide persistent links to uploaded data.</p>
       <p>BMRbig IDs are separate from BMRB IDs and are <b>not equivalent</b>. To switch to the BMRBdep deposition system
       which assigns complete BMRB IDs, please proceed to <a href="https://betadeposit.bmrb.wisc.edu">BMRBdep</a>.</p>
       <h3>Note that BMRbig is in <b>alpha</b> form. You may find bugs! If so, please report
@@ -18,33 +17,33 @@
     </div>
     <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
         <div class="content-box resume-box" *ngIf="entry">
-            <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
+            <h2>You have an in progress upload: {{entry.depositionNickname}}</h2>
             <div>
                 <div>
                     <a mat-raised-button color="primary"
                        [routerLink]="['/entry', 'pending-verification']"
                        matTooltip="Return to the first uncompleted section of the current deposition.">
-                       Return to your deposition</a>
+                       Return to your upload</a>
                 </div>
               <!--
                 <div>
                   <a mat-raised-button color="primary"
-                     matTooltip="Create a new deposition with the same contents as the currently
+                     matTooltip="Create a new upload with the same contents as the currently
 active deposition." (click)="api.cloneDeposition()">
-                    Clone deposition</a>
+                    Clone upload</a>
                 </div>-->
                 <div>
                     <button mat-raised-button color="primary" (click)="api.clearDeposition()"
                             matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">
-                        End your session for this deposition
+                        End your session for this upload
                     </button>
                 </div>
             </div>
         </div>
         <div class="content-box">
-            <h2>Make a deposition
-              <!--<mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>-->
+            <h2>Make an upload
+              <!--<mat-icon routerLink="/support" class="pointer" title="Click to view upload resources">help_outline</mat-icon>-->
             </h2>
 
           <!--
@@ -72,13 +71,13 @@ your email when you created the deposition.">
                            placeholder="Please enter a title for this deposition."
                            required>
                 </label>
-                <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the deposition.</mat-error>
+                <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the upload.</mat-error>
             </mat-form-field>
  <!--
             <mat-form-field>
               <mat-select [formControl]="sessionVisibility" placeholder="Click to select a data visibility status." required>
-                <mat-option value="public">Deposit data publicly - your data will be public as soon as you complete the deposition and the data has been checked for suitability.</mat-option>
-                <mat-option value="private">Deposit data privately for a special project - it will not be released.</mat-option>
+                <mat-option value="public">Upload data publicly - your data will be public as soon as you complete the deposition and the data has been checked for suitability.</mat-option>
+                <mat-option value="private">Upload data privately for a special project - it will not be released.</mat-option>
               </mat-select>
               <mat-error *ngIf="sessionVisibility.invalid">Please select a data visibility status.</mat-error>
             </mat-form-field>-->
@@ -96,17 +95,17 @@ your email when you created the deposition.">
 
             <br>
             <button mat-raised-button color="primary">
-                Click here to start a new deposition.
+                Click here to start a new upload.
             </button>
 
         </div>
     </form>
 
     <div class="content-box">
-        <h3>Resume deposition</h3>
-        <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
-            deposition.</p>
-        <p>If you have lost that e-mail, please
+        <h3>Resume upload</h3>
+        <p>To resume your upload, simply click the link in the e-mail you were sent when you created the
+            upload.</p>
+        <p>If you have lost that e-mail, or need support with anything related to BMRbig, please
             <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
         </p>
     </div>

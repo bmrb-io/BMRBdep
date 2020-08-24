@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 
 // Our components
 import {AppComponent} from './app.component';
@@ -24,9 +24,11 @@ import {SaveframeViewComponent} from './view_mode/saveframe/saveframe-view.compo
 import {RestoreComponent} from './restore/restore.component'; // Saving/loading bar
 import {SupportComponent} from './support/support-component';
 
-// From https://github.com/mika-el/angular-loading-page
-// When able, change to: https://github.com/aitboudad/ngx-loading-bar
-import {LoadingPageModule, SlidingBarModule} from 'angular-loading-page';
+// From https://github.com/aitboudad/ngx-loading-bar
+import {LoadingBarHttpClientModule} from '@ngx-loading-bar/http-client';
+
+// From https://github.com/jfcere/ngx-markdown
+import {MarkdownModule} from 'ngx-markdown';
 
 // Angular Material
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -48,6 +50,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {SidenavService} from './sidenav.service';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import { DataViewerComponent } from './data-viewer/data-viewer.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +72,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     LoadEntryComponent,
     ConfirmationDialogComponent,
     SupportComponent,
+    DataViewerComponent,
   ],
   imports: [
     BrowserModule,
@@ -89,13 +93,13 @@ import {MatTooltipModule} from '@angular/material/tooltip';
     MatCardModule,
     MatButtonModule,
     MatSnackBarModule,
-    LoadingPageModule,
-    SlidingBarModule,
+    LoadingBarHttpClientModule,
     MatDialogModule,
     MatRadioModule,
     MatCheckboxModule,
     MatAutocompleteModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MarkdownModule.forRoot({ loader: HttpClient })
   ],
   bootstrap: [AppComponent],
   entryComponents: [ConfirmationDialogComponent],

@@ -1,5 +1,5 @@
 <mat-toolbar>
-    <mat-toolbar-row>
+    <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
         <div *ngIf="entry"
              (click)="sidenav.toggle(); treeView.scrollSideNav()"
              class="valign-center" matTooltip="Toggle the navigation menu.">
@@ -8,27 +8,27 @@
         </div>
         <ng-container *ngIf="entry">
           <span *ngIf="entry && !entry.deposited" class="title-center">
-            BMRbig - Deposition '{{entry.depositionNickname}}' in progress
+            BMRbig - Upload '{{entry.depositionNickname}}' in progress
           </span>
           <span *ngIf="entry && entry.deposited" class="title-center">
-            BMRbig - Deposition '{{entry.depositionNickname}}' completed and deposited
+            BMRbig - Upload '{{entry.depositionNickname}}' completed
           </span>
           <span *ngIf="!entry" class="title-center"
-                  matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">BMRbig</span>
+                  matTooltip="Log out from this upload. You can resume it later by following the link sent to
+your email when you created the upload.">BMRbig</span>
           <span class="title-right pointer" routerLink="/" (click)="clearEntry()">End session</span>
         </ng-container>
 
-      <span *ngIf="!entry" class="title-center pointer bmrb" routerLink="/">BMRbig Home</span>
-      <a href="http://www.bmrb.wisc.edu" *ngIf="!entry" class="title-right pointer">
-        <img src="/assets/images/logo_bmrb.svg" alt="BMRB logo" width="50px" height="50px" />
-      </a>
+      <div *ngIf="!entry" class="title-center pointer">
+        <a href="http://www.bmrb.wisc.edu" *ngIf="!entry" class="title-right pointer">
+          <img src="/assets/images/BMRbig_logo_new.png" alt="BMRB logo"
+               style="padding-top: 10px; height: 90px"/>
+        </a>
+      </div>
 
     </mat-toolbar-row>
-    <mat-toolbar-row class="loading-bar-holder">
-        <div *mkLoadingPage="{checkPendingHttp: true}">
-            <mk-sliding-bar colorOne="#CBDBFF" colorTwo="#F5F5F5"></mk-sliding-bar>
-        </div>
+    <mat-toolbar-row class="loading-bar-holder" *ngIf="(loader.value$ | async)">
+        <mat-progress-bar mode="indeterminate" [value]="loader.value$ | async"></mat-progress-bar>
     </mat-toolbar-row>
 </mat-toolbar>
 

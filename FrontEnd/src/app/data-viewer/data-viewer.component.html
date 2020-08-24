@@ -1,0 +1,60 @@
+<div *ngIf="entry_id">
+  <ng-container *ngIf="files else no_data">
+    <h2>Viewing BMRbig entry {{entry_id}}: {{title}}</h2>
+
+    <markdown [src]="env.serverURL + '/released/' + entry_id + '/README.md'"></markdown>
+
+    <table class="alternating">
+      <thead>
+      <tr>
+        <th>File name</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><a href="{{env.serverURL}}/released/{{entry_id}}/{{entry_id}}.str">{{entry_id}}.str</a></td>
+      </tr>
+      <tr *ngFor="let file of files">
+        <td><a href="{{file.path}}">{{file.name}}</a></td>
+      </tr>
+      </tbody>
+    </table>
+  </ng-container>
+  <ng-template #no_data>
+    <h2>No such entry ID exists, or the entry has not yet been released</h2>
+  </ng-template>
+
+  <br>
+  <button mat-raised-button color="primary" routerLink="..">Return to the entry list.</button>
+</div>
+
+<div *ngIf="!entry_id">
+  <h3>Available entries:</h3>
+
+  <h4 *ngIf="!records">Loading...</h4>
+  <table *ngIf="records" class="alternating">
+    <thead>
+    <tr>
+      <th>Entry ID</th>
+      <th>Title</th>
+      <th>Upload author</th>
+      <th>Release date</th>
+      <th>Linked BMRB ID</th>
+      <th>Linked PDB ID</th>
+      <th>Publication DOI</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let record of records">
+      <td><a routerLink='bmrbig{{record.id}}'>BMRbig{{record.id}}</a></td>
+      <td>{{record.title}}</td>
+      <td>{{record.author}}</td>
+      <td>{{record.release_date}}</td>
+      <td><a href="http://www.bmrb.wisc.edu/data_library/summary/index.php?bmrbId={{record.bmrb_id}}" target="_blank">
+        {{record.bmrb_id}}</a></td>
+      <td><a href="https://www.wwpdb.org/pdb?id={{record.pdb_id}}" target="_blank">{{record.pdb_id}}</a></td>
+      <td><a href="https://doi.org/{{record.doi}}" target="_blank">{{record.doi}}</a></td>
+    </tr>
+    </tbody>
+  </table>
+</div>

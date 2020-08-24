@@ -1,10 +1,10 @@
 <div class="main-content">
     <mat-card>
         <mat-card-header>
-            <mat-card-title *ngIf="!(entry.valid && entry.emailValidated)">You are viewing all sections of your deposition that still need to be
+            <mat-card-title *ngIf="!(entry.valid && entry.emailValidated)">You are viewing all sections of your upload that still need to be
                 completed.
             </mat-card-title>
-            <mat-card-title *ngIf="entry.valid && entry.emailValidated">Your deposition is ready to submit.</mat-card-title>
+            <mat-card-title *ngIf="entry.valid && entry.emailValidated">Your upload is ready to submit.</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <mat-nav-list>
@@ -27,13 +27,10 @@
           </mat-form-field>
         </mat-card-content>
         <mat-card-actions>
-            <h4 *ngIf="(entry.valid && entry.emailValidated)">Unless this upload is providing more data for an
-            existing BMRB entry, or you specified that this is a private deposition, the data will be made public
-            immediately.</h4>
-            <h5 *ngIf="api.saveInProgress || entry.unsaved">You cannot deposit until you have finished uploading the data files / metadata changes. Please wait
-            for the deposition system to stop displaying a progress bar at the top of the page before continuing.</h5>
+            <h5 *ngIf="api.saveInProgress || entry.unsaved">You cannot upload until you have finished uploading the data files / metadata changes. Please wait
+            for the BMRbig system to stop displaying a progress bar at the top of the page before continuing.</h5>
             <button mat-raised-button class="saveframe-button" [disabled]="!(entry.valid && entry.emailValidated && !api.saveInProgress && !entry.unsaved)" color="accent"
-                    (click)="submitEntry()">Upload to BMRB
+                    (click)="submitEntry()">Upload to BMRbig
             </button>
             <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
         </mat-card-actions>

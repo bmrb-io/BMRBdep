@@ -19,8 +19,10 @@ from werkzeug.datastructures import FileStorage
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 # Set up the flask application
+from bmrbdep.helpers.sqlite import EntryDB
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -131,19 +133,49 @@ def handle_other_errors(exception: Exception):
         return response
 
 
-@application.route('/released/<int:entry_id>')
-@application.route('/released/<int:entry_id>/<file_name>')
-def released(entry_id: int, file_name=None):
-    if file_name:
-        return send_from_directory(os.path.join(configuration['output_path'], str(entry_id)), file_name)
+@application.route('/deposition/released')
+def all_released():
 
-    full_path = os.path.join(configuration['output_path'], str(entry_id))
-    if not os.path.exists(full_path):
-        return "Invalid entry ID."
-    files = [f'<a href="{url_for("released", entry_id=entry_id, file_name=f)}">{f}</a>' for f in os.listdir(full_path)]
-    if len(files) == 0:
-        return "Invalid entry ID."
-    return "<br>".join(files)
+    with EntryDB() as entry_database:
+        return jsonify(entry_database.get_released())
+
+
+@application.route('/deposition/released/<string:entry_id>')
+@application.route('/deposition/released/<string:entry_id>/<file_name>')
+def released(entry_id: str, file_name=None):
+
+    # Fix the ID if necessary
+    if entry_id.startswith('bmrbig'):
+        entry_id = int(entry_id.replace('bmrbig', ''))
+
+    # Check if the entry is released
+    with EntryDB() as entry_db:
+        restart_id = entry_db.get_id_from_released_entry(entry_id)
+        if not restart_id:
+            raise RequestError("No deposition with that ID exists or has been released!")
+
+    with DepositionRepo(restart_id) as deposition_repo:
+
+        # If they are viewing a particular deposition, send the file they want
+        if file_name:
+            return deposition_repo.get_file(file_name, root=False).read()
+
+        # Get the information about the entry
+        entry = deposition_repo.get_entry()
+
+        # If we want to restore the type display
+        # available_data = entry.get_tags(['_Upload_data.Data_file_name', '_Upload_data.Data_file_content_type'])
+        # file_data = {}
+        # for x, name in enumerate(available_data['_Upload_data.Data_file_name']):
+        #     if name in file_data:
+        #         file_data[name].append(available_data['_Upload_data.Data_file_content_type'][x])
+        #     else:
+        #         file_data[name] = [available_data['_Upload_data.Data_file_content_type'][x]]
+
+        files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
+        files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
+
+        return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
 
 
 @application.route('/')
@@ -156,7 +188,8 @@ def send_local_file(filename: str = None) -> Response:
     if not os.path.exists(angular_path):
         angular_path = os.path.join(root_dir, '..', 'dist')
     if not os.path.exists(angular_path):
-        return Response('Broken installation. The Angular HTML/JS/CSS files are missing from the docker container. ')
+        return Response(f'Broken installation. The Angular HTML/JS/CSS files are missing from the docker container: '
+                        f'{angular_path} ')
 
     if not os.path.exists(os.path.join(angular_path, filename)):
         filename = 'index.html'
@@ -190,17 +223,17 @@ def send_validation_email(uuid) -> Response:
             token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
             confirm_message.html = """
-            Thank you for your deposition '%s' created %s (UTC).
+            Thank you for your upload '%s' created %s (UTC).
             <br><br>
-            To return to this deposition, click <a href="%s" target="BMRbig">here</a>.
+            To return to this upload, click <a href="%s" target="BMRbig">here</a>.
             <br><br>
             If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
-            share this e-mail with will have access to the full contents of your in-progress deposition and can make
+            share this e-mail with will have access to the full contents of your in-progress upload and can make
             changes to it.
 
             If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
             leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
-            computer could access your in-process deposition.
+            computer could access your in-process upload.
             <br><br>
             Thank you,
             <br>
@@ -209,32 +242,30 @@ def send_validation_email(uuid) -> Response:
 
             mail.send(confirm_message)
 
-
-
             return jsonify({'status': 'validated'})
 
 
         # Ask them to confirm their e-mail
-        confirm_message = Message("Please validate your e-mail address for BMRbig deposition '%s'." %
+        confirm_message = Message("Please validate your e-mail address for BMRbig upload '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
                                   reply_to=configuration['smtp']['reply_to_address'])
         token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
         confirm_message.html = """
-Thank you for your deposition '%s' created %s (UTC).
+Thank you for your upload '%s' created %s (UTC).
 <br><br>
 Please click <a href="%s" target="BMRbig">here</a> to validate your e-mail for this session. This is required to
-proceed. You can also use this link to return to your deposition later if you close the page before
+proceed. You can also use this link to return to your upload later if you close the page before
 it is complete.
 <br><br>
 If you wish to share access with collaborators, simply forward them this e-mail. Be aware that anyone you
-share this e-mail with will have access to the full contents of your in-progress deposition and can make
+share this e-mail with will have access to the full contents of your in-progress upload and can make
 changes to it.
 
 If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
 leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
-computer could access your in-process deposition.
+computer could access your in-process upload.
 <br><br>
 Thank you,
 <br>
@@ -363,14 +394,17 @@ def new_deposition_micro() -> Response:
         if 'orcid' not in configuration or configuration['orcid']['bearer'] == 'CHANGEME':
             logging.warning('Please specify your ORCID API credentials, or else auto-filling from ORCID will fail.')
         else:
-            r = requests.get(configuration['orcid']['url'] % author_orcid,
-                             headers={"Accept": "application/json",
-                                      'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            try:
+                r = requests.get(configuration['orcid']['url'] % author_orcid,
+                                 headers={"Accept": "application/json",
+                                          'Authorization': 'Bearer %s' % configuration['orcid']['bearer']})
+            except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+                raise ServerError('An error occurred while contacting the ORCID server.')
             if not r.ok:
                 if r.status_code == 404:
                     raise RequestError('Invalid ORCID!')
                 else:
-                    application.logger.exception('An error occurred while contacting the ORCID server.')
+                    raise ServerError('An error occurred while contacting the ORCID server.')
             else:
                 orcid_json = r.json()
                 try:
@@ -447,12 +481,11 @@ def deposit_entry(uuid) -> Response:
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                             ['Given_name', 'Family_name', 'Email_address'])]
-        message = Message("Your entry has been deposited!", recipients=contact_emails,
+        message = Message("Your entry has been uploaded!", recipients=contact_emails,
                           reply_to=configuration['smtp']['reply_to_address'])
-        message.html = f'''Thank you for your deposition! Your assigned BMRbig ID is test-{bmrb_num}. This is a
-test-only ID, and will not be preserved permanently. We have attached a
-copy of the deposition contents for reference. If you have marked your submission as public,
-it will be visible <a href="{url_for("released", entry_id=bmrb_num, _external=True)}">here</a>.<br><br>
+        message.html = f'''Thank you for your upload! Your assigned BMRbig ID is {bmrb_num}. We have attached a
+copy of the deposition contents for reference. If you have marked your submission as for immediate release,
+it will be visible <a href="https://bmrbig.org/released/{bmrb_num}">here</a>.<br><br>
 Deposited data files: {repo.get_data_file_list()}'''
         message.attach("%s.str" % uuid, "text/plain", str(final_entry))
         mail.send(message)
@@ -463,33 +496,35 @@ Deposited data files: {repo.get_data_file_list()}'''
                 send_to = configuration['smtp']['annotator_address']
             else:
                 send_to = [configuration['smtp']['annotator_address']]
-            message = Message("BMRbig: BMRB entry %s has been deposited." % bmrb_num, recipients=send_to)
-            message.body = '''The following new entry has been deposited via BMRbig:
+            message = Message("BMRbig: BMRB entry %s has been uploaded." % bmrb_num, recipients=send_to)
+            entry_saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+            message.body = '''The following new entry has been uploaded via BMRbig:
 
-restart id:            %s
-BMRbig accession number: test-%s
+restart id:              %s
+BMRbig accession number: %s
+release status:          %s
 
 title: %s
 
 contact persons: %s
-''' % (uuid, bmrb_num, final_entry.get_saveframes_by_category('entry_information')[0]['Title'][0], contact_full)
+''' % (uuid, bmrb_num, entry_saveframe['Release_request'][0], entry_saveframe['Title'][0], contact_full)
         mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
 
 
-@application.route('/deposition/<uuid:uuid>/file/<filename>', methods=('GET', 'DELETE'))
-def file_operations(uuid, filename: str) -> Response:
+@application.route('/deposition/<uuid:uuid>/file/<path:path>', methods=('GET', 'DELETE'))
+def file_operations(uuid, path: str) -> Response:
     """ Either retrieve or delete a file. """
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(filename, root=False),
-                             attachment_filename=secure_filename(filename))
+            return send_file(repo.get_file(path, root=False),
+                             attachment_filename=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
-            if repo.delete_data_file(filename):
-                repo.commit('Deleted file %s' % filename)
+            if repo.delete_data_file(path):
+                repo.commit('Deleted file %s' % path)
         return jsonify({'commit': repo.last_commit})
     else:
         raise ServerError('If you see this, then somebody changed the allowed methods without changing the logic.')
@@ -500,16 +535,17 @@ def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
     file_obj: Optional[FileStorage] = request.files.get('file', None)
+    relative_path = file_obj.filename
 
     if not file_obj or not file_obj.filename:
         raise RequestError('No file uploaded!')
 
     # Store a data file
     with depositions.DepositionRepo(uuid) as repo:
-        filename = repo.write_file(file_obj.filename, file_obj.read())
+        filename = repo.write_file(relative_path, file_obj.read())
 
         # Update the entry data
-        if repo.commit("User uploaded file: %s" % filename):
+        if repo.commit("User uploaded file: %s" % relative_path):
             return jsonify({'filename': filename, 'changed': True,
                             'commit': repo.last_commit})
         else:

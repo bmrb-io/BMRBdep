@@ -3,18 +3,19 @@
 import json
 import logging
 import os
-import sqlite3
+import pathlib
 from datetime import date, datetime
-from shutil import copy
 from typing import List, BinaryIO
 
 import flask
 import pynmrstar
 import unidecode
+from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
+from bmrbdep.helpers.sqlite import EntryDB
+from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 
@@ -52,7 +53,7 @@ class DepositionRepo:
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
             if not self._initialize:
-                raise RequestError('No deposition with that ID exists!', status_code=404)
+                raise RequestError('No deposition with that ID exists or has been released!', status_code=404)
             else:
                 # Create the entry directory (and parent folders, where needed)
                 first_parent = os.path.join(configuration['repo_path'], uuids[0])
@@ -71,7 +72,7 @@ class DepositionRepo:
                     config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
 
         # Create the lock object
-        self._lock_object: FileLock = FileLock(self._lock_path, timeout=10)
+        self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
         if not self._initialize:
             self._repo = Repo(self._entry_dir)
@@ -144,9 +145,19 @@ class DepositionRepo:
             pass
 
         # Assign the PubMed ID
-        for citation in final_entry.get_saveframes_by_category('citations'):
-            if citation['PubMed_ID'] and citation['PubMed_ID'] != ".":
-                update_citation_with_pubmed(citation, schema=schema)
+        entry_pubmed_id = final_entry.get_tag('Entry.Citation_PubMed_ID')
+        entry_citation_doi = final_entry.get_tag('Entry.Citation_DOI')
+
+        if (entry_pubmed_id and entry_pubmed_id[0] not in pynmrstar.definitions.NULL_VALUES) or \
+           (entry_citation_doi and entry_citation_doi[0] not in pynmrstar.definitions.NULL_VALUES):
+            citation = pynmrstar.Saveframe.from_template('citations', schema=schema)
+            final_entry.add_saveframe(citation)
+            if entry_pubmed_id:
+                citation['PubMed_ID'] = entry_pubmed_id[0]
+                if citation['PubMed_ID'] not in pynmrstar.definitions.NULL_VALUES:
+                    update_citation_with_pubmed(citation, schema=schema)
+            if entry_citation_doi:
+                citation['DOI'] = entry_citation_doi[0]
 
         for saveframe in final_entry:
             # Remove all unicode from the entry
@@ -253,100 +264,28 @@ class DepositionRepo:
 
         # Calculate the values needed to insert into ETS
         today_str: str = date.today().isoformat()
-        today_date: datetime = datetime.now()
 
         # Set the accession and submission date
         entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
         entry_saveframe['Submission_date'] = today_str
         entry_saveframe['Accession_date'] = today_str
 
+        release_status = entry_saveframe['Release_request'][0]
+        release_date = date.today()
+        if release_status == 'Hold for 4 weeks':
+            release_date = release_date + relativedelta(weeks=4)
+        elif release_status == 'Hold for 8 weeks':
+            release_date = release_date + relativedelta(weeks=8)
+        elif release_status == 'Hold for 6 months':
+            release_date = release_date + relativedelta(months=6)
+        entry_saveframe['Original_release_date'] = release_date.isoformat()
+        entry_saveframe['Last_release_date'] = release_date.isoformat()
+
         # Do final entry normalization
         final_entry.normalize(schema=schema)
 
-        params = {'source': 'Author',
-                  'submit_type': 'Dep',
-                  'status': 'nd',
-                  'lit_search_required': 'N',
-                  'submission_date': today_str,
-                  'accession_date': today_str,
-                  'last_updated': today_str,
-                  'molecular_system': entry_saveframe['Title'][0],
-                  'onhold_status': 'RELEASE NOW',
-                  'restart_id': final_entry.entry_id
-                  }
-
-        contact_loop: pynmrstar.Loop = final_entry.get_loops_by_category("_Contact_Person")[0]
-        params['author_email'] = ",".join(contact_loop.get_tag(['Email_address']))
-        contact_people = [', '.join(x) for x in contact_loop.get_tag(['Family_name', 'Given_name'])]
-        params['contact_person1'] = contact_people[0]
-        try:
-            params['contact_person2'] = contact_people[1]
-        except IndexError:
-            params['contact_person2'] = None
-
-        # Make sqlite database for now
-        database_path = os.path.join(configuration['repo_path'], 'depositions.sqlite3')
-        if not os.path.exists(database_path):
-            with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-                cur = conn.cursor()
-                cur.execute("""
-    CREATE TABLE entrylog (bmrbnum INTEGER PRIMARY KEY AUTOINCREMENT,
-                           restart_id TEXT UNIQUE,
-                           author_email TEXT,
-                           submission_date DATE,
-                           contact_person1 TEXT,
-                           contact_person2 TEXT,
-                           molecular_system TEXT);""")
-                cur.execute("CREATE INDEX restart_ids on entrylog (restart_id);")
-                conn.commit()
-
-        with sqlite3.connect(os.path.join(configuration['repo_path'], 'depositions.sqlite3')) as conn:
-            cur = conn.cursor()
-
-            # Create the deposition record
-            insert_query = """
-INSERT INTO entrylog (submission_date, molecular_system, contact_person1, contact_person2, author_email,
-                      restart_id, author_email)
-VALUES (?, ?, ?, ?, ?, ?, ?)"""
-
-            try:
-                cur.execute(insert_query, [params['submission_date'], params['molecular_system'],
-                                           params['contact_person1'], params['contact_person2'],
-                                           params['author_email'], params['restart_id'],
-                                           params['author_email']])
-                conn.commit()
-                cur.execute("SELECT bmrbnum FROM entrylog WHERE restart_id = ?", [params['restart_id']])
-                final_entry.entry_id = cur.fetchone()[0]
-            except sqlite3.IntegrityError:
-                logging.exception('This entry has already been deposited!')
-                conn.rollback()
-                raise ServerError('This entry has already been deposited! Please contact us.')
-            except sqlite3.Error:
-                logging.exception('Could not assign an ID in the database!')
-                conn.rollback()
-                raise ServerError('Could not create deposition. Please try again.')
-
-        # Assign the BMRB ID in all the appropriate places in the entry
-        for saveframe in final_entry.frame_list:
-            for tag in saveframe.tags:
-                fqtn: str = (saveframe.tag_prefix + "." + tag[0]).lower()
-                try:
-                    tag_schema = schema.schema[fqtn]
-                    if tag_schema['entryIdFlg'] == 'Y':
-                        tag[1] = final_entry.entry_id
-                except KeyError:
-                    pass
-
-            for loop in saveframe.loops:
-                for tag in loop.tags:
-                    fqtn = (loop.category + "." + tag).lower()
-                    try:
-                        tag_schema = schema.schema[fqtn]
-                        if tag_schema['entryIdFlg'] == 'Y':
-                            loop[tag] = [final_entry.entry_id] * len(loop[tag])
-                    except KeyError:
-                        pass
-        final_entry.get_saveframes_by_category('entry_information')[0]['ID'] = str(final_entry.entry_id)
+        # Assign our record in the db
+        self.update_db(from_entry=final_entry)
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
@@ -357,22 +296,68 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         self.commit('Deposition submitted!')
 
         # Data out
-        entry_saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
-        if entry_saveframe['Release_privacy'][0] == 'public':
-            output_dir = os.path.join(configuration['output_path'], str(final_entry.entry_id))
-            os.mkdir(output_dir)
-            contact_loop = entry_saveframe['_Contact_person']
-            del entry_saveframe['_Contact_person']
-            final_entry.write_to_file(os.path.join(output_dir, f"{final_entry.entry_id}.str"))
-            entry_saveframe.add_loop(contact_loop)
-            for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
-                try:
-                    os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-                except OSError:
-                    copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        if entry_saveframe['Release_request'][0] == 'Release now':
+            self.release_entry()
 
         # Return the assigned BMRB ID
         return final_entry.entry_id
+
+    def update_db(self, from_entry: pynmrstar.Entry = None):
+        """ Update the DB record for this entry, or create one. Assigns the ID in the entry if one is provided.
+
+            If from_entry provided, then load the parameters from the active entry rather than the disk."""
+
+        assign = True if from_entry else False
+        if not from_entry:
+            from_entry = self.get_entry()
+
+        esf: pynmrstar.saveframe = from_entry.get_saveframes_by_category('entry_information')[0]
+        submission_date: date = datetime.strptime(esf['Submission_date'][0], "%Y-%m-%d").date()
+        contact_loop: pynmrstar.Loop = from_entry.get_loops_by_category("_Contact_Person")[0]
+
+        params = {'submission_date': submission_date,
+                  'title': esf['Title'][0],
+                  'contact_person1': f"{contact_loop['Family_name'][0]}, {contact_loop['Given_name'][0]}",
+                  'author_email': contact_loop['Email_address'][0],
+                  'restart_id': str(self._uuid),
+                  'onhold_status': esf['Release_request'][0],
+                  'bmrb_id': esf.get_tag('Selected_BMRB_ID')[0] if esf.get_tag('Selected_BMRB_ID') else None,
+                  'pdb_id': esf.get_tag('Selected_PDB_ID')[0] if esf.get_tag('Selected_PDB_ID') else None,
+                  'publication_doi': esf.get_tag('Citation_DOI')[0] if esf.get_tag('Citation_DOI') else None,
+                  'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
+                  }
+
+        with EntryDB() as entry_database:
+            entry_id = entry_database.create_or_update_entry_record(params, assign)
+            if assign:
+                from_entry.entry_id = entry_id
+
+    def release_entry(self) -> None:
+        """" Actually release the entry. """
+
+        final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
+
+        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        contact_loop = entry_saveframe['_Contact_person']
+        del entry_saveframe['_Contact_person']
+
+        # We need to temporarily lie and say we aren't deposited in order to be able to write to this directory
+        self.metadata['entry_deposited'] = False
+        self.write_file(f'{final_entry.entry_id}.str',
+                        final_entry.format(skip_empty_tags=True, skip_empty_loops=True).encode(),
+                        root=False)
+        self.metadata['entry_deposited'] = True
+        entry_saveframe.add_loop(contact_loop)
+
+        #for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
+        #    try:
+        #        os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        #    except OSError:
+        #        try:
+        #            copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
+        #        except SameFileError:
+        #            # This is good, just means the file was already hardlinked
+        #            pass
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
@@ -390,14 +375,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, filename: str, root: bool = True) -> BinaryIO:
+    def get_file(self, path: str, root: bool = True) -> BinaryIO:
         """ Returns the current version of a file from the repo. """
 
-        secured_filename: str = secure_filename(filename)
-        if not root:
-            secured_filename = os.path.join('data_files', secured_filename)
+        secured_path, secured_filename = secure_full_path(path)
+        if not secured_filename:
+            raise RequestError('Cannot access directories, just files.')
         try:
-            return open(os.path.join(self._entry_dir, secured_filename), "rb")
+            if root:
+                return open(os.path.join(self._entry_dir, secured_filename), "rb")
+            else:
+                return open(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename), 'rb')
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
 
@@ -406,13 +394,15 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
         return os.listdir(os.path.join(self._entry_dir, 'data_files'))
 
-    def delete_data_file(self, filename: str) -> bool:
+    def delete_data_file(self, path: str) -> bool:
         """ Delete a data file by name."""
 
         self.raise_write_errors()
-        secured_filename = secure_filename(filename)
+
+        secured_path, secured_filename = secure_full_path(path)
+
         try:
-            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
+            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename))
         except FileNotFoundError:
             return False
         self._modified_files = True
@@ -433,17 +423,27 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
         if filename != 'submission_info.json':
             self.raise_write_errors()
 
-        secured_filename: str = secure_filename(filename)
-        file_path: str = secured_filename
-        if not root:
-            file_path = os.path.join('data_files', secured_filename)
+        # This ensures that no hijinks in the file names or issues with OS file names exist
+        file_path, file_name = secure_full_path(filename)
 
-        with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
+        if root:
+            full_path: str = os.path.join(self._entry_dir, file_name)
+        else:
+            full_path = os.path.join(self._entry_dir, 'data_files', file_path, file_name)
+
+        # Make the directory if it doesn't exist
+        if not os.path.exists(os.path.dirname(full_path)):
+            pathlib.Path(os.path.dirname(full_path)).mkdir(parents=True, exist_ok=True)
+
+        with open(full_path, "wb") as fo:
             fo.write(data)
 
         self._modified_files = True
 
-        return secured_filename
+        if root:
+            return file_name
+        else:
+            return os.path.join(file_path, file_name)
 
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """

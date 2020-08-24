@@ -11,7 +11,6 @@ import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-di
 import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
-import {SidenavService} from './sidenav.service';
 
 function getTime(): number {
   return (new Date()).getTime();
@@ -41,8 +40,7 @@ export class ApiService implements OnDestroy {
               private router: Router,
               private route: ActivatedRoute,
               private titleService: Title,
-              private dialog: MatDialog,
-              private sidenavService: SidenavService) {
+              private dialog: MatDialog) {
 
     this.entrySubject = new ReplaySubject<Entry>();
 
@@ -89,7 +87,7 @@ export class ApiService implements OnDestroy {
         event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && !this.cachedEntry) {
+              && this.router.url.indexOf('/released') && !this.cachedEntry) {
               this.subscription$.unsubscribe();
               router.navigate(['/']).then();
             }
@@ -182,7 +180,8 @@ export class ApiService implements OnDestroy {
   checkValidatedEmail(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
-      this.http.get(entryURL).subscribe(response => {
+      // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
+      this.http.get(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe(response => {
           resolve(response['status']);
         }, error => {
           this.handleError(error);
@@ -208,11 +207,11 @@ export class ApiService implements OnDestroy {
 
   cloneDeposition() {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
-    dialogRef.componentInstance.confirmMessage = 'This will create a new deposition pre-filled with all of the data from the current' +
-      ' deposition, except any uploaded data files. Are you sure you want to proceed?';
-    dialogRef.componentInstance.proceedMessage = 'Yes, create new deposition';
+    dialogRef.componentInstance.confirmMessage = 'This will create a new upload pre-filled with all of the data from the current' +
+      ' upload, except any uploaded data files. Are you sure you want to proceed?';
+    dialogRef.componentInstance.proceedMessage = 'Yes, create new upload';
     dialogRef.componentInstance.cancelMessage = 'No, cancel';
-    dialogRef.componentInstance.inputBoxText = 'Enter a nickname for the new deposition';
+    dialogRef.componentInstance.inputBoxText = 'Enter a nickname for the new upload';
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -230,7 +229,7 @@ export class ApiService implements OnDestroy {
   loadEntry(entryID: string, skipMessage: boolean = false): void {
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
-      this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
+      this.messagesService.sendMessage(new Message(`Loading upload ${entryID}...`));
     }
     this.http.get(entryURL).subscribe(
       jsonData => {
@@ -302,10 +301,10 @@ export class ApiService implements OnDestroy {
             disableClose: false
           });
 
-          dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
+          dialogRef.componentInstance.confirmMessage = 'Changes to this upload have been detected on the server - changes most ' +
             ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
             'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
-            'unsure, load changes from the server.) Note that you should only edit one deposition at a time, in one tab.';
+            'unsure, load changes from the server.) Note that you should only edit one upload at a time, in one tab.';
           dialogRef.componentInstance.proceedMessage = 'Load changes from server';
           dialogRef.componentInstance.cancelMessage = 'Push changes to server';
 
@@ -336,7 +335,7 @@ export class ApiService implements OnDestroy {
       () => {
         if (!this.cachedEntry.unsaved) {
           this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
-            ' connection? Changes can still be made to the deposition, but please don\'t clear your browser cache until internet' +
+            ' connection? Changes can still be made to the upload, but please don\'t clear your browser cache until internet' +
             ' is restored and the entry can be saved.'));
         }
         this.saveInProgress = false;
@@ -357,10 +356,10 @@ export class ApiService implements OnDestroy {
       if (userName.length < 2) {
         userName = 'Unknown User';
       }
-      comment = `${comment}\n\nDeposition ID: ${this.cachedEntry.entryID}`;
+      comment = `${comment}\n\nUpload ID: ${this.cachedEntry.entryID}`;
     } else {
       if (!userEmail) {
-        throw new Error('Invalid function use. Please provide user e-mail if no active deposition session.');
+        throw new Error('Invalid function use. Please provide user e-mail if no active upload session.');
       }
     }
 
@@ -389,12 +388,12 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newMicroDeposition(authorEmail: string,
-                     depositionNickname: string,
-                     orcid: string,
-                     sessionValidity: string): Promise<string> {
+  newDeposition(authorEmail: string,
+                depositionNickname: string,
+                orcid: string,
+                sessionValidity: string): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;
-    this.messagesService.sendMessage(new Message('Creating deposition...',
+    this.messagesService.sendMessage(new Message('Configuring upload...',
       MessageType.NotificationMessage, 0));
 
     const body = new FormData();
@@ -425,61 +424,10 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newDeposition(authorEmail: string,
-                depositionNickname: string,
-                depositionType: string,
-                orcid: string = null,
-                skipEmailValidation: boolean = false,
-                file: File = null,
-                bootstrapID: string = null): Promise<string> {
-    const apiEndPoint = `${environment.serverURL}/new`;
-    this.messagesService.sendMessage(new Message('Creating deposition...',
-      MessageType.NotificationMessage, 0));
-
-    const body = new FormData();
-    body.append('email', authorEmail);
-    body.append('deposition_nickname', depositionNickname);
-    body.append('deposition_type', depositionType);
-    if (skipEmailValidation) {
-      body.append('skip_validation', 'true');
-    }
-    if (orcid) {
-      body.append('orcid', orcid);
-    }
-    if (file) {
-      body.append('nmrstar_file', file);
-    }
-    if (bootstrapID) {
-      body.append('bootstrapID', bootstrapID);
-    }
-
-    const options = {
-      params: new HttpParams(),
-      reportProgress: true,
-    };
-
-    return new Promise((resolve, reject) => {
-
-      this.http.post(apiEndPoint, body, options)
-        .subscribe(jsonData => {
-          this.clearDeposition();
-          this.sidenavService.open().then();
-          this.messagesService.clearMessage();
-          resolve(jsonData['deposition_id']);
-        }, error => {
-          if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
-            reject('Invalid e-mail');
-          }
-          this.handleError(error);
-          reject(error);
-        });
-    });
-  }
-
   depositEntry(feedback: string = null): Promise<boolean> {
 
     if (!this.cachedEntry.valid) {
-      this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
+      this.messagesService.sendMessage(new Message('Can not submit upload: it is still incomplete!',
         MessageType.ErrorMessage, 15000));
       return;
     }
@@ -489,7 +437,7 @@ export class ApiService implements OnDestroy {
     const formData = new FormData();
     formData.append('deposition_contents', this.cachedEntry.print());
 
-    this.messagesService.sendMessage(new Message('Submitting deposition...',
+    this.messagesService.sendMessage(new Message('Submitting upload...',
       MessageType.NotificationMessage, 0));
 
     return new Promise(((resolve, reject) => {

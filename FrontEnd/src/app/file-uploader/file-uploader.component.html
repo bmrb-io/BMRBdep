@@ -8,7 +8,7 @@
     <thead>
     <tr>
         <th colspan="2" (contextmenu)="logFileUploadSaveframe()">
-            <a class="header-text">Deposit data files</a>
+            <a class="header-text">Upload data files</a>
         </th>
         <th>
             <div class="right-float">
@@ -24,7 +24,7 @@
 
     <tr *ngFor="let file of entry.dataStore.dataFiles; let i = index">
         <td><p class="center-text">{{i + 1}}</p></td>
-        <td>
+        <td colspan="2">
             <div class="file-upload">
                 <div *ngIf="file.fileName">
                     <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)"
@@ -40,7 +40,7 @@
                 </mat-progress-bar>
             </div>
         </td>
-        <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
+        <!--<td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
             <div class="file-upload">
                 <mat-form-field>
                     <mat-select (selectionChange)="updateAndSaveDataFiles()" [formControl]="file.control"
@@ -51,7 +51,7 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-        </td>
+        </td>-->
     </tr>
 
     <tr>
@@ -65,7 +65,7 @@
         </td>
         <td class="drag-td" (drop)="onDropFile($event)" (dragover)="onDragOverFile($event)">
             <div class="drag-box">
-                <div class="drag-text" *ngIf="!entry.deposited">Or drag and drop files here</div>
+              <div class="drag-text" *ngIf="!entry.deposited">Or drag and drop files <b>or</b> folders here.</div>
             </div>
         </td>
     </tr>

@@ -5,29 +5,62 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Check if the initial setups need to happen
 "${SCRIPT_DIR}"/install.sh
 
+secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
+if [[ ${secret_key} == "CHANGE_ME" ]]; then
+  echo 'Please change the secret key in the configuration first!'
+  exit 1
+fi
 echo "Removing existing local docker image"
-sudo docker stop bmrbig
-sudo docker rm bmrbig
+docker stop bmrbdep
+docker rm bmrbdep
 
-# We're going to make a special directory with just the docker build context
-mkdir -p ${SCRIPT_DIR}/docker_build/
-rm -rf ${SCRIPT_DIR}/docker_build/*
-cp -rp ${SCRIPT_DIR}/wsgi.conf ${SCRIPT_DIR}/BackEnd/bmrbdep ${SCRIPT_DIR}/BackEnd/schema/schema_data ${SCRIPT_DIR}/FrontEnd/dist ${SCRIPT_DIR}/docker_build
-find ${SCRIPT_DIR}/docker_build -name __pycache__ -print0 | xargs -0 rm -rf
+echo "Getting newest schema."
+(
+source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
+if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
+  echo "Schema loader failed, quitting."
+  exit 2
+fi
+)
 
-if [[ $# -eq 0 ]]; then
-  if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig ${SCRIPT_DIR}/docker_build; then
+echo "Compiling angular."
+(
+source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
+cd "${SCRIPT_DIR}"/FrontEnd || exit 2
+if ! npm run build.prod; then
+  echo "Angular build failed, quitting."
+  exit 3
+fi
+)
+
+echo "Writing out git version to file..."
+# https://gist.github.com/dciccale/5560837
+function parse_git_dirty() {
+  git diff --quiet --ignore-submodules HEAD 2>/dev/null; [[ $? -eq 1 ]] && echo "*"
+}
+function parse_git_branch() {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+}
+function parse_git_hash() {
+  git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
+}
+echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/version.txt
+
+
+echo "Removing existing local docker image"
+docker stop bmrbig
+docker rm bmrbig
+
+
+echo "Building the Docker container..."
+if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
     echo "Docker build failed."
-    exit 2
-  fi
-  echo "Running in development mode."
-  sudo docker run -d --name bmrbig -p 9001:9001 --restart=always -v /tmp/depositions:/opt/wsgi/depositions -v /tmp/released:/opt/wsgi/released -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbig
-else
-  if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig ${SCRIPT_DIR}/docker_build; then
-    echo "Docker build failed."
-    exit 3
-  fi
-  echo "Building with configuration file: $1"
+    exit 4
 fi
 
-rm -rf ${SCRIPT_DIR}/docker_build
+deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
+output_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"output_path\" | cut -f4 -d\")
+echo $output_dir
+
+echo "Starting the docker container locally."
+docker run -d --name bmrbig -p 9001:9001 -p 9000:9000 --restart=always -v /bmrbig/depositions:/opt/wsgi/depositions -v /bmrbig/released:/opt/wsgi/released -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbig
