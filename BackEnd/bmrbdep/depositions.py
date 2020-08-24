@@ -334,6 +334,9 @@ class DepositionRepo:
                   'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
                   }
 
+        if not assign:
+            params['bmrbig_id'] = from_entry.entry_id
+
         with EntryDB() as entry_database:
             entry_id = entry_database.create_or_update_entry_record(params, assign)
             if assign:
