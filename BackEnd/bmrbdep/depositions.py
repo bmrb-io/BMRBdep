@@ -335,7 +335,7 @@ class DepositionRepo:
                   }
 
         if not assign:
-            params['bmrbig_id'] = from_entry.entry_id
+            params['bmrbig_id'] = int(from_entry.entry_id[6:])
 
         with EntryDB() as entry_database:
             entry_id = entry_database.create_or_update_entry_record(params, assign)
