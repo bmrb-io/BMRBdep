@@ -24,14 +24,14 @@ fi
 )
 
 echo "Compiling angular."
-(
-source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
-cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if ! npm run build.prod; then
-  echo "Angular build failed, quitting."
-  exit 3
-fi
-)
+#(
+#source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
+#cd "${SCRIPT_DIR}"/FrontEnd || exit 2
+#if ! npm run build.prod; then
+#  echo "Angular build failed, quitting."
+#  exit 3
+#fi
+#)
 
 echo "Writing out git version to file..."
 # https://gist.github.com/dciccale/5560837
@@ -44,7 +44,7 @@ function parse_git_branch() {
 function parse_git_hash() {
   git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
 }
-echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/version.txt
+echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/version.txt
 
 
 echo "Removing existing local docker image"
@@ -63,4 +63,8 @@ output_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"outpu
 echo $output_dir
 
 echo "Starting the docker container locally."
-docker run -d --name bmrbig -p 9001:9001 -p 9000:9000 --restart=always -v /bmrbig/depositions:/opt/wsgi/depositions -v /bmrbig/released:/opt/wsgi/released -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbig
+
+docker run -d --name bmrbig --restart=always --network host \
+  -v /projects/BMRB/depositions/bmrbig/:/opt/wsgi/depositions \
+  -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json \
+ bmrbig
