@@ -158,7 +158,8 @@ def released(entry_id: str, file_name=None):
 
         # If they are viewing a particular deposition, send the file they want
         if file_name:
-            return deposition_repo.get_file(file_name, root=False).read()
+            path, file = deposition_repo.get_file_path(file_name, root=False)
+            return send_from_directory(path, file)
 
         # Get the information about the entry
         entry = deposition_repo.get_entry()

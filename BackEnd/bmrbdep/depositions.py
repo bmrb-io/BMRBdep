@@ -375,19 +375,25 @@ class DepositionRepo:
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, path: str, root: bool = True) -> BinaryIO:
-        """ Returns the current version of a file from the repo. """
+    def get_file_path(self, path: str, root: bool = False) -> (str, str):
+        """ Returns the path a file is in, and the file name."""
 
         secured_path, secured_filename = secure_full_path(path)
         if not secured_filename:
             raise RequestError('Cannot access directories, just files.')
         try:
             if root:
-                return open(os.path.join(self._entry_dir, secured_filename), "rb")
+                return os.path.join(self._entry_dir), secured_filename
             else:
-                return open(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename), 'rb')
+                return os.path.join(self._entry_dir, 'data_files', secured_path), secured_filename
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
+
+    def get_file(self, path: str, root: bool = True) -> BinaryIO:
+        """ Returns the current version of a file from the repo. """
+
+        path, file_name = self.get_file_path(path, root)
+        return open(os.path.join(path, file_name), 'rb')
 
     def get_data_file_list(self) -> List[str]:
         """ Returns the list of data files associated with this deposition. """
