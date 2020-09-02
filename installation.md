@@ -23,6 +23,7 @@ A basic installation of the BMRBdep server is very straightforward. These are th
      * `ETS` section. Please use a 'test ETS' database while testing that the server is installed correctly.
    * Sections which you will need to update before production use
      * `orcid` - You can get an API key for the ORCID API [here](https://orcid.org/organizations/integrators/API).
+     There is a script to fetch the bearer and refresh tokens in the BackEnd folder called `get_orcid_token.py`
    * Other notes
      * `local-ips` - This will cause the server to return a full stack trace rather than a basic error
       if your IP address is in the `local-ips` list. Only enter IPs for development machines,
@@ -41,3 +42,32 @@ experimental "small molecule" deposition type is hidden.
 2. Change the `debug` value in the configuration file to `false`. This turns on e-mail validation.
 3. Deploy docker by running `./build_docker.sh production` rather than `./build_docker.sh`.
 (This will replace the previous docker instance from step 5 above.)
+
+
+### Upgrading to a new release
+
+To upgrade to a new release of BMRBdep, first cd to the root BMRBdep directory and then run the following:
+
+```python
+git pull
+cd FrontEnd
+source node_env/bin/activate
+npm install
+deactivate_node
+```
+
+If you are running in production more (or in the development Docker mode) you must then run
+
+```python
+./build_docker.sh
+```
+
+for a development mode container or
+
+```python
+./build_docker.sh production
+```
+
+for a production mode container
+
+in the root BMRBdep directory.

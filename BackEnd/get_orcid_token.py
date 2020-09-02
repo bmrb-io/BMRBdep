@@ -10,5 +10,5 @@ r = requests.post(url, data={'client_id': configuration['orcid']['client_id'],
                              'grant_type': 'client_credentials',
                              'scope': '/read-public'})
 
-print('access_token: %s' % r.json()['access_token'])
+print('bearer: %s' % r.json()['access_token'])
 print('refresh_token: %s' % r.json()['refresh_token'])

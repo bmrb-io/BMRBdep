@@ -13,6 +13,13 @@ from bmrbdep.exceptions import ServerError, RequestError
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
 configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
 
+# If we are running in docker, ignore the 'repo_path' and use the standard location
+try:
+    if '/docker' in open('/proc/self/cgroup', 'r').read():
+        configuration['repo_path'] = '/opt/wsgi/depositions'
+except IOError:
+    pass
+
 residue_mappings = {'polypeptide(L)': {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 'ARG', 'N': 'ASN',
                                        'D': 'ASP', 'C': 'CYS', 'Q': 'GLN', 'E': 'GLU', 'H': 'HIS',
                                        'I': 'ILE', 'L': 'LEU', 'K': 'LYS', 'M': 'MET', 'F': 'PHE',
