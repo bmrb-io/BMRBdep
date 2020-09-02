@@ -41,3 +41,32 @@ experimental "small molecule" deposition type is hidden.
 2. Change the `debug` value in the configuration file to `false`. This turns on e-mail validation.
 3. Deploy docker by running `./build_docker.sh production` rather than `./build_docker.sh`.
 (This will replace the previous docker instance from step 5 above.)
+
+
+### Upgrading to a new release
+
+To upgrade to a new release of BMRBdep, first cd to the root BMRBdep directory and then run the following:
+
+```python
+git pull
+cd FrontEnd
+source node_env/bin/activate
+npm install
+deactivate_node
+```
+
+If you are running in production more (or in the development Docker mode) you must then run
+
+```python
+./build_docker.sh
+```
+
+for a development mode container or
+
+```python
+./build_docker.sh production
+```
+
+for a production mode container
+
+in the root BMRBdep directory.
