@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import pathlib
 from datetime import date, datetime
 from typing import Optional, List, BinaryIO
 
@@ -14,7 +15,7 @@ from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock
 from git import Repo, CacheError
 
-from bmrbdep.common import configuration, secure_filename, residue_mappings, get_release, get_schema
+from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
@@ -72,7 +73,7 @@ class DepositionRepo:
                     config.set_value("user", "email", "bmrbhelp@bmrb.wisc.edu")
 
         # Create the lock object
-        self._lock_object: FileLock = FileLock(self._lock_path, timeout=10)
+        self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
         if not self._initialize:
             self._repo = Repo(self._entry_dir)
@@ -400,14 +401,17 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
 
-    def get_file(self, filename: str, root: bool = True) -> BinaryIO:
+    def get_file(self, path: str, root: bool = True) -> BinaryIO:
         """ Returns the current version of a file from the repo. """
 
-        secured_filename: str = secure_filename(filename)
-        if not root:
-            secured_filename = os.path.join('data_files', secured_filename)
+        secured_path, secured_filename = secure_full_path(path)
+        if not secured_filename:
+            raise RequestError('Cannot access directories, just files.')
         try:
-            return open(os.path.join(self._entry_dir, secured_filename), "rb")
+            if root:
+                return open(os.path.join(self._entry_dir, secured_filename), "rb")
+            else:
+                return open(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename), 'rb')
         except IOError:
             raise RequestError('No file with that name saved for this entry.')
 
@@ -416,13 +420,15 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         return os.listdir(os.path.join(self._entry_dir, 'data_files'))
 
-    def delete_data_file(self, filename: str) -> bool:
+    def delete_data_file(self, path: str) -> bool:
         """ Delete a data file by name."""
 
         self.raise_write_errors()
-        secured_filename = secure_filename(filename)
+
+        secured_path, secured_filename = secure_full_path(path)
+
         try:
-            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_filename))
+            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename))
         except FileNotFoundError:
             return False
         self._modified_files = True
@@ -443,17 +449,28 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         if filename != 'submission_info.json':
             self.raise_write_errors()
 
-        secured_filename: str = secure_filename(filename)
-        file_path: str = secured_filename
-        if not root:
-            file_path = os.path.join('data_files', secured_filename)
+        # This ensures that no hijinks in the file names or issues with OS file names exist
+        file_path, file_name = secure_full_path(filename)
+        real_entry_dir: str = os.path.realpath(self._entry_dir)
 
-        with open(os.path.join(self._entry_dir, file_path), "wb") as fo:
+        if root:
+            full_path: str = os.path.join(self._entry_dir, file_name)
+        else:
+            full_path = os.path.join(self._entry_dir, 'data_files', file_path, file_name)
+
+        # Make the directory if it doesn't exist
+        if not os.path.exists(os.path.dirname(full_path)):
+            pathlib.Path(os.path.dirname(full_path)).mkdir(parents=True, exist_ok=True)
+
+        with open(full_path, "wb") as fo:
             fo.write(data)
 
         self._modified_files = True
 
-        return secured_filename
+        if root:
+            return file_name
+        else:
+            return os.path.join(file_path, file_name)
 
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
