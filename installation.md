@@ -23,6 +23,7 @@ A basic installation of the BMRBdep server is very straightforward. These are th
      * `ETS` section. Please use a 'test ETS' database while testing that the server is installed correctly.
    * Sections which you will need to update before production use
      * `orcid` - You can get an API key for the ORCID API [here](https://orcid.org/organizations/integrators/API).
+     There is a script to fetch the bearer and refresh tokens in the BackEnd folder called `get_orcid_token.py`
    * Other notes
      * `local-ips` - This will cause the server to return a full stack trace rather than a basic error
       if your IP address is in the `local-ips` list. Only enter IPs for development machines,
