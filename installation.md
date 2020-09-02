@@ -49,12 +49,10 @@ experimental "small molecule" deposition type is hidden.
 To upgrade to a new release of BMRBdep, first cd to the root BMRBdep directory and then run the following:
 
 ```python
-git pull
-cd FrontEnd
-source node_env/bin/activate
-npm install
-deactivate_node
+./upgrade.sh
 ```
+
+This will update the node environment and pip environment if necessary.
 
 If you are running in production more (or in the development Docker mode) you must then run
 
