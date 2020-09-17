@@ -290,7 +290,7 @@ class DepositionRepo:
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
-        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y")
         self.metadata['bmrbnum'] = final_entry.entry_id
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
