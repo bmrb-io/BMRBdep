@@ -3,7 +3,7 @@
 import os
 import pathlib
 import zlib
-from typing import Union, TextIO, Tuple
+from typing import Union, TextIO, Tuple, Iterable
 
 import simplejson as json
 import werkzeug.utils
@@ -81,3 +81,20 @@ def secure_full_path(path: str) -> Tuple[str, str]:
     file_name: str = secure_filename(os.path.basename(path))
 
     return file_path, file_name
+
+
+def list_all_depositions() -> Iterable[str]:
+
+    for first_character_dir in os.listdir(configuration['repo_path']):
+        first_char_path = os.path.join(configuration['repo_path'], first_character_dir)
+        if not os.path.isdir(first_char_path):
+            continue
+        for second_character_dir in os.listdir(first_char_path):
+            second_char_path = os.path.join(first_char_path, second_character_dir)
+            if not os.path.isdir(second_char_path):
+                continue
+            for entry in os.listdir(second_char_path):
+                entry_dir = os.path.join(second_char_path, entry)
+                if not os.path.isdir(entry_dir):
+                    continue
+                yield entry
