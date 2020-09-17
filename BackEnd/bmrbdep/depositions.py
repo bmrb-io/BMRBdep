@@ -379,7 +379,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
-        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y")
         self.metadata['bmrbnum'] = bmrbnum
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
