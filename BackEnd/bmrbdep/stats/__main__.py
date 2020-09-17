@@ -49,7 +49,7 @@ for entry in list_all_depositions():
             deposition_date_time = datetime.strptime(entry_repo.metadata['deposition_date'], "%I:%M %p on %B %d, %Y")
             creation_date_time = datetime.strptime(entry_repo.metadata['creation_date'], "%I:%M %p on %B %d, %Y")
 
-            deposition_time = int((deposition_date_time - creation_date_time).seconds / 60)
+            deposition_time = int((deposition_date_time - creation_date_time).total_seconds() / 60)
             output_csv.writerow([entry, deposition_time])
 
 output_file.close()
