@@ -45,12 +45,6 @@ class DepositionRepo:
         self._lock_path: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids, '.git', 'api.lock')
         self._entry_dir: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids)
 
-        # To transition, first check the old entry path
-        # TODO: Remove this after the transition to the new path structure
-        if os.path.exists(os.path.join(configuration['repo_path'], uuids)):
-            self._entry_dir = os.path.join(configuration['repo_path'], uuids)
-            self._lock_path: str = os.path.join(configuration['repo_path'], uuids, '.git', 'api.lock')
-
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
             if not self._initialize:
