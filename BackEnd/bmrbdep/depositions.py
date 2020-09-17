@@ -41,7 +41,8 @@ class DepositionRepo:
     that change the state of the repository as a result of what you found. For example, opening a repo
     read only to check if the repo needs a change, closing the repo, opening it with write access, and then
     making a change IS NOT ACCEPTABLE. Checking the current state to get the contents of a file or calculate a
-    statistic is acceptable.
+    statistic is acceptable. Furthermore, read_only mode does not allow performing any git related action, so
+    you cannot use .last_commit.
     """
 
     def __init__(self, uuid, initialize: bool = False, read_only: bool = False):
@@ -80,7 +81,7 @@ class DepositionRepo:
         # Create the lock object
         self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
-        if not self._initialize:
+        if not self._initialize and not self._read_only:
             self._repo = Repo(self._entry_dir)
 
     def __enter__(self):
@@ -113,8 +114,6 @@ class DepositionRepo:
             if self._live_metadata != self._original_metadata:
                 raise ServerError("Metadata edited for a deposition that was opened read-only! These changes have not"
                                   " been saved.")
-            # Still need to drop the repo object
-            self._repo.__del__()
 
     @property
     def metadata(self) -> dict:
@@ -127,6 +126,8 @@ class DepositionRepo:
 
     @property
     def last_commit(self) -> str:
+        if not self._repo:
+            raise ServerError("Cannot access this attribute when repo opened read only.")
         return self._repo.head.object.hexsha
 
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
