@@ -19,7 +19,7 @@ opt.add_option("--verbose", action="store_true", dest="verbose", default=False, 
 logging.basicConfig()
 logger = logging.getLogger()
 if options.verbose:
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 else:
     logger.setLevel(logging.WARNING)
 
