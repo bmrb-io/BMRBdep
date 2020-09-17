@@ -32,12 +32,23 @@ class DepositionRepo:
     """ A class to interface with git repos for depositions.
 
     You *MUST* use the 'with' statement when using this class to ensure that
-    changes are committed."""
+    changes are committed. Whenever making changes to the repo that are conditional on the state in the
+    repository, perform all logic within a single `with` statement to ensure consistent state. Opening the
+    repo multiple times to perform actions based on values from a previous opening may not longer be correct
+    due to changes made in another process.
 
-    def __init__(self, uuid, initialize: bool = False):
+    Be aware that if you use the read_only mode, you MUST NOT perform any operations
+    that change the state of the repository as a result of what you found. For example, opening a repo
+    read only to check if the repo needs a change, closing the repo, opening it with write access, and then
+    making a change IS NOT ACCEPTABLE. Checking the current state to get the contents of a file or calculate a
+    statistic is acceptable.
+    """
+
+    def __init__(self, uuid, initialize: bool = False, read_only: bool = False):
         self._repo: Repo
         self._uuid = uuid
         self._initialize: bool = initialize
+        self._read_only: bool = read_only
         self._modified_files: bool = False
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
@@ -75,27 +86,35 @@ class DepositionRepo:
     def __enter__(self):
         """ Get a session cookie to use for future requests. """
 
-        try:
-            self._lock_object.acquire()
-        except Timeout:
-            raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
-                              ' request is already in progress.')
+        if not self._read_only:
+            try:
+                self._lock_object.acquire()
+            except Timeout:
+                raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
+                                  ' request is already in progress.')
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """ End the current session."""
 
-        # If nothing changed the commit won't do anything
-        try:
-            self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
-            self._repo.close()
+        if not self._read_only:
+            # If nothing changed the commit won't do anything
+            try:
+                self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
+                self._repo.close()
+                self._repo.__del__()
+            # Catches all git-related errors
+            except CacheError as err:
+                raise ServerError("An exception happened while closing the entry repository: %s" % err)
+            finally:
+                self._lock_object.release()
+        else:
+            if self._live_metadata != self._original_metadata:
+                raise ServerError("Metadata edited for a deposition that was opened read-only! These changes have not"
+                                  " been saved.")
+            # Still need to drop the repo object
             self._repo.__del__()
-        # Catches all git-related errors
-        except CacheError as err:
-            raise ServerError("An exception happened while closing the entry repository: %s" % err)
-        finally:
-            self._lock_object.release()
 
     @property
     def metadata(self) -> dict:
@@ -437,6 +456,8 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         if not self._initialize:
             if self.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
+        if self._read_only:
+            raise ServerError('Cannot write to a deposition opened read-only!')
 
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
@@ -444,6 +465,10 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # The submission info file should always be writeable
         if filename != 'submission_info.json':
             self.raise_write_errors()
+        else:
+            # Even if the submission file, it can't be written if opened read-only
+            if self._read_only:
+                raise ServerError('Cannot write to a deposition opened read-only!')
 
         # This ensures that no hijinks in the file names or issues with OS file names exist
         file_path, file_name = secure_full_path(filename)
