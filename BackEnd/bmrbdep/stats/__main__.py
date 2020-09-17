@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import csv
+import logging
 import optparse
 from datetime import datetime
 
@@ -15,23 +16,31 @@ opt.add_option("--verbose", action="store_true", dest="verbose", default=False, 
 # Parse the command line input
 (options, cmd_input) = opt.parse_args()
 
+logging.basicConfig()
+logger = logging.getLogger()
+if options.verbose:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.WARNING)
+
 output_file = open(options.file_name, 'w')
 output_csv = csv.writer(output_file)
 output_csv.writerow(['entry', 'deposition_time_minutes'])
 
 for entry in list_all_depositions():
+    logging.info('Calculating stats for entry: %s' % entry)
     with DepositionRepo(entry) as entry_repo:
-        meta = entry_repo.metadata
-        if 'deposition_date' in meta:
+        if 'deposition_date' in entry_repo.metadata:
 
             # Fix the records with a bug
-            if isinstance(meta['deposition_date'], list):
-                meta['deposition_date'] = meta['deposition_date'][0]
+            if isinstance(entry_repo.metadata['deposition_date'], list):
+                logging.warning("Fixing bug in deposition_date in submission_info file for entry %s" % entry)
+                entry_repo.metadata['deposition_date'] = entry_repo.metadata['deposition_date'][0]
                 entry_repo.commit('Fix the deposition date within the metadata to not be inside of a list.')
 
             # Get the time delta
-            deposition_date_time = datetime.strptime(meta['deposition_date'], "%I:%M %p on %B %d, %Y")
-            creation_date_time = datetime.strptime(meta['creation_date'], "%I:%M %p on %B %d, %Y")
+            deposition_date_time = datetime.strptime(entry_repo.metadata['deposition_date'], "%I:%M %p on %B %d, %Y")
+            creation_date_time = datetime.strptime(entry_repo.metadata['creation_date'], "%I:%M %p on %B %d, %Y")
 
             deposition_time = int((deposition_date_time - creation_date_time).seconds / 60)
             output_csv.writerow([entry, deposition_time])
