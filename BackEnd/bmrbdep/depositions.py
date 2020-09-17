@@ -313,6 +313,8 @@ class DepositionRepo:
 
         # If they have already deposited, just keep the same BMRB ID
         bmrbnum = self.metadata.get('bmrbnum', None)
+        if configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME' and not bmrbnum:
+            bmrbnum = 999999
         if bmrbnum:
             params['bmrbnum'] = bmrbnum
         else:
