@@ -278,7 +278,7 @@ def duplicate_deposition(uuid) -> Response:
     entry_template: pynmrstar.Entry = pynmrstar.Entry.from_template(entry_id=deposition_id, all_tags=True,
                                                                     default_values=True, schema=schema)
 
-    with depositions.DepositionRepo(uuid) as repo:
+    with depositions.DepositionRepo(uuid, read_only=True) as repo:
         merge_entries(entry_template, repo.get_entry(), schema)
         # Add a "deleted" tag to use to track deletion status
         for saveframe in entry_template:
@@ -612,9 +612,8 @@ def file_operations(uuid, path: str) -> Response:
     """ Either retrieve or delete a file. """
 
     if request.method == "GET":
-        with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(path, root=False),
-                             attachment_filename=path)
+        with depositions.DepositionRepo(uuid, read_only=True) as repo:
+            return send_file(repo.get_file(path, root=False), attachment_filename=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.delete_data_file(path):
