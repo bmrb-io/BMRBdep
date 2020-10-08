@@ -180,7 +180,8 @@ export class ApiService implements OnDestroy {
   checkValidatedEmail(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
-      this.http.get(entryURL).subscribe(response => {
+      // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
+      this.http.get(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe(response => {
           resolve(response['status']);
         }, error => {
           this.handleError(error);

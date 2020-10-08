@@ -6,8 +6,12 @@
   text-align: right;
 }
 
+.auto-height {
+  height: auto;
+}
+
 .loading-bar-holder {
-  height: 4px;
+  height: 4px !important;
   display: block;
 }
 

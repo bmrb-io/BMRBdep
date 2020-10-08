@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import pathlib
 import zlib
-from typing import Union, TextIO
+from typing import Union, TextIO, Tuple
 
 import simplejson as json
 import werkzeug.utils
@@ -11,6 +12,13 @@ from bmrbdep.exceptions import ServerError, RequestError
 
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
 configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
+
+# If we are running in docker, ignore the 'repo_path' and use the standard location
+try:
+    if '/docker' in open('/proc/self/cgroup', 'r').read():
+        configuration['repo_path'] = '/opt/wsgi/depositions'
+except IOError:
+    pass
 
 residue_mappings = {'polypeptide(L)': {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 'ARG', 'N': 'ASN',
                                        'D': 'ASP', 'C': 'CYS', 'Q': 'GLN', 'E': 'GLU', 'H': 'HIS',
@@ -60,3 +68,16 @@ def secure_filename(filename: str) -> str:
     return filename
 
 
+def secure_full_path(path: str) -> Tuple[str, str]:
+    """ Takes a path, secures each component, reassembles them,
+        and returns (secure_path, secure_file_name)."""
+
+    # This ensures that no hijinks in the file names or issues with OS file names exist
+    joined_path_elements = [secure_filename(_) for _ in pathlib.Path(os.path.dirname(path)).parts if _]
+    if joined_path_elements:
+        file_path = os.path.join(*joined_path_elements)
+    else:
+        file_path = ''
+    file_name: str = secure_filename(os.path.basename(path))
+
+    return file_path, file_name
