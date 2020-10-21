@@ -1,6 +1,6 @@
 <div class="main-content">
 
-  <mat-card>
+  <mat-card *ngIf="!caughtException">
     <mat-card-header>
       <mat-card-title>Deposition Resources</mat-card-title>
     </mat-card-header>
@@ -18,15 +18,19 @@
 
   <mat-card>
     <mat-card-header>
-      <mat-card-title>Contact Us</mat-card-title>
+      <mat-card-title *ngIf="caughtException">Report an exception</mat-card-title>
+      <mat-card-title *ngIf="!caughtException">Contact Us</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <p>Use this form to report a bug or get support with any aspect of the BMRBdep system. We will respond,
+      <p *ngIf="!caughtException">Use this form to report a bug or get support with any aspect of the BMRBdep system. We will respond,
         if appropriate, via e-mail.</p>
+      <p *ngIf="caughtException">Details on the exception you encountered have been captured and will be sent along
+      with this request. Please include any other relevant details about when the error occurred.</p>
 
       <mat-form-field class="content-box" color="accent">
         <label>
-          <input matInput placeholder="Please enter your message." required [formControl]="messageControl">
+          <input *ngIf="!caughtException" matInput placeholder="Please enter your message." required [formControl]="messageControl">
+          <input *ngIf="caughtException" matInput placeholder="Please enter your message." [formControl]="messageControl">
         </label>
       </mat-form-field>
 

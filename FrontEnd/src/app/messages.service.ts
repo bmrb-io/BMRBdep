@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {environment} from '../environments/environment';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
 
 export enum MessageType {
   ErrorMessage,
@@ -34,10 +34,11 @@ export class MessagesService {
 
   snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private snackBar: MatSnackBar) {
+  constructor(private snackBar: MatSnackBar,
+              private router: Router) {
   }
 
-  sendMessage(message: Message) {
+  sendMessage(message: Message, actualException = null) {
     let action = null;
     if (message.messageType === MessageType.ErrorMessage) {
       action = 'Notify Us';
@@ -48,9 +49,11 @@ export class MessagesService {
     });
 
     this.snackBarRef.onAction().subscribe(() => {
-      const mail = document.createElement('a');
-      mail.href = 'mailto:' + environment.contactEmail + '?subject=' + 'An BMRBdep error occurred: ' + message.messageBody;
-      mail.click();
+      let errorMessage = message.messageBody;
+      if (actualException) {
+        errorMessage = actualException;
+      }
+      this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
     });
 
     // Log messages to the console if in development mode
