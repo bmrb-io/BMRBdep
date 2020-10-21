@@ -488,9 +488,10 @@ export class ApiService implements OnDestroy {
 
   handleError(error: HttpErrorResponse): Observable<null> | null {
     if (error.error && error.error.error) {
-      this.messagesService.sendMessage(new Message(error.error.error, MessageType.ErrorMessage, 15000));
+      this.messagesService.sendMessage(new Message(error.error.error, MessageType.ErrorMessage, 15000), error.error.error);
     } else {
-      this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000));
+      this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000),
+        error.message);
     }
     if (!environment.production) {
       throw error;
