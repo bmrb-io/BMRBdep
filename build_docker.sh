@@ -5,15 +5,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Check if the initial setups need to happen
 "${SCRIPT_DIR}"/install.sh
 
-secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
-if [[ ${secret_key} == "CHANGE_ME" ]]; then
-  echo 'Please change the secret key in the configuration first!'
-  exit 1
-fi
+#secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
+#if [[ ${secret_key} == "CHANGE_ME" ]]; then
+#  echo 'Please change the secret key in the configuration first!'
+#  exit 1
+#fi
 echo "Removing existing local docker image"
-docker stop bmrbdep
-docker rm bmrbdep
+docker stop bmrbig
+docker rm bmrbig
 
+
+if [[ $1 != "production" ]]; then
 echo "Getting newest schema."
 (
 source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
@@ -24,14 +26,14 @@ fi
 )
 
 echo "Compiling angular."
-#(
-#source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
-#cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-#if ! npm run build.prod; then
-#  echo "Angular build failed, quitting."
-#  exit 3
-#fi
-#)
+(
+source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
+cd "${SCRIPT_DIR}"/FrontEnd || exit 2
+if ! npm run build.prod; then
+  echo "Angular build failed, quitting."
+  exit 3
+fi
+)
 
 echo "Writing out git version to file..."
 # https://gist.github.com/dciccale/5560837
@@ -46,6 +48,7 @@ function parse_git_hash() {
 }
 echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/version.txt
 
+fi
 
 echo "Removing existing local docker image"
 docker stop bmrbig
@@ -58,13 +61,18 @@ if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
     exit 4
 fi
 
-deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
-output_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"output_path\" | cut -f4 -d\")
-echo $output_dir
-
 echo "Starting the docker container locally."
+if [[ $1 == "production" ]]; then
+  echo "Deploying production"
+  docker run -d --name bmrbig --restart=always --network host --user 17473:10144 \
+    -v /projects/BMRB/depositions/bmrbig/production:/opt/wsgi/depositions \
+    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_production.json:/opt/wsgi/bmrbdep/configuration.json \
+   bmrbig
+else
+  echo "Deploying development"
+  docker run -d --name bmrbig --restart=always --network host --user 17473:10144 \
+    -v /projects/BMRB/depositions/bmrbig/development:/opt/wsgi/depositions \
+    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_development.json:/opt/wsgi/bmrbdep/configuration.json \
+   bmrbig
+fi
 
-docker run -d --name bmrbig --restart=always --network host \
-  -v /projects/BMRB/depositions/bmrbig/:/opt/wsgi/depositions \
-  -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json \
- bmrbig
