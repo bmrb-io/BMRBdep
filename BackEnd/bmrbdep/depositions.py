@@ -32,24 +32,30 @@ class DepositionRepo:
     """ A class to interface with git repos for depositions.
 
     You *MUST* use the 'with' statement when using this class to ensure that
-    changes are committed."""
+    changes are committed. Whenever making changes to the repo that are conditional on the state in the
+    repository, perform all logic within a single `with` statement to ensure consistent state. Opening the
+    repo multiple times to perform actions based on values from a previous opening may not longer be correct
+    due to changes made in another process.
 
-    def __init__(self, uuid, initialize: bool = False):
+    Be aware that if you use the read_only mode, you MUST NOT perform any operations
+    that change the state of the repository as a result of what you found. For example, opening a repo
+    read only to check if the repo needs a change, closing the repo, opening it with write access, and then
+    making a change IS NOT ACCEPTABLE. Checking the current state to get the contents of a file or calculate a
+    statistic is acceptable. Furthermore, read_only mode does not allow performing any git related action, so
+    you cannot use .last_commit.
+    """
+
+    def __init__(self, uuid, initialize: bool = False, read_only: bool = False):
         self._repo: Repo
         self._uuid = uuid
         self._initialize: bool = initialize
+        self._read_only: bool = read_only
         self._modified_files: bool = False
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         uuids = str(uuid)
         self._lock_path: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids, '.git', 'api.lock')
         self._entry_dir: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids)
-
-        # To transition, first check the old entry path
-        # TODO: Remove this after the transition to the new path structure
-        if os.path.exists(os.path.join(configuration['repo_path'], uuids)):
-            self._entry_dir = os.path.join(configuration['repo_path'], uuids)
-            self._lock_path: str = os.path.join(configuration['repo_path'], uuids, '.git', 'api.lock')
 
         # Make sure the entry ID is valid, or throw an exception
         if not os.path.exists(self._entry_dir):
@@ -75,33 +81,39 @@ class DepositionRepo:
         # Create the lock object
         self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
 
-        if not self._initialize:
+        if not self._initialize and not self._read_only:
             self._repo = Repo(self._entry_dir)
 
     def __enter__(self):
         """ Get a session cookie to use for future requests. """
 
-        try:
-            self._lock_object.acquire()
-        except Timeout:
-            raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
-                              ' request is already in progress.')
+        if not self._read_only:
+            try:
+                self._lock_object.acquire()
+            except Timeout:
+                raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
+                                  ' request is already in progress.')
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """ End the current session."""
 
-        # If nothing changed the commit won't do anything
-        try:
-            self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
-            self._repo.close()
-            self._repo.__del__()
-        # Catches all git-related errors
-        except CacheError as err:
-            raise ServerError("An exception happened while closing the entry repository: %s" % err)
-        finally:
-            self._lock_object.release()
+        if not self._read_only:
+            # If nothing changed the commit won't do anything
+            try:
+                self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
+                self._repo.close()
+                self._repo.__del__()
+            # Catches all git-related errors
+            except CacheError as err:
+                raise ServerError("An exception happened while closing the entry repository: %s" % err)
+            finally:
+                self._lock_object.release()
+        else:
+            if self._live_metadata != self._original_metadata:
+                raise ServerError("Metadata edited for a deposition that was opened read-only! These changes have not"
+                                  " been saved.")
 
     @property
     def metadata(self) -> dict:
@@ -114,6 +126,8 @@ class DepositionRepo:
 
     @property
     def last_commit(self) -> str:
+        if not self._repo:
+            raise ServerError("Cannot access this attribute when repo opened read only.")
         return self._repo.head.object.hexsha
 
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
@@ -313,6 +327,8 @@ class DepositionRepo:
 
         # If they have already deposited, just keep the same BMRB ID
         bmrbnum = self.metadata.get('bmrbnum', None)
+        if configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME' and not bmrbnum:
+            bmrbnum = 999999
         if bmrbnum:
             params['bmrbnum'] = bmrbnum
         else:
@@ -377,7 +393,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
-        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y")
         self.metadata['bmrbnum'] = bmrbnum
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
@@ -441,6 +457,8 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         if not self._initialize:
             if self.metadata['entry_deposited']:
                 raise RequestError('Entry already deposited, no changes allowed.')
+        if self._read_only:
+            raise ServerError('Cannot write to a deposition opened read-only!')
 
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
@@ -448,6 +466,10 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # The submission info file should always be writeable
         if filename != 'submission_info.json':
             self.raise_write_errors()
+        else:
+            # Even if the submission file, it can't be written if opened read-only
+            if self._read_only:
+                raise ServerError('Cannot write to a deposition opened read-only!')
 
         # This ensures that no hijinks in the file names or issues with OS file names exist
         file_path, file_name = secure_full_path(filename)
