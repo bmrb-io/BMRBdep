@@ -5,7 +5,7 @@ import requests
 import webbrowser
 
 # First make a request to create a deposition
-deposition_info = {'email': 'wedell@bmrb.wisc.edu',
+deposition_info = {'email': 'wedell@uchc.edu',
                    'orcid': '0000-0002-2247-6259',
                    'deposition_nickname': 'test deposition'}
 r = requests.post("https://bmrbig.org/deposition/new", data=deposition_info)
