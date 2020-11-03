@@ -39,7 +39,7 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
 
     # Get the XML
     req = requests.get("https://www.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=%s"
-                       "&retmode=xml&tool=bmrbcitationparser&email=bmrbhelp@bmrb.wisc.edu" % pubmed_id)
+                       "&retmode=xml&tool=bmrbcitationparser&email=help@bmrb.io" % pubmed_id)
 
     try:
         root = ET.fromstring(req.text)
