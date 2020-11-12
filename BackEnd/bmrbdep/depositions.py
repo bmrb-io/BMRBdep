@@ -286,6 +286,7 @@ class DepositionRepo:
 
         # Assign our record in the db
         self.update_db(from_entry=final_entry)
+        final_entry.entry_id = self.metadata['bmrbnum']
 
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
