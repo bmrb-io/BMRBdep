@@ -344,28 +344,21 @@ class DepositionRepo:
         """" Actually release the entry. """
 
         final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
+        entry_information = final_entry.get_saveframes_by_category('entry_information')[0]
+        del entry_information['_Contact_person']
 
-        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
-        contact_loop = entry_saveframe['_Contact_person']
-        del entry_saveframe['_Contact_person']
-
-        # We need to temporarily lie and say we aren't deposited in order to be able to write to this directory
-        self.metadata['entry_deposited'] = False
+        # Write out the release file
         self.write_file(f"{self.metadata['bmrbnum']}.str",
                         final_entry.format(skip_empty_tags=True, skip_empty_loops=True).encode(),
                         root=False)
-        self.metadata['entry_deposited'] = True
-        entry_saveframe.add_loop(contact_loop)
 
-        #for data_file in os.listdir(os.path.join(self._entry_dir, 'data_files')):
-        #    try:
-        #        os.link(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-        #    except OSError:
-        #        try:
-        #            copy(os.path.join(self._entry_dir, "data_files", data_file), os.path.join(output_dir, data_file))
-        #        except SameFileError:
-        #            # This is good, just means the file was already hardlinked
-        #            pass
+        # Write out a README if they didn't upload one
+        try:
+            self.get_file('README.md', root=False)
+        except IOError:
+            self.write_file('README.md', entry_information['Details'][0], root=False)
+
+        self.commit('Releasing entry.', tag=True)
 
     def get_entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
@@ -461,7 +454,7 @@ class DepositionRepo:
         else:
             return os.path.join(file_path, file_name)
 
-    def commit(self, message: str) -> bool:
+    def commit(self, message: str, tag: bool = False) -> bool:
         """ Commits the changes to the repository with a message. """
 
         # Check if the metadata has changed
@@ -489,4 +482,18 @@ class DepositionRepo:
         self._repo.git.add(all=True)
         self._repo.git.commit(message=message)
         self._modified_files = False
+
+        if tag:
+            numeric_tags = sorted([int(x) for x in self.tags if x.isdigit()])
+            next_tag = '1'
+            if len(numeric_tags) >= 0:
+                next_tag = str(int(numeric_tags.pop()) + 1)
+            self._repo.create_tag(next_tag, message='Tagging as a new upload version.')
+
         return True
+
+    @property
+    def tags(self):
+        """ Returns a list of which tags exist for this entry. """
+
+        return [x.name for x in self._repo.tags]
