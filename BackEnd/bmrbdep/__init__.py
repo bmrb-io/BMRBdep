@@ -579,10 +579,6 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            # Next two lines can be removed after clients upgrade (06/01/2020)
-            if isinstance(entry_json['commit'], str):
-                entry_json['commit'] = [entry_json['commit']]
-
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
                     logging.exception('An entry changed on the server!')
@@ -629,7 +625,8 @@ def re_release_entries():
         for record in entry_db.get_all():
             with DepositionRepo(record['restart_id']) as deposition_repo:
                 deposition_repo.update_db()
-                if datetime.datetime.strptime(record['release_date'], "%Y-%m-%d").date() <= datetime.date.today():
-                    deposition_repo.release_entry()
+        for record in entry_db.get_released():
+            with DepositionRepo(record['restart_id']) as deposition_repo:
+                deposition_repo.release_entry()
 
     return jsonify(True)
