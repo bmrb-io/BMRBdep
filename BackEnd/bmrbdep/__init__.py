@@ -444,7 +444,7 @@ def new_deposition_micro() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': False,
+                        'email_validated': configuration['debug'],
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
@@ -626,10 +626,10 @@ def re_release_entries():
     """ Re-releases all entries. """
 
     with EntryDB() as entry_db:
-        all_entries = [x['restart_id'] for x in entry_db.get_released()]
-        for entry in all_entries:
-            with DepositionRepo(entry) as deposition_repo:
+        for record in entry_db.get_all():
+            with DepositionRepo(record['restart_id']) as deposition_repo:
                 deposition_repo.update_db()
-                deposition_repo.release_entry()
+                if datetime.datetime.strptime(record['release_date'], "%Y-%m-%d").date() <= datetime.date.today():
+                    deposition_repo.release_entry()
 
     return jsonify(True)

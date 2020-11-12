@@ -291,7 +291,6 @@ class DepositionRepo:
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
         self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y")
-        self.metadata['bmrbnum'] = final_entry.entry_id
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
 
@@ -299,15 +298,14 @@ class DepositionRepo:
         if entry_saveframe['Release_request'][0] == 'Release now':
             self.release_entry()
 
-        # Return the assigned BMRB ID
-        return final_entry.entry_id
+        # Return the assigned BMRB ID - metadata['bmrbnum'] is set in self.update_db()
+        return self.metadata['bmrbnum']
 
     def update_db(self, from_entry: pynmrstar.Entry = None):
         """ Update the DB record for this entry, or create one. Assigns the ID in the entry if one is provided.
 
             If from_entry provided, then load the parameters from the active entry rather than the disk."""
 
-        assign = True if from_entry else False
         if not from_entry:
             from_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str'))
 
@@ -334,13 +332,13 @@ class DepositionRepo:
                   'release_date': datetime.strptime(esf['Original_release_date'][0], "%Y-%m-%d").date()
                   }
 
-        if not assign:
-            params['bmrbig_id'] = int(from_entry.entry_id[6:])
+        if 'bmrbnum' in self.metadata:
+            params['bmrbig_id'] = self.metadata['bmrbnum']
 
         with EntryDB() as entry_database:
-            entry_id = entry_database.create_or_update_entry_record(params, assign)
-            if assign:
-                from_entry.entry_id = entry_id
+            assigned_id = entry_database.create_or_update_entry_record(params)
+            if assigned_id:
+                self.metadata['bmrbnum'] = assigned_id
 
     def release_entry(self) -> None:
         """" Actually release the entry. """
@@ -353,7 +351,7 @@ class DepositionRepo:
 
         # We need to temporarily lie and say we aren't deposited in order to be able to write to this directory
         self.metadata['entry_deposited'] = False
-        self.write_file(f'{final_entry.entry_id}.str',
+        self.write_file(f"{self.metadata['bmrbnum']}.str",
                         final_entry.format(skip_empty_tags=True, skip_empty_loops=True).encode(),
                         root=False)
         self.metadata['entry_deposited'] = True

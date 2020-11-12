@@ -50,12 +50,12 @@ CREATE TABLE entrylog (bmrbig_id INTEGER PRIMARY KEY AUTOINCREMENT,
         finally:
             cursor.close()
 
-    def create_or_update_entry_record(self, params, assign):
+    def create_or_update_entry_record(self, params):
         """ If assign is provided, will return the newly created ID."""
 
-        if assign:
+        if 'bmrbig_id' not in params:
             sql = """
-INSERT OR REPLACE INTO entrylog (submission_date, release_date, title, contact_person1,
+INSERT INTO entrylog (submission_date, release_date, title, contact_person1,
 author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             args = [params['submission_date'], params['release_date'],
@@ -67,7 +67,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
 INSERT OR REPLACE INTO entrylog (bmrbig_id, submission_date, release_date, title, contact_person1,
 author_email, restart_id, author_email, bmrb_id, pdb_id, publication_doi)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-            args = [params['bmrbig_id'], params['submission_date'], params['release_date'],
+            args = [params['bmrbig_id'][6:], params['submission_date'], params['release_date'],
                     params['title'], params['contact_person1'], params['author_email'],
                     params['restart_id'], params['author_email'],
                     params['bmrb_id'], params['pdb_id'], params['publication_doi']]
@@ -75,14 +75,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         try:
             self._run_command(sql, args)
             self._connection.commit()
-            if assign:
+            if 'bmrbig_id' not in params:
                 res = self._run_command("SELECT bmrbig_id FROM entrylog WHERE restart_id = ?",
                                         [params['restart_id']])
                 return 'bmrbig' + str(res[0][0])
-        except sqlite3.IntegrityError:
-            logging.exception('This entry has already been deposited!')
-            self._connection.rollback()
-            raise bmrbdep.ServerError('This entry has already been deposited! Please contact us.')
         except sqlite3.Error:
             logging.exception('Could not assign an ID in the database!')
             self._connection.rollback()
@@ -95,6 +91,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         return [{'id': x[0], 'release_date': x[1], 'title': x[2], 'bmrb_id': x[3], 'pdb_id': x[4],
                  'doi': x[5], 'author': x[6], 'restart_id': x[7]} for x in res if
                 datetime.datetime.strptime(x[1], "%Y-%m-%d").date() <= datetime.date.today()]
+
+    def get_all(self) -> List[Dict[str, any]]:
+        sql = "SELECT bmrbig_id, release_date, title, bmrb_id, pdb_id, publication_doi, contact_person1, " \
+              "restart_id FROM entrylog"
+        res = self._run_command(sql, [])
+        return [{'id': x[0], 'release_date': x[1], 'title': x[2], 'bmrb_id': x[3], 'pdb_id': x[4],
+                 'doi': x[5], 'author': x[6], 'restart_id': x[7]} for x in res]
 
     def get_id_from_released_entry(self, bmrbbig_id: int) -> Union[bool, Dict[str, any]]:
         """ Returns false if the entry isn't released. """
