@@ -176,7 +176,13 @@ def released(entry_id: str, file_name=None):
         files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
         files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
 
-        return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0]})
+        try:
+            details = deposition_repo.get_file("README.md", root=False).read().decode()
+        except IOError:
+            details = ""
+        details += "\n" + entry.get_tag('Entry.Details')[0]
+
+        return jsonify({'files': files, 'title': entry.get_tag('Entry.Title')[0], 'details': details})
 
 
 @application.route('/')

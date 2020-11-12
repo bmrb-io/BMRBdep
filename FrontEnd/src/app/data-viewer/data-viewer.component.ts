@@ -12,6 +12,7 @@ export class Entry {
   id: string;
   release_date: string;
   title: string;
+  details: string;
   author: string;
   bmrb_id: string;
   pdb_id: string;
@@ -26,6 +27,7 @@ export class Entry {
 export class DataViewerComponent implements OnInit {
   public files: Array<Files>;
   public title: string;
+  public details: string;
   public entry_id: string;
   public env: object;
   public records: Array<Entry>;
@@ -57,6 +59,7 @@ export class DataViewerComponent implements OnInit {
     this.http.get(url).subscribe(response => {
       this.files = response['files'] as Array<Files>;
       this.title = response['title'];
+      this.details = response['details'];
     });
   }
 
