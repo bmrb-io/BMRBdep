@@ -57,7 +57,7 @@ validation step.">
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='restore'}"
-                       *ngIf="entry.hasDeleted && !entry.deposited"
+                       *ngIf="entry.hasDeleted"
                        routerLink="/entry/restore" id="restore"
                        matTooltip="View and restore deleted sections">
                         <h2 matLine>View and restore deleted sections</h2>
@@ -69,7 +69,7 @@ validation step.">
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to BMRbig." id="review"
-                       routerLink="/entry/review" *ngIf="!entry.deposited">
+                       routerLink="/entry/review">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
                         <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>

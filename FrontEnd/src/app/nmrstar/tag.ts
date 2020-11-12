@@ -150,9 +150,9 @@ export class Tag {
     } */
 
     // Set tag enabled/disabled status based on the status of the entry
-    if (setDisabled) {
+    /* if (setDisabled) {
       this.disabled = this.getEntry().deposited;
-    }
+    } */
     if (this.name === 'ID') {
       this.disabled = true;
     }

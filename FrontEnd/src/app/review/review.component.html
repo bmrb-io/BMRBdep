@@ -4,7 +4,8 @@
             <mat-card-title *ngIf="!(entry.valid && entry.emailValidated)">You are viewing all sections of your upload that still need to be
                 completed.
             </mat-card-title>
-            <mat-card-title *ngIf="entry.valid && entry.emailValidated">Your upload is ready to submit.</mat-card-title>
+            <mat-card-title *ngIf="entry.valid && entry.emailValidated && !entry.deposited">Your upload is ready to submit.</mat-card-title>
+            <mat-card-title *ngIf="entry.valid && entry.emailValidated && entry.deposited">Your upload is ready to save.</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <mat-nav-list>
@@ -20,7 +21,7 @@
               <a *ngIf="!entry.emailValidated" mat-raised-button [routerLink]="['/entry', 'pending-verification']" color="accent">
                 Verify Email Address</a>
             </mat-nav-list>
-          <mat-form-field *ngIf="entry.valid && entry.emailValidated" class="content-box" color="accent">
+          <mat-form-field *ngIf="entry.valid && entry.emailValidated && !entry.deposited" class="content-box" color="accent">
             <label>
               <input matInput placeholder="Do you have any feedback on the BMRbig system?" [formControl]="messageControl">
             </label>
@@ -30,7 +31,9 @@
             <h5 *ngIf="api.saveInProgress || entry.unsaved">You cannot upload until you have finished uploading the data files / metadata changes. Please wait
             for the BMRbig system to stop displaying a progress bar at the top of the page before continuing.</h5>
             <button mat-raised-button class="saveframe-button" [disabled]="!(entry.valid && entry.emailValidated && !api.saveInProgress && !entry.unsaved)" color="accent"
-                    (click)="submitEntry()">Upload to BMRbig
+                    (click)="submitEntry()">
+              <span *ngIf="!entry.deposited">Upload to BMRbig</span>
+              <span *ngIf="entry.deposited">Save changes to previously deposited entry</span>
             </button>
             <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
         </mat-card-actions>

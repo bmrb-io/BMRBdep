@@ -38,11 +38,15 @@ export class ReviewComponent implements OnInit, OnDestroy {
   }
 
   submitEntry(): void {
+    if (this.entry.deposited) {
+      this.api.depositEntry(this.messageControl.value).then();
+      return;
+    }
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
     this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to upload the entry '${this.entry.depositionNickname}'?` +
-      ' No changes are allowed after upload via the BMRbig interface.';
+      " You'll be able to add additional data to this upload later.";
     this.dialogRef.componentInstance.proceedMessage = 'Upload';
 
     this.dialogRef.afterClosed().subscribe(result => {

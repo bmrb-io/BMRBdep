@@ -11,7 +11,7 @@ jump between sections by clicking on the 'Menu' button on the top left.">Previou
            matTooltip="Navigate to the next section. Note you may also open the navigation menu to
 jump between sections by clicking on the 'Menu' button on the top left.">Next section</a>
         <ng-template #final_review_top>
-            <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
+            <a mat-raised-button class="saveframe-button" routerLink="/entry/review"
                color="accent"> Review upload</a>
         </ng-template>
         <app-saveframe *ngFor='let saveframe of saveframes' [saveframe]='saveframe'
@@ -33,7 +33,7 @@ jump between sections by clicking on the 'Menu' button on the top left.">
 jump between sections by clicking on the 'Menu' button on the top left.">
                 Next section</a>
             <ng-template #final_review_bottom>
-                <a *ngIf="!entry.deposited" mat-raised-button class="saveframe-button" routerLink="/entry/review"
+                <a mat-raised-button class="saveframe-button" routerLink="/entry/review"
                    color="accent"> Review upload</a>
             </ng-template>
         </div>
