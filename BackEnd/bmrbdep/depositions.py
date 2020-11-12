@@ -426,9 +426,11 @@ class DepositionRepo:
         """ Raises an error if the entry may not be edited. This could happen if it is already deposited, or the email
         has not been validated."""
 
-        if not self._initialize:
-            if self.metadata['entry_deposited']:
-                raise RequestError('Entry already deposited, no changes allowed.')
+        return
+
+        #if not self._initialize:
+        #    if self.metadata['entry_deposited']:
+        #        raise RequestError('Entry already deposited, no changes allowed.')
 
     def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
