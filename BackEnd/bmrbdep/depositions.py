@@ -352,12 +352,6 @@ class DepositionRepo:
                         final_entry.format(skip_empty_tags=True, skip_empty_loops=True).encode(),
                         root=False)
 
-        # Write out a README if they didn't upload one
-        try:
-            self.get_file('README.md', root=False)
-        except IOError:
-            self.write_file('README.md', entry_information['Details'][0], root=False)
-
         self.commit('Releasing entry.', tag=True)
 
     def get_entry(self) -> pynmrstar.Entry:
