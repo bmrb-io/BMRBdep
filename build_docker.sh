@@ -3,13 +3,16 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # Check if the initial setups need to happen
-"${SCRIPT_DIR}"/install.sh
+#"${SCRIPT_DIR}"/install.sh
 
-secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
-if [[ ${secret_key} == "CHANGE_ME" ]]; then
-  echo 'Please change the secret key in the configuration first!'
-  exit 1
-fi
+#secret_key=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"secret_key\" | cut -f4 -d\")
+#if [[ ${secret_key} == "CHANGE_ME" ]]; then
+#  echo 'Please change the secret key in the configuration first!'
+#  exit 1
+#fi
+
+
+if [[ $1 != "production" ]]; then
 
 echo "Getting newest schema."
 (
@@ -48,19 +51,31 @@ function parse_git_branch() {
 function parse_git_hash() {
   git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/@\1/"
 }
-echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/BackEnd/bmrbdep/version.txt
+echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/version.txt
+
+fi
 
 echo "Removing existing local docker image"
-sudo docker stop bmrbdep
-sudo docker rm bmrbdep
+docker stop bmrbdep
+docker rm bmrbdep
 
 echo "Building the Docker container..."
-if ! sudo docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbdep .; then
+if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbdep .; then
     echo "Docker build failed."
     exit 4
 fi
 
-deposition_dir=$(cat ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json | grep \"repo_path\" | cut -f4 -d\")
-
 echo "Starting the docker container locally."
-sudo docker run -d --name bmrbdep -p 9001:9001 -p 9000:9000 --network host --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
+#sudo docker run -d --name bmrbdep -p 9001:9001 -p 9000:9000 --network host --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
+
+if [[ $1 == "production" ]]; then
+  docker run -d --name bmrbdep --restart=always --network host \
+    -v /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions \
+    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_production.json:/opt/wsgi/bmrbdep/configuration.json \
+   bmrbdep
+else
+  docker run -d --name bmrbdep --restart=always --network host \
+    -v /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions \
+    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_development.json:/opt/wsgi/bmrbdep/configuration.json \
+   bmrbdep
+fi
