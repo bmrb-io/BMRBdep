@@ -279,7 +279,7 @@ def duplicate_deposition(uuid) -> Response:
                                                                     default_values=True, schema=schema)
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
-        merge_entries(entry_template, repo.get_entry(), schema)
+        merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
 
         # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
         #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
