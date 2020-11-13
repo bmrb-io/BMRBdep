@@ -278,6 +278,10 @@ class DepositionRepo:
             release_date = release_date + relativedelta(weeks=8)
         elif release_status == 'Hold for 6 months':
             release_date = release_date + relativedelta(months=6)
+        elif release_status == 'Hold for 12 months':
+            release_date = release_date + relativedelta(months=12)
+        elif release_status == 'Hold for 24 months':
+            release_date = release_date + relativedelta(months=24)
         entry_saveframe['Original_release_date'] = release_date.isoformat()
         entry_saveframe['Last_release_date'] = release_date.isoformat()
 
