@@ -3,4 +3,6 @@
     <ng-container *ngFor='let sf of entry.saveframes'>
         <app-saveframe *ngIf="!sf.deleted" [saveframe]='sf'></app-saveframe>
     </ng-container>
+
+  <app-review></app-review>
 </div>
