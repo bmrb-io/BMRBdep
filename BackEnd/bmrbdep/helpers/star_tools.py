@@ -56,7 +56,7 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
                                          'original_nmr_star_version', 'atomic_coordinate_file_name',
                                          'atomic_coordinate_file_syntax', 'constraint_file_name']:
                         fqtn = frame_prefix_lower + '.' + lower_tag
-                        if fqtn in new_schema.schema:
+                        if fqtn in new_schema.schema or lower_tag == '_deleted':
                             new_saveframe.add_tag(tag[0], tag[1], update=True)
 
             for loop in saveframe.loops:

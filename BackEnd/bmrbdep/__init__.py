@@ -280,9 +280,13 @@ def duplicate_deposition(uuid) -> Response:
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
         merge_entries(entry_template, repo.get_entry(), schema)
-        # Add a "deleted" tag to use to track deletion status
+
+        # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
+        #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
+        #   the tag. Alternatively, search for and fix all old entries with saveframes missing the '_Deleted' tag
         for saveframe in entry_template:
-            saveframe.add_tag('_Deleted', 'no')
+            if '_Deleted' not in saveframe or saveframe['_Deleted'] in pynmrstar.utils.definitions.NULL_VALUES:
+                saveframe.add_tag('_Deleted', 'no', update=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -306,8 +310,7 @@ def duplicate_deposition(uuid) -> Response:
             for file_ in new_repo.get_data_file_list():
                 new_repo.delete_data_file(file_)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
-
-            send_validation_email(deposition_id, repo)
+            send_validation_email(deposition_id, new_repo)
 
     return jsonify({'deposition_id': deposition_id})
 
