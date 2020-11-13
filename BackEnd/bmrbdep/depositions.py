@@ -485,7 +485,7 @@ class DepositionRepo:
         if tag:
             numeric_tags = sorted([int(x) for x in self.tags if x.isdigit()])
             next_tag = '1'
-            if len(numeric_tags) >= 0:
+            if len(numeric_tags) > 0:
                 next_tag = str(int(numeric_tags.pop()) + 1)
             self._repo.create_tag(next_tag, message='Tagging as a new upload version.')
 
