@@ -16,7 +16,10 @@ def _sort_saveframes(sort_list: list) -> list:
     return sorted(sort_list, key=alphanum_key)
 
 
-def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Entry, new_schema: pynmrstar.Schema):
+def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Entry, new_schema: pynmrstar.Schema,
+                  preserve_entry_information: bool = False):
+    """ By default it does not copy over the entry information - but it should for cloned entries, so the
+     preserve_entry_information boolean is available."""
 
     existing_entry.normalize()
 
@@ -49,14 +52,14 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
             frame_prefix_lower = saveframe.tag_prefix.lower()
 
             # Don't copy the tags from entry_information
-            if saveframe.category != "entry_information":
+            if saveframe.category != "entry_information" or preserve_entry_information:
                 for tag in saveframe.tags:
                     lower_tag = tag[0].lower()
                     if lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
                                          'original_nmr_star_version', 'atomic_coordinate_file_name',
                                          'atomic_coordinate_file_syntax', 'constraint_file_name']:
                         fqtn = frame_prefix_lower + '.' + lower_tag
-                        if fqtn in new_schema.schema:
+                        if fqtn in new_schema.schema or lower_tag == '_deleted':
                             new_saveframe.add_tag(tag[0], tag[1], update=True)
 
             for loop in saveframe.loops:

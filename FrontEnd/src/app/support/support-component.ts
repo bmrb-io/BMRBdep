@@ -18,16 +18,23 @@ export class SupportComponent implements OnInit, OnDestroy {
   entry: Entry;
   notificationMessage: string;
   subscription$: Subscription;
+  caughtException: {};
 
   constructor(private api: ApiService,
               private location: Location) {
     this.submitted = false;
     this.notificationMessage = null;
     this.entry = null;
+    this.caughtException = null;
   }
 
   ngOnInit() {
     this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
+
+    if (history.state.data) {
+      this.caughtException = history.state.data;
+      this.messageControl = new FormControl('');
+    }
   }
 
   ngOnDestroy() {
@@ -37,7 +44,14 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   sendRequest() {
-    this.api.newSupportRequest(this.messageControl.value, undefined, this.emailControl.value).then(() => {
+    let supportMessage = this.messageControl.value;
+    if (this.caughtException) {
+      supportMessage = `User reporting an exception.\nException URL: ${this.caughtException['url']}\nException message: ${this.caughtException['message']}\n`;
+      if (this.messageControl.value) {
+        supportMessage += 'User message: ' + this.messageControl.value;
+      }
+    }
+    this.api.newSupportRequest(supportMessage, undefined, this.emailControl.value).then(() => {
       this.messageControl.disable();
       this.notificationMessage = 'Your message has been sent to BMRB support.';
     }, () => {
