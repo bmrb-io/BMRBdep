@@ -493,7 +493,7 @@ def new_deposition() -> Response:
     for saveframe in entry_template:
 
         # Add a "deleted" tag to use to track deletion status
-        saveframe.add_tag('_Deleted', 'no')
+        saveframe.add_tag('_Deleted', 'no', update=True)
 
         for loop in saveframe:
             if not loop.data:
