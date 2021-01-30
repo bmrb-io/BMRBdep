@@ -46,9 +46,15 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
             # Don't copy over the entry interview at all
             if saveframe.category == "entry_interview":
                 continue
-            new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name,
-                                                              entry_id=template_entry.entry_id,
-                                                              default_values=True, schema=new_schema, all_tags=True)
+
+            # If the sameframe isn't in the dictionary, or has some other issue, better to skip it
+            #  than to crash
+            try:
+                new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name,
+                                                                  entry_id=template_entry.entry_id,
+                                                                  default_values=True, schema=new_schema, all_tags=True)
+            except ValueError:
+                continue
             frame_prefix_lower = saveframe.tag_prefix.lower()
 
             # Don't copy the tags from entry_information
