@@ -47,7 +47,7 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
             if saveframe.category == "entry_interview":
                 continue
 
-            # If the sameframe isn't in the dictionary, or has some other issue, better to skip it
+            # If the saveframe isn't in the dictionary, or has some other issue, better to skip it
             #  than to crash
             try:
                 new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name,
@@ -171,4 +171,3 @@ def upgrade_chemcomps_and_create_entities_where_needed(entry: pynmrstar.Entry, s
         for row in each_entity_assembly.data:
             if row[entity_label_col][1:] in chem_comp_entity_map:
                 row[entity_label_col] = f"${chem_comp_entity_map[row[entity_label_col][1:]]}"
-
