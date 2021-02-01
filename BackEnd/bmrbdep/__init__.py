@@ -12,6 +12,7 @@ from uuid import uuid4
 import pynmrstar
 import requests
 import simplejson as json
+import werkzeug.exceptions
 from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
@@ -25,8 +26,6 @@ from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
-
-# Set up the flask application
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -99,6 +98,13 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
     response = jsonify(exception.to_dict())
     response.status_code = exception.status_code
     return response
+
+
+@application.errorhandler(werkzeug.exceptions.MethodNotAllowed)
+def handle_wrong_method(exception: werkzeug.exceptions.MethodNotAllowed):
+    logging.warning('Someone is vulnerability scanning us. Method that was'
+                    f' scanned: {request.method}:{request.url}')
+    return Response('🤨', status=404)
 
 
 @application.errorhandler(Exception)
