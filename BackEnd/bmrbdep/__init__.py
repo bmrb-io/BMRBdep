@@ -102,8 +102,8 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
 
 @application.errorhandler(werkzeug.exceptions.MethodNotAllowed)
 def handle_wrong_method(exception: werkzeug.exceptions.MethodNotAllowed):
-    logging.warning('Someone is vulnerability scanning us. Method that was'
-                    f' scanned: {request.method}:{request.url}')
+    logging.warning('Someone is vulnerability scanning us. Scan details'
+                    f': {request.method}:{request.url}')
     return Response('🤨', status=404)
 
 
