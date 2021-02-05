@@ -10,12 +10,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #  echo 'Please change the secret key in the configuration first!'
 #  exit 1
 #fi
-echo "Removing existing local docker image"
-docker stop bmrbig
-docker rm bmrbig
 
+user_id=$(id -u)
+if [[ $user_id != '17473' ]]; then
+ echo "Must run this as bmrbsvc user (or apache on production)..."
+ exit 1
+fi
+host=$(hostname)
 
-if [[ $1 != "production" ]]; then
 echo "Getting newest schema."
 (
 source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
@@ -48,31 +50,26 @@ function parse_git_hash() {
 }
 echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/version.txt
 
-fi
-
-echo "Removing existing local docker image"
-docker stop bmrbig
-docker rm bmrbig
-
-
 echo "Building the Docker container..."
-if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbig .; then
+if ! docker build -f "${SCRIPT_DIR}"/Dockerfile -t bmrbig .; then
     echo "Docker build failed."
     exit 4
 fi
 
+echo "Removing existing local docker image and starting the new one."
+docker stop bmrbig
+docker rm bmrbig
+
 echo "Starting the docker container locally."
-if [[ $1 == "production" ]]; then
+if [[ $1 == "production" ]] || [[ "$host" == "bmrb-prod.cam.uchc.edu" ]]; then
   echo "Deploying production"
   docker run -d --name bmrbig --restart=always --network host --user 17473:10144 \
     -v /projects/BMRB/depositions/bmrbig/production:/opt/wsgi/depositions \
-    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_production.json:/opt/wsgi/bmrbdep/configuration.json \
+    -v "${SCRIPT_DIR}"/BackEnd/bmrbdep/configuration_production.json:/opt/wsgi/bmrbdep/configuration.json \
    bmrbig
 else
-  echo "Deploying development"
   docker run -d --name bmrbig --restart=always --network host --user 17473:10144 \
     -v /projects/BMRB/depositions/bmrbig/development:/opt/wsgi/depositions \
-    -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_development.json:/opt/wsgi/bmrbdep/configuration.json \
+    -v "${SCRIPT_DIR}"/BackEnd/bmrbdep/configuration_development.json:/opt/wsgi/bmrbdep/configuration.json \
    bmrbig
 fi
-
