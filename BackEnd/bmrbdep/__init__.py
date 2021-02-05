@@ -129,12 +129,12 @@ def handle_other_errors(exception: Exception):
     else:
         # Send a message to the admin
         if not configuration['debug']:
-            message = Message("An unhandled BMRBdep exception happened!", recipients=configuration['smtp']['admins'])
+            message = Message("An unhandled BMRBbig exception happened!", recipients=configuration['smtp']['admins'])
             message.body = "Exception raised on request %s %s\n\n%s" % \
                            (request.method, request.url, traceback.format_exc())
             mail.send(message)
 
-        response = jsonify({"error": "An exception has been triggered on the BMRBdep server. This error has been sent "
+        response = jsonify({"error": "An exception has been triggered on the BMRBbig server. This error has been sent "
                                      "to BMRB staff to investigate. If you were attempting to deposit when this error "
                                      "occurred, expect us to reach out to you within one business day."})
         response.status_code = 500
