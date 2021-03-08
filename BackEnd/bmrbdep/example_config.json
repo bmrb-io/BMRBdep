@@ -12,12 +12,12 @@
   },
   "smtp": {
     "admins": [
-      "wedell@bmrb.wisc.edu"
+      "wedell@uchc.edu"
     ],
     "server": "CHANGE_ME",
-    "from_address": "bmrbhelp@bmrb.wisc.edu",
-    "reply_to_address": "bmrbhelp@bmrb.wisc.edu",
-    "annotator_address": "annotators@lists.bmrb.wisc.edu"
+    "from_address": "help@bmrb.io",
+    "reply_to_address": "help@bmrb.io",
+    "annotator_address": "annotators@bmrb.io"
   },
   "orcid": {
     "url": "https://pub.orcid.org/v2.1/%s/record",
