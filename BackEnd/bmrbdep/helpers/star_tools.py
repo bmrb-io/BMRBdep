@@ -73,7 +73,13 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
                 if loop.category == "_Upload_data":
                     continue
                 lower_tags = [_.lower() for _ in loop.tags]
-                tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
+
+                try:
+                    tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
+                # Skip loops that don't exist in the schema used
+                except KeyError:
+                    continue
+
                 filtered_original_loop = loop.filter(tags_to_pull)
                 filtered_original_loop.add_missing_tags(schema=new_schema, all_tags=True)
                 new_saveframe[filtered_original_loop.category] = filtered_original_loop
