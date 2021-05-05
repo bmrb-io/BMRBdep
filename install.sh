@@ -13,24 +13,24 @@ fi
 
 if [[ ! -d "${SCRIPT_DIR}/BackEnd/env" ]]; then
     echo "python environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    python3.6 -m venv "${SCRIPT_DIR}"/BackEnd/env
+    python3 -m venv "${SCRIPT_DIR}"/BackEnd/env
     source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
-    pip3.6 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
-    pip3.6 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
 if [[ "$1" == "--update" ]]; then
     echo "Updating requirements in virtualenv..." | tee -a "${SCRIPT_DIR}"/installation.log
     source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
-    pip3.6 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
 if [[ ! -d "${SCRIPT_DIR}/FrontEnd/node_env" ]]; then
     echo "node environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
     source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
-    python3.6 -m nodeenv "${SCRIPT_DIR}"/FrontEnd/node_env | tee -a "${SCRIPT_DIR}"/installation.log
+    python3 -m nodeenv "${SCRIPT_DIR}"/FrontEnd/node_env | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
     source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
     cd "${SCRIPT_DIR}"/FrontEnd || exit 1

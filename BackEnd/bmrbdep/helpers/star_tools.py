@@ -46,9 +46,15 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
             # Don't copy over the entry interview at all
             if saveframe.category == "entry_interview":
                 continue
-            new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name,
-                                                              entry_id=template_entry.entry_id,
-                                                              default_values=True, schema=new_schema, all_tags=True)
+
+            # If the saveframe isn't in the dictionary, or has some other issue, better to skip it
+            #  than to crash
+            try:
+                new_saveframe = pynmrstar.Saveframe.from_template(category, name=saveframe.name,
+                                                                  entry_id=template_entry.entry_id,
+                                                                  default_values=True, schema=new_schema, all_tags=True)
+            except ValueError:
+                continue
             frame_prefix_lower = saveframe.tag_prefix.lower()
 
             # Don't copy the tags from entry_information
@@ -64,10 +70,16 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
 
             for loop in saveframe.loops:
                 # Don't copy the experimental data loops
-                if loop.category == "_Upload_data" in loop.tags:
+                if loop.category == "_Upload_data":
                     continue
                 lower_tags = [_.lower() for _ in loop.tags]
-                tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
+
+                try:
+                    tags_to_pull = [_ for _ in new_saveframe[loop.category].tags if _.lower() in lower_tags]
+                # Skip loops that don't exist in the schema used
+                except KeyError:
+                    continue
+
                 filtered_original_loop = loop.filter(tags_to_pull)
                 filtered_original_loop.add_missing_tags(schema=new_schema, all_tags=True)
                 new_saveframe[filtered_original_loop.category] = filtered_original_loop
@@ -165,4 +177,3 @@ def upgrade_chemcomps_and_create_entities_where_needed(entry: pynmrstar.Entry, s
         for row in each_entity_assembly.data:
             if row[entity_label_col][1:] in chem_comp_entity_map:
                 row[entity_label_col] = f"${chem_comp_entity_map[row[entity_label_col][1:]]}"
-

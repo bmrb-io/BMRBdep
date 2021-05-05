@@ -187,6 +187,10 @@ export class Tag {
         if (!sampleConditionsFrame) {
           sampleConditionsName = 'No sample conditions selected';
         } else {
+          if (sampleConditionsFrame.category !== 'sample_conditions') {
+            throw new Error('There is an invalid pointer in your entry, pointing to a saveframe of type sample when it should point' +
+              ' to a saveframe of type sample_conditions.');
+          }
           sampleConditionsName = sampleConditionsFrame.tagDict['_Sample_condition_list.Name'].value;
           if (checkValueIsNull(sampleConditionsName)) {
             sampleConditionsName = sampleConditionsFrame.getTag('Sf_framecode').value + ' (Unnamed)';

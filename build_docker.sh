@@ -11,8 +11,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #  exit 1
 #fi
 
-
-if [[ $1 != "production" ]]; then
+user_id=`id -u`
+if [[ $user_id != '17473' ]]; then
+ echo "Must run this as bmrbsvc user (or apache on production)..."
+ exit 1
+fi
+host=`hostname`
 
 echo "Getting newest schema."
 (
@@ -27,7 +31,7 @@ echo "Compiling angular."
 (
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if [[ $1 == "production" ]]; then
+if [[ $1 == "production" || $host == "bmrb-prod.cam.uchc.edu" ]]; then
   if ! npm run build.prod; then
     echo "Angular build failed, quitting."
     exit 3
@@ -53,11 +57,8 @@ function parse_git_hash() {
 }
 echo "$(parse_git_branch)$(parse_git_hash)" > "${SCRIPT_DIR}"/version.txt
 
-fi
-
-echo "Removing existing local docker image"
-docker stop bmrbdep
-docker rm bmrbdep
+#echo "Renaming existing bmrbdep image so that we can build the new one..."
+#docker rename bmrbdep bmrbdep_old
 
 echo "Building the Docker container..."
 if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbdep .; then
@@ -65,16 +66,19 @@ if ! docker build -f ${SCRIPT_DIR}/Dockerfile -t bmrbdep .; then
     exit 4
 fi
 
+echo "Removing existing local docker image and starting the new one."
+docker stop bmrbdep && docker rm bmrbdep
+
 echo "Starting the docker container locally."
 #sudo docker run -d --name bmrbdep -p 9001:9001 -p 9000:9000 --network host --restart=always -v ${deposition_dir}:/opt/wsgi/depositions -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json:/opt/wsgi/bmrbdep/configuration.json bmrbdep
 
-if [[ $1 == "production" ]]; then
-  docker run -d --name bmrbdep --restart=always --network host \
+if [[ $1 == "production" || "$host" == "bmrb-prod.cam.uchc.edu" ]]; then
+  docker run -d --name bmrbdep --restart=always --network host --user 17473:10144 \
     -v /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions \
     -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_production.json:/opt/wsgi/bmrbdep/configuration.json \
    bmrbdep
 else
-  docker run -d --name bmrbdep --restart=always --network host \
+  docker run -d --name bmrbdep --restart=always --network host --user 17473:10144 \
     -v /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions \
     -v ${SCRIPT_DIR}/BackEnd/bmrbdep/configuration_development.json:/opt/wsgi/bmrbdep/configuration.json \
    bmrbdep
