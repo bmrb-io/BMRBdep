@@ -406,11 +406,17 @@ class DepositionRepo:
         self.raise_write_errors()
 
         secured_path, secured_filename = secure_full_path(path)
+        data_file_path = os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename)
 
         try:
-            os.unlink(os.path.join(self._entry_dir, 'data_files', secured_path, secured_filename))
+            if os.path.isfile(data_file_path):
+                os.unlink(data_file_path)
+            elif os.path.isdir(data_file_path):
+                os.rmdir(data_file_path)
         except FileNotFoundError:
             return False
+        except OSError:
+            raise RequestError('You must first remove any files in a directory before removing the directory itself.')
         self._modified_files = True
         return True
 
