@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import tempfile
 import traceback
 from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
@@ -347,7 +348,10 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_cloned_from': str(uuid)
                                        }
             new_repo.write_entry(entry_template)
-            new_repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+            new_repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
+            # Delete data files when cloning
+            for file_ in new_repo.get_data_file_list():
+                new_repo.delete_data_file(file_)
             new_repo.commit('Creating new deposition from existing deposition %s' % uuid)
 
     return jsonify({'deposition_id': deposition_id})
@@ -471,7 +475,7 @@ def new_deposition_micro() -> Response:
         # Manually set the metadata during object creation - never should be done this way elsewhere
         repo._live_metadata = entry_meta
         repo.write_entry(entry_template)
-        repo.write_file('schema.json', json.dumps(json_schema).encode(), root=True)
+        repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
         repo.commit("Entry created.")
 
     # Send the validation e-mail
@@ -549,23 +553,28 @@ def file_operations(uuid, path: str) -> Response:
 def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
-    file_obj: Optional[FileStorage] = request.files.get('file', None)
-    relative_path = file_obj.filename
-
-    if not file_obj or not file_obj.filename:
-        raise RequestError('No file uploaded!')
-
     # Store a data file
     with depositions.DepositionRepo(uuid) as repo:
-        filename = repo.write_file(relative_path, file_obj.read())
 
-        # Update the entry data
-        if repo.commit("User uploaded file: %s" % relative_path):
-            return jsonify({'filename': filename, 'changed': True,
-                            'commit': repo.last_commit})
-        else:
-            return jsonify({'filename': filename, 'changed': False,
-                            'commit': repo.last_commit})
+        temp_dir = configuration.get('temporary_directory', None)
+        with tempfile.TemporaryDirectory(dir=temp_dir) as upload_dir:
+            def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
+                return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir)
+
+            stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
+                                                                      stream_factory=custom_stream_factory)
+            for file_ in files.values():
+                if file_.name == 'file':
+                    filename = repo.write_file(file_.filename, source_path=file_.stream.name)
+                    file_.close()
+
+                    # Update the entry data
+                    if repo.commit("User uploaded file: %s" % file_.filename):
+                        return jsonify({'filename': filename, 'changed': True, 'commit': repo.last_commit})
+                    else:
+                        return jsonify({'filename': filename, 'changed': False, 'commit': repo.last_commit})
+
+            raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
 
 
 @application.route('/deposition/<uuid:uuid>', methods=('GET', 'PUT'))

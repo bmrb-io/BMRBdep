@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pathlib
+import shutil
 from datetime import date, datetime
 from typing import List, BinaryIO
 
@@ -430,7 +431,11 @@ class DepositionRepo:
         #    if self.metadata['entry_deposited']:
         #        raise RequestError('Entry already deposited, no changes allowed.')
 
-    def write_file(self, filename: str, data: bytes, root: bool = False) -> str:
+    def write_file(self, filename: str,
+                   data: Optional[bytes] = None,
+                   source_path: Optional[str] = None,
+                   root: bool = False) \
+            -> str:
         """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
 
         # The submission info file should always be writeable
@@ -449,8 +454,14 @@ class DepositionRepo:
         if not os.path.exists(os.path.dirname(full_path)):
             pathlib.Path(os.path.dirname(full_path)).mkdir(parents=True, exist_ok=True)
 
-        with open(full_path, "wb") as fo:
-            fo.write(data)
+        # Write the data, depending on how we got it
+        if data and not source_path:
+            with open(full_path, "wb") as fo:
+                fo.write(data)
+        elif source_path and not data:
+            shutil.copy(source_path, full_path)
+        else:
+            raise ValueError('Cannot provide both data and source_path, please only provide one.')
 
         self._modified_files = True
 
