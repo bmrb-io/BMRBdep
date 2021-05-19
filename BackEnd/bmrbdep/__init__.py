@@ -158,7 +158,7 @@ def send_local_file(filename: str = None) -> Response:
     if not os.path.exists(os.path.join(angular_path, filename)):
         filename = 'index.html'
 
-    return send_from_directory(angular_path, filename)
+    return send_from_directory(directory=angular_path, path=filename)
 
 
 @application.route('/deposition/<uuid:uuid>/check-valid')
@@ -622,7 +622,7 @@ def file_operations(uuid, path: str) -> Response:
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid, read_only=True) as repo:
-            return send_file(repo.get_file(path, root=False), attachment_filename=path)
+            return send_file(repo.get_file(path, root=False), download_name=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.delete_data_file(path):

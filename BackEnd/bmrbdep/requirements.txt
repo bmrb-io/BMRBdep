@@ -1,28 +1,28 @@
 # Flask related
-wheel==0.35.1
-flask==1.1.2
+wheel==0.36.2
+flask==2.0.0
 simplejson==3.17.2
-flask-cors==3.0.9
+flask-cors==3.0.10
 Flask-Mail==0.9.1
 # For querying ORCID and PubMed
-requests==2.24.0
+requests==2.25.1
 # For working with BMRB entries
-pynmrstar==3.11.0
+pynmrstar==3.1.1
 # For email validation
 git+git://github.com/uwbmrb/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
 # For managing depositions
-gitpython==3.1.8
+gitpython==3.1.17
 filelock==3.0.12
 python-dateutil==2.8.1
 # For putting entries in ETS
 psycopg2-binary==2.8.6
 # For stripping unicode
-Unidecode==1.1.1
+Unidecode==1.2.0
 
 ## Development related
 # This is for installing node locally
-nodeenv==1.5.0
+nodeenv==1.6.0
 # This makes the local flask server faster to reload when editing the code
-watchdog==0.10.3
+watchdog==2.1.2
 # For type checking the project
-mypy==0.782
+mypy==0.812
