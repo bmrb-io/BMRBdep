@@ -6,7 +6,7 @@ import os
 import pathlib
 import shutil
 from datetime import date, datetime
-from typing import List, BinaryIO
+from typing import List, BinaryIO, Optional
 
 import flask
 import pynmrstar
