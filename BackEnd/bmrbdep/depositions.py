@@ -462,6 +462,8 @@ class DepositionRepo:
             shutil.copy(source_path, full_path)
         else:
             raise ValueError('Cannot provide both data and source_path, please only provide one.')
+        # Make sure the permissions of the written file are correct
+        os.chmod(full_path, 0o644)
 
         self._modified_files = True
 
