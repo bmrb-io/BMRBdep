@@ -35,6 +35,14 @@ export function cleanValue(value): string {
     }
   }
 
+  // Quote if necessary
+  if (value[0] === '\'') {
+    return '"' + value + '"';
+  }
+  if (value[0] === '"') {
+    return '\'' + value + '\'';
+  }
+
   return value;
 }
 
