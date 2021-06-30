@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import logging
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 import pynmrstar
 import requests
@@ -42,8 +42,8 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
                        "&retmode=xml&tool=bmrbcitationparser&email=help@bmrb.io" % pubmed_id)
 
     try:
-        root = ET.fromstring(req.text)
-    except ET.ParseError:
+        root = ElementTree.fromstring(req.text)
+    except ElementTree.ParseError:
         logging.exception('Could not get the information for the PubMed ID!')
         citation_saveframe.add_tag('Note_to_annotator', "API Error: %s" % req.text)
         return
@@ -74,7 +74,7 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
 
     try:
         # Figure out the authors
-        for author in root.getiterator('Author'):
+        for author in root.iter('Author'):
             author_dict = {}
             for child in author:
                 if child.tag == "LastName":
@@ -114,15 +114,15 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
         citation_saveframe.add_tag('Journal_ISSN', _get_tag_value('ISSN', root=root), update=True)
 
         # DOI requires a bit of checking
-        for article_id in root.getiterator('ArticleId'):
+        for article_id in root.iter('ArticleId'):
             if article_id.attrib.get('IdType', None) == "doi":
                 citation_saveframe.add_tag('DOI', article_id.text, update=True)
                 break
 
         # Might need to check MedlineDate for the next field as well
         try:
-            year = _get_tag_value('Year', root=next(root.getiterator('PubDate')))
-        except (ValueError, ET.ParseError, StopIteration):
+            year = _get_tag_value('Year', root=next(root.iter('PubDate')))
+        except (ValueError, ElementTree.ParseError, StopIteration):
             logging.warning("Had to fallback to MedlineDate as Year not available in PubMed XML.")
             year = _get_tag_value('MedlineDate', root=root).split()[0]
         citation_saveframe.add_tag('Year', year, update=True)

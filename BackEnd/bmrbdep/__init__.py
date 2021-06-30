@@ -21,7 +21,6 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeSerializer
 from itsdangerous.exc import BadData
 from validate_email import validate_email
-from werkzeug.datastructures import FileStorage
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
@@ -101,6 +100,7 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
     return response
 
 
+# noinspection PyUnusedLocal
 @application.errorhandler(werkzeug.exceptions.MethodNotAllowed)
 def handle_wrong_method(exception: werkzeug.exceptions.MethodNotAllowed):
     logging.warning('Someone is vulnerability scanning us. Scan details'
@@ -199,9 +199,9 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
             share this e-mail with will have access to the full contents of your in-progress deposition and can make
             changes to it.
 
-            If you are using a shared computer, please ensure that you click the "End Session" button in the left panel menu when
-            leaving the computer. (You can always return to it using the link above.) If you fail to do so, others who use your
-            computer could access your in-process deposition.
+            If you are using a shared computer, please ensure that you click the "End Session" button in the left panel
+            menu when leaving the computer. (You can always return to it using the link above.) If you fail to do so,
+            others who use your computer could access your in-process deposition.
             <br><br>
             Thank you,
             <br>
@@ -216,7 +216,6 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                 else:
                     raise ServerError('Server is mis-configured, please contact the administrator.')
             return jsonify({'status': 'validated'})
-
 
         # Ask them to confirm their e-mail
         confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
@@ -342,6 +341,7 @@ def new_deposition() -> Response:
     entry_bootstrap: bool = False
     if 'nmrstar_file' in request.files and request.files['nmrstar_file'] and request.files['nmrstar_file'].filename:
         try:
+            # noinspection PyUnresolvedReferences
             uploaded_entry = pynmrstar.Entry.from_string(request.files['nmrstar_file'].read().decode())
         except pynmrstar.exceptions.ParsingError as e:
             raise RequestError("Invalid NMR-STAR file: %s" % repr(e))
@@ -557,7 +557,9 @@ def new_deposition() -> Response:
                 entry_meta['bootstrap_entry'] = request_info['bootstrapID']
                 repo.write_file('bootstrap_entry.str', data=str(uploaded_entry).encode(), root=True)
             else:
+                # noinspection PyUnresolvedReferences
                 request.files['nmrstar_file'].seek(0)
+                # noinspection PyUnresolvedReferences
                 repo.write_file('bootstrap_entry.str', data=request.files['nmrstar_file'].read(), root=True)
                 entry_meta['bootstrap_filename'] = repo.write_file(request.files['nmrstar_file'].filename,
                                                                    data=str(uploaded_entry).encode())
@@ -642,9 +644,11 @@ def store_file(uuid) -> Response:
 
         temp_dir = configuration.get('temporary_directory', None)
         with tempfile.TemporaryDirectory(dir=temp_dir) as upload_dir:
+            # noinspection PyUnusedLocal,PyShadowingNames
             def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
                 return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir)
 
+            # noinspection PyUnresolvedReferences
             stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
                                                                       stream_factory=custom_stream_factory)
             for file_ in files.values():
