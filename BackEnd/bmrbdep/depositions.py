@@ -352,7 +352,7 @@ class DepositionRepo:
         final_entry = pynmrstar.Entry.from_file(self.get_file('deposition.str', root=True))
         entry_information = final_entry.get_saveframes_by_category('entry_information')[0]
         contact_person = entry_information['_Contact_person']
-        del contact_person['Email_address']
+        contact_person.remove_tag('Email_address')
 
         # Write out the release file
         self.write_file(f"{self.metadata['bmrbnum']}.str",
