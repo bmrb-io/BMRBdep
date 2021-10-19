@@ -184,7 +184,7 @@ def released(entry_id: str, file_name=None):
 
         files = entry.get_tags(['_Upload_data.Data_file_name'])['_Upload_data.Data_file_name']
         if f'bmrbig{entry_id}.str' not in files:
-            files.append('bmrbig{entry_id}.str')
+            files.append(f'bmrbig{entry_id}.str')
         files = [{'path': url_for("released", entry_id=entry_id, file_name=f, _external=True), 'name': f} for f in files]
 
         try:
