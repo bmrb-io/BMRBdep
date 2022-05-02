@@ -27,7 +27,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
-      '. View commit on GitHub: https://github.com/uwbmrb/BMRBDep/commit/' + versions.revision);
+      '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
 
     this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
   }
