@@ -27,8 +27,8 @@ your email when you created the deposition.">End session</span>
     </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-sidenav-container>
-    <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false">
+<mat-sidenav-container> <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
+    <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false" [fixedInViewport]="true">
         <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
     </mat-sidenav>
 
