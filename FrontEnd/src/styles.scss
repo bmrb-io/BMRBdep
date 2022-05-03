@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import './custom-theme.scss';
 
 * {
@@ -70,7 +71,7 @@ select{
 }
 
 .ErrorMessage {
-  background-color: mat-color($custom-theme-warn) !important;
+  background-color: mat.get-color-from-palette($custom-theme-warn) !important;
   font-weight: bold !important;
   color: black !important;
 
@@ -82,12 +83,12 @@ select{
 }
 
 .NotificationMessage {
-  background-color: mat-color($custom-theme-accent) !important;
+  background-color: mat.get-color-from-palette($custom-theme-accent) !important;
   color: black !important;
 }
 
 .mat-card:not(.nav-card) {
-  background-color: mat-color($custom-theme-primary) !important;
+  background-color: mat.get-color-from-palette($custom-theme-primary) !important;
   .mat-card-header-text {
     margin: 0;
   }
