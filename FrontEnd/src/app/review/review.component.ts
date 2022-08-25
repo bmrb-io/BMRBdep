@@ -6,7 +6,7 @@ import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 
 @Component({
   selector: 'app-review',
@@ -17,7 +17,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   entry: Entry;
   subscription$: Subscription;
-  messageControl = new FormControl('');
+  messageControl = new UntypedFormControl('');
 
   constructor(public api: ApiService,
               private messagesService: MessagesService,

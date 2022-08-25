@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {ApiService} from '../api.service';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
@@ -29,17 +29,17 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.production = environment.production;
   }
 
-  sessionType = new FormControl('', [Validators.required]);
-  authorEmail = new FormControl('', [
+  sessionType = new UntypedFormControl('', [Validators.required]);
+  authorEmail = new UntypedFormControl('', [
     Validators.required,
     Validators.email,
   ]);
-  depositionNickname = new FormControl('', [Validators.required]);
-  authorORCID = new FormControl('', [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
-  bootstrapID = new FormControl('', [Validators.required, Validators.pattern(/^[0-9]+$/)]);
-  depositionType = new FormControl('macromolecule');
+  depositionNickname = new UntypedFormControl('', [Validators.required]);
+  authorORCID = new UntypedFormControl('', [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
+  bootstrapID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^[0-9]+$/)]);
+  depositionType = new UntypedFormControl('macromolecule');
 
-  createDepositionForm: FormGroup = new FormGroup({
+  createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
     sessionType: this.sessionType,
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
@@ -47,12 +47,12 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     depositionType: this.depositionType
   });
 
-  getEmailErrorMessage(emailForm: FormControl) {
+  getEmailErrorMessage(emailForm: UntypedFormControl) {
     return emailForm.hasError('required') ? 'You must enter your email address.' :
       emailForm.hasError('email') ? 'Not a valid email address.' : '';
   }
 
-  getBootstrapErrorMessage(bootstrapForm: FormControl) {
+  getBootstrapErrorMessage(bootstrapForm: UntypedFormControl) {
     return bootstrapForm.hasError('required') ? 'You must enter the ID of an existing entry.' :
       bootstrapForm.hasError('pattern') ? 'Not a valid BMRB ID. BMRB IDs consist only of numbers. (For example: 15000)' : '';
   }
@@ -75,7 +75,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.fileUploadElement.nativeElement.click();
   }
 
-  new(f: FormGroup) {
+  new(f: UntypedFormGroup) {
 
     if (!f.valid) {
       return;
