@@ -28,7 +28,6 @@ fi
 )
 
 echo "Compiling angular."
-(
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
 if [[ $1 == "production" || $host == "bmrb-prod.cam.uchc.edu" ]]; then
@@ -37,12 +36,11 @@ if [[ $1 == "production" || $host == "bmrb-prod.cam.uchc.edu" ]]; then
     exit 3
   fi
 else
-  if ! ng build --configuration devprod; then
+  if ! npm run ng build --configuration=devprod; then
     echo "Angular build failed, quitting."
     exit 3
   fi
 fi
-)
 
 echo "Writing out git version to file..."
 # https://gist.github.com/dciccale/5560837
