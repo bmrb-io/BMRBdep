@@ -323,6 +323,11 @@ export class ApiService implements OnDestroy {
 
         } else {
           // Commit is successful!
+          const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
+          if (this.cachedEntry.unsaved && time_diff > 30) {
+            this.messagesService.sendMessage(new Message('Successfully saved pending changes! You are back online.'));
+          }
+
           this.cachedEntry.addCommit(response['commit']);
           if (saveOriginTime === this.lastChangeTime) {
             this.cachedEntry.unsaved = false;
@@ -333,10 +338,16 @@ export class ApiService implements OnDestroy {
         }
       },
       () => {
-        if (!this.cachedEntry.unsaved) {
-          this.messagesService.sendMessage(new Message('Save attempt failed. Perhaps you have lost your internet' +
-            ' connection? Changes can still be made to the upload, but please don\'t clear your browser cache until internet' +
-            ' is restored and the entry can be saved.'));
+        if (this.cachedEntry.unsaved) {
+          const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
+          if (time_diff > 30 && time_diff < 180) {
+            this.messagesService.sendMessage(new Message('Unable to save changes for the last ' + time_diff + ' seconds. ' +
+              'Perhaps you have lost your internet connection? Changes can still be made to the deposition, but please don\'t close this tab ' +
+              'until internet is restored and the entry can be saved - otherwise you may lose your progress!'));
+          } else if (time_diff >= 180) {
+            this.messagesService.sendMessage(new Message('Unable to save changes for the last ' + time_diff + ' seconds! Please check to ensure that ' +
+              'you have a working internet connection. If so, please contact support. If this message persists and you keep making changes, you may lose them!', MessageType.ErrorMessage));
+          }
         }
         this.saveInProgress = false;
       }
