@@ -27,6 +27,7 @@ export class ApiService implements OnDestroy {
   private entryChangeCheckTimer;
   private saveTimer;
   private lastChangeTime: number;
+  private firstSaveMessageSent;
   public saveInProgress: boolean;
 
   private JSONOptions = {
@@ -43,6 +44,7 @@ export class ApiService implements OnDestroy {
               private dialog: MatDialog) {
 
     this.entrySubject = new ReplaySubject<Entry>();
+    this.firstSaveMessageSent = false;
 
     this.subscription$ = this.entrySubject.subscribe(entry => {
       this.cachedEntry = entry;
@@ -333,6 +335,12 @@ export class ApiService implements OnDestroy {
           const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
           if (this.cachedEntry.unsaved && time_diff > 30) {
             this.messagesService.sendMessage(new Message('Successfully saved pending changes! You are back online.'));
+          }
+
+          if (!this.firstSaveMessageSent) {
+            this.messagesService.sendMessage(new Message('Your changes have been saved - and they will continue to be automatically ' +
+              'saved as you work.'));
+            this.firstSaveMessageSent = true;
           }
 
           this.cachedEntry.addCommit(response['commit']);
