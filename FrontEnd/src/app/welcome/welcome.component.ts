@@ -13,12 +13,12 @@ import {SidenavService} from '../sidenav.service';
   styleUrls: ['./welcome.component.scss']
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
-  entry: Entry;
+  public entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
-  subscription$: Subscription;
-  skipEmailValidation: boolean;
-  emailValidationError: boolean;
+  public skipEmailValidation: boolean;
+  public emailValidationError: boolean;
   public production;
+  private subscription$: Subscription;
 
   constructor(private router: Router,
               public api: ApiService,

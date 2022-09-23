@@ -36,17 +36,17 @@ your email when you created the deposition.">
 
             <mat-form-field>
                 <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
-                    <mat-option value="new">Begin a new deposition (with NMR data upload)</mat-option>
-                    <mat-option value="bmrb_id">Begin a new deposition from an existing and released BMRB entry</mat-option>
-                    <mat-option value="file">Pre-populate an entire deposition by uploading a full NMR-STAR file (version 3.x)</mat-option>
+                    <mat-option [value]="'new'">Begin a new deposition (with NMR data upload)</mat-option>
+                    <mat-option [value]="'bmrb_id'">Begin a new deposition from an existing and released BMRB entry</mat-option>
+                    <mat-option [value]="'file'">Pre-populate an entire deposition's metadata by uploading an NMR-STAR file (version 3.x)</mat-option>
                 </mat-select>
                 <mat-error *ngIf="sessionType.invalid">Please select a deposition type.</mat-error>
             </mat-form-field>
 
           <mat-form-field *ngIf="!production">
             <mat-select [formControl]="depositionType" placeholder="Select server type" required>
-              <mat-option value="macromolecule">Macromolecule deposition</mat-option>
-              <mat-option value="small molecule">Small molecule deposition</mat-option>
+              <mat-option [value]="'macromolecule'">Macromolecule deposition</mat-option>
+              <mat-option [value]="'small molecule'">Small molecule deposition</mat-option>
             </mat-select>
           </mat-form-field>
 
