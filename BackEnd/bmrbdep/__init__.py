@@ -401,7 +401,8 @@ def new_deposition() -> Response:
     if uploaded_entry:
         for saveframe in entry_template:
             for loop in saveframe:
-                if loop.category in ['_Atom_chem_shift', '_Atom_site', '_Gen_dist_constraint']:
+                if loop.category in ['_Atom_chem_shift', '_Peak', '_Atom_site', '_Gen_dist_constraint',
+                                     '_Peak_general_char', '_Peak_char', '_Assigned_peak_chem_shift']:
                     loop.data = []
 
     # Calculate the uploaded file types, if they upload a file
