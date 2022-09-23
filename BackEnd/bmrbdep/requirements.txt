@@ -9,7 +9,7 @@ requests==2.28.1
 # For working with BMRB entries
 pynmrstar==3.3.1
 # For email validation
-git+git://github.com/uwbmrb/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
+git+git://github.com/bmrb-io/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
 # For managing depositions
 gitpython==3.1.27
 filelock==3.8.0

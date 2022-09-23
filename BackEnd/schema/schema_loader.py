@@ -326,7 +326,7 @@ if __name__ == "__main__":
 
     # Pull changes
     if not os.path.exists(dictionary_dir):
-        Git(root_dir).clone('https://github.com/uwbmrb/nmr-star-dictionary.git')
+        Git(root_dir).clone('https://github.com/bmrb-io/nmr-star-dictionary.git')
     repo = Repo(dictionary_dir)
     repo.remotes.origin.pull()
     most_recent_commit = repo.commit()
