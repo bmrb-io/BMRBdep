@@ -31,9 +31,16 @@ echo "Compiling angular."
 (
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if ! npm run build.prod; then
-  echo "Angular build failed, quitting."
-  exit 3
+if [[ $1 == "production" || $host == "bmrb-prod.cam.uchc.edu" ]]; then
+  if ! npm run build.prod; then
+    echo "Angular build failed, quitting."
+    exit 3
+  fi
+else
+  if ! npm run ng build --configuration=devprod; then
+    echo "Angular build failed, quitting."
+    exit 3
+  fi
 fi
 )
 
