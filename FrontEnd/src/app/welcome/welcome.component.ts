@@ -71,12 +71,12 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
   // This is needed for angular to detect the file upload
   fileChangeEvent(file_input: any) {
-    if (file_input.files[0].size > 1025000) {
-      const message: Message = new Message('Warning - your selected file is greater than ' +
-        '1 MB. It is recommended to only upload a metadata file here and upload data (chemical shifts,' +
-        'peak lists, etc.) in a separate file uploaded as one or more data files after creating your deposition. ');
-      this.messagingService.sendMessage(message);
-    }
+    // if (file_input.files[0].size > 1025000) {
+    //   const message: Message = new Message('Warning - your selected file is greater than ' +
+    //     '1 MB. It is recommended to only upload a metadata file here and upload data (chemical shifts, ' +
+    //     'peak lists, etc.) in a separate file uploaded as one or more data files after creating your deposition. ');
+    //   this.messagingService.sendMessage(message);
+    // }
   }
 
   openInput() {
