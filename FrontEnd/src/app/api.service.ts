@@ -257,7 +257,7 @@ export class ApiService implements OnDestroy {
           localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
         } catch (e) {
           const message: Message = new Message('Error! Entry too large to load into browser storage. Please contact support ' +
-            'for help. Your session will end since changes can\'t be saved in this state', MessageType.ErrorMessage, undefined);
+            'for help. Your session will end since changes can\'t be saved in this state.', MessageType.ErrorMessage, undefined);
           this.messagesService.sendMessage(message);
           this.clearDeposition();
         }

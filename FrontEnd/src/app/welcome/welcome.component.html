@@ -100,16 +100,16 @@ your email when you created the deposition.">
             <div *ngIf="sessionType.value == 'file'">
                 <span *ngIf="inputFile.files[0]">{{inputFile.files[0].name}}</span>
                 <span *ngIf="!inputFile.files[0]">No file selected</span>
-                <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
+                <input type="file" hidden #inputFile (change)="fileChangeEvent(inputFile)"/>
                 <ng-container *ngIf="!inputFile.files[0] else other_button">
                     <button mat-raised-button color="accent" type="button" (click)="openInput()"
-                             id="fileUploadButton">
+                             [id]="'fileUploadButton'">
                         Click to select a file to upload.
                     </button>
                 </ng-container>
                 <ng-template #other_button>
                     <button mat-raised-button color="accent" type="button" (click)="openInput()"
-                            id="fileUploadButton">
+                            [id]="'fileUploadButton'">
                         Click to select a different file to upload.
                     </button>
                 </ng-template>
