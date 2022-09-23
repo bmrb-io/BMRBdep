@@ -18,7 +18,7 @@ def _sort_saveframes(sort_list: list) -> list:
 
 def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Entry, new_schema: pynmrstar.Schema,
                   preserve_entry_information: bool = False):
-    """ By default it does not copy over the entry information - but it should for cloned entries, so the
+    """ By default, it does not copy over the entry information - but it should for cloned entries, so the
      preserve_entry_information boolean is available."""
 
     existing_entry.normalize()

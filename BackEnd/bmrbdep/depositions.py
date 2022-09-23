@@ -13,7 +13,7 @@ import psycopg2
 import pynmrstar
 import unidecode
 from dateutil.relativedelta import relativedelta
-from filelock import Timeout, FileLock
+from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
@@ -80,7 +80,7 @@ class DepositionRepo:
                     config.set_value("user", "email", "help@bmrb.io")
 
         # Create the lock object
-        self._lock_object: FileLock = FileLock(self._lock_path, timeout=360)
+        self._lock_object: BaseFileLock = FileLock(self._lock_path, timeout=360)
 
         if not self._initialize and not self._read_only:
             self._repo = Repo(self._entry_dir)
