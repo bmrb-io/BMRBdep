@@ -402,7 +402,11 @@ def new_deposition() -> Response:
         for saveframe in entry_template:
             for loop in saveframe:
                 if loop.category in ['_Atom_chem_shift', '_Peak', '_Atom_site', '_Gen_dist_constraint',
-                                     '_Peak_general_char', '_Peak_char', '_Assigned_peak_chem_shift']:
+                                     '_Peak_general_char', '_Peak_char', '_Assigned_peak_chem_shift',
+                                     '_Peak_row_format']:
+                    loop.data = []
+                # Metadata loops will almost never have more than this much data
+                if len(loop.data) > 300:
                     loop.data = []
 
     # Calculate the uploaded file types, if they upload a file
