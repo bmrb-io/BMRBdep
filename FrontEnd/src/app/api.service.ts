@@ -21,13 +21,13 @@ function getTime(): number {
 })
 export class ApiService implements OnDestroy {
 
+  public entrySubject: ReplaySubject<Entry>;
   private cachedEntry: Entry;
-  entrySubject: ReplaySubject<Entry>;
-  subscription$: Subscription;
-  entryChangeCheckTimer;
-  saveTimer;
-  lastChangeTime: number;
-  saveInProgress: boolean;
+  private subscription$: Subscription;
+  private entryChangeCheckTimer;
+  private saveTimer;
+  private lastChangeTime: number;
+  public saveInProgress: boolean;
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -251,9 +251,16 @@ export class ApiService implements OnDestroy {
         }
 
         this.entrySubject.next(loadedEntry);
-        localStorage.setItem('entry', JSON.stringify(loadedEntry));
-        localStorage.setItem('entryID', loadedEntry.entryID);
-        localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
+        try {
+          localStorage.setItem('entry', JSON.stringify(loadedEntry));
+          localStorage.setItem('entryID', loadedEntry.entryID);
+          localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
+        } catch (e) {
+          const message: Message = new Message('Error! Entry too large to load into browser storage. Please contact support ' +
+            'for help. Your session will end since changes can\'t be saved in this state', MessageType.ErrorMessage, undefined);
+          this.messagesService.sendMessage(message);
+          this.clearDeposition();
+        }
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
