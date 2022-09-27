@@ -209,7 +209,7 @@ export class Tag {
         }
 
         this.frameLink.push([row[IDIndex].value, row[nameTagIndex].value + ' - ' + sampleName + ' - ' + sampleConditionsName +
-                             ' - ' + spectrometerName]);
+        ' - ' + spectrometerName]);
 
         // Check the validity of this tag in the process
         if (row[IDIndex].value === this.value) {
@@ -330,12 +330,6 @@ export class Tag {
         this.valid = false;
         this.validationMessage = 'Tag must have a value.';
       }
-      // Check data type
-    } else if (!this.schemaValues['Regex'].test(this.value)) {
-      if (this.fullyQualifiedTagName !== '_Contact_person.State_province' && this.fullyQualifiedTagName !== '_Contact_person.Country') {
-        this.valid = false;
-        this.validationMessage = 'Value does not match specified data type.';
-      }
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
       if (this.enums.size === 0) {
@@ -361,6 +355,12 @@ export class Tag {
           this.validationMessage = 'Invalid selected value. Have you deleted the data it referenced?';
           this.valid = false;
         }
+      }
+      // Check data type
+    } else if (!this.schemaValues['Regex'].test(this.value)) {
+      if (this.fullyQualifiedTagName !== '_Contact_person.State_province' && this.fullyQualifiedTagName !== '_Contact_person.Country') {
+        this.valid = false;
+        this.validationMessage = 'Value does not match specified data type.';
       }
     }
   }
