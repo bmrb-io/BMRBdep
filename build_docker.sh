@@ -41,6 +41,7 @@ else
     exit 3
   fi
 fi
+cd "${SCRIPT_DIR}"
 
 echo "Writing out git version to file..."
 # https://gist.github.com/dciccale/5560837
