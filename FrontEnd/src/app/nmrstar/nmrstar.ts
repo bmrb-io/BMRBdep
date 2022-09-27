@@ -1,4 +1,3 @@
-import {sprintf} from 'sprintf-js';
 import {nullTags} from './definitions';
 import {Entry} from './entry';
 
@@ -18,7 +17,7 @@ export function cleanValue(value): string {
   }
 
   if ((value.indexOf('"') !== -1) && (value.indexOf('\'') !== -1)) {
-    return sprintf('%s\n', value);
+    return `${value}\n`;
   }
 
   if ((value.indexOf(' ') !== -1) || (value.indexOf('\t') !== -1) ||
@@ -27,11 +26,11 @@ export function cleanValue(value): string {
       (value.startsWith('save_')) || (value.startsWith('loop_')) || (value.startsWith('stop_')))) {
 
     if (value.indexOf('"') !== -1) {
-      return sprintf('\'%s\'', value);
+      return `'${value}'`;
     } else if (value.indexOf('\'') !== -1) {
-      return sprintf('"%s"', value);
+      return `"${value}"`;
     } else {
-      return sprintf('\'%s\'', value);
+      return `'${value}'`;
     }
   }
 
