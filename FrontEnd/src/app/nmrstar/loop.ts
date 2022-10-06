@@ -309,15 +309,14 @@ export class Loop {
 
     // Can't print data without columns
     if (this.tags.length === 0) {
-      throw new Error(sprintf('Impossible to print data if there are no associated tags. Loop: \'%s\'.', parent.category));
+      throw new Error(`Impossible to print data if there are no associated tags. Loop: '${parent.category}'.`);
     }
 
     // Make sure that if there is data, it is the same width as the column tags
     if (this.data.length > 0) {
       for (let n = 0; n < this.data.length; n++) {
         if (this.tags.length !== this.data[n].length) {
-          throw new Error(sprintf('The number of column tags must match width of the data.\
- Row: %d Loop: \'%s\'.', n, parent.category));
+          throw new Error(`The number of column tags must match width of the data. Row: ${n} Loop: '${parent.category}'.`);
         }
       }
     }
@@ -390,7 +389,7 @@ export class Loop {
 
           let datumCopy = cleanValue(row[n].value);
           if (datumCopy.indexOf('\n') !== -1) {
-            datumCopy = sprintf('\n;\n%s;\n', datumCopy);
+            datumCopy = `\n;\n${datumCopy};\n`;
           }
 
           if (widths[n] === null) {
