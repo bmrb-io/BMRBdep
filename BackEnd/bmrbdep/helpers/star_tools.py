@@ -106,7 +106,7 @@ def create_entity_for_saveframe_and_attach(parent_entry: pynmrstar.Entry, savefr
     next_entity: int = max([int(x.name.split('_')[-1]) for x in parent_entry.get_saveframes_by_category('entity')]) + 1
     new_entity = pynmrstar.Saveframe.from_template('entity', name='entity_%s' % next_entity, schema=schema,
                                                    all_tags=False, entry_id=parent_entry.entry_id)
-    new_entity.loops = []
+    new_entity._loops = []
     new_entity['Name'] = saveframe['Name'][0]
     new_entity['Paramagnetic'] = saveframe['Paramagnetic'][0]
     new_entity['Type'] = 'non-polymer'
