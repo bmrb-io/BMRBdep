@@ -16,7 +16,7 @@ def _safe_unidecode(item):
 
 def _get_tag_value(tag_name, root=None):
 
-    res = list(root.getiterator(tag_name))
+    res = list(root.iter(tag_name))
     if len(res) == 1:
         return res[0].text
     elif len(res) > 1:
