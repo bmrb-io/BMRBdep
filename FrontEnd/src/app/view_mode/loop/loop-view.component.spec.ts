@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { LoopViewComponent } from './loop-view.component';
 
@@ -6,7 +6,7 @@ describe('LoopViewComponent', () => {
   let component: LoopViewComponent;
   let fixture: ComponentFixture<LoopViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ LoopViewComponent ]
     })
