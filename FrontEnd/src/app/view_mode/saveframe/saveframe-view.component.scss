@@ -1,7 +1,8 @@
+@use '~@angular/material' as mat;
 @import "../../../custom-theme.scss";
 
 .star {
-  border: solid 2px mat-color($custom-theme-primary, darker);
+  border: solid 2px mat.get-color-from-palette($custom-theme-primary, darker);
   margin-top: 0.5em;
   max-width: 98%;
 }

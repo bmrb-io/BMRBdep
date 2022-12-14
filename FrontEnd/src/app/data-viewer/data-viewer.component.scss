@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import "../../custom-theme.scss";
 
 div {
@@ -7,7 +8,7 @@ div {
 
 /* Use these to style tables nicely */
 table.alternating tr:nth-child(even) {
-  background-color: mat-color($custom-theme-primary, lighter);
+  background-color: mat.get-color-from-palette($custom-theme-primary, lighter);
 }
 
 table.alternating tr:nth-child(odd) {
@@ -28,12 +29,12 @@ table.alternating th {
   padding: 0.25em;
   font-size: 130%;
   text-align: left;
-  background-color: mat-color($custom-theme-primary, lighter);
+  background-color: mat.get-color-from-palette($custom-theme-primary, lighter);
 }
 
 table.alternating tfoot {
   font-size: 110%;
-  background-color: mat-color($custom-theme-primary, lighter);
+  background-color: mat.get-color-from-palette($custom-theme-primary, lighter);
 }
 
 table.alternating tr:hover {

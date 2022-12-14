@@ -1,7 +1,8 @@
+@use '~@angular/material' as mat;
 @import "../../custom-theme.scss";
 
 .mandatory {
-  color: mat-color($custom-theme-warn, darker);
+  color: mat.get-color-from-palette($custom-theme-warn, darker);
 }
 
 .invisible {
@@ -11,16 +12,16 @@
 }
 
 .invalid {
-  background-color: mat-color($custom-theme-warn, lighter);
+  background-color: mat.get-color-from-palette($custom-theme-warn, lighter);
 }
 
 .greyed-out {
-  background-color: mat-color($custom-theme-accent);
+  background-color: mat.get-color-from-palette($custom-theme-accent);
 }
 
 .tag-header {
   cursor: help;
-  background-color: mat-color($custom-theme-accent);
+  background-color: mat.get-color-from-palette($custom-theme-accent);
 }
 
 .header-text {
@@ -35,7 +36,7 @@
 }
 
 table {
-  background-color: mat-color($custom-theme-accent);
+  background-color: mat.get-color-from-palette($custom-theme-accent);
   margin: 0;
   padding: 0 .25em 0 .25em;
   border-collapse: collapse;
@@ -44,21 +45,21 @@ table {
 
 th {
   text-align: left;
-  background-color: mat-color($custom-theme-primary);
+  background-color: mat.get-color-from-palette($custom-theme-primary);
   font-weight: bold;
   font-style: normal;
   color: black;
-  border: 1px solid mat-color($custom-theme-primary, darker);
+  border: 1px solid mat.get-color-from-palette($custom-theme-primary, darker);
   padding: .5em;
 }
 
 td {
   text-align: left;
-  background-color: mat-color($custom-theme-primary);
+  background-color: mat.get-color-from-palette($custom-theme-primary);
   font-weight: normal;
   font-style: normal;
   color: black;
-  border: 1px solid mat-color($custom-theme-primary, darker);
+  border: 1px solid mat.get-color-from-palette($custom-theme-primary, darker);
   padding: 0 0.25em;
 }
 

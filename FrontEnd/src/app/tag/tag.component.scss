@@ -1,7 +1,8 @@
+@use '~@angular/material' as mat;
 @import "../../custom-theme.scss";
 
 .type-error {
-  background-color: mat-color($custom-theme-warn, lighter) !important;
+  background-color: mat.get-color-from-palette($custom-theme-warn, lighter) !important;
 }
 
 .tag-input {
@@ -18,7 +19,7 @@
 }
 
 .tag-input:hover:not([disabled]):not(.mat-select-disabled) {
-  outline: mat-color($custom-theme-primary, darker) solid 1px;
+  outline: mat.get-color-from-palette($custom-theme-primary, darker) solid 1px;
 }
 
 .first-button {
