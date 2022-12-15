@@ -1,18 +1,18 @@
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 
 export class DataFile {
   dropDownList;
   selectedItems;
   fileName;
   percent;
-  control: FormControl;
+  control: UntypedFormControl;
 
   constructor(fileName: string, dropDownList: {}, selectedItems: {} = []) {
     this.fileName = fileName;
     this.dropDownList = dropDownList;
     this.selectedItems = selectedItems;
     this.percent = 0;
-    this.control = new FormControl(selectedItems);
+    this.control = new UntypedFormControl(selectedItems);
   }
 }
 

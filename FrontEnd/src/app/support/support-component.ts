@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {ApiService} from '../api.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
@@ -12,8 +12,8 @@ import {Entry} from '../nmrstar/entry';
 })
 export class SupportComponent implements OnInit, OnDestroy {
 
-  messageControl = new FormControl('', [Validators.required]);
-  emailControl = new FormControl('', [Validators.required]);
+  messageControl = new UntypedFormControl('', [Validators.required]);
+  emailControl = new UntypedFormControl('', [Validators.required]);
   submitted: boolean;
   entry: Entry;
   notificationMessage: string;
@@ -33,7 +33,7 @@ export class SupportComponent implements OnInit, OnDestroy {
 
     if (history.state.data) {
       this.caughtException = history.state.data;
-      this.messageControl = new FormControl('');
+      this.messageControl = new UntypedFormControl('');
     }
   }
 

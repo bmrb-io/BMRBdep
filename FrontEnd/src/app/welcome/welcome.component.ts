@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {ApiService} from '../api.service';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
@@ -26,21 +26,21 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.production = environment.production;
   }
 
-  authorEmail = new FormControl('', [
+  authorEmail = new UntypedFormControl('', [
     Validators.required,
     Validators.email,
   ]);
-  depositionNickname = new FormControl('', [Validators.required]);
-  authorORCID = new FormControl('', [Validators.required, Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
-  sessionVisibility = new FormControl('', [Validators.required]);
+  depositionNickname = new UntypedFormControl('', [Validators.required]);
+  authorORCID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
+  sessionVisibility = new UntypedFormControl('', [Validators.required]);
 
-  createDepositionForm: FormGroup = new FormGroup({
+  createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
     authorORCID: this.authorORCID,
   });
 
-  getEmailErrorMessage(emailForm: FormControl) {
+  getEmailErrorMessage(emailForm: UntypedFormControl) {
     return emailForm.hasError('required') ? 'You must enter your email address.' :
       emailForm.hasError('email') ? 'Not a valid email address.' : '';
   }
@@ -55,7 +55,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.subscription$.unsubscribe();
   }
 
-  new(f: FormGroup) {
+  new(f: UntypedFormGroup) {
 
     if (!f.valid) {
       return;
