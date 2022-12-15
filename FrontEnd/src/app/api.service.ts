@@ -23,7 +23,7 @@ export class ApiService implements OnDestroy {
 
   private cachedEntry: Entry;
   private subscription$: Subscription;
-  private entrySubject: ReplaySubject<Entry>;
+  entrySubject: ReplaySubject<Entry>;
   private entryChangeCheckTimer;
   private saveTimer;
   private lastChangeTime: number;
