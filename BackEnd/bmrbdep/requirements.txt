@@ -11,7 +11,7 @@ pynmrstar==3.3.1
 # For email validation
 git+https://github.com/bmrb-io/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
 # For managing depositions
-gitpython==3.1.29
+gitpython==3.1.30
 filelock==3.8.2
 python-dateutil==2.8.2
 # For putting entries in ETS
