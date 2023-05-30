@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.14
 EXPOSE 9000
 WORKDIR /opt/wsgi
 
