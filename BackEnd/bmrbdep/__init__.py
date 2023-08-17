@@ -540,8 +540,8 @@ def file_operations(uuid, path: str) -> Response:
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid) as repo:
-            return send_file(repo.get_file(path, root=False),
-                             attachment_filename=path)
+            return send_file(path_or_file=repo.get_file(path, root=False),
+                             download_name=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.delete_data_file(path):
