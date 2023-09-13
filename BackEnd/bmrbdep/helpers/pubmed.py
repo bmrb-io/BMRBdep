@@ -75,7 +75,8 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
     try:
         # Figure out the authors
         for author in root.getiterator('Author'):
-            author_dict = {}
+            author_dict = {'first': ".", 'last': "."}
+
             for child in author:
                 if child.tag == "LastName":
                     author_dict['last'] = _safe_unidecode(child.text)
