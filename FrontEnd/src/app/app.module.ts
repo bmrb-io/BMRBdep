@@ -46,7 +46,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
 import {MatLegacyAutocompleteModule as MatAutocompleteModule} from '@angular/material/legacy-autocomplete';
 import {SidenavService} from './sidenav.service';
-import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {MatLegacyTooltipModule as MatTooltipModule, MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS} from '@angular/material/legacy-tooltip';
 
 @NgModule({
     declarations: [
@@ -96,7 +96,7 @@ import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/lega
         MatTooltipModule
     ],
     bootstrap: [AppComponent],
-    providers: [SidenavService]
+    providers: [SidenavService, {provide: MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 1250}}]
 })
 export class AppModule {
 }
