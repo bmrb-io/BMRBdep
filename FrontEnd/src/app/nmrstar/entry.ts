@@ -60,7 +60,7 @@ export function entryFromJSON(jdata: Object): Entry {
   }
 
   if ('unsaved' in jdata) {
-    entry.unsaved = jdata['unsaved'];
+    entry.unsaved = jdata['unsaved'] as boolean;
   } else {
     entry.unsaved = false;
   }

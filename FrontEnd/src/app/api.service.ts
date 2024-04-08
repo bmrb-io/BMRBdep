@@ -8,7 +8,7 @@ import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
 
@@ -243,7 +243,8 @@ export class ApiService implements OnDestroy {
         // Verify that the NMR-STAR matches the uploaded files
         let filesOutOfSync = false;
         if ('data_files' in jsonData) {
-          const files: Array<string> = jsonData['data_files'];
+          const files: string[] = jsonData['data_files'] as string[];
+          console.log(files);
           for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;
