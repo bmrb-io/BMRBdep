@@ -29,7 +29,7 @@ export class TagComponent implements OnInit {
     }
   }
 
-  private filter() {
+  filter() {
     this.filteredOptions = [];
     for (const singleEnum of this.tag.enums) {
       if (singleEnum[0].toLowerCase().includes(this.tag.value.toLowerCase())) {
