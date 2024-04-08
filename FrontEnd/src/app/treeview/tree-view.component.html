@@ -10,10 +10,13 @@
                 <div>
                     <ng-container *ngFor="let superGroupCat of entry.superGroups">
                         <div *ngIf="(superGroupCat.display == 'Y' || (entry.showAll && superGroupCat.display != 'H'))">
-                            <h3 matLine [matTooltip]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+                            <h3 matLine
+                                [matTooltipShowDelay]="1000"
+                                [matTooltip]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
                                 <mat-icon routerLink="/help/molecular-assembly"
                                           *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
                                           class="pointer"
+                                          [matTooltipShowDelay]="1000"
                                           matTooltip="Molecular assembly help">help_outline
                                 </mat-icon>
                             </h3>
@@ -25,12 +28,17 @@
                                         *ngIf="(entry.showAll || category.display == 'Y') && category.display != 'H'">
                                     <a mat-list-item
                                        [ngClass]="{'active': active==category.category && page=='category'}"
+                                       [matTooltipShowDelay]="1000"
                                        [matTooltip]="entry.schema.saveframeSchema[category.category]['group_view_help']"
                                        [routerLink]="['/entry', 'saveframe', category.category]"
                                        [id]="category.category">
-                                        <mat-icon *ngIf="category.valid" matTooltip="Section incomplete">done</mat-icon>
+                                        <mat-icon *ngIf="category.valid"
+                                                  [matTooltipShowDelay]="1000"
+                                                  matTooltip="Section incomplete">done</mat-icon>
                                         <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
-                                        <mat-icon *ngIf="!category.valid" matTooltip="Section complete">error_outline</mat-icon>
+                                        <mat-icon *ngIf="!category.valid"
+                                                  [matTooltipShowDelay]="1000"
+                                                  matTooltip="Section complete">error_outline</mat-icon>
                                         <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
                                         <h2 matLine> {{category.displayName}} </h2>
                                     </a>
@@ -45,13 +53,16 @@
                     <h3 matLine>Deposition options</h3>
 
                     <a mat-list-item [ngClass]="{'active': page=='pending-verification'}" *ngIf="!entry.emailValidated"
-                       routerLink="/entry/pending-verification" id="pending-verification" matTooltip="Complete the e-mail
+                       routerLink="/entry/pending-verification" id="pending-verification"
+                       [matTooltipShowDelay]="1000"
+                       matTooltip="Complete the e-mail
 validation step.">
                         <h2 matLine>Verify your email</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='new'}"
                        routerLink="/" id="new"
+                       [matTooltipShowDelay]="1000"
                        matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
 deposition to a new deposition if your other deposition is very similar.">
                         <h2 matLine>Create new deposition</h2>
@@ -60,16 +71,21 @@ deposition to a new deposition if your other deposition is very similar.">
                     <a mat-list-item [ngClass]="{'active': page=='restore'}"
                        *ngIf="entry.hasDeleted && !entry.deposited"
                        routerLink="/entry/restore" id="restore"
+                       [matTooltipShowDelay]="1000"
                        matTooltip="View and restore deleted sections">
                         <h2 matLine>View and restore deleted sections</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
-                       routerLink="/entry" id="entry" matTooltip="Review entire deposition.">
+                       routerLink="/entry" id="entry"
+                       [matTooltipShowDelay]="1000"
+                       matTooltip="Review entire deposition.">
                         <h2 matLine>View full deposition</h2>
                     </a>
 
-                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Deposit entry to the BMRB." id="review"
+                    <a mat-list-item [ngClass]="{'active': page=='review'}"
+                       [matTooltipShowDelay]="1000"
+                       matTooltip="Deposit entry to the BMRB." id="review"
                        routerLink="/entry/review" *ngIf="!entry.deposited">
                         <mat-icon *ngIf="entry.valid">done</mat-icon>
                         <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
@@ -79,13 +95,16 @@ deposition to a new deposition if your other deposition is very similar.">
                     </a>
 
                     <a mat-list-item routerLink="/" (click)="endSession()"
+                       [matTooltipShowDelay]="1000"
                        matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">
                         <h2 matLine>End session</h2>
                     </a>
 
                     <a mat-list-item [ngClass]="{'active': page=='support'}"
-                       routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
+                       routerLink="/support" id="contact-us"
+                       [matTooltipShowDelay]="1000"
+                       matTooltip="Contact BMRB for support for any issue.">
                         <h2 matLine>Support</h2>
                     </a>
                 </div>

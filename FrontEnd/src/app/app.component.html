@@ -2,7 +2,9 @@
     <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
         <div *ngIf="entry"
              (click)="sidenav.toggle(); treeView.scrollSideNav()"
-             class="valign-center" matTooltip="Toggle the navigation menu.">
+             class="valign-center"
+             [matTooltipShowDelay]="1000"
+             matTooltip="Toggle the navigation menu.">
             <mat-icon>menu</mat-icon>
             <span style="vertical-align: bottom">Menu</span>
         </div>
@@ -15,6 +17,7 @@
       </span>
             <span *ngIf="!entry" class="title-center">BMRBdep</span>
             <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
+                  [matTooltipShowDelay]="1000"
                   matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">End session</span>
         </ng-container>
