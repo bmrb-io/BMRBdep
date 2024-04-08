@@ -1,8 +1,7 @@
 import {Entry} from './entry';
 import {Loop} from './loop';
 import {checkTagIsRequired, checkValueIsNull, cleanValue, isMixedCase} from './nmrstar';
-import {LoopTag, SaveframeTag, Tag} from './tag';
-import {sprintf} from 'sprintf-js';
+import {LoopTag, SaveframeTag} from './tag';
 
 export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
   const test: Saveframe = new Saveframe(jdata['name'], jdata['category'], jdata['tag_prefix'], parent);
@@ -360,9 +359,7 @@ export class Saveframe {
     width += this.tagPrefix.length + 2;
 
     // Print the saveframe
-    let returnString = sprintf('save_%s\n', this.name);
-    const standardFormatString = sprintf('   %%-%ds %%s\n', width);
-    const multiLineFormatString = sprintf('   %%-%ds\n;\n%%s;\n', width);
+    let returnString = `save_${this.name}\n`;
 
     for (const tag of this.tags) {
       // Don't show null tags
@@ -383,9 +380,11 @@ export class Saveframe {
       const cleanedTag = cleanValue(tag.value);
 
       if (cleanedTag.indexOf('\n') === -1) {
-        returnString += sprintf(standardFormatString, this.tagPrefix + '.' + tag.name, cleanedTag);
+        const padded = (this.tagPrefix + '.' + tag.name).padEnd(width, ' ');
+        returnString += `   ${padded} ${cleanedTag}\n`;
       } else {
-        returnString += sprintf(multiLineFormatString, this.tagPrefix + '.' + tag.name, cleanedTag);
+        const padded = (this.tagPrefix + '.' + tag.name).padEnd(width, ' ');
+        returnString += `   ${padded}\n;\n${cleanedTag};\n`;
       }
     }
 
