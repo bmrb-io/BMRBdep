@@ -6,9 +6,7 @@
             </colgroup>
             <thead>
             <tr (contextmenu)="log()">
-                <th colspan=999
-                    [matTooltipShowDelay]="1000"
-                    [matTooltip]="loop.schemaValues['group_view_help']">
+                <th colspan=999 [matTooltip]="loop.schemaValues['group_view_help']">
                     {{loop.data[0][0].schemaValues['ADIT category view name']}}
                     <button mat-raised-button *ngIf="loop.category == '_Citation_author' && loop.empty"
                             (click)="copyAuthors()" color="accent">Copy authors from 'Entry information'
@@ -20,7 +18,6 @@
                 <ng-container *ngFor='let sampleTag of loop.data[0]; let col = index'>
                     <th *ngIf="loop.displayTags[col] == 'Y' || (loop.displayTags[col] == 'N' && loop.parent.parent.showAll)"
                         class="tag-header" (click)="helpClick(sampleTag, tag_info_box)"
-                        [matTooltipShowDelay]="1000"
                         [matTooltip]="sampleTag.schemaValues['Interface'] + ' Click for more information.'">{{sampleTag.schemaValues['Prompt']}}
                         <span *ngIf="loop.displayTags[col] == 'Y'" class="mandatory">*</span>
                     </th>
@@ -32,9 +29,7 @@
                 <td>
                     <button mat-raised-button
                             *ngIf="(loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 0 && loop.data.length > 2)"
-                            (click)='deleteRow(r)' color="accent" class="square-button"
-                            [matTooltipShowDelay]="1000"
-                            matTooltip="Remove this row of data."
+                            (click)='deleteRow(r)' color="accent" class="square-button" matTooltip="Remove this row of data."
                             [disabled]="loop.parent.parent.deposited">-
                     </button>
                 </td>
@@ -52,7 +47,6 @@
             <tr>
                 <td colspan=1>
                     <button mat-raised-button (click)='addRow()' color="accent" class="square-button"
-                            [matTooltipShowDelay]="1000"
                             matTooltip="Add another row of data." [disabled]="loop.parent.parent.deposited">+
                     </button>
                 </td>

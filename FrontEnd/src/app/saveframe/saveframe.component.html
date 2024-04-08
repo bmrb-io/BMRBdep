@@ -11,15 +11,11 @@
                 </colgroup>
 
                 <thead>
-                <tr
-                  [matTooltipShowDelay]="1000"
-                  [matTooltip]="saveframe.schemaValues['group_view_help']">
+                <tr [matTooltip]="saveframe.schemaValues['group_view_help']">
                     <th *ngIf="saveframe.tags[0]" (contextmenu)="saveframe.log()">
                         <a class="header-text">{{saveframe.tags[0].schemaValues['ADIT category view name']}}
                           <mat-icon routerLink="/help/molecular-assembly" *ngIf="saveframe.category == 'assembly'"
-                                    class="pointer"
-                                    [matTooltipShowDelay]="1000"
-                                    matTooltip="Molecular assembly help">help_outline
+                                    class="pointer" matTooltip="Molecular assembly help">help_outline
                           </mat-icon></a>
                     </th>
                     <th>
@@ -27,35 +23,30 @@
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
                                     (click)='saveframe.duplicate(); processChange()' color="accent"
-                                    [matTooltipShowDelay]="1000"
                                     matTooltip="Create a new section of this type with the same data as this section."
                                     [disabled]="saveframe.parent.deposited">Duplicate
                             </button>
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="saveframe.schemaValues['ADIT replicable'] === 'Y' && !saveframe.deleted"
                                     (click)='saveframe.duplicate(true); processChange()' color="accent"
-                                    [matTooltipShowDelay]="1000"
                                     matTooltip="Create a new and blank section of this type."
                                     [disabled]="saveframe.parent.deposited">Create new
                             </button>
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="saveframe.saveframesInCategory > saveframe.schemaValues['mandatory_number'] && !saveframe.deleted"
                                     (click)='deleteSaveframe()' color="accent"
-                                    [matTooltipShowDelay]="1000"
                                     matTooltip="Delete this entire section."
                                     [disabled]="saveframe.parent.deposited">Delete
                             </button>
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="!saveframe.deleted"
                                     (click)='clearSaveframe()' color="accent"
-                                    [matTooltipShowDelay]="1000"
                                     matTooltip="Clear all the data in this section."
                                     [disabled]="saveframe.parent.deposited">Clear data
                             </button>
                             <button mat-raised-button class="saveframe-button"
                                     *ngIf="saveframe.deleted"
                                     (click)='saveframe.restore(); processChange()' color="accent"
-                                    [matTooltipShowDelay]="1000"
                                     matTooltip="Restore this section. (Undo the previous delete.)"
                                     [disabled]="saveframe.parent.deposited">Restore
                             </button>
@@ -72,14 +63,12 @@
                     <tr *ngIf="saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')"
                         (contextmenu)="saveframeTag.log()">
                         <td *ngIf="saveframeTag.display == 'Y'; else non_mandatory" class="tag-description"
-                            [matTooltipShowDelay]="1000"
                             [matTooltip]="saveframeTag.schemaValues['Interface'] + ' Click for more information.'"
                             [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
                             (click)="helpClick(saveframeTag, tag_info_box)">
                         </td>
                         <ng-template #non_mandatory>
                             <td class="tag-description"
-                                [matTooltipShowDelay]="1000"
                                 [matTooltip]="saveframeTag.schemaValues['Interface'] + ' Click for more information.'"
                                 [innerHTML]="saveframeTag.schemaValues['Prompt']"
                                 (click)="helpClick(saveframeTag, tag_info_box)">
