@@ -363,7 +363,7 @@ def new_deposition() -> Response:
         author_orcid = None
 
     # Check the e-mail
-    if not skip_email_validation:
+    if not skip_email_validation and not application.debug:
         try:
             if not validate_email(author_email):
                 raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
