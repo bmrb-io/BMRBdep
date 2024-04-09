@@ -432,6 +432,10 @@ def new_deposition() -> Response:
                 if data_type != 'chem_comp' and data_type != 'experiment_list':
                     data_file_loop.add_data([pos, 1, upload_filename, legal_data_categories[data_type], data_type])
                     pos += 1
+                    # Set the linked file automatically when uploaded data types are in the bootstrap entry
+                    for saveframe in entry_template.get_saveframes_by_category(data_type):
+                        if 'Data_file_name' in saveframe:
+                            saveframe['Data_file_name'] = upload_filename
         data_file_loop.add_missing_tags(all_tags=True, schema=schema)
         entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data'] = data_file_loop
 
