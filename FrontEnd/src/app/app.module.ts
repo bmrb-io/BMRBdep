@@ -96,7 +96,7 @@ import {MatLegacyTooltipModule as MatTooltipModule, MAT_LEGACY_TOOLTIP_DEFAULT_O
         MatTooltipModule
     ],
     bootstrap: [AppComponent],
-    providers: [SidenavService, {provide: MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 1250}}]
+    providers: [SidenavService, {provide: MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 1250, position: 'right'}}]
 })
 export class AppModule {
 }
