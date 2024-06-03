@@ -47,7 +47,7 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
         logging.exception('Could not get the information for the PubMed ID!')
         citation_saveframe.add_tag('Note_to_annotator', "API Error: %s" % req.text)
         return
-    for error in root.getiterator('ERROR'):
+    for error in root.iter('ERROR'):
         if 'ID list is empty' in error.text:
             logging.warning("Invalid or not yet released PubMed ID. Cannot update citation saveframe.")
             citation_saveframe.add_tag('Note_to_annotator', 'Invalid or not yet released PubMed ID')
@@ -74,8 +74,8 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
 
     try:
         # Figure out the authors
-        for author in root.getiterator('Author'):
-            author_dict = {}
+        for author in root.iter('Author'):
+            author_dict = {'first': ".", 'last': "."}
             for child in author:
                 if child.tag == "LastName":
                     author_dict['last'] = _safe_unidecode(child.text)
@@ -114,14 +114,14 @@ def update_citation_with_pubmed(citation_saveframe: pynmrstar.Saveframe,
         citation_saveframe.add_tag('Journal_ISSN', _get_tag_value('ISSN', root=root), update=True)
 
         # DOI requires a bit of checking
-        for article_id in root.getiterator('ArticleId'):
+        for article_id in root.iter('ArticleId'):
             if article_id.attrib.get('IdType', None) == "doi":
                 citation_saveframe.add_tag('DOI', article_id.text, update=True)
                 break
 
         # Might need to check MedlineDate for the next field as well
         try:
-            year = _get_tag_value('Year', root=next(root.getiterator('PubDate')))
+            year = _get_tag_value('Year', root=next(root.iter('PubDate')))
         except (ValueError, ET.ParseError, StopIteration):
             logging.warning("Had to fallback to MedlineDate as Year not available in PubMed XML.")
             year = _get_tag_value('MedlineDate', root=root).split()[0]
