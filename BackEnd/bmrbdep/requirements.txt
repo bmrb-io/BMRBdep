@@ -1,5 +1,9 @@
 # Flask related
-wheel==0.37.1
+wheel==0.38.4
+
+# Can be removed after updating to flask3 (also requires dealing with deprecation of url_quote)
+Werkzeug==2.3.8
+
 flask==2.2.2
 simplejson==3.17.6
 flask-cors==3.0.10
@@ -7,7 +11,7 @@ Flask-Mail==0.9.1
 # For querying ORCID and PubMed
 requests==2.28.1
 # For working with BMRB entries
-pynmrstar==3.3.1
+pynmrstar==3.3.2
 # The following two are for email validation
 git+https://github.com/bmrb-io/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0
 # For managing depositions
