@@ -102,7 +102,8 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
 
 # noinspection PyUnusedLocal
 @application.errorhandler(werkzeug.exceptions.MethodNotAllowed)
-def handle_wrong_method(exception: werkzeug.exceptions.MethodNotAllowed):
+@application.errorhandler(werkzeug.exceptions.NotFound)
+def handle_scanner(exception: werkzeug.exceptions.MethodNotAllowed):
     logging.warning('Someone is vulnerability scanning us. Scan details'
                     f': {request.method}:{request.url}')
     return Response('🤨', status=404)
