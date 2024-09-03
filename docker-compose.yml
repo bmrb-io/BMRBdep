@@ -1,0 +1,12 @@
+services:
+  bmrbig:
+    build:
+      context: .
+    image: bmrbig
+    container_name: bmrbig
+    restart: always
+    network_mode: host
+    user: "17473:10144"
+    volumes:
+      - /projects/BMRB/depositions/bmrbig/${ENVIRONMENT}:/opt/wsgi/depositions
+      - /projects/BMRB/public/BMRBdep/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbig/configuration.json
