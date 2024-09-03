@@ -15,7 +15,7 @@ configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json
 
 # If we are running in docker, ignore the 'repo_path' and use the standard location
 try:
-    if '/docker' in open('/proc/self/cgroup', 'r').read():
+    if '/docker' in open('/proc/self/cgroup', 'r').read() or os.path.exists('/.dockerenv'):
         configuration['repo_path'] = '/opt/wsgi/depositions'
 except IOError:
     pass
