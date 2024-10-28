@@ -7,6 +7,8 @@ services:
     restart: always
     network_mode: host
     user: "17473:10144"
+    env_file:
+      - .env
     volumes:
       - /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions
       - /projects/BMRB/public/BMRBdep/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbdep/configuration.json
