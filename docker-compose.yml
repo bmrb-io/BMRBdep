@@ -6,7 +6,9 @@ services:
     container_name: bmrbig
     restart: always
     network_mode: host
+    env_file:
+      - .env
     user: "17473:10144"
     volumes:
       - /projects/BMRB/depositions/bmrbig/${ENVIRONMENT}:/opt/wsgi/depositions
-      - /projects/BMRB/public/BMRBdep/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbig/configuration.json
+      - /projects/BMRB/public/bmrbig/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbdep/configuration.json
