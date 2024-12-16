@@ -21,7 +21,10 @@
     </table>
   </ng-container>
   <ng-template #no_data>
-    <h2>No such entry ID exists, or the entry has not yet been released</h2>
+    <h2 *ngIf="files === undefined else noexist">Loading...</h2>
+      <ng-template #noexist>
+        <h2>No such entry ID exists, or the entry has not yet been released</h2>
+      </ng-template>
   </ng-template>
 
   <br>
