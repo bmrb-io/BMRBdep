@@ -20,7 +20,7 @@ host=$(hostname)
 
 echo "Getting newest schema."
 (
-source "${SCRIPT_DIR}"/BackEnd/env/bin/activate
+source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
 if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
   echo "Schema loader failed, quitting."
   exit 2
