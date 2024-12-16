@@ -29,7 +29,7 @@
     "ajv": "^8.11.2",
     "core-js": "^3.6.2",
     "material-design-icons": "^3.0.1",
-    "ngx-markdown": "^15.0.0",
+    "ngx-markdown": "^16.0.0",
     "rxjs": "^6.5.4",
     "sprintf-js": "^1.1.2",
     "tslib": "^2.0.0",
