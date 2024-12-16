@@ -46,7 +46,7 @@ Thumbs.db
 __pycache__
 package-lock.json
 configuration.json
-env/
+venv/
 nmr-star-dictionary
 schema_data
 /installation.log
