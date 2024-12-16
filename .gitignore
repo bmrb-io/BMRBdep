@@ -56,3 +56,5 @@ schema_data
 .mypy_cache
 orcid.py
 /docker_build
+/version.txt
+.angular
