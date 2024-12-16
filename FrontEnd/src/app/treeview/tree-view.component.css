@@ -2,3 +2,7 @@
   font-weight: bolder !important;
   background: rgba(0,0,0,.1) !important;
 }
+
+.mat-mdc-card-title {
+  margin: 1em 1em 0 1em !important;
+}

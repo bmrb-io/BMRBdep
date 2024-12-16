@@ -89,9 +89,6 @@ select{
 
 .mat-card:not(.nav-card) {
   background-color: mat.get-color-from-palette($custom-theme-primary) !important;
-  .mat-card-header-text {
-    margin: 0;
-  }
 }
 
 .mat-tooltip { font-size: 14px !important; }
