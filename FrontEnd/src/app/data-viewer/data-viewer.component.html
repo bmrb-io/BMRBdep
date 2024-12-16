@@ -1,7 +1,6 @@
 <div *ngIf="entry_id">
   <ng-container *ngIf="files else no_data">
     <h2>Viewing BMRbig entry {{entry_id}}: {{title}}</h2>
-
     <markdown>{{details}}</markdown>
 
     <table class="alternating">
@@ -19,6 +18,8 @@
       </tr>
       </tbody>
     </table>
+      <h4>Entry DOI: <a href="https://doi.org/10.13018/{{entry_id}}">10.13018/{{entry_id}}</a></h4>
+
   </ng-container>
   <ng-template #no_data>
     <h2 *ngIf="files === undefined else noexist">Loading...</h2>
