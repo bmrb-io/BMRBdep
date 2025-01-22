@@ -43,7 +43,12 @@ assert application.secret_key != "CHANGE_ME"
 # Set up the mail interface
 application.config.update(
     MAIL_SERVER=configuration['smtp']['server'],
-    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
+    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address'],
+    MAIL_PORT=configuration['smtp'].get('MAIL_PORT', 587),
+    MAIL_USE_TLS=configuration['smtp'].get('MAIL_USE_TLS', True),
+    MAIL_USE_SSL=configuration['smtp'].get('MAIL_USE_SSL', False),
+    MAIL_USERNAME=configuration['smtp'].config['MAIL_USERNAME'],
+    MAIL_PASSWORD=configuration['smtp'].config['MAIL_PASSWORD'],
 )
 mail = Mail(application)
 
