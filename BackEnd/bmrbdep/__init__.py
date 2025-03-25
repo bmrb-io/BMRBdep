@@ -55,12 +55,10 @@ mail = Mail(application)
 # Set up the SMTP error handler
 if configuration['smtp'].get('server') != 'CHANGE_ME':
 
-    # Don't send error e-mails in debugging mode
+    # Don't send error e-mails in debugging mode, but otherwise e-mail them
+    #  Using the same e-mail settings as for mailing deposition information
     if not configuration['debug']:
-        mail_handler = SMTPHandler(mailhost=configuration['smtp']['server'],
-                                   fromaddr=configuration['smtp']['from_address'],
-                                   toaddrs=configuration['smtp']['admins'],
-                                   subject='BMRB API Error occurred')
+        mail_handler = logging.StreamHandler()
         mail_handler.setLevel(logging.WARNING)
         application.logger.addHandler(mail_handler)
 
