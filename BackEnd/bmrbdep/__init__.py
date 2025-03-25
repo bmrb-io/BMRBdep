@@ -84,6 +84,9 @@ if configuration['debug']:
 else:
     logging.getLogger().setLevel('WARNING')
 
+# Only log pynmrstar errors of level ERROR or above.
+#  Otherwise, the docker logs get super congested
+logging.getLogger('pynmrstar').setLevel(logging.ERROR)
 
 # Set up error handling
 @application.errorhandler(ServerError)
