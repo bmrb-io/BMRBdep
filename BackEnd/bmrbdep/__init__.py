@@ -194,6 +194,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
             confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
                                       repo.metadata['deposition_nickname'],
                                       recipients=[repo.metadata['author_email']],
+                                      bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
             token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
@@ -228,6 +229,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
         confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
+                                  bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
         token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
 
@@ -603,7 +605,9 @@ def deposit_entry(uuid) -> Response:
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                             ['Given_name', 'Family_name', 'Email_address'])]
-        message = Message("Your entry has been deposited!", recipients=contact_emails,
+        message = Message("Your entry has been deposited!",
+                          recipients=contact_emails,
+                          bcc=configuration['smtp'].get('logging_emails', []),
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
                        'deposition contents for reference. You may also use this file to start a new deposition. ' \
