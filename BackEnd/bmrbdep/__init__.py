@@ -554,7 +554,9 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': configuration['debug'],
+                        # Skip the e-mail validation if coming from a system where the email is already validated
+                        'email_validated': configuration['debug'] or \
+                                           (request.environ['REMOTE_ADDR'] in application.config['local-ips'] and request_info.get('email_validated') == 'true'),
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
