@@ -570,8 +570,27 @@ def new_deposition() -> Response:
     with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
         # Manually set the metadata during object creation - never should be done this way elsewhere
         repo._live_metadata = entry_meta
+
+        # If they uploaded files, add them to the repo
+        upload_data = entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data']
+        pos = len(upload_data.data) + 1
+        for file_name, file in request.files.to_dict().items():
+            if file_name == 'nmrstar_file':
+                continue
+            else:
+                filename = repo.write_file(filename=file_name, data=file.read())
+                upload_data.add_data([{'Data_file_ID': pos,
+                                       'Deposited_data_files_ID': 1,
+                                       'Data_file_name': filename,
+                                       'Data_file_content_type': 'Time-domain data (raw spectral data)',
+                                       'Data_file_Sf_category': "*"}])
+                pos += 1
+
+        # Write out the NMR-STAR file, plus the schema being used
         repo.write_entry(entry_template)
         repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
+
+        # Create the rest of the metadata
         if uploaded_entry:
             if entry_bootstrap:
                 entry_meta['bootstrap_entry'] = request_info['bootstrapID']
