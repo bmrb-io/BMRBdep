@@ -463,9 +463,10 @@ def new_deposition() -> Response:
         sample_conditions['Val'] = [None, None, '1', None]
         sample_conditions['Val_units'] = ['K', 'pH', 'atm', 'M']
 
-    # Just add a single row to the entry author loop
+    # Just add a single row to the entry author loop if this is a new deposition and it isn't from a validated system like NAN
     author_loop: pynmrstar.Loop = entry_saveframe['_Entry_author']
-    author_loop.data.insert(0, ['.'] * len(author_loop.tags))
+    if not (request.environ['REMOTE_ADDR'] in application.config['local-ips'] and request_info.get('email_validated') == 'true'):
+        author_loop.data.insert(0, ['.'] * len(author_loop.tags))
 
     # Modify the contact_loop as needed
     contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
