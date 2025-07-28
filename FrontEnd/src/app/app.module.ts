@@ -49,7 +49,7 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
 import {MatLegacyAutocompleteModule as MatAutocompleteModule} from '@angular/material/legacy-autocomplete';
 import {SidenavService} from './sidenav.service';
-import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS, MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
 import { DataViewerComponent } from './data-viewer/data-viewer.component';
 
 @NgModule({
@@ -102,7 +102,7 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
         MarkdownModule.forRoot({ loader: HttpClient })
     ],
     bootstrap: [AppComponent],
-    providers: [SidenavService]
+    providers: [SidenavService, {provide: MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 1750, position: 'right'}}]
 })
 export class AppModule {
 }
