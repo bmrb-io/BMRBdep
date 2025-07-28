@@ -16,14 +16,14 @@ if [[ ! -d "${SCRIPT_DIR}/BackEnd/venv" ]]; then
     python3 -m venv "${SCRIPT_DIR}"/BackEnd/venv
     source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
     pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
-    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/pyproject.toml | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
 if [[ "$1" == "--update" ]]; then
     echo "Updating requirements in virtualenv..." | tee -a "${SCRIPT_DIR}"/installation.log
     source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/requirements.txt | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/pyproject.toml | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
