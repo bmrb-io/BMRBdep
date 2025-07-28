@@ -15,6 +15,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Create system group and user
+ENV SERVICE_NAME="uwsgi"
+RUN addgroup --gid 1001 --system $SERVICE_NAME && \
+    adduser --uid 1001 --gid 1001 --system --disabled-login --shell /bin/false $SERVICE_NAME && \
+    mkdir -p /var/log/$SERVICE_NAME && \
+    mkdir -p /opt/venv && \
+    chown $SERVICE_NAME:$SERVICE_NAME /var/log/$SERVICE_NAME /opt/venv /opt/wsgi
+USER $SERVICE_NAME
+
 # Create virtual environment
 ENV VENV_PATH="/opt/venv"
 RUN python3 -m venv $VENV_PATH
@@ -24,17 +33,17 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 RUN pip install --upgrade pip setuptools wheel uwsgi
 
 # Copy pyproject.toml early for caching
-COPY ./BackEnd/bmrbdep/pyproject.toml /opt/wsgi/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/pyproject.toml /opt/wsgi/
 
 # Install Python dependencies inside venv
 RUN pip install --no-cache-dir .
 
 # Copy static files
-COPY ./wsgi.conf /opt/wsgi/wsgi.conf
-COPY ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
-COPY ./FrontEnd/dist/ /opt/wsgi/dist/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./wsgi.conf /opt/wsgi/wsgi.conf
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./FrontEnd/dist/ /opt/wsgi/dist/
 
 # Copy backend code last for caching efficiency
-COPY ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
 
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf"]
