@@ -1,6 +1,7 @@
 FROM python:3.13-slim
 
 EXPOSE 9001
+EXPOSE 9111
 WORKDIR /opt/wsgi
 
 # Install system dependencies including uwsgi and git
@@ -45,6 +46,6 @@ COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./FrontEnd/dist/ /opt/wsgi/dist/
 
 # Copy backend code last for caching efficiency
 COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
-#COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./version.txt /opt/wsgi/bmrbdep/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./version.txt /opt/wsgi/bmrbdep/
 
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf"]
