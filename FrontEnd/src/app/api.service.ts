@@ -244,7 +244,6 @@ export class ApiService implements OnDestroy {
         let filesOutOfSync = false;
         if ('data_files' in jsonData) {
           const files: string[] = jsonData['data_files'] as string[];
-          console.log(files);
           for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;
