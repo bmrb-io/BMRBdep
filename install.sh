@@ -13,17 +13,19 @@ fi
 
 if [[ ! -d "${SCRIPT_DIR}/BackEnd/venv" ]]; then
     echo "python environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    python3 -m venv "${SCRIPT_DIR}"/BackEnd/venv
+    python3.13 -m venv "${SCRIPT_DIR}"/BackEnd/venv
     source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    pip3 install --upgrade pip | tee -a "${SCRIPT_DIR}"/installation.log
-    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/pyproject.toml | tee -a "${SCRIPT_DIR}"/installation.log
+    pip3 install --upgrade pip nodeenv | tee -a "${SCRIPT_DIR}"/installation.log
+    cd "${SCRIPT_DIR}"/BackEnd/bmrbdep
+    pip3 install -e . | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
 if [[ "$1" == "--update" ]]; then
     echo "Updating requirements in virtualenv..." | tee -a "${SCRIPT_DIR}"/installation.log
     source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    pip3 install -r "${SCRIPT_DIR}"/BackEnd/bmrbdep/pyproject.toml | tee -a "${SCRIPT_DIR}"/installation.log
+    cd "${SCRIPT_DIR}"/BackEnd/bmrbdep
+    pip3 install -e . | tee -a "${SCRIPT_DIR}"/installation.log
     deactivate
 fi
 
