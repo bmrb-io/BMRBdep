@@ -86,6 +86,9 @@ else:
 #  Otherwise, the docker logs get super congested
 logging.getLogger('pynmrstar').setLevel(logging.ERROR)
 
+# If they upload NMR-STAR with empty strings, just map them to null rather than throw an exception
+pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
+
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)
