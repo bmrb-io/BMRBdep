@@ -49,27 +49,7 @@ import {SidenavService} from './sidenav.service';
 import {MatTooltipModule, MAT_TOOLTIP_DEFAULT_OPTIONS} from '@angular/material/tooltip';
 import {MatLineModule} from '@angular/material/core';
 
-@NgModule({ declarations: [
-        AppComponent,
-        WelcomeComponent,
-        LoopComponent,
-        SaveframeComponent,
-        SaveframeEditorComponent,
-        EntryComponent,
-        LoopViewComponent,
-        SaveframeViewComponent,
-        TagComponent,
-        TreeViewComponent,
-        FileUploaderComponent,
-        ReviewComponent,
-        RestoreComponent,
-        MolecularSystemComponent,
-        PendingValidationComponent,
-        LoadEntryComponent,
-        ConfirmationDialogComponent,
-        SupportComponent,
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+@NgModule({ declarations: [AppComponent], bootstrap: [AppComponent], imports: [BrowserModule,
         FormsModule,
         AppRoutingModule,
         BrowserAnimationsModule,
@@ -92,6 +72,22 @@ import {MatLineModule} from '@angular/material/core';
         MatCheckboxModule,
         MatAutocompleteModule,
         MatTooltipModule,
-        MatLineModule], providers: [SidenavService, { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: { showDelay: 1750, position: 'right' } }, provideHttpClient(withInterceptorsFromDi())] })
+        MatLineModule, WelcomeComponent,
+        LoopComponent,
+        SaveframeComponent,
+        SaveframeEditorComponent,
+        EntryComponent,
+        LoopViewComponent,
+        SaveframeViewComponent,
+        TagComponent,
+        TreeViewComponent,
+        FileUploaderComponent,
+        ReviewComponent,
+        RestoreComponent,
+        MolecularSystemComponent,
+        PendingValidationComponent,
+        LoadEntryComponent,
+        ConfirmationDialogComponent,
+        SupportComponent], providers: [SidenavService, { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: { showDelay: 1750, position: 'right' } }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }

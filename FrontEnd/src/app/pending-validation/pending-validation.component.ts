@@ -3,59 +3,62 @@ import {ApiService} from '../api.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 import {Subscription, timer} from 'rxjs';
+import {MatCard, MatCardHeader, MatCardTitle, MatCardContent} from '@angular/material/card';
+import {MatButton} from '@angular/material/button';
 
 @Component({
-    selector: 'app-pending-validation',
-    templateUrl: './pending-validation.component.html',
-    styleUrls: ['./pending-validation.component.css'],
-    standalone: false
+  selector: 'app-pending-validation',
+  templateUrl: './pending-validation.component.html',
+  styleUrls: ['./pending-validation.component.css'],
+  standalone: true,
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatButton]
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
 
-    entry: Entry;
-    subscription$: Subscription;
+  entry: Entry;
+  subscription$: Subscription;
 
-    constructor(private api: ApiService,
-                private router: Router) {
-    }
+  constructor(private api: ApiService,
+              private router: Router) {
+  }
 
-    ngOnInit() {
-        const parent: PendingValidationComponent = this;
-        this.subscription$ = this.api.entrySubject.subscribe(entry => {
-            parent.entry = entry;
-            // Route straight to the entry if validated
-            if (entry && entry.emailValidated) {
-                if (entry.firstIncompleteCategory) {
-                    parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
-                } else {
-                    parent.router.navigate(['/entry/', 'review']).then();
-                }
-            }
-        });
-
-        // Check the validation status every 2.5 seconds
-        this.subscription$.add(timer(0, 2500).subscribe(() => {
-            parent.api.checkValidatedEmail().then(status => {
-                if (status) {
-                    parent.entry.emailValidated = true;
-                    parent.api.storeEntry(false);
-                    if (parent.entry.firstIncompleteCategory) {
-                        parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
-                    } else {
-                        parent.router.navigate(['/entry/', 'review']).then();
-                    }
-                }
-            });
-        }));
-    }
-
-    ngOnDestroy() {
-        if (this.subscription$) {
-            this.subscription$.unsubscribe();
+  ngOnInit() {
+    const parent: PendingValidationComponent = this;
+    this.subscription$ = this.api.entrySubject.subscribe(entry => {
+      parent.entry = entry;
+      // Route straight to the entry if validated
+      if (entry && entry.emailValidated) {
+        if (entry.firstIncompleteCategory) {
+          parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
+        } else {
+          parent.router.navigate(['/entry/', 'review']).then();
         }
-    }
+      }
+    });
 
-    resendValidationEmail(): void {
-        this.api.resendValidationEmail().subscribe();
+    // Check the validation status every 2.5 seconds
+    this.subscription$.add(timer(0, 2500).subscribe(() => {
+      parent.api.checkValidatedEmail().then(status => {
+        if (status) {
+          parent.entry.emailValidated = true;
+          parent.api.storeEntry(false);
+          if (parent.entry.firstIncompleteCategory) {
+            parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
+          } else {
+            parent.router.navigate(['/entry/', 'review']).then();
+          }
+        }
+      });
+    }));
+  }
+
+  ngOnDestroy() {
+    if (this.subscription$) {
+      this.subscription$.unsubscribe();
     }
+  }
+
+  resendValidationEmail(): void {
+    this.api.resendValidationEmail().subscribe();
+  }
 }

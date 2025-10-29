@@ -1,12 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Location} from '@angular/common';
+import {MatButton} from '@angular/material/button';
 
 @Component({
-    selector: 'app-molecular-system',
-    templateUrl: './molecular-system.component.html',
-    styleUrls: ['./molecular-system.component.css'],
-    standalone: false
+  selector: 'app-molecular-system',
+  templateUrl: './molecular-system.component.html',
+  styleUrls: ['./molecular-system.component.css'],
+  standalone: true,
+  imports: [MatButton]
 })
 export class MolecularSystemComponent implements OnInit {
 

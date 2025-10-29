@@ -1,15 +1,20 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {UntypedFormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ApiService} from '../api.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {Entry} from '../nmrstar/entry';
+import {MatCard, MatCardHeader, MatCardTitle, MatCardContent} from '@angular/material/card';
+import {MatFormField} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
 
 @Component({
-    selector: 'app-support',
-    templateUrl: './support.component.html',
-    styleUrls: ['./support.component.scss'],
-    standalone: false
+  selector: 'app-support',
+  templateUrl: './support.component.html',
+  styleUrls: ['./support.component.scss'],
+  standalone: true,
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {
 

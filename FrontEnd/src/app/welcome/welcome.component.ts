@@ -1,18 +1,24 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {ApiService} from '../api.service';
-import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
 import {Message, MessagesService} from '../messages.service';
+import {MatButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatFormField, MatSelect, MatOption, MatError} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 @Component({
-    selector: 'app-welcome',
-    templateUrl: './welcome.component.html',
-    styleUrls: ['./welcome.component.scss'],
-    standalone: false
+  selector: 'app-welcome',
+  templateUrl: './welcome.component.html',
+  styleUrls: ['./welcome.component.scss'],
+  standalone: true,
+  imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatTooltip, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   public entry: Entry;
