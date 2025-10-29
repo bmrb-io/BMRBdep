@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpClientModule} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 // Our components
 import {AppComponent} from './app.component';
@@ -49,8 +49,7 @@ import {SidenavService} from './sidenav.service';
 import {MatTooltipModule, MAT_TOOLTIP_DEFAULT_OPTIONS} from '@angular/material/tooltip';
 import {MatLineModule} from '@angular/material/core';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         WelcomeComponent,
         LoopComponent,
@@ -70,35 +69,29 @@ import {MatLineModule} from '@angular/material/core';
         ConfirmationDialogComponent,
         SupportComponent,
     ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    ReactiveFormsModule,
-    MatProgressBarModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatSidenavModule,
-    MatInputModule,
-    MatListModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatMenuModule,
-    MatCardModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    LoadingBarHttpClientModule,
-    MatDialogModule,
-    MatRadioModule,
-    MatCheckboxModule,
-    MatAutocompleteModule,
-    MatTooltipModule,
-    MatLineModule
-  ],
-    bootstrap: [AppComponent],
-    providers: [SidenavService, {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 1750, position: 'right'}}]
-})
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        FormsModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        ReactiveFormsModule,
+        MatProgressBarModule,
+        MatSelectModule,
+        MatSlideToggleModule,
+        MatSidenavModule,
+        MatInputModule,
+        MatListModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatMenuModule,
+        MatCardModule,
+        MatButtonModule,
+        MatSnackBarModule,
+        LoadingBarHttpClientModule,
+        MatDialogModule,
+        MatRadioModule,
+        MatCheckboxModule,
+        MatAutocompleteModule,
+        MatTooltipModule,
+        MatLineModule], providers: [SidenavService, { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: { showDelay: 1750, position: 'right' } }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }
