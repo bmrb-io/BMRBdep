@@ -2,7 +2,7 @@
 @import "../../custom-theme.scss";
 
 .type-error {
-  background-color: mat.get-color-from-palette($custom-theme-warn, lighter) !important;
+  background-color: mat.m2-get-color-from-palette($custom-theme-warn, lighter) !important;
 }
 
 .tag-input {
@@ -20,7 +20,7 @@
 
 /* TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version. */
 .tag-input:hover:not([disabled]):not(.mat-select-disabled) {
-  outline: mat.get-color-from-palette($custom-theme-primary, darker) solid 1px;
+  outline: mat.m2-get-color-from-palette($custom-theme-primary, darker) solid 1px;
 }
 
 .first-button {
