@@ -3,9 +3,10 @@ import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
 
 @Component({
-  selector: 'app-tag',
-  templateUrl: './tag.component.html',
-  styleUrls: ['./tag.component.scss']
+    selector: 'app-tag',
+    templateUrl: './tag.component.html',
+    styleUrls: ['./tag.component.scss'],
+    standalone: false
 })
 export class TagComponent implements OnInit {
   @Input() tag: Tag;

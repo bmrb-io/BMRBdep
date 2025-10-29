@@ -2,9 +2,10 @@ import {Loop} from '../../nmrstar/loop';
 import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
-  selector: 'app-loop-view',
-  templateUrl: './loop-view.component.html',
-  styleUrls: ['./loop-view.component.scss']
+    selector: 'app-loop-view',
+    templateUrl: './loop-view.component.html',
+    styleUrls: ['./loop-view.component.scss'],
+    standalone: false
 })
 
 export class LoopViewComponent implements OnInit {

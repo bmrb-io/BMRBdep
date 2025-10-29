@@ -10,9 +10,10 @@ import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-d
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-file-uploader',
-  templateUrl: './file-uploader.component.html',
-  styleUrls: ['./file-uploader.component.scss']
+    selector: 'app-file-uploader',
+    templateUrl: './file-uploader.component.html',
+    styleUrls: ['./file-uploader.component.scss'],
+    standalone: false
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
 

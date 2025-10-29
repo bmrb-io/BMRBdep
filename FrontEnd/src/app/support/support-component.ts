@@ -6,9 +6,10 @@ import {Subscription} from 'rxjs';
 import {Entry} from '../nmrstar/entry';
 
 @Component({
-  selector: 'app-support',
-  templateUrl: './support.component.html',
-  styleUrls: ['./support.component.scss']
+    selector: 'app-support',
+    templateUrl: './support.component.html',
+    styleUrls: ['./support.component.scss'],
+    standalone: false
 })
 export class SupportComponent implements OnInit, OnDestroy {
 

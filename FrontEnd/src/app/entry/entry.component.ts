@@ -4,9 +4,10 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-entry',
-  templateUrl: './entry.component.html',
-  styleUrls: ['./entry.component.css']
+    selector: 'app-entry',
+    templateUrl: './entry.component.html',
+    styleUrls: ['./entry.component.css'],
+    standalone: false
 })
 export class EntryComponent implements OnInit, OnDestroy {
   entry: Entry;
