@@ -4,7 +4,7 @@ import {MessagesService} from '../messages.service';
 import {Location} from '@angular/common';
 import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 import {UntypedFormControl} from '@angular/forms';
 

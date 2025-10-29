@@ -7,7 +7,7 @@ import {environment} from '../../environments/environment';
 import {ActivatedRoute, Params} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-file-uploader',

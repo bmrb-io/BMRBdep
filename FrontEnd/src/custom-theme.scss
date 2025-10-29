@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
-@include mat.all-legacy-component-typographies();
-@include mat.legacy-core();
+@include mat.all-component-typographies();
+@include mat.core();
 
 $custom-theme-primary: mat.define-palette(mat.$blue-palette, 200);
 $custom-theme-accent: mat.define-palette(mat.$grey-palette, 300, 100, 400);
@@ -15,5 +15,5 @@ $custom-app-theme: mat.define-light-theme((
   )
 ));
 
-@include mat.all-legacy-component-themes($custom-app-theme);
+@include mat.all-component-themes($custom-app-theme);
 
