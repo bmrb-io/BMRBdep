@@ -1,49 +1,67 @@
 <div class="main-content">
 
-  <mat-card appearance="outlined" *ngIf="!caughtException">
-    <mat-card-header>
-      <mat-card-title>Deposition Resources</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <ul>
-        <li><a href="https://bmrb.io/bmrb/data_accepted.shtml" target="_blank">Types of data accepted</a></li>
-        <li><a href="https://bmrb.io/software/tablegen/" target="_blank">Data table generators</a></li>
-        <li><a href="https://bmrb.io/software/starch/" target="_blank">Format conversion STARch</a></li>
-        <li><a href="https://bmrb.io/validate/" target="_blank">Validation tools</a></li>
-        <li><a href="https://bmrb.io/deposit/shifts_example_help.shtml" target="_blank">NMR-STAR Chemical shift format details</a></li>
-        <li><a href="https://bmrb.io/software/ambi/" target="_blank">Ambiguity code assignment tool</a></li>
-      </ul>
-    </mat-card-content>
-  </mat-card>
+  @if (!caughtException) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Deposition Resources</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li><a href="https://bmrb.io/bmrb/data_accepted.shtml" target="_blank">Types of data accepted</a></li>
+          <li><a href="https://bmrb.io/software/tablegen/" target="_blank">Data table generators</a></li>
+          <li><a href="https://bmrb.io/software/starch/" target="_blank">Format conversion STARch</a></li>
+          <li><a href="https://bmrb.io/validate/" target="_blank">Validation tools</a></li>
+          <li><a href="https://bmrb.io/deposit/shifts_example_help.shtml" target="_blank">NMR-STAR Chemical shift format details</a></li>
+          <li><a href="https://bmrb.io/software/ambi/" target="_blank">Ambiguity code assignment tool</a></li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <mat-card appearance="outlined">
     <mat-card-header>
-      <mat-card-title *ngIf="caughtException">Report an exception</mat-card-title>
-      <mat-card-title *ngIf="!caughtException">Contact Us</mat-card-title>
+      @if (caughtException) {
+        <mat-card-title>Report an exception</mat-card-title>
+      }
+      @if (!caughtException) {
+        <mat-card-title>Contact Us</mat-card-title>
+      }
     </mat-card-header>
     <mat-card-content>
-      <p *ngIf="!caughtException">Use this form to report a bug or get support with any aspect of the BMRBdep system. We will respond,
+      @if (!caughtException) {
+        <p>Use this form to report a bug or get support with any aspect of the BMRBdep system. We will respond,
         if appropriate, via e-mail.</p>
-      <p *ngIf="caughtException">Details on the exception you encountered have been captured and will be sent along
-      with this request. Please include any other relevant details about when the error occurred.</p>
+      }
+      @if (caughtException) {
+        <p>Details on the exception you encountered have been captured and will be sent along
+        with this request. Please include any other relevant details about when the error occurred.</p>
+      }
 
       <mat-form-field class="content-box" color="accent">
         <label>
-          <input *ngIf="!caughtException" matInput placeholder="Please enter your message." required [formControl]="messageControl">
-          <input *ngIf="caughtException" matInput placeholder="Please enter your message." [formControl]="messageControl">
+          @if (!caughtException) {
+            <input matInput placeholder="Please enter your message." required [formControl]="messageControl">
+          }
+          @if (caughtException) {
+            <input matInput placeholder="Please enter your message." [formControl]="messageControl">
+          }
         </label>
       </mat-form-field>
 
-      <mat-form-field class="content-box" color="accent" *ngIf="entry == null">
-        <label>
-          <input matInput placeholder="Please enter your e-mail." required [formControl]="emailControl">
-        </label>
-      </mat-form-field>
+      @if (entry == null) {
+        <mat-form-field class="content-box" color="accent">
+          <label>
+            <input matInput placeholder="Please enter your e-mail." required [formControl]="emailControl">
+          </label>
+        </mat-form-field>
+      }
 
       <button [disabled]="!messageControl.valid || submitted" mat-raised-button color="accent" (click)="sendRequest()">
         Click here to submit.
       </button>
-      <p *ngIf="notificationMessage">{{notificationMessage}}</p>
+      @if (notificationMessage) {
+        <p>{{notificationMessage}}</p>
+      }
     </mat-card-content>
   </mat-card>
 

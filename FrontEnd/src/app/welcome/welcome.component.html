@@ -1,149 +1,178 @@
 <div>
-    <h1>Welcome to BMRBdep!
-      <span class="right-float">
-        <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
-      </span>
-    </h1>
-    <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
-        <div class="content-box resume-box" *ngIf="entry">
-            <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
-            <div>
-                <div>
-                    <a mat-raised-button color="primary"
-                       [routerLink]="['/entry', 'pending-verification']"
-                       matTooltip="Return to the first uncompleted section of the current deposition.">
-                       Return to your deposition</a>
-                </div>
-                <div>
-                  <a mat-raised-button color="primary"
+  <h1>Welcome to BMRBdep!
+    <span class="right-float">
+      <a mat-raised-button routerLink="/support" color="primary">Deposition Support</a>
+    </span>
+  </h1>
+  <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
+    @if (entry) {
+      <div class="content-box resume-box">
+        <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
+        <div>
+          <div>
+            <a mat-raised-button color="primary"
+              [routerLink]="['/entry', 'pending-verification']"
+              matTooltip="Return to the first uncompleted section of the current deposition.">
+            Return to your deposition</a>
+          </div>
+          <div>
+            <a mat-raised-button color="primary"
                      matTooltip="Create a new deposition with the same contents as the currently
 active deposition." (click)="api.cloneDeposition()">
-                    Clone deposition</a>
-                </div>
-                <div>
-                    <button mat-raised-button color="primary" (click)="api.clearDeposition()"
+            Clone deposition</a>
+          </div>
+          <div>
+            <button mat-raised-button color="primary" (click)="api.clearDeposition()"
                             matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">
-                        End your session for this deposition
-                    </button>
-                </div>
-            </div>
+              End your session for this deposition
+            </button>
+          </div>
         </div>
-        <div class="content-box">
-            <h2>Start a new deposition
-              <!--<mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>-->
-            </h2>
+      </div>
+    }
+    <div class="content-box">
+      <h2>Start a new deposition
+        <!--<mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>-->
+      </h2>
 
-            <mat-form-field>
-                <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
-                    <mat-option [value]="'new'">Begin a new deposition (with NMR data upload)</mat-option>
-                    <mat-option [value]="'bmrb_id'">Begin a new deposition from an existing and released BMRB entry</mat-option>
-                    <mat-option [value]="'file'">Pre-populate an entire deposition's metadata by uploading an NMR-STAR file (version 3.x)</mat-option>
-                </mat-select>
-                <mat-error *ngIf="sessionType.invalid">Please select a deposition type.</mat-error>
-            </mat-form-field>
+      <mat-form-field>
+        <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
+          <mat-option [value]="'new'">Begin a new deposition (with NMR data upload)</mat-option>
+          <mat-option [value]="'bmrb_id'">Begin a new deposition from an existing and released BMRB entry</mat-option>
+          <mat-option [value]="'file'">Pre-populate an entire deposition's metadata by uploading an NMR-STAR file (version 3.x)</mat-option>
+        </mat-select>
+        @if (sessionType.invalid) {
+          <mat-error>Please select a deposition type.</mat-error>
+        }
+      </mat-form-field>
 
-          <mat-form-field *ngIf="!production">
-            <mat-select [formControl]="depositionType" placeholder="Select server type" required>
-              <mat-option [value]="'macromolecule'">Macromolecule deposition</mat-option>
-              <mat-option [value]="'small molecule'">Small molecule deposition</mat-option>
-            </mat-select>
-          </mat-form-field>
+      @if (!production) {
+        <mat-form-field>
+          <mat-select [formControl]="depositionType" placeholder="Select server type" required>
+            <mat-option [value]="'macromolecule'">Macromolecule deposition</mat-option>
+            <mat-option [value]="'small molecule'">Small molecule deposition</mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
 
-            <mat-form-field>
-                <label>
-                    <input matInput
-                           [formControl]="authorEmail"
-                           placeholder="Please enter your e-mail."
-                           required>
-                </label>
-                <mat-error *ngIf="authorEmail.invalid" [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
-            </mat-form-field>
+      <mat-form-field>
+        <label>
+          <input matInput
+            [formControl]="authorEmail"
+            placeholder="Please enter your e-mail."
+            required>
+        </label>
+        @if (authorEmail.invalid) {
+          <mat-error [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
+        }
+      </mat-form-field>
 
-            <div *ngIf="emailValidationError" class="fake-form-field">
-                <mat-checkbox color="primary" [(ngModel)]="skipEmailValidation"
-                              [ngModelOptions]="{standalone: true}">My e-mail is correct</mat-checkbox>
-            </div>
-
-            <mat-form-field>
-                <label>
-                    <input matInput
-                           [formControl]="depositionNickname"
-                           placeholder="Please enter a brief nickname for this deposition."
-                           required>
-                </label>
-                <mat-error *ngIf="depositionNickname.invalid">You must enter a nickname for the deposition.</mat-error>
-            </mat-form-field>
-
-            <mat-form-field>
-                <label>
-                    <input matInput
-                           [formControl]="authorORCID"
-                           placeholder="Please enter your ORCID if you have one.">
-                </label>
-                <mat-error *ngIf="authorORCID.invalid">Invalid ORCID value. Valid ORCID IDs look like:
-                    0000-0002-1825-0097
-                </mat-error>
-            </mat-form-field>
-
-
-            <mat-form-field *ngIf="sessionType.value == 'bmrb_id'">
-                <label>
-                    <input matInput
-                           [formControl]="bootstrapID"
-                           placeholder="Enter the BMRB ID from which to start a new deposition."
-                           required>
-                </label>
-                <mat-error *ngIf="bootstrapID.invalid" [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
-            </mat-form-field>
-
-            <div *ngIf="sessionType.value == 'file'">
-                <span *ngIf="inputFile.files[0]">{{inputFile.files[0].name}}</span>
-                <span *ngIf="!inputFile.files[0]">No file selected</span>
-                <input type="file" hidden #inputFile (change)="fileChangeEvent(inputFile)"/>
-                <ng-container *ngIf="!inputFile.files[0] else other_button">
-                    <button mat-raised-button color="accent" type="button" (click)="openInput()"
-                             [id]="'fileUploadButton'">
-                        Click to select a file to upload.
-                    </button>
-                </ng-container>
-                <ng-template #other_button>
-                    <button mat-raised-button color="accent" type="button" (click)="openInput()"
-                            [id]="'fileUploadButton'">
-                        Click to select a different file to upload.
-                    </button>
-                </ng-template>
-
-                <p></p>
-
-                <button *ngIf="sessionType.value == 'file' && inputFile.files[0]" mat-raised-button color="primary">
-                    Click here to start a new deposition from {{inputFile.files[0]?.name}}.
-                </button>
-            </div>
-
-            <br>
-
-            <button *ngIf="sessionType.value == 'bmrb_id'" mat-raised-button color="primary">
-                Click here to start a new deposition from an existing entry.
-            </button>
-
-            <button *ngIf="sessionType.value == 'new'" mat-raised-button color="primary">
-                Click here to start a new deposition from scratch.
-            </button>
-
-            <button *ngIf="!sessionType.value" mat-raised-button color="primary">
-                Click here to start a new deposition.
-            </button>
-
+      @if (emailValidationError) {
+        <div class="fake-form-field">
+          <mat-checkbox color="primary" [(ngModel)]="skipEmailValidation"
+          [ngModelOptions]="{standalone: true}">My e-mail is correct</mat-checkbox>
         </div>
+      }
+
+      <mat-form-field>
+        <label>
+          <input matInput
+            [formControl]="depositionNickname"
+            placeholder="Please enter a brief nickname for this deposition."
+            required>
+        </label>
+        @if (depositionNickname.invalid) {
+          <mat-error>You must enter a nickname for the deposition.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <label>
+          <input matInput
+            [formControl]="authorORCID"
+            placeholder="Please enter your ORCID if you have one.">
+        </label>
+        @if (authorORCID.invalid) {
+          <mat-error>Invalid ORCID value. Valid ORCID IDs look like:
+            0000-0002-1825-0097
+          </mat-error>
+        }
+      </mat-form-field>
+
+
+      @if (sessionType.value == 'bmrb_id') {
+        <mat-form-field>
+          <label>
+            <input matInput
+              [formControl]="bootstrapID"
+              placeholder="Enter the BMRB ID from which to start a new deposition."
+              required>
+          </label>
+          @if (bootstrapID.invalid) {
+            <mat-error [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
+          }
+        </mat-form-field>
+      }
+
+      @if (sessionType.value == 'file') {
+        <div>
+          @if (inputFile.files[0]) {
+            <span>{{inputFile.files[0].name}}</span>
+          }
+          @if (!inputFile.files[0]) {
+            <span>No file selected</span>
+          }
+          <input type="file" hidden #inputFile (change)="fileChangeEvent(inputFile)"/>
+          @if (!inputFile.files[0]) {
+            <button mat-raised-button color="accent" type="button" (click)="openInput()"
+              [id]="'fileUploadButton'">
+              Click to select a file to upload.
+            </button>
+          } @else {
+            <button mat-raised-button color="accent" type="button" (click)="openInput()"
+              [id]="'fileUploadButton'">
+              Click to select a different file to upload.
+            </button>
+          }
+          <p></p>
+          @if (sessionType.value == 'file' && inputFile.files[0]) {
+            <button mat-raised-button color="primary">
+              Click here to start a new deposition from {{inputFile.files[0]?.name}}.
+            </button>
+          }
+        </div>
+      }
+
+      <br>
+
+        @if (sessionType.value == 'bmrb_id') {
+          <button mat-raised-button color="primary">
+            Click here to start a new deposition from an existing entry.
+          </button>
+        }
+
+        @if (sessionType.value == 'new') {
+          <button mat-raised-button color="primary">
+            Click here to start a new deposition from scratch.
+          </button>
+        }
+
+        @if (!sessionType.value) {
+          <button mat-raised-button color="primary">
+            Click here to start a new deposition.
+          </button>
+        }
+
+      </div>
     </form>
 
     <div class="content-box">
-        <h3>Resume deposition</h3>
-        <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
-            deposition with the subject 'Please validate your e-mail address for BMRBdep deposition...'</p>
-        <p>If you have lost that e-mail, please
-            <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
-        </p>
+      <h3>Resume deposition</h3>
+      <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
+      deposition with the subject 'Please validate your e-mail address for BMRBdep deposition...'</p>
+      <p>If you have lost that e-mail, please
+        <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
+      </p>
     </div>
-</div>
+  </div>
