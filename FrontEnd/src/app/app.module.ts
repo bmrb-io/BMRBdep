@@ -50,7 +50,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {SidenavService} from './sidenav.service';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import { DataViewerComponent } from './data-viewer/data-viewer.component';
+import {DataViewerComponent} from './data-viewer/data-viewer.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -96,6 +96,7 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
         MatCheckboxModule,
         MatAutocompleteModule,
         MatTooltipModule,
-        MarkdownModule.forRoot({ loader: HttpClient })], providers: [SidenavService, provideHttpClient(withInterceptorsFromDi())] })
+        MarkdownModule.forRoot({ loader: HttpClient })],
+    providers: [SidenavService, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }
