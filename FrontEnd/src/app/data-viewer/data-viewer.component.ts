@@ -20,9 +20,10 @@ export class Entry {
 }
 
 @Component({
-  selector: 'app-data-viewer',
-  templateUrl: './data-viewer.component.html',
-  styleUrls: ['./data-viewer.component.scss']
+    selector: 'app-data-viewer',
+    templateUrl: './data-viewer.component.html',
+    styleUrls: ['./data-viewer.component.scss'],
+    standalone: false
 })
 export class DataViewerComponent implements OnInit {
   public files: Array<Files>;

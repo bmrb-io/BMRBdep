@@ -7,9 +7,10 @@ import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@an
 import * as crs from '../javascript/crs.min';
 
 @Component({
-  selector: 'app-loop',
-  templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.scss']
+    selector: 'app-loop',
+    templateUrl: './loop.component.html',
+    styleUrls: ['./loop.component.scss'],
+    standalone: false
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;

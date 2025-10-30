@@ -9,9 +9,10 @@ import {Subscription} from 'rxjs';
 import {UntypedFormControl} from '@angular/forms';
 
 @Component({
-  selector: 'app-review',
-  templateUrl: './review.component.html',
-  styleUrls: ['./review.component.css']
+    selector: 'app-review',
+    templateUrl: './review.component.html',
+    styleUrls: ['./review.component.css'],
+    standalone: false
 })
 export class ReviewComponent implements OnInit, OnDestroy {
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;

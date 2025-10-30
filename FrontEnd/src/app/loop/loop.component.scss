@@ -1,8 +1,8 @@
 @use '@angular/material' as mat;
-@import "../../custom-theme.scss";
+@use "../../custom-theme.scss" as theme;
 
 .mandatory {
-  color: mat.m2-get-color-from-palette($custom-theme-warn, darker);
+  color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, darker);
 }
 
 .invisible {
@@ -12,16 +12,16 @@
 }
 
 .invalid {
-  background-color: mat.m2-get-color-from-palette($custom-theme-warn, lighter);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, lighter);
 }
 
 .greyed-out {
-  background-color: mat.m2-get-color-from-palette($custom-theme-accent);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-accent);
 }
 
 .tag-header {
   cursor: help;
-  background-color: mat.m2-get-color-from-palette($custom-theme-accent);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-accent);
 }
 
 .header-text {
@@ -36,7 +36,7 @@
 }
 
 table {
-  background-color: mat.m2-get-color-from-palette($custom-theme-accent);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-accent);
   margin: 0;
   padding: 0 .25em 0 .25em;
   border-collapse: collapse;
@@ -45,21 +45,21 @@ table {
 
 th {
   text-align: left;
-  background-color: mat.m2-get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
   font-weight: bold;
   font-style: normal;
   color: black;
-  border: 1px solid mat.m2-get-color-from-palette($custom-theme-primary, darker);
+  border: 1px solid mat.m2-get-color-from-palette(theme.$custom-theme-primary, darker);
   padding: .5em;
 }
 
 td {
   text-align: left;
-  background-color: mat.m2-get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
   font-weight: normal;
   font-style: normal;
   color: black;
-  border: 1px solid mat.m2-get-color-from-palette($custom-theme-primary, darker);
+  border: 1px solid mat.m2-get-color-from-palette(theme.$custom-theme-primary, darker);
   padding: 0 0.25em;
 }
 

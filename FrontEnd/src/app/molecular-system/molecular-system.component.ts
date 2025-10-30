@@ -3,9 +3,10 @@ import {Title} from '@angular/platform-browser';
 import {Location} from '@angular/common';
 
 @Component({
-  selector: 'app-molecular-system',
-  templateUrl: './molecular-system.component.html',
-  styleUrls: ['./molecular-system.component.css']
+    selector: 'app-molecular-system',
+    templateUrl: './molecular-system.component.html',
+    styleUrls: ['./molecular-system.component.css'],
+    standalone: false
 })
 export class MolecularSystemComponent implements OnInit {
 

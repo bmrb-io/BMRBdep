@@ -4,9 +4,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-load-entry',
-  templateUrl: './load-entry.component.html',
-  styleUrls: ['./load-entry.component.css']
+    selector: 'app-load-entry',
+    templateUrl: './load-entry.component.html',
+    styleUrls: ['./load-entry.component.css'],
+    standalone: false
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
 

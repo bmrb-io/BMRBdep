@@ -8,10 +8,11 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-saveframe',
-  templateUrl: './saveframe.component.html',
-  styleUrls: ['./saveframe.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-saveframe',
+    templateUrl: './saveframe.component.html',
+    styleUrls: ['./saveframe.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
   @Input() saveframe: Saveframe;

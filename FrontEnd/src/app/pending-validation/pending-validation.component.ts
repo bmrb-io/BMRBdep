@@ -7,7 +7,8 @@ import {Subscription, timer} from 'rxjs';
 @Component({
     selector: 'app-pending-validation',
     templateUrl: './pending-validation.component.html',
-    styleUrls: ['./pending-validation.component.css']
+    styleUrls: ['./pending-validation.component.css'],
+    standalone: false
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
 

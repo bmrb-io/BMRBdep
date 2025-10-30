@@ -6,9 +6,10 @@ import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-saveframe-editor',
-  templateUrl: './saveframe-editor.component.html',
-  styleUrls: ['./saveframe-editor.component.css']
+    selector: 'app-saveframe-editor',
+    templateUrl: './saveframe-editor.component.html',
+    styleUrls: ['./saveframe-editor.component.css'],
+    standalone: false
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
   saveframes: Saveframe[];

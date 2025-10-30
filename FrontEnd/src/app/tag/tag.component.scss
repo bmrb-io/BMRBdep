@@ -1,8 +1,8 @@
 @use '@angular/material' as mat;
-@import "../../custom-theme.scss";
+@use "../../custom-theme.scss" as theme;
 
 .type-error {
-  background-color: mat.m2-get-color-from-palette($custom-theme-warn, lighter) !important;
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, lighter) !important;
 }
 
 .tag-input {
@@ -20,7 +20,7 @@
 
 /* TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version. */
 .tag-input:hover:not([disabled]):not(.mat-select-disabled) {
-  outline: mat.m2-get-color-from-palette($custom-theme-primary, darker) solid 1px;
+  outline: mat.m2-get-color-from-palette(theme.$custom-theme-primary, darker) solid 1px;
 }
 
 .first-button {

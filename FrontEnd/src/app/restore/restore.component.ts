@@ -4,9 +4,10 @@ import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 
 @Component({
-  selector: 'app-restore',
-  templateUrl: './restore.component.html',
-  styleUrls: ['./restore.component.css']
+    selector: 'app-restore',
+    templateUrl: './restore.component.html',
+    styleUrls: ['./restore.component.css'],
+    standalone: false
 })
 export class RestoreComponent implements OnInit, OnDestroy {
 
