@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
-import {HttpEventType, HttpResponse} from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';

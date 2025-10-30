@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HttpClient, HttpClientModule} from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 // Our components
 import {AppComponent} from './app.component';
@@ -52,8 +52,7 @@ import {SidenavService} from './sidenav.service';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { DataViewerComponent } from './data-viewer/data-viewer.component';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         WelcomeComponent,
         LoopComponent,
@@ -74,10 +73,8 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
         SupportComponent,
         DataViewerComponent,
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         FormsModule,
-        HttpClientModule,
         AppRoutingModule,
         BrowserAnimationsModule,
         ReactiveFormsModule,
@@ -99,10 +96,6 @@ import { DataViewerComponent } from './data-viewer/data-viewer.component';
         MatCheckboxModule,
         MatAutocompleteModule,
         MatTooltipModule,
-        MarkdownModule.forRoot({ loader: HttpClient })
-    ],
-    bootstrap: [AppComponent],
-    providers: [SidenavService]
-})
+        MarkdownModule.forRoot({ loader: HttpClient })], providers: [SidenavService, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 }
