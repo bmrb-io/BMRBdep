@@ -1,17 +1,24 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ApiService} from '../api.service';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
 import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {environment} from '../../environments/environment';
+import { MatCard, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatNavList, MatDivider, MatListItem } from '@angular/material/list';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-tree-view',
     templateUrl: './tree-view.component.html',
     styleUrls: ['./tree-view.component.css'],
-    standalone: false
+    imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
   active: string;

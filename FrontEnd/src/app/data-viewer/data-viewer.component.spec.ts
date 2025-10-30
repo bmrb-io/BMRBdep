@@ -8,8 +8,8 @@ describe('DataViewerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DataViewerComponent ]
-    })
+    imports: [DataViewerComponent]
+})
     .compileComponents();
   }));
 

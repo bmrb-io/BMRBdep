@@ -6,8 +6,7 @@ import {Subscription} from 'rxjs';
 @Component({
     selector: 'app-load-entry',
     templateUrl: './load-entry.component.html',
-    styleUrls: ['./load-entry.component.css'],
-    standalone: false
+    styleUrls: ['./load-entry.component.css']
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
 

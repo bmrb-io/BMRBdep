@@ -8,8 +8,8 @@ describe('MolecularSystemComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ MolecularSystemComponent ]
-    })
+    imports: [MolecularSystemComponent]
+})
     .compileComponents();
   }));
 
