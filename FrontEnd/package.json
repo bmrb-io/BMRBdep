@@ -43,11 +43,6 @@
     "@angular/language-service": "^20.3.9",
     "@types/node": "^12.20.55",
     "codelyzer": "^6.0.2",
-    "karma": "~6.3.19",
-    "karma-chrome-launcher": "~3.1.0",
-    "karma-cli": "^2.0.0",
-    "karma-coverage-istanbul-reporter": "~3.0.2",
-    "protractor": "~7.0.0",
     "ts-node": "^8.10.2",
     "tslint": "~6.1.0",
     "typescript": "^5.9.3"
