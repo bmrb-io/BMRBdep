@@ -1,64 +1,72 @@
-<div *ngIf="entry_id">
-  <ng-container *ngIf="files else no_data">
-    <h2>Viewing BMRbig entry {{entry_id}}: {{title}}</h2>
-    <markdown>{{details}}</markdown>
-
-    <table class="alternating">
-      <thead>
-      <tr>
-        <th>File name</th>
-      </tr>
-      </thead>
-      <tbody>
-      <!--<tr>
-        <td><a href="{{env.serverURL}}/released/{{entry_id}}/{{entry_id}}.str">{{entry_id}}.str</a></td>
-      </tr>-->
-      <tr *ngFor="let file of files">
-        <td><a href="{{file.path}}">{{file.name}}</a></td>
-      </tr>
+@if (entry_id) {
+  <div>
+    @if (files) {
+      <h2>Viewing BMRbig entry {{entry_id}}: {{title}}</h2>
+      <markdown>{{details}}</markdown>
+      <table class="alternating">
+        <thead>
+          <tr>
+            <th>File name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!--<tr>
+          <td><a href="{{env.serverURL}}/released/{{entry_id}}/{{entry_id}}.str">{{entry_id}}.str</a></td>
+        </tr>-->
+        @for (file of files; track file) {
+          <tr>
+            <td><a href="{{file.path}}">{{file.name}}</a></td>
+          </tr>
+        }
       </tbody>
     </table>
-      <h4>Entry DOI: <a href="https://doi.org/10.13018/{{entry_id}}">10.13018/{{entry_id}}</a></h4>
-
-  </ng-container>
-  <ng-template #no_data>
-    <h2 *ngIf="files === undefined else noexist">Loading...</h2>
-      <ng-template #noexist>
-        <h2>No such entry ID exists, or the entry has not yet been released</h2>
-      </ng-template>
-  </ng-template>
-
+    <h4>Entry DOI: <a href="https://doi.org/10.13018/{{entry_id}}">10.13018/{{entry_id}}</a></h4>
+  } @else {
+    @if (files === undefined) {
+      <h2>Loading...</h2>
+    } @else {
+      <h2>No such entry ID exists, or the entry has not yet been released</h2>
+    }
+  }
   <br>
-  <button mat-raised-button color="primary" routerLink="..">Return to the entry list.</button>
-</div>
+    <button mat-raised-button color="primary" routerLink="..">Return to the entry list.</button>
+  </div>
+}
 
-<div *ngIf="!entry_id">
-  <h3>Available entries:</h3>
-
-  <h4 *ngIf="!records">Loading...</h4>
-  <table *ngIf="records" class="alternating" style="padding-bottom: 6rem">
-    <thead>
-    <tr>
-      <th>Entry ID</th>
-      <th>Title</th>
-      <th>Upload author</th>
-      <th>Release date</th>
-      <th>Linked BMRB ID</th>
-      <th>Linked PDB ID</th>
-      <th>Publication DOI</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let record of records">
-      <td><a routerLink='bmrbig{{record.id}}'>BMRbig{{record.id}}</a></td>
-      <td>{{record.title}}</td>
-      <td>{{record.author}}</td>
-      <td>{{record.release_date}}</td>
-      <td><a href="https://bmrb.io/data_library/summary/index.php?bmrbId={{record.bmrb_id}}" target="_blank">
-        {{record.bmrb_id}}</a></td>
-      <td><a href="https://www.wwpdb.org/pdb?id={{record.pdb_id}}" target="_blank">{{record.pdb_id}}</a></td>
-      <td><a href="https://doi.org/{{record.doi}}" target="_blank">{{record.doi}}</a></td>
-    </tr>
-    </tbody>
-  </table>
-</div>
+@if (!entry_id) {
+  <div>
+    <h3>Available entries:</h3>
+    @if (!records) {
+      <h4>Loading...</h4>
+    }
+    @if (records) {
+      <table class="alternating" style="padding-bottom: 6rem">
+        <thead>
+          <tr>
+            <th>Entry ID</th>
+            <th>Title</th>
+            <th>Upload author</th>
+            <th>Release date</th>
+            <th>Linked BMRB ID</th>
+            <th>Linked PDB ID</th>
+            <th>Publication DOI</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records; track record) {
+            <tr>
+              <td><a routerLink='bmrbig{{record.id}}'>BMRbig{{record.id}}</a></td>
+              <td>{{record.title}}</td>
+              <td>{{record.author}}</td>
+              <td>{{record.release_date}}</td>
+              <td><a href="https://bmrb.io/data_library/summary/index.php?bmrbId={{record.bmrb_id}}" target="_blank">
+              {{record.bmrb_id}}</a></td>
+              <td><a href="https://www.wwpdb.org/pdb?id={{record.pdb_id}}" target="_blank">{{record.pdb_id}}</a></td>
+              <td><a href="https://doi.org/{{record.doi}}" target="_blank">{{record.doi}}</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}
