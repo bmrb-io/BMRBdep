@@ -61,10 +61,9 @@ validation step.">
                        matTooltip="View and restore deleted sections">
                         View and restore deleted sections
                     </mat-list-item>
-
                     <mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
                        routerLink="/entry" id="entry" matTooltip="Review entire upload.">
-                        <h2 matLine>View full upload</h2>
+                        View full upload
                     </mat-list-item>
 
                     <mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to BMRbig." id="review"
