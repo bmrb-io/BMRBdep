@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --hmr",
     "prebuild.prod": "ts-node -O '{\"module\": \"commonjs\"}' git.version.ts",
     "build.prod": "ng build --configuration production --configuration=production",
     "test": "ng test",
