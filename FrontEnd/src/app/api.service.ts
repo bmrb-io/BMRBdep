@@ -8,7 +8,7 @@ import {Message, MessagesService, MessageType} from './messages.service';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
 
