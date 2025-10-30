@@ -2,11 +2,11 @@
 @import "../../../custom-theme.scss";
 
 table.alternating_color tr:nth-child(even) {
-  background-color: mat.get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette($custom-theme-primary);
 }
 
 table.alternating_color tr:nth-child(even) .datum {
-  background-color: mat.get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette($custom-theme-primary);
 }
 
 .datum {
