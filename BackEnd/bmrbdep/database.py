@@ -69,63 +69,53 @@ def rescan():
                     uuid.UUID(uuid_str)
                     
                     # Load deposition data
-                    deposition_repo = DepositionRepo(uuid_str)
-                    json_data = deposition_repo.metadata
-                    
-                    # Parse creation_date
-                    creation_date = None
-                    if 'creation_date' in json_data:
-                        date_str = None
-                        try:
-                            # Parse format like "10:49 PM on October 06, 2019"
-                            date_str = json_data['creation_date']
-                            creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
-                        except ValueError as e:
-                            logging.warning(f"Failed to parse creation_date '{date_str}' for {uuid_str}: {e}")
-                    
-                    # Handle author emails and orcids as arrays
-                    author_emails = []
-                    author_orcids = []
-                    
-                    if 'author_email' in json_data and json_data['author_email']:
-                        if isinstance(json_data['author_email'], list):
-                            author_emails = json_data['author_email']
+                    with DepositionRepo(uuid_str) as deposition_repo:
+                        json_data = deposition_repo.metadata
+                        entry = deposition_repo.get_entry()
+
+                        # Parse creation_date
+                        creation_date = None
+                        if 'creation_date' in json_data:
+                            date_str = None
+                            try:
+                                # Parse format like "10:49 PM on October 06, 2019"
+                                date_str = json_data['creation_date']
+                                creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
+                            except ValueError as e:
+                                logging.warning(f"Failed to parse creation_date '{date_str}' for {uuid_str}: {e}")
+
+                        # Handle author emails and orcids as arrays
+                        contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
+                        author_emails = list(set(contact_loop.get_tag('Email_address')))
+                        author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
+
+                        # Check if deposition already exists
+                        stmt = select(Deposition).where(Deposition.deposition_id == uuid_str)
+                        existing = session.execute(stmt).scalar_one_or_none()
+
+                        if existing:
+                            # Update existing record
+                            existing.author_emails = author_emails
+                            existing.author_orcids = author_orcids
+                            existing.bmrbnum = json_data.get('bmrbnum')
+                            existing.creation_date = creation_date
+                            existing.nickname = json_data.get('deposition_nickname')
+                            existing.email_validated = json_data.get('email_validated', False)
+                            existing.entry_deposited = json_data.get('entry_deposited', False)
+                            existing.schema_version = json_data.get('schema_version')
                         else:
-                            author_emails = [json_data['author_email']]
-                    
-                    if 'author_orcid' in json_data and json_data['author_orcid']:
-                        if isinstance(json_data['author_orcid'], list):
-                            author_orcids = json_data['author_orcid']
-                        else:
-                            author_orcids = [json_data['author_orcid']]
-                    
-                    # Check if deposition already exists
-                    stmt = select(Deposition).where(Deposition.deposition_id == uuid_str)
-                    existing = session.execute(stmt).scalar_one_or_none()
-                    
-                    if existing:
-                        # Update existing record
-                        existing.author_emails = author_emails
-                        existing.author_orcids = author_orcids
-                        existing.bmrbnum = json_data.get('bmrbnum')
-                        existing.creation_date = creation_date
-                        existing.nickname = json_data.get('deposition_nickname')
-                        existing.email_validated = json_data.get('email_validated', False)
-                        existing.entry_deposited = json_data.get('entry_deposited', False)
-                        existing.schema_version = json_data.get('schema_version')
-                    else:
-                        deposition = Deposition(
-                            deposition_id=uuid_str,
-                            author_emails=author_emails,
-                            author_orcids=author_orcids,
-                            bmrbnum=json_data.get('bmrbnum'),
-                            creation_date=creation_date,
-                            nickname=json_data.get('deposition_nickname'),
-                            email_validated=json_data.get('email_validated', False),
-                            entry_deposited=json_data.get('entry_deposited', False),
-                            schema_version=json_data.get('schema_version')
-                        )
-                        session.add(deposition)
+                            deposition = Deposition(
+                                deposition_id=uuid_str,
+                                author_emails=author_emails,
+                                author_orcids=author_orcids,
+                                bmrbnum=json_data.get('bmrbnum'),
+                                creation_date=creation_date,
+                                nickname=json_data.get('deposition_nickname'),
+                                email_validated=json_data.get('email_validated', False),
+                                entry_deposited=json_data.get('entry_deposited', False),
+                                schema_version=json_data.get('schema_version')
+                            )
+                            session.add(deposition)
                     
                 except ValueError as e:
                     # Skip invalid UUIDs
