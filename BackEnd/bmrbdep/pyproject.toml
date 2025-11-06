@@ -21,6 +21,7 @@ dependencies = [
     "python-dateutil==2.9.0", # For managing depositions
     "psycopg2-binary==2.9.10", # For putting entries in ETS
     "Unidecode==1.4.0", # For stripping unicode
+    "sqlalchemy==2.0.44", # For keeping a DB of the entries
 ]
 
 [dependency-groups]
