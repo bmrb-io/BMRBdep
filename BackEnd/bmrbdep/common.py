@@ -86,13 +86,11 @@ def list_all_depositions() -> Iterable[str]:
     repo = configuration['repo_path']
 
     for level1 in os.scandir(repo):
-        if not level1.is_dir():
+        if not level1.is_dir() or len(level1.name) != 1:
             continue
         for level2 in os.scandir(level1.path):
             if not level2.is_dir():
                 continue
             for level3 in os.scandir(level2.path):
                 if level3.is_dir():
-                    if len(level3.name) < 36:
-                        print(f"BAD!: {level3.path}/{level3.name}")
                     yield level3.name
