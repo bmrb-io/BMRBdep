@@ -117,16 +117,16 @@ def rescan():
                             )
                             session.add(deposition)
                     
+                    # Commit after each deposition to avoid long-running transactions
+                    session.commit()
+                    
                 except ValueError as e:
-                    # Skip invalid UUIDs
                     logging.debug(f"Skipping {uuid_str}: invalid UUID format - {e}")
                     continue
                 except Exception as e:
-                    # Log other errors but continue processing
                     logging.error(f"Error processing {uuid_str}: {e}")
+                    session.rollback()
                     continue
-        
-        session.commit()
         
     except Exception as e:
         session.rollback()
