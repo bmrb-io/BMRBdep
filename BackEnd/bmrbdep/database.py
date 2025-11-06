@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
 from bmrbdep import DepositionRepo
-from common import configuration
+from bmrbdep.common import configuration
 
 
 class Base(DeclarativeBase):
