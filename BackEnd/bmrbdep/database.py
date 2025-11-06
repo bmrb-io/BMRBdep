@@ -52,7 +52,10 @@ def rescan():
     session = Session(engine)
     
     try:
-        for deposition_id in list_all_depositions():
+        # Get current deposition IDs from the filesystem
+        current_deposition_ids = set(list_all_depositions())
+        
+        for deposition_id in current_deposition_ids:
             logging.debug(f"Processing deposition: {deposition_id}")
 
             try:
@@ -111,6 +114,21 @@ def rescan():
                 logging.error(f"Error processing {deposition_id}: {e}")
                 session.rollback()
                 continue
+        
+        # Remove depositions from database that are no longer in the filesystem
+        stmt = select(Deposition.deposition_id)
+        db_deposition_ids = set(session.execute(stmt).scalars().all())
+        
+        depositions_to_remove = db_deposition_ids - current_deposition_ids
+        if depositions_to_remove:
+            logging.info(f"Removing {len(depositions_to_remove)} depositions no longer found in filesystem")
+            for deposition_id in depositions_to_remove:
+                stmt = select(Deposition).where(Deposition.deposition_id == deposition_id)
+                deposition_to_delete = session.execute(stmt).scalar_one_or_none()
+                if deposition_to_delete:
+                    session.delete(deposition_to_delete)
+                    logging.debug(f"Removed deposition: {deposition_id}")
+            session.commit()
         
     except Exception as e:
         session.rollback()
