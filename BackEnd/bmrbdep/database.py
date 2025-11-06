@@ -1,7 +1,5 @@
-import glob
 import logging
 import os
-import uuid
 from datetime import datetime
 from typing import Optional, List
 
@@ -9,7 +7,7 @@ from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
 from bmrbdep import DepositionRepo
-from bmrbdep.common import configuration
+from bmrbdep.common import configuration, list_all_depositions
 
 
 class Base(DeclarativeBase):
@@ -45,7 +43,7 @@ def init_db():
     return engine
 
 def rescan():
-    """Iterate through repo_path and upsert deposition data into database"""
+    """Iterate through repo_path and upsert deposition data into the database"""
     entry_dir = configuration.get('repo_path')
     if not entry_dir:
         raise ValueError("repo_path not configured")
@@ -54,79 +52,65 @@ def rescan():
     session = Session(engine)
     
     try:
-        # Pattern: entry_dir/first_digit/second_digit/uuid/
-        pattern = os.path.join(entry_dir, '*', '*', '*')
-        
-        logging.debug(f"Scanning entry directories with pattern: {pattern}")
-        
-        for repo_path in glob.glob(pattern):
-            if os.path.isdir(repo_path):
-                uuid_str = os.path.basename(repo_path)
-                logging.debug(f"Processing directory: {repo_path} (UUID: {uuid_str})")
-                
-                try:
-                    # Validate UUID format
-                    uuid.UUID(uuid_str)
-                    
-                    # Load deposition data
-                    with DepositionRepo(uuid_str) as deposition_repo:
-                        json_data = deposition_repo.metadata
-                        entry = deposition_repo.get_entry()
+        for deposition_id in list_all_depositions():
+            logging.debug(f"Processing deposition: {deposition_id}")
 
-                        # Parse creation_date
-                        creation_date = None
-                        if 'creation_date' in json_data:
-                            date_str = None
-                            try:
-                                # Parse format like "10:49 PM on October 06, 2019"
-                                date_str = json_data['creation_date']
-                                creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
-                            except ValueError as e:
-                                logging.warning(f"Failed to parse creation_date '{date_str}' for {uuid_str}: {e}")
+            try:
+                # Load deposition data
+                with DepositionRepo(deposition_id) as deposition_repo:
+                    json_data = deposition_repo.metadata
+                    entry = deposition_repo.get_entry()
 
-                        # Handle author emails and orcids as arrays
-                        contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
-                        author_emails = list(set(contact_loop.get_tag('Email_address')))
-                        author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
+                    # Parse creation_date
+                    creation_date = None
+                    if 'creation_date' in json_data:
+                        date_str = None
+                        try:
+                            # Parse format like "10:49 PM on October 06, 2019"
+                            date_str = json_data['creation_date']
+                            creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
+                        except ValueError as e:
+                            logging.warning(f"Failed to parse creation_date '{date_str}' for {deposition_id}: {e}")
 
-                        # Check if deposition already exists
-                        stmt = select(Deposition).where(Deposition.deposition_id == uuid_str)
-                        existing = session.execute(stmt).scalar_one_or_none()
+                    # Handle author emails and orcids as arrays
+                    contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
+                    author_emails = list(set(contact_loop.get_tag('Email_address')))
+                    author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
 
-                        if existing:
-                            # Update existing record
-                            existing.author_emails = author_emails
-                            existing.author_orcids = author_orcids
-                            existing.bmrbnum = json_data.get('bmrbnum')
-                            existing.creation_date = creation_date
-                            existing.nickname = json_data.get('deposition_nickname')
-                            existing.email_validated = json_data.get('email_validated', False)
-                            existing.entry_deposited = json_data.get('entry_deposited', False)
-                            existing.schema_version = json_data.get('schema_version')
-                        else:
-                            deposition = Deposition(
-                                deposition_id=uuid_str,
-                                author_emails=author_emails,
-                                author_orcids=author_orcids,
-                                bmrbnum=json_data.get('bmrbnum'),
-                                creation_date=creation_date,
-                                nickname=json_data.get('deposition_nickname'),
-                                email_validated=json_data.get('email_validated', False),
-                                entry_deposited=json_data.get('entry_deposited', False),
-                                schema_version=json_data.get('schema_version')
-                            )
-                            session.add(deposition)
-                    
-                    # Commit after each deposition to avoid long-running transactions
-                    session.commit()
-                    
-                except ValueError as e:
-                    logging.debug(f"Skipping {uuid_str}: invalid UUID format - {e}")
-                    continue
-                except Exception as e:
-                    logging.error(f"Error processing {uuid_str}: {e}")
-                    session.rollback()
-                    continue
+                    # Check if the deposition already exists
+                    stmt = select(Deposition).where(Deposition.deposition_id == deposition_id)
+                    existing = session.execute(stmt).scalar_one_or_none()
+
+                    if existing:
+                        # Update existing record
+                        existing.author_emails = author_emails
+                        existing.author_orcids = author_orcids
+                        existing.bmrbnum = json_data.get('bmrbnum')
+                        existing.creation_date = creation_date
+                        existing.nickname = json_data.get('deposition_nickname')
+                        existing.email_validated = json_data.get('email_validated', False)
+                        existing.entry_deposited = json_data.get('entry_deposited', False)
+                        existing.schema_version = json_data.get('schema_version')
+                    else:
+                        deposition = Deposition(
+                            deposition_id=deposition_id,
+                            author_emails=author_emails,
+                            author_orcids=author_orcids,
+                            bmrbnum=json_data.get('bmrbnum'),
+                            creation_date=creation_date,
+                            nickname=json_data.get('deposition_nickname'),
+                            email_validated=json_data.get('email_validated', False),
+                            entry_deposited=json_data.get('entry_deposited', False),
+                            schema_version=json_data.get('schema_version')
+                        )
+                        session.add(deposition)
+
+                # Commit after each deposition to avoid long-running transactions
+                session.commit()
+            except Exception as e:
+                logging.error(f"Error processing {deposition_id}: {e}")
+                session.rollback()
+                continue
         
     except Exception as e:
         session.rollback()
