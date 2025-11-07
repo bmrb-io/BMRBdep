@@ -6,7 +6,6 @@ import os
 import socket
 import tempfile
 import traceback
-from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
 
@@ -26,6 +25,7 @@ from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
+from bmrbdep.helpers import tokens
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -199,7 +199,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                       recipients=[repo.metadata['author_email']],
                                       bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
-            token = URLSafeSerializer(application.secret_key).dumps({'deposition_id': uuid})
+            token = tokens.get_deposition_token(uuid)
 
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
@@ -234,7 +234,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                   recipients=[repo.metadata['author_email']],
                                   bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
-        token = URLSafeSerializer(application.secret_key).dumps({'deposition_id': uuid})
+        token = tokens.get_deposition_token(uuid)
 
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
@@ -265,12 +265,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
-    serializer = URLSafeSerializer(application.secret_key)
-    try:
-        deposition_data = serializer.loads(token)
-        deposition_id = deposition_data['deposition_id']
-    except (BadData, KeyError, TypeError):
-        raise RequestError('Invalid e-mail validation token. Please request a new e-mail validation message.')
+    deposition_id = tokens.verify_deposition_token(token)
 
     with depositions.DepositionRepo(deposition_id) as repo:
         if not repo.metadata['email_validated']:
@@ -298,13 +293,6 @@ def duplicate_deposition(uuid) -> Response:
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
         merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
-
-        # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
-        #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
-        #   the tag. Alternatively, search for and fix all old entries with saveframes missing the '_Deleted' tag
-        for saveframe in entry_template:
-            if '_Deleted' not in saveframe or saveframe['_Deleted'] in pynmrstar.utils.definitions.NULL_VALUES:
-                saveframe.add_tag('_Deleted', 'no', update=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
