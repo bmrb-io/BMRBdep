@@ -199,7 +199,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                       recipients=[repo.metadata['author_email']],
                                       bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
-            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+            token = URLSafeSerializer(application.secret_key).dumps({'deposition_id': uuid})
 
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
@@ -234,7 +234,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                   recipients=[repo.metadata['author_email']],
                                   bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
-        token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+        token = URLSafeSerializer(application.secret_key).dumps({'deposition_id': uuid})
 
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
@@ -265,7 +265,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
-    serializer = URLSafeSerializer(application.config['SECRET_KEY'])
+    serializer = URLSafeSerializer(application.secret_key)
     try:
         deposition_data = serializer.loads(token)
         deposition_id = deposition_data['deposition_id']
