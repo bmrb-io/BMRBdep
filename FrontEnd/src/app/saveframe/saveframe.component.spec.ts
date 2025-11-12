@@ -8,8 +8,8 @@ describe('SaveframeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ SaveframeComponent ]
-    })
+    imports: [SaveframeComponent]
+})
     .compileComponents();
   }));
 

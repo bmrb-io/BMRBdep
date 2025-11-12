@@ -5,11 +5,16 @@ import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@an
 
 /* Import country updater code */
 import * as crs from '../javascript/crs.min';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { NgClass } from '@angular/common';
+import { TagComponent } from '../tag/tag.component';
 
 @Component({
-  selector: 'app-loop',
-  templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.scss']
+    selector: 'app-loop',
+    templateUrl: './loop.component.html',
+    styleUrls: ['./loop.component.scss'],
+    imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;

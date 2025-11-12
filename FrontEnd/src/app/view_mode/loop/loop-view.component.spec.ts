@@ -8,8 +8,8 @@ describe('LoopViewComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LoopViewComponent ]
-    })
+    imports: [LoopViewComponent]
+})
     .compileComponents();
   }));
 

@@ -1,16 +1,21 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {ApiService} from '../api.service';
-import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatError } from '@angular/material/select';
+import { MatInput } from '@angular/material/input';
 
 @Component({
-  selector: 'app-welcome',
-  templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.scss']
+    selector: 'app-welcome',
+    templateUrl: './welcome.component.html',
+    styleUrls: ['./welcome.component.scss'],
+    imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, MatError]
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   entry: Entry;

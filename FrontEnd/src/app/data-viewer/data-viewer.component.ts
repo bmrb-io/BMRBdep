@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {MarkdownComponent} from 'ngx-markdown';
+import {MatButton} from '@angular/material/button';
 
 export class Files {
   name: string;
@@ -20,9 +22,10 @@ export class Entry {
 }
 
 @Component({
-  selector: 'app-data-viewer',
-  templateUrl: './data-viewer.component.html',
-  styleUrls: ['./data-viewer.component.scss']
+    selector: 'app-data-viewer',
+    templateUrl: './data-viewer.component.html',
+    styleUrls: ['./data-viewer.component.scss'],
+    imports: [MarkdownComponent, MatButton, RouterLink]
 })
 export class DataViewerComponent implements OnInit {
   public files: Array<Files>;

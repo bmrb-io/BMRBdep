@@ -1,25 +1,27 @@
 <div class="line highlight one_indent">
-    <span class="uneditable">loop_</span>
+  <span class="uneditable">loop_</span>
 </div>
-<ng-container *ngFor='let col of loop.tags'>
-    <div class="line highlight">
-        <span class="uneditable">{{loop.category + '.' + col}}</span>
-    </div>
-</ng-container>
+@for (col of loop.tags; track col) {
+  <div class="line highlight">
+    <span class="uneditable">{{loop.category + '.' + col}}</span>
+  </div>
+}
 <table class="alternating_color">
-    <tbody>
-    <tr *ngFor='let row of loop.data'>
-        <ng-container *ngFor='let datum of row'>
-            <td>
-                <label>
-                    <input class="datum highlight" [(ngModel)]="datum.value" placeholder="."
-                           [style.width.ch]='(datum.value !== null) ? datum.value.length + 2 : 2'>
-                </label>
-            </td>
-        </ng-container>
-    </tr>
-    </tbody>
+  <tbody>
+    @for (row of loop.data; track row) {
+      <tr>
+        @for (datum of row; track datum) {
+          <td>
+            <label>
+              <input class="datum highlight" [(ngModel)]="datum.value" placeholder="."
+                [style.width.ch]='(datum.value !== null) ? datum.value.length + 2 : 2'>
+            </label>
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
 </table>
 <div class="line highlight one_indent">
-    <span class="uneditable">stop_</span>
+  <span class="uneditable">stop_</span>
 </div>

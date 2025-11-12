@@ -1,14 +1,19 @@
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SaveframeComponent } from '../saveframe/saveframe.component';
+import { MatCard, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
 
 @Component({
-  selector: 'app-saveframe-editor',
-  templateUrl: './saveframe-editor.component.html',
-  styleUrls: ['./saveframe-editor.component.css']
+    selector: 'app-saveframe-editor',
+    templateUrl: './saveframe-editor.component.html',
+    styleUrls: ['./saveframe-editor.component.css'],
+    imports: [MatButton, MatTooltip, RouterLink, SaveframeComponent, MatCard, MatCardTitle, MatCardContent, MatCardActions]
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
   saveframes: Saveframe[];

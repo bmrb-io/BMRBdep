@@ -1,18 +1,21 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
-import {HttpEventType, HttpResponse} from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
-import {ActivatedRoute, Params} from '@angular/router';
+import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 import {Subscription} from 'rxjs';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
-  selector: 'app-file-uploader',
-  templateUrl: './file-uploader.component.html',
-  styleUrls: ['./file-uploader.component.scss']
+    selector: 'app-file-uploader',
+    templateUrl: './file-uploader.component.html',
+    styleUrls: ['./file-uploader.component.scss'],
+    imports: [MatButton, RouterLink, MatProgressBar]
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
 

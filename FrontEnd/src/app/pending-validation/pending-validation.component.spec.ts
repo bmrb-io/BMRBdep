@@ -8,8 +8,8 @@ describe('PendingValidationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PendingValidationComponent ]
-    })
+    imports: [PendingValidationComponent]
+})
     .compileComponents();
   }));
 

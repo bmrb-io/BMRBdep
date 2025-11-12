@@ -2,11 +2,13 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
+import { SaveframeComponent } from '../saveframe/saveframe.component';
 
 @Component({
-  selector: 'app-restore',
-  templateUrl: './restore.component.html',
-  styleUrls: ['./restore.component.css']
+    selector: 'app-restore',
+    templateUrl: './restore.component.html',
+    styleUrls: ['./restore.component.css'],
+    imports: [SaveframeComponent]
 })
 export class RestoreComponent implements OnInit, OnDestroy {
 
