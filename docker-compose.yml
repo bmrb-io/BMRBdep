@@ -5,7 +5,8 @@ services:
     image: bmrbig
     container_name: bmrbig
     restart: always
-    network_mode: host
+    ports:
+      - 9001:9001
     env_file:
       - .env
     user: "17473:10144"
