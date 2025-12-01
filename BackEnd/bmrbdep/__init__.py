@@ -725,10 +725,6 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            # Next two lines can be removed after clients upgrade (06/01/2020)
-            if isinstance(entry_json['commit'], str):
-                entry_json['commit'] = [entry_json['commit']]
-
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
                     logging.exception('An entry changed on the server!')
