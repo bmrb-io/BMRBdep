@@ -62,7 +62,7 @@ def rescan():
                 # Load deposition data
                 with DepositionRepo(deposition_id) as deposition_repo:
                     json_data = deposition_repo.metadata
-                    entry = deposition_repo.get_entry()
+                    entry = deposition_repo.entry
 
                     # Parse creation_date
                     creation_date = None

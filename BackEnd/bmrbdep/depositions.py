@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import functools
 import json
 import logging
 import os
@@ -54,6 +54,7 @@ class DepositionRepo:
         self._initialize: bool = initialize
         self._read_only: bool = read_only
         self._modified_files: bool = False
+        self._cached_entry: pynmrstar.Entry | None = None
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         uuids = str(uuid)
@@ -153,8 +154,7 @@ class DepositionRepo:
                 
                 # Get current entry data
                 try:
-                    entry = self.get_entry()
-                    contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
+                    contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
                     author_emails = list(set(contact_loop.get_tag('Email_address')))
                     author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
                 except Exception:
@@ -213,7 +213,7 @@ class DepositionRepo:
         contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
         if self.metadata['author_email'] not in contact_emails:
             raise RequestError('At least one contact person must have the email of the original deposition creator.')
-        existing_entry_id = self.get_entry().entry_id
+        existing_entry_id = self.entry.entry_id
 
         if existing_entry_id != final_entry.entry_id:
             raise RequestError('Invalid deposited entry. The ID must match that of this deposition.')
@@ -349,7 +349,7 @@ class DepositionRepo:
         today_date: datetime = datetime.now()
 
         # Set the accession and submission date
-        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        entry_saveframe: pynmrstar.Saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
         entry_saveframe['Submission_date'] = today_str
         entry_saveframe['Accession_date'] = today_str
 
@@ -475,8 +475,12 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Return the assigned BMRB ID
         return bmrbnum
 
-    def get_entry(self) -> pynmrstar.Entry:
+    @property
+    def entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
+
+        if self._cached_entry is not None:
+            return self._cached_entry
 
         entry_location = os.path.join(self._entry_dir, 'entry.str')
 
@@ -485,11 +489,14 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         except Exception as e:
             raise ServerError('Error loading an entry!\nError: %s\nEntry location:%s' % (repr(e), entry_location))
 
-    def write_entry(self, entry: pynmrstar.Entry) -> None:
+    @entry.setter
+    def entry(self, entry: pynmrstar.Entry) -> None:
         """ Save an entry in the standard place. """
 
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
+        self._cached_entry = entry
+        self._modified_files = True
 
     def get_file(self, path: str, root: bool = True) -> BinaryIO:
         """ Returns the current version of a file from the repo. """

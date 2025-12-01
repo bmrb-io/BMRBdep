@@ -294,7 +294,7 @@ def duplicate_deposition(uuid) -> Response:
                                                                     default_values=True, schema=schema)
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
-        merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
+        merge_entries(entry_template, repo.entry, schema, preserve_entry_information=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -312,7 +312,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
                                        }
-            new_repo.write_entry(entry_template)
+            new_repo.entry = entry_template
             new_repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
             # Delete data files when cloning
             for file_ in new_repo.get_data_file_list():
@@ -581,7 +581,7 @@ def new_deposition() -> Response:
                 pos += 1
 
         # Write out the NMR-STAR file, plus the schema being used
-        repo.write_entry(entry_template)
+        repo.entry = entry_template
         repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
 
         # Create the rest of the metadata
@@ -713,7 +713,7 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
-            existing_entry: pynmrstar.Entry = repo.get_entry()
+            existing_entry: pynmrstar.Entry = repo.entry
 
             # If they aren't making any changes
             try:
@@ -735,7 +735,7 @@ def fetch_or_store_deposition(uuid):
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
-            repo.write_entry(entry)
+            repo.entry = entry
             repo.commit("Entry updated.")
 
             return jsonify({'commit': repo.last_commit})
@@ -744,7 +744,7 @@ def fetch_or_store_deposition(uuid):
     elif request.method == "GET":
 
         with depositions.DepositionRepo(uuid) as repo:
-            entry: pynmrstar.Entry = repo.get_entry()
+            entry: pynmrstar.Entry = repo.entry
             schema_version: str = repo.metadata['schema_version']
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
