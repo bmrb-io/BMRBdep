@@ -17,12 +17,11 @@ from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeSerializer
-from itsdangerous.exc import BadData
 from validate_email import validate_email
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.database import init_db
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers import tokens
@@ -88,6 +87,9 @@ logging.getLogger('pynmrstar').setLevel(logging.ERROR)
 
 # If they upload NMR-STAR with empty strings, just map them to null rather than throw an exception
 pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
+
+# Ensure that the database is set up
+init_db()
 
 # Set up error handling
 @application.errorhandler(ServerError)
