@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
-from bmrbdep import DepositionRepo
+from bmrbdep.depositions import DepositionRepo
 from bmrbdep.common import configuration, list_all_depositions
 
 
