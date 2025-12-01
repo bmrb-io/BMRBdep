@@ -155,8 +155,8 @@ class DepositionRepo:
                 # Get current entry data
                 try:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
-                    author_emails = list(set(contact_loop.get_tag('Email_address')))
-                    author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
+                    author_emails = contact_loop.get_tag('Email_address')
+                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
                 except Exception:
                     # If we can't get entry data, just use empty lists
                     author_emails = []

@@ -77,8 +77,8 @@ def rescan():
 
                     # Handle author emails and orcids as arrays
                     contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
-                    author_emails = list(set(contact_loop.get_tag('Email_address')))
-                    author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
+                    author_emails = contact_loop.get_tag('Email_address')
+                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
 
                     # Check if the deposition already exists
                     stmt = select(Deposition).where(Deposition.deposition_id == deposition_id)
