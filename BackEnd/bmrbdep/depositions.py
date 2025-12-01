@@ -15,6 +15,8 @@ import unidecode
 from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
@@ -130,6 +132,77 @@ class DepositionRepo:
         if not self._repo:
             raise ServerError("Cannot access this attribute when repo opened read only.")
         return self._repo.head.object.hexsha
+
+    def _update_database_metadata(self):
+        """ Update the database with current metadata. """
+        if self._read_only:
+            return
+
+        # Import here to avoid circular imports
+        from bmrbdep.database import Deposition
+
+        try:
+            entry_dir = configuration.get('repo_path')
+            if not entry_dir:
+                return
+                
+            db_path = os.path.join(entry_dir, 'database.sqlite3')
+            engine = create_engine(f'sqlite:///{db_path}')
+            
+            with Session(engine) as session:
+                
+                # Get current entry data
+                try:
+                    entry = self.get_entry()
+                    contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
+                    author_emails = list(set(contact_loop.get_tag('Email_address')))
+                    author_orcids = list(set([_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]))
+                except Exception:
+                    # If we can't get entry data, just use empty lists
+                    author_emails = []
+                    author_orcids = []
+
+                # Parse creation_date
+                creation_date = None
+                if 'creation_date' in self._live_metadata:
+                    try:
+                        date_str = self._live_metadata['creation_date']
+                        creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
+                    except ValueError as e:
+                        logging.warning(f"Failed to parse creation_date '{date_str}' for {self._uuid}: {e}")
+
+                # Check if the deposition already exists
+                stmt = select(Deposition).where(Deposition.deposition_id == str(self._uuid))
+                existing = session.execute(stmt).scalar_one_or_none()
+
+                if existing:
+                    # Update existing record
+                    existing.author_emails = author_emails
+                    existing.author_orcids = author_orcids
+                    existing.bmrbnum = self._live_metadata.get('bmrbnum')
+                    existing.creation_date = creation_date
+                    existing.nickname = self._live_metadata.get('deposition_nickname')
+                    existing.email_validated = self._live_metadata.get('email_validated', False)
+                    existing.entry_deposited = self._live_metadata.get('entry_deposited', False)
+                    existing.schema_version = self._live_metadata.get('schema_version')
+                else:
+                    # Create new record
+                    deposition = Deposition(
+                        deposition_id=str(self._uuid),
+                        author_emails=author_emails,
+                        author_orcids=author_orcids,
+                        bmrbnum=self._live_metadata.get('bmrbnum'),
+                        creation_date=creation_date,
+                        nickname=self._live_metadata.get('deposition_nickname'),
+                        email_validated=self._live_metadata.get('email_validated', False),
+                        entry_deposited=self._live_metadata.get('entry_deposited', False),
+                        schema_version=self._live_metadata.get('schema_version')
+                    )
+                    session.add(deposition)
+
+                session.commit()
+        except Exception as e:
+            logging.warning(f"Could not update database metadata for {self._uuid}: {e}")
 
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
         """ Deposits an entry into ETS. """
@@ -539,5 +612,6 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Add the changes, commit
         self._repo.git.add(all=True)
         self._repo.git.commit(message=message)
+        self._update_database_metadata()
         self._modified_files = False
         return True
