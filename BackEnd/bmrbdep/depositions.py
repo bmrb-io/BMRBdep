@@ -515,26 +515,26 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
 
+        # No recorded changes
+        if not self._modified_files and self._live_metadata == self._original_metadata:
+            return False
+
+        # Store the IP of the user making the change. We purposefully do this after checking for modified files, as we don't want
+        #  to update it just because a user loaded a deposition - only when they change one.
+        try:
+            self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
+        except RuntimeError:
+            pass
+
         # Check if the metadata has changed
         if self._live_metadata != self._original_metadata:
             self.write_file('submission_info.json',
                             json.dumps(self._live_metadata, indent=2, sort_keys=True).encode(),
                             root=True)
-            self._original_metadata = self._live_metadata.copy()
-
-        # No recorded changes
-        if not self._modified_files:
-            return False
 
         # See if they wrote the same value to an existing file
         if not self._repo.untracked_files and not [item.a_path for item in self._repo.index.diff(None)]:
             return False
-
-        # Store the IP of the user making the change
-        try:
-            self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
-        except RuntimeError:
-            pass
 
         # Add the changes, commit
         self._repo.git.add(all=True)
