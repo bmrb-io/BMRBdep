@@ -43,4 +43,7 @@ COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./wsgi.conf /opt/wsgi/wsgi.conf
 COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
 COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./version.txt /opt/wsgi/bmrbdep/
 
+# To rescan the entries: docker exec -it bmrbdep /opt/wsgi/rescan.sh
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./rescan.sh /opt/wsgi/rescan.sh
+
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf"]
