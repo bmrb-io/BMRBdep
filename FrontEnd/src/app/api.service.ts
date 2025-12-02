@@ -541,4 +541,24 @@ export class ApiService implements OnDestroy {
   }
 
 
+  sendEmailAccessToken(email: string) {
+
+    const apiEndPoint = `${environment.serverURL}/request-email-access`;
+
+    const body = new FormData();
+    body.append('email', email);
+
+    return new Promise(((resolve, reject) => {
+      this.http.post(apiEndPoint, body).subscribe(jsonData => {
+        console.log(jsonData);
+
+    this.messagesService.sendMessage(new Message('Email sent. Please check your inbox, and spam folder if you don\'t see it.',
+          MessageType.NotificationMessage, 15000));
+        resolve(jsonData['status']);
+      }, error => {
+        this.handleError(error);
+        reject();
+      });
+    }));
+  }
 }

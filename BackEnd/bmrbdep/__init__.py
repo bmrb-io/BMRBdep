@@ -91,6 +91,12 @@ pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
 # Ensure that the database is set up
 init_db()
 
+# We need the context in order to load the modules
+with application.app_context():
+    from bmrbdep.user_endpoints import user_endpoints
+
+application.register_blueprint(user_endpoints)
+
 # Set up error handling
 @application.errorhandler(ServerError)
 @application.errorhandler(RequestError)

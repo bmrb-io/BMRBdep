@@ -169,10 +169,46 @@ your email when you created the deposition.">
 
     <div class="content-box">
       <h3>Resume deposition</h3>
-      <p>To resume your deposition, simply click the link in the e-mail you were sent when you created the
-      deposition with the subject 'Please validate your e-mail address for BMRBdep deposition...'</p>
-      <p>If you have lost that e-mail, please
-        <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
-      </p>
+
+      <div class="resume-options">
+        <div class="resume-option">
+          <h4>Get access by email</h4>
+          <p>Enter your email address to receive a link that will give you access to all your depositions.</p>
+          <mat-form-field>
+            <label>
+              <input matInput
+                [formControl]="resumeEmail"
+                placeholder="Enter your email address"
+                type="email">
+            </label>
+            @if (resumeEmail.invalid) {
+              <mat-error>Please enter a valid email address.</mat-error>
+            }
+          </mat-form-field>
+          <div>
+            <button mat-raised-button color="primary" (click)="requestEmailAccess()" [disabled]="resumeEmail.invalid">
+              Request access
+            </button>
+          </div>
+        </div>
+
+        <div class="resume-option">
+          <h4>Sign in with ORCID</h4>
+          <p>Access all your depositions by signing in with your ORCID account.</p>
+          <div>
+            <button mat-raised-button color="primary">
+              Sign in with ORCID
+            </button>
+          </div>
+        </div>
+      </div>
+
+
     </div>
   </div>
+
+<div class="content-box">
+  <p>If you need additional help, please
+    <a mat-raised-button routerLink="/support" color="primary">contact us.</a>
+  </p>
+</div>
