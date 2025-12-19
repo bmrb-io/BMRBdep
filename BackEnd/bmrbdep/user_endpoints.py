@@ -1,14 +1,12 @@
 import logging
-import os
 import socket
 
 from flask import Blueprint, request, url_for, session
 from flask_mail import Message
-from sqlalchemy import create_engine, select, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import select, or_
 
 from bmrbdep import application, RequestError, configuration, mail, ServerError
-from bmrbdep.database import Deposition
+from bmrbdep.database import Deposition, get_db_session
 from bmrbdep.helpers.tokens import get_email_token, verify_email_token
 
 user_endpoints = Blueprint('user_endpoints', __name__)
@@ -74,16 +72,8 @@ def get_authorized_depositions():
     if not active_email and not orcid_id:
         return []
 
-    # Connect to the database
-    entry_dir = configuration.get('repo_path')
-    if not entry_dir:
-        raise ServerError('Server is mis-configured, please contact the administrator.')
-
-    db_path = os.path.join(entry_dir, 'database.sqlite3')
-    engine = create_engine(f'sqlite:///{db_path}')
-
     # Fetch entries the user has access to
-    with Session(engine) as db_session:
+    with get_db_session() as db_session:
         conditions = []
 
         if active_email:

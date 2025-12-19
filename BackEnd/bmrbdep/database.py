@@ -1,13 +1,14 @@
 import logging
 import os
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List
 
 from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
+from bmrbdep.common import configuration, list_all_depositions, ServerError
 from bmrbdep.depositions import DepositionRepo
-from bmrbdep.common import configuration, list_all_depositions
 
 
 class Base(DeclarativeBase):
@@ -15,7 +16,7 @@ class Base(DeclarativeBase):
 
 class Deposition(Base):
     __tablename__ = 'depositions'
-    
+
     deposition_id: Mapped[str] = mapped_column(String, primary_key=True)
     author_emails: Mapped[Optional[List]] = mapped_column(JSON)
     author_orcids: Mapped[Optional[List]] = mapped_column(JSON)
@@ -26,20 +27,51 @@ class Deposition(Base):
     entry_deposited: Mapped[Optional[bool]] = mapped_column(Boolean)
     schema_version: Mapped[Optional[str]] = mapped_column(String)
 
+# Global engine and session factory
+_engine = None
+_SessionFactory = None
+
+def get_engine():
+    """Get or create the database engine"""
+    global _engine
+    if _engine is None:
+        entry_dir = configuration.get('repo_path')
+        if not entry_dir:
+            raise ServerError("repo_path not configured")
+
+        if not os.path.exists(entry_dir):
+            raise ServerError(f"Repository path does not exist: {entry_dir}")
+
+        db_path = os.path.join(entry_dir, 'database.sqlite3')
+        _engine = create_engine(f'sqlite:///{db_path}')
+
+    return _engine
+
+def get_session_factory():
+    """Get or create the session factory"""
+    global _SessionFactory
+    if _SessionFactory is None:
+        _SessionFactory = sessionmaker(bind=get_engine())
+    return _SessionFactory
+
+@contextmanager
+def get_db_session():
+    """Context manager for database sessions"""
+    SessionFactory = get_session_factory()
+    session = SessionFactory()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
 def init_db():
     """Create the database if it doesn't exist and populate it with the table"""
-    entry_dir = configuration.get('repo_path')
-    if not entry_dir:
-        raise ValueError("repo_path not configured")
-    
-    if not os.path.exists(entry_dir):
-        raise FileNotFoundError(f"Repository path does not exist: {entry_dir}")
-    
-    db_path = os.path.join(entry_dir, 'database.sqlite3')
-    
-    engine = create_engine(f'sqlite:///{db_path}')
+    engine = get_engine()
     Base.metadata.create_all(engine)
-    
     return engine
 
 def rescan():
@@ -47,14 +79,13 @@ def rescan():
     entry_dir = configuration.get('repo_path')
     if not entry_dir:
         raise ValueError("repo_path not configured")
-    
-    engine = init_db()
-    session = Session(engine)
-    
-    try:
+
+    init_db()
+
+    with get_db_session() as session:
         # Get current deposition IDs from the filesystem
         current_deposition_ids = set(list_all_depositions())
-        
+
         for deposition_id in current_deposition_ids:
             logging.debug(f"Processing deposition: {deposition_id}")
 
@@ -114,11 +145,11 @@ def rescan():
                 logging.error(f"Error processing {deposition_id}: {e}")
                 session.rollback()
                 continue
-        
+
         # Remove depositions from database that are no longer in the filesystem
         stmt = select(Deposition.deposition_id)
         db_deposition_ids = set(session.execute(stmt).scalars().all())
-        
+
         depositions_to_remove = db_deposition_ids - current_deposition_ids
         if depositions_to_remove:
             logging.info(f"Removing {len(depositions_to_remove)} depositions no longer found in filesystem")
@@ -129,10 +160,3 @@ def rescan():
                     session.delete(deposition_to_delete)
                     logging.debug(f"Removed deposition: {deposition_id}")
             session.commit()
-        
-    except Exception as e:
-        session.rollback()
-        logging.error(f"Database error during rescan: {e}")
-        raise
-    finally:
-        session.close()

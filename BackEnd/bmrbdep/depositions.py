@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import functools
 import json
 import logging
 import os
@@ -15,8 +14,7 @@ import unidecode
 from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
@@ -140,18 +138,10 @@ class DepositionRepo:
             return
 
         # Import here to avoid circular imports
-        from bmrbdep.database import Deposition
+        from bmrbdep.database import Deposition, get_db_session
 
         try:
-            entry_dir = configuration.get('repo_path')
-            if not entry_dir:
-                return
-                
-            db_path = os.path.join(entry_dir, 'database.sqlite3')
-            engine = create_engine(f'sqlite:///{db_path}')
-            
-            with Session(engine) as session:
-                
+            with get_db_session() as session:
                 # Get current entry data
                 try:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
@@ -199,8 +189,6 @@ class DepositionRepo:
                         schema_version=self._live_metadata.get('schema_version')
                     )
                     session.add(deposition)
-
-                session.commit()
         except Exception as e:
             logging.warning(f"Could not update database metadata for {self._uuid}: {e}")
 
