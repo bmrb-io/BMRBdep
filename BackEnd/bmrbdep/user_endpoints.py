@@ -1,7 +1,7 @@
 import logging
 import socket
 
-from flask import Blueprint, request, url_for, session
+from flask import Blueprint, request, url_for, session, redirect
 from flask_mail import Message
 from sqlalchemy import select, or_
 
@@ -57,8 +57,7 @@ def activate_email_session(token: str):
         raise RequestError('Invalid e-mail validation token.')
 
     session['active_email'] = email
-
-    return {'status': 'success'}
+    return redirect('/my-depositions', code=302)
 
 
 @application.get('/deposition/authorized-depositions')
