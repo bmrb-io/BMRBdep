@@ -16,13 +16,13 @@ const routes: Routes = [
   {path: '', component: WelcomeComponent},
   {path: 'entry', component: EntryComponent},
   {path: 'entry/load/:entry', component: LoadEntryComponent},
-  {path: 'entry/my-depositions', component: MyDepositionsComponent},
   {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
   {path: 'entry/review', component: ReviewComponent},
   {path: 'entry/restore', component: RestoreComponent},
   {path: 'entry/pending-verification', component: PendingValidationComponent},
   {path: 'help/molecular-assembly', component: MolecularSystemComponent},
-  {path: 'support', component: SupportComponent}
+  {path: 'support', component: SupportComponent},
+  {path: 'my-depositions', component: MyDepositionsComponent},
 ];
 
 @NgModule({

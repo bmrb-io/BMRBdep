@@ -64,7 +64,15 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     if (!authorizedVia || authorizedVia.length === 0) {
       return '';
     }
-    return authorizedVia.join(', ');
+    const auths = authorizedVia.map(auth => {
+      if (auth === 'email') {
+       return 'E-mail address';
+      }
+      if (auth === 'orcid') {
+        return 'ORCID iD';
+      }
+    });
+    return auths.join(', ');
   }
 
   loadDeposition(deposition: Deposition): void {
