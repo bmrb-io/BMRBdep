@@ -1,10 +1,14 @@
 import logging
+import os
 import socket
 
 from flask import Blueprint, request, url_for, session
 from flask_mail import Message
+from sqlalchemy import create_engine, select, or_
+from sqlalchemy.orm import Session
 
 from bmrbdep import application, RequestError, configuration, mail, ServerError
+from bmrbdep.database import Deposition
 from bmrbdep.helpers.tokens import get_email_token, verify_email_token
 
 user_endpoints = Blueprint('user_endpoints', __name__)
@@ -57,3 +61,56 @@ def activate_email_session(token: str):
     session['active_email'] = email
 
     return {'status': 'success'}
+
+
+@application.get('/deposition/authorized-depositions')
+def get_authorized_depositions():
+    """ Return the list of depositions the user can access based on their session. """
+
+    active_email = session.get('active_email')
+    orcid_id = session.get('orcid_id')
+
+    # If neither credential is present, return an empty array
+    if not active_email and not orcid_id:
+        return []
+
+    # Connect to the database
+    entry_dir = configuration.get('repo_path')
+    if not entry_dir:
+        raise ServerError('Server is mis-configured, please contact the administrator.')
+
+    db_path = os.path.join(entry_dir, 'database.sqlite3')
+    engine = create_engine(f'sqlite:///{db_path}')
+
+    # Fetch entries the user has access to
+    with Session(engine) as db_session:
+        conditions = []
+
+        if active_email:
+            conditions.append(Deposition.author_emails.contains(active_email))
+
+        if orcid_id:
+            conditions.append(Deposition.author_orcids.contains(orcid_id))
+
+        stmt = select(Deposition).where(or_(*conditions))
+        depositions = db_session.execute(stmt).scalars().all()
+
+        # Return list of dictionaries with deposition_id, nickname, and authorization reason
+        result = []
+        for dep in depositions:
+            auth_reasons = []
+
+            if active_email and active_email in (dep.author_emails or []):
+                auth_reasons.append('email')
+
+            if orcid_id and orcid_id in (dep.author_orcids or []):
+                auth_reasons.append('orcid')
+
+            result.append({
+                'deposition_id': dep.deposition_id,
+                'nickname': dep.nickname,
+                'authorized_via': auth_reasons
+            })
+
+        return result
+
