@@ -11,6 +11,7 @@ import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-di
 import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
+import {Deposition} from './my-depositions/my-depositions.component';
 
 function getTime(): number {
   return (new Date()).getTime();
@@ -89,7 +90,7 @@ export class ApiService implements OnDestroy {
         event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && !this.cachedEntry) {
+              && this.router.url.indexOf('/my-depositions') < 0 && !this.cachedEntry) {
               this.subscription$.unsubscribe();
               router.navigate(['/']).then();
             }
@@ -560,5 +561,16 @@ export class ApiService implements OnDestroy {
         reject();
       });
     }));
+  }
+
+  getAuthorizedDepositions(): Observable<Deposition[]> {
+    const apiEndPoint = `${environment.serverURL}/authorized-depositions`;
+    return this.http.get<Deposition[]>(apiEndPoint, { withCredentials: true })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.handleError(error);
+          return of([]);
+        })
+      );
   }
 }

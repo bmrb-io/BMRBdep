@@ -10,11 +10,13 @@ import {MolecularSystemComponent} from './molecular-system/molecular-system.comp
 import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {SupportComponent} from './support/support-component';
+import {MyDepositionsComponent} from './my-depositions/my-depositions.component';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
   {path: 'entry', component: EntryComponent},
   {path: 'entry/load/:entry', component: LoadEntryComponent},
+  {path: 'entry/my-depositions', component: MyDepositionsComponent},
   {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
   {path: 'entry/review', component: ReviewComponent},
   {path: 'entry/restore', component: RestoreComponent},

@@ -1,0 +1,47 @@
+<div class="main-content">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>My Depositions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading) {
+        <div class="loading-container">
+          <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+          <p>Loading your depositions...</p>
+        </div>
+      }
+      @if (!loading && depositions.length === 0) {
+        <div class="no-depositions">
+          <p>No accessible depositions found.</p>
+          <p>You can create a new deposition from the welcome page.</p>
+        </div>
+      }
+      @if (!loading && depositions.length > 0) {
+        <p>Click on a deposition to load it. Your current deposition is highlighted.</p>
+        <mat-nav-list>
+          @for (deposition of depositions; track deposition.deposition_id) {
+            <p>
+              <a mat-raised-button
+                 [ngClass]="{'current-deposition': isCurrentDeposition(deposition.deposition_id)}"
+                 (click)="loadDeposition(deposition)"
+                 color="accent">
+                <mat-icon>
+                  @if (isCurrentDeposition(deposition.deposition_id)) {
+                    check_circle
+                  }
+                  @if (!isCurrentDeposition(deposition.deposition_id)) {
+                    folder
+                  }
+                </mat-icon>
+                {{ deposition.nickname }}
+                @if (deposition.authorized_via && deposition.authorized_via.length > 0) {
+                  <span class="auth-reason"> ({{ getAuthReasonText(deposition.authorized_via) }})</span>
+                }
+              </a>
+            </p>
+          }
+        </mat-nav-list>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

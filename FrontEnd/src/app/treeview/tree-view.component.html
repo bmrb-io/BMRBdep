@@ -55,6 +55,11 @@ validation step.">
               Verify your email
             </mat-list-item>
           }
+          <mat-list-item [ngClass]="{'active': page=='my-depositions'}"
+            routerLink="/entry/my-depositions" id="my-depositions"
+                       matTooltip="View and switch between your accessible depositions.">
+            My depositions
+          </mat-list-item>
           <mat-list-item [ngClass]="{'active': page=='new'}"
             routerLink="/" id="new"
                        matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
