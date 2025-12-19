@@ -114,3 +114,11 @@ def get_authorized_depositions():
 
         return result
 
+
+@application.post('/deposition/end-session')
+def end_session():
+    """ Clear all session state. """
+
+    session.clear()
+    return {'status': 'success'}
+
