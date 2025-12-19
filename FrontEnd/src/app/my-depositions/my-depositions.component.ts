@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {Subscription} from 'rxjs';
@@ -22,7 +22,7 @@ export interface Deposition {
   templateUrl: './my-depositions.component.html',
   styleUrls: ['./my-depositions.component.css'],
   standalone: true,
-  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton]
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink]
 })
 export class MyDepositionsComponent implements OnInit, OnDestroy {
   depositions: Deposition[] = [];
