@@ -553,7 +553,7 @@ export class ApiService implements OnDestroy {
       this.http.post(apiEndPoint, body).subscribe(jsonData => {
         console.log(jsonData);
 
-    this.messagesService.sendMessage(new Message('Email sent. Please check your inbox, and spam folder if you don\'t see it.',
+    this.messagesService.sendMessage(new Message('Email sent. Please check your inbox and also check your spam folder if you don\'t see it.',
           MessageType.NotificationMessage, 15000));
         resolve(jsonData['status']);
       }, error => {
