@@ -44,6 +44,36 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     this.subscription$ = this.api.getAuthorizedDepositions().subscribe(
       (depositions: Deposition[]) => {
         this.depositions = depositions;
+
+        // Add current deposition from localStorage if not already included
+        if (this.currentDepositionId) {
+          const isCurrentIncluded = depositions.some(
+            dep => dep.deposition_id === this.currentDepositionId
+          );
+
+          if (!isCurrentIncluded) {
+            // Get nickname from localStorage entry
+            let nickname = 'Current deposition';
+            try {
+              const entryData = JSON.parse(localStorage.getItem('entry'));
+              if (entryData && entryData.deposition_nickname) {
+                nickname = entryData.deposition_nickname;
+              }
+            } catch (e) {
+              // If parsing fails, use default nickname
+            }
+
+            this.depositions = [
+              {
+                deposition_id: this.currentDepositionId,
+                nickname: nickname,
+                authorized_via: []
+              },
+              ...this.depositions
+            ];
+          }
+        }
+
         this.loading = false;
       },
       () => {
