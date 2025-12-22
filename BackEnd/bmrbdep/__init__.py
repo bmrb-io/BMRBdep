@@ -39,6 +39,9 @@ if application.debug or configuration['debug']:
 application.secret_key = configuration['secret_key']
 assert application.secret_key != "CHANGE_ME"
 
+# Configure session timeout for email sessions (2 weeks)
+application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(weeks=2)
+
 # Set up the mail interface
 application.config.update(
     MAIL_SERVER=configuration['smtp']['server'],

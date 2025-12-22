@@ -56,6 +56,7 @@ def activate_email_session(token: str):
     if not (email := verify_email_token(token)):
         raise RequestError('Invalid e-mail validation token.')
 
+    session.permanent = True
     session['active_email'] = email
     return redirect('/my-depositions', code=302)
 
