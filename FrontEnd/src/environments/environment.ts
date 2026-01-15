@@ -1,6 +1,6 @@
 
 let apiRoot = 'http://localhost:9000/deposition';
-if (window.location.hostname.startsWith('dev.')) {
+if (window.location.hostname.includes('bmrb')) {
   apiRoot = '/deposition';
 }
 
