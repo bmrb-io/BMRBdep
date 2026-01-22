@@ -3,64 +3,66 @@ import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/sna
 import {Router} from '@angular/router';
 
 export enum MessageType {
-  ErrorMessage,
-  NotificationMessage
+    ErrorMessage,
+    NotificationMessage
 }
 
 export const MessageTypeLabel = new Map<number, string>([
-  [MessageType.ErrorMessage, 'ErrorMessage'],
-  [MessageType.NotificationMessage, 'NotificationMessage'],
+    [MessageType.ErrorMessage, 'ErrorMessage'],
+    [MessageType.NotificationMessage, 'NotificationMessage'],
 ]);
 
 
 export class Message {
-  messageBody: string;
-  messageType: MessageType;
-  messageTimeout: number;
+    messageBody: string;
+    messageType: MessageType;
+    messageTimeout: number;
 
-  constructor(messageBody: string,
-              messageType: MessageType = MessageType.NotificationMessage,
-              messageTimeout: number = 15000) {
-    this.messageBody = messageBody;
-    this.messageType = messageType;
-    this.messageTimeout = messageTimeout;
-  }
+    constructor(messageBody: string,
+                messageType: MessageType = MessageType.NotificationMessage,
+                messageTimeout: number = 15000) {
+        this.messageBody = messageBody;
+        this.messageType = messageType;
+        this.messageTimeout = messageTimeout;
+    }
 }
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class MessagesService {
 
-  snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+    snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private snackBar: MatSnackBar,
-              private router: Router) {
-  }
-
-  sendMessage(message: Message, actualException = null) {
-    let action = null;
-    if (message.messageType === MessageType.ErrorMessage) {
-      action = 'Notify Us';
+    constructor(private snackBar: MatSnackBar,
+                private router: Router) {
     }
-    this.snackBarRef = this.snackBar.open(message.messageBody, action, {
-      duration: message.messageTimeout,
-      panelClass: MessageTypeLabel.get(message.messageType)
-    });
 
-    this.snackBarRef.onAction().subscribe(() => {
-      let errorMessage = message.messageBody;
-      if (actualException) {
-        errorMessage = actualException;
-      }
-      this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
-    });
+    sendMessage(message: Message, actualException = null) {
+        let action = null;
+        if (message.messageType === MessageType.ErrorMessage) {
+            action = 'Notify Us';
+        }
+        this.snackBarRef = this.snackBar.open(message.messageBody, action, {
+            duration: message.messageTimeout,
+            panelClass: MessageTypeLabel.get(message.messageType)
+        });
 
-    // Log messages to the console if in development mode
-    console.log('Sent message: ', message);
-  }
+        this.snackBarRef.onAction().subscribe({
+            next: () => {
+                let errorMessage = message.messageBody;
+                if (actualException) {
+                    errorMessage = actualException;
+                }
+                this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
+            }
+        });
 
-  clearMessage() {
-    this.snackBarRef.dismiss();
-  }
+        // Log messages to the console if in development mode
+        console.log('Sent message: ', message);
+    }
+
+    clearMessage() {
+        this.snackBarRef.dismiss();
+    }
 }

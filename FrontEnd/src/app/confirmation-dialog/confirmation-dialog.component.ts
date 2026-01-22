@@ -12,15 +12,15 @@ import {MatButton} from '@angular/material/button';
     imports: [MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton]
 })
 export class ConfirmationDialogComponent {
-  public confirmMessage: string;
-  public proceedMessage: string;
-  public cancelMessage: string;
-  public inputBoxText: string;
-  public name: string;
+    public confirmMessage: string;
+    public proceedMessage: string;
+    public cancelMessage: string;
+    public inputBoxText: string;
+    public name: string;
 
-  constructor(public dialogRef: MatDialogRef<ConfirmationDialogComponent>) {
-    this.proceedMessage = 'Proceed';
-    this.cancelMessage = 'Cancel';
-    this.inputBoxText = null;
-  }
+    constructor(public dialogRef: MatDialogRef<ConfirmationDialogComponent>) {
+        this.proceedMessage = 'Proceed';
+        this.cancelMessage = 'Cancel';
+        this.inputBoxText = null;
+    }
 }

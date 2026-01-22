@@ -3,8 +3,8 @@ import {ApiService} from '../api.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 import {Subscription, timer} from 'rxjs';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
-import { MatButton } from '@angular/material/button';
+import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
+import {MatButton} from '@angular/material/button';
 
 @Component({
     selector: 'app-pending-validation',
@@ -23,31 +23,35 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         const parent: PendingValidationComponent = this;
-        this.subscription$ = this.api.entrySubject.subscribe(entry => {
-            parent.entry = entry;
-            // Route straight to the entry if validated
-            if (entry && entry.emailValidated) {
-                if (entry.firstIncompleteCategory) {
-                    parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
-                } else {
-                    parent.router.navigate(['/entry/', 'review']).then();
+        this.subscription$ = this.api.entrySubject.subscribe({
+            next: entry => {
+                parent.entry = entry;
+                // Route straight to the entry if validated
+                if (entry && entry.emailValidated) {
+                    if (entry.firstIncompleteCategory) {
+                        parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
+                    } else {
+                        parent.router.navigate(['/entry/', 'review']).then();
+                    }
                 }
             }
         });
 
         // Check the validation status every 2.5 seconds
-        this.subscription$.add(timer(0, 2500).subscribe(() => {
-            parent.api.checkValidatedEmail().then(status => {
-                if (status) {
-                    parent.entry.emailValidated = true;
-                    parent.api.storeEntry(false);
-                    if (parent.entry.firstIncompleteCategory) {
-                        parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
-                    } else {
-                        parent.router.navigate(['/entry/', 'review']).then();
+        this.subscription$.add(timer(0, 2500).subscribe({
+            next: () => {
+                parent.api.checkValidatedEmail().then(status => {
+                    if (status) {
+                        parent.entry.emailValidated = true;
+                        parent.api.storeEntry(false);
+                        if (parent.entry.firstIncompleteCategory) {
+                            parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
+                        } else {
+                            parent.router.navigate(['/entry/', 'review']).then();
+                        }
                     }
-                }
-            });
+                });
+            }
         }));
     }
 

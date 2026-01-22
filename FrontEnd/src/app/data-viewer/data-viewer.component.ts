@@ -6,19 +6,19 @@ import {MarkdownComponent} from 'ngx-markdown';
 import {MatButton} from '@angular/material/button';
 
 export class Files {
-  name: string;
-  path: string;
+    name: string;
+    path: string;
 }
 
 export class Entry {
-  id: string;
-  release_date: string;
-  title: string;
-  details: string;
-  author: string;
-  bmrb_id: string;
-  pdb_id: string;
-  doi: string;
+    id: string;
+    release_date: string;
+    title: string;
+    details: string;
+    author: string;
+    bmrb_id: string;
+    pdb_id: string;
+    doi: string;
 }
 
 @Component({
@@ -28,48 +28,55 @@ export class Entry {
     imports: [MarkdownComponent, MatButton, RouterLink]
 })
 export class DataViewerComponent implements OnInit {
-  public files: Array<Files>;
-  public title: string;
-  public details: string;
-  public entry_id: string;
-  public env: object;
-  public records: Array<Entry>;
-  constructor(private http: HttpClient,
-              private route: ActivatedRoute) {
-    this.env = environment;
-  }
+    public files: Array<Files>;
+    public title: string;
+    public details: string;
+    public entry_id: string;
+    public env: object;
+    public records: Array<Entry>;
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      // Entry summary page
-      if (params['entry']) {
-        let entry: string = params['entry'];
-        // Work if they only supply the number
-        if (!isNaN(+entry)) {
-          entry = 'bmrbig' + entry;
-        }
-        this.getEntryRecord(entry);
-        this.entry_id = entry;
-      } else {
-        // All entries page
-        this.getAllEntries();
-      }
-    });
-  }
+    constructor(private http: HttpClient,
+                private route: ActivatedRoute) {
+        this.env = environment;
+    }
 
-  getEntryRecord(entry_id): void {
-    const url = `${environment.serverURL}/released/${entry_id}`;
-    this.http.get(url).subscribe(response => {
-      this.files = response['files'] as Array<Files>;
-      this.title = response['title'];
-      this.details = response['details'];
-    });
-  }
+    ngOnInit(): void {
+        this.route.params.subscribe({
+            next: params => {
+                // Entry summary page
+                if (params['entry']) {
+                    let entry: string = params['entry'];
+                    // Work if they only supply the number
+                    if (!isNaN(+entry)) {
+                        entry = 'bmrbig' + entry;
+                    }
+                    this.getEntryRecord(entry);
+                    this.entry_id = entry;
+                } else {
+                    // All entries page
+                    this.getAllEntries();
+                }
+            }
+        });
+    }
 
-  getAllEntries(): void {
-    const url = `${environment.serverURL}/released`;
-    this.http.get(url).subscribe(response => {
-      this.records = response as Array<Entry>;
-    });
-  }
+    getEntryRecord(entry_id): void {
+        const url = `${environment.serverURL}/released/${entry_id}`;
+        this.http.get(url).subscribe({
+            next: response => {
+                this.files = response['files'] as Array<Files>;
+                this.title = response['title'];
+                this.details = response['details'];
+            }
+        });
+    }
+
+    getAllEntries(): void {
+        const url = `${environment.serverURL}/released`;
+        this.http.get(url).subscribe({
+            next: response => {
+                this.records = response as Array<Entry>;
+            }
+        });
+    }
 }

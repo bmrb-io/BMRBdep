@@ -22,35 +22,37 @@ import {TreeViewComponent} from './treeview/tree-view.component';
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  sidenav_open: boolean;
-  entry: Entry;
-  subscription$: Subscription;
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+    sidenav_open: boolean;
+    entry: Entry;
+    subscription$: Subscription;
+    @ViewChild('sidenav') public sidenav: MatSidenav;
 
-  constructor(private api: ApiService,
-              private sidenavService: SidenavService,
-              public loader: LoadingBarService) {
-    this.sidenav_open = false;
-  }
-
-  ngOnInit() {
-    console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
-      '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
-
-    this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
-  }
-
-  ngAfterViewInit(): void {
-    this.sidenavService.setSidenav(this.sidenav);
-  }
-
-  ngOnDestroy() {
-    if (this.subscription$) {
-      this.subscription$.unsubscribe();
+    constructor(private api: ApiService,
+                private sidenavService: SidenavService,
+                public loader: LoadingBarService) {
+        this.sidenav_open = false;
     }
-  }
 
-  clearEntry(): void {
-    this.api.clearDeposition();
-  }
+    ngOnInit() {
+        console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
+            '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
+
+        this.subscription$ = this.api.entrySubject.subscribe({
+            next: entry => this.entry = entry
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.sidenavService.setSidenav(this.sidenav);
+    }
+
+    ngOnDestroy() {
+        if (this.subscription$) {
+            this.subscription$.unsubscribe();
+        }
+    }
+
+    clearEntry(): void {
+        this.api.clearDeposition();
+    }
 }

@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Saveframe} from '../../nmrstar/saveframe';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { LoopViewComponent } from '../loop/loop-view.component';
+import {FormsModule} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {LoopViewComponent} from '../loop/loop-view.component';
 
 @Component({
     selector: 'app-saveframe-view',
@@ -11,11 +11,11 @@ import { LoopViewComponent } from '../loop/loop-view.component';
     imports: [FormsModule, RouterLink, LoopViewComponent]
 })
 export class SaveframeViewComponent implements OnInit {
-  @Input() saveframe: Saveframe;
+    @Input() saveframe: Saveframe;
 
-  constructor() {
-  }
+    constructor() {
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+    }
 }

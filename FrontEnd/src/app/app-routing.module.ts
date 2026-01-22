@@ -13,26 +13,26 @@ import {SupportComponent} from './support/support-component';
 import {DataViewerComponent} from './data-viewer/data-viewer.component';
 
 const routes: Routes = [
-  {path: '', component: WelcomeComponent},
-  {path: 'entry', component: EntryComponent},
-  {path: 'entry/load/:entry', component: LoadEntryComponent},
-  {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
-  {path: 'entry/review', component: ReviewComponent},
-  {path: 'entry/restore', component: RestoreComponent},
-  {path: 'entry/pending-verification', component: PendingValidationComponent},
-  {path: 'help/molecular-assembly', component: MolecularSystemComponent},
-  {path: 'support', component: SupportComponent},
-  {path: 'released', component: DataViewerComponent},
-  {path: 'released/:entry', component: DataViewerComponent}
+    {path: '', component: WelcomeComponent},
+    {path: 'entry', component: EntryComponent},
+    {path: 'entry/load/:entry', component: LoadEntryComponent},
+    {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
+    {path: 'entry/review', component: ReviewComponent},
+    {path: 'entry/restore', component: RestoreComponent},
+    {path: 'entry/pending-verification', component: PendingValidationComponent},
+    {path: 'help/molecular-assembly', component: MolecularSystemComponent},
+    {path: 'support', component: SupportComponent},
+    {path: 'released', component: DataViewerComponent},
+    {path: 'released/:entry', component: DataViewerComponent}
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })
-  ],
-  exports: [
-    RouterModule
-  ]
+    imports: [
+        RouterModule.forRoot(routes, {scrollPositionRestoration: 'enabled'})
+    ],
+    exports: [
+        RouterModule
+    ]
 })
 
 export class AppRoutingModule {

@@ -1,6 +1,6 @@
 import {Loop} from '../../nmrstar/loop';
 import {Component, Input, OnInit} from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 
 @Component({
     selector: 'app-loop-view',
@@ -10,12 +10,12 @@ import { FormsModule } from '@angular/forms';
 })
 
 export class LoopViewComponent implements OnInit {
-  @Input() loop: Loop;
+    @Input() loop: Loop;
 
-  constructor() {
-  }
+    constructor() {
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+    }
 
 }

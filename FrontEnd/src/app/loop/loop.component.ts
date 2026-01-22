@@ -5,10 +5,10 @@ import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@an
 
 /* Import country updater code */
 import * as crs from '../javascript/crs.min';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
-import { NgClass } from '@angular/common';
-import { TagComponent } from '../tag/tag.component';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatButton} from '@angular/material/button';
+import {NgClass} from '@angular/common';
+import {TagComponent} from '../tag/tag.component';
 
 @Component({
     selector: 'app-loop',
@@ -17,64 +17,66 @@ import { TagComponent } from '../tag/tag.component';
     imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
-  @Input() loop: Loop;
-  activeTag: LoopTag;
-  crsInit: boolean;
+    @Input() loop: Loop;
+    activeTag: LoopTag;
+    crsInit: boolean;
 
-  constructor(private api: ApiService,
-              private changeDetector: ChangeDetectorRef) {
-    this.activeTag = null;
-    this.crsInit = false;
-  }
-
-  ngOnInit() {
-  }
-
-  // Load the country autofill code
-  ngAfterViewChecked() {
-    // Note that we use ngAfterViewChecked with a custom run-once check rather than AfterViewInit due to the issues discussed here:
-    // https://stackoverflow.com/questions/31171084/how-to-call-function-after-dom-renders-in-angular2
-    if (!this.crsInit && this.loop.category === '_Contact_person') {
-      crs.init();
-      this.crsInit = true;
+    constructor(private api: ApiService,
+                private changeDetector: ChangeDetectorRef) {
+        this.activeTag = null;
+        this.crsInit = false;
     }
-  }
 
-  // Add another row of data
-  addRow() {
-    this.loop.addRow();
-    this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
-    // Reload the country-autofill code
-    if (this.loop.category === '_Contact_person') {
-      this.changeDetector.detectChanges();
-      crs.init();
+    ngOnInit() {
     }
-  }
 
-  // Delete a row of data
-  deleteRow(row_id) {
-    this.loop.deleteRow(row_id);
-    this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
-  }
-
-  helpClick(activeTag: LoopTag, el: HTMLElement) {
-    if (this.activeTag !== activeTag) {
-      this.activeTag = activeTag;
-      setTimeout(() => {el.scrollIntoView(false); }, 5);
-    } else {
-      this.activeTag = null;
+    // Load the country autofill code
+    ngAfterViewChecked() {
+        // Note that we use ngAfterViewChecked with a custom run-once check rather than AfterViewInit due to the issues discussed here:
+        // https://stackoverflow.com/questions/31171084/how-to-call-function-after-dom-renders-in-angular2
+        if (!this.crsInit && this.loop.category === '_Contact_person') {
+            crs.init();
+            this.crsInit = true;
+        }
     }
-  }
 
-  log() {
-    console.log(this.loop);
-  }
+    // Add another row of data
+    addRow() {
+        this.loop.addRow();
+        this.loop.parent.parent.refresh();
+        this.api.storeEntry(true);
+        // Reload the country-autofill code
+        if (this.loop.category === '_Contact_person') {
+            this.changeDetector.detectChanges();
+            crs.init();
+        }
+    }
 
-  copyAuthors(): void {
-    this.loop.copyAuthors();
-    this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
-  }
+    // Delete a row of data
+    deleteRow(row_id) {
+        this.loop.deleteRow(row_id);
+        this.loop.parent.parent.refresh();
+        this.api.storeEntry(true);
+    }
+
+    helpClick(activeTag: LoopTag, el: HTMLElement) {
+        if (this.activeTag !== activeTag) {
+            this.activeTag = activeTag;
+            setTimeout(() => {
+                el.scrollIntoView(false);
+            }, 5);
+        } else {
+            this.activeTag = null;
+        }
+    }
+
+    log() {
+        console.log(this.loop);
+    }
+
+    copyAuthors(): void {
+        this.loop.copyAuthors();
+        this.loop.parent.parent.refresh();
+        this.api.storeEntry(true);
+    }
 }

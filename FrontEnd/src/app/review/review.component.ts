@@ -6,14 +6,14 @@ import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
-import { MatNavList } from '@angular/material/list';
-import { MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
-import { MatFormField } from '@angular/material/select';
-import { MatInput } from '@angular/material/input';
+import {FormsModule, ReactiveFormsModule, UntypedFormControl} from '@angular/forms';
+import {MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
+import {MatNavList} from '@angular/material/list';
+import {MatButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {RouterLink} from '@angular/router';
+import {MatFormField} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
 
 @Component({
     selector: 'app-review',
@@ -22,47 +22,51 @@ import { MatInput } from '@angular/material/input';
     imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatCardActions]
 })
 export class ReviewComponent implements OnInit, OnDestroy {
-  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
-  entry: Entry;
-  subscription$: Subscription;
-  messageControl = new UntypedFormControl('');
+    dialogRef: MatDialogRef<ConfirmationDialogComponent>;
+    entry: Entry;
+    subscription$: Subscription;
+    messageControl = new UntypedFormControl('');
 
-  constructor(public api: ApiService,
-              private messagesService: MessagesService,
-              private location: Location,
-              private dialog: MatDialog) {
-  }
-
-  ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
-  }
-
-  ngOnDestroy() {
-    this.subscription$.unsubscribe();
-  }
-
-  goBack(): void {
-    this.location.back();
-  }
-
-  submitEntry(): void {
-    if (this.entry.deposited) {
-      this.api.depositEntry(this.messageControl.value).then();
-      return;
+    constructor(public api: ApiService,
+                private messagesService: MessagesService,
+                private location: Location,
+                private dialog: MatDialog) {
     }
-    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      disableClose: false
-    });
-    this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to upload the entry '${this.entry.depositionNickname}'?` +
-      " You'll be able to add additional data to this upload later.";
-    this.dialogRef.componentInstance.proceedMessage = 'Upload';
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Submit the entry!
-        this.api.depositEntry(this.messageControl.value).then();
-      }
-      this.dialogRef = null;
-    });
-  }
+    ngOnInit() {
+        this.subscription$ = this.api.entrySubject.subscribe({
+            next: entry => this.entry = entry
+        });
+    }
+
+    ngOnDestroy() {
+        this.subscription$.unsubscribe();
+    }
+
+    goBack(): void {
+        this.location.back();
+    }
+
+    submitEntry(): void {
+        if (this.entry.deposited) {
+            this.api.depositEntry(this.messageControl.value).then();
+            return;
+        }
+        this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+            disableClose: false
+        });
+        this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to upload the entry '${this.entry.depositionNickname}'?` +
+            ' You\'ll be able to add additional data to this upload later.';
+        this.dialogRef.componentInstance.proceedMessage = 'Upload';
+
+        this.dialogRef.afterClosed().subscribe({
+            next: result => {
+                if (result) {
+                    // Submit the entry!
+                    this.api.depositEntry(this.messageControl.value).then();
+                }
+                this.dialogRef = null;
+            }
+        });
+    }
 }

@@ -1,15 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {ApiService} from '../api.service';
-import { UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
-import { MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatFormField, MatError } from '@angular/material/select';
-import { MatInput } from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatError, MatFormField} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
 
 @Component({
     selector: 'app-welcome',
@@ -18,65 +18,67 @@ import { MatInput } from '@angular/material/input';
     imports: [FormsModule, ReactiveFormsModule, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, MatError]
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
-  entry: Entry;
-  subscription$: Subscription;
-  emailValidationError: boolean;
-  public production;
+    entry: Entry;
+    subscription$: Subscription;
+    emailValidationError: boolean;
+    public production;
 
-  constructor(private router: Router,
-              public api: ApiService,
-              private sidenavService: SidenavService) {
-    this.entry = null;
-    this.emailValidationError = false;
-    this.production = environment.production;
-  }
-
-  authorEmail = new UntypedFormControl('', [
-    Validators.required,
-    Validators.email,
-  ]);
-  depositionNickname = new UntypedFormControl('', [Validators.required]);
-  authorORCID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
-  sessionVisibility = new UntypedFormControl('', [Validators.required]);
-
-  createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
-    authorEmail: this.authorEmail,
-    depositionNickname: this.depositionNickname,
-    authorORCID: this.authorORCID,
-  });
-
-  getEmailErrorMessage(emailForm: UntypedFormControl) {
-    return emailForm.hasError('required') ? 'You must enter your email address.' :
-      emailForm.hasError('email') ? 'Not a valid email address.' : '';
-  }
-
-  ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-    });
-  }
-
-  ngOnDestroy() {
-    this.subscription$.unsubscribe();
-  }
-
-  new(f: UntypedFormGroup) {
-
-    if (!f.valid) {
-      return;
+    constructor(private router: Router,
+                public api: ApiService,
+                private sidenavService: SidenavService) {
+        this.entry = null;
+        this.emailValidationError = false;
+        this.production = environment.production;
     }
 
-    this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, 'public').then(
-      deposition_id => {
-        this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
-          this.sidenavService.open().then();
-          location.reload();
+    authorEmail = new UntypedFormControl('', [
+        Validators.required,
+        Validators.email,
+    ]);
+    depositionNickname = new UntypedFormControl('', [Validators.required]);
+    authorORCID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
+    sessionVisibility = new UntypedFormControl('', [Validators.required]);
+
+    createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
+        authorEmail: this.authorEmail,
+        depositionNickname: this.depositionNickname,
+        authorORCID: this.authorORCID,
+    });
+
+    getEmailErrorMessage(emailForm: UntypedFormControl) {
+        return emailForm.hasError('required') ? 'You must enter your email address.' :
+            emailForm.hasError('email') ? 'Not a valid email address.' : '';
+    }
+
+    ngOnInit() {
+        this.subscription$ = this.api.entrySubject.subscribe({
+            next: entry => {
+                this.entry = entry;
+            }
         });
-      }, error => {
-        if (error === 'Invalid e-mail') {
-          this.emailValidationError = true;
+    }
+
+    ngOnDestroy() {
+        this.subscription$.unsubscribe();
+    }
+
+    new(f: UntypedFormGroup) {
+
+        if (!f.valid) {
+            return;
         }
-      });
-  }
+
+        this.api.clearDeposition();
+        this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.authorORCID, 'public').then(
+            deposition_id => {
+                this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
+                    this.sidenavService.open().then();
+                    location.reload();
+                });
+            }, error => {
+                if (error === 'Invalid e-mail') {
+                    this.emailValidationError = true;
+                }
+            });
+    }
 }

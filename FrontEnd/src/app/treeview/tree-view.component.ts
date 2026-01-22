@@ -1,18 +1,18 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ApiService} from '../api.service';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
 import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {environment} from '../../environments/environment';
-import { MatCard, MatCardTitle, MatCardContent } from '@angular/material/card';
-import { MatNavList, MatDivider, MatListItem } from '@angular/material/list';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIcon } from '@angular/material/icon';
-import { NgClass } from '@angular/common';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { FormsModule } from '@angular/forms';
+import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
+import {MatDivider, MatListItem, MatNavList} from '@angular/material/list';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatIcon} from '@angular/material/icon';
+import {NgClass} from '@angular/common';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {FormsModule} from '@angular/forms';
 
 @Component({
     selector: 'app-tree-view',
@@ -21,95 +21,97 @@ import { FormsModule } from '@angular/forms';
     imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
-  active: string;
-  developerMode: boolean;
-  entry: Entry;
-  page: string;
-  @Output() sessionEnd = new EventEmitter<boolean>();
-  subscription$: Subscription;
+    active: string;
+    developerMode: boolean;
+    entry: Entry;
+    page: string;
+    @Output() sessionEnd = new EventEmitter<boolean>();
+    subscription$: Subscription;
 
-  constructor(private api: ApiService,
-              private router: Router,
-              private route: ActivatedRoute) {
-    this.developerMode = !environment.production;
-    this.page = '?';
-  }
+    constructor(private api: ApiService,
+                private router: Router,
+                private route: ActivatedRoute) {
+        this.developerMode = !environment.production;
+        this.page = '?';
+    }
 
-  ngOnInit() {
+    ngOnInit() {
 
-    const parent = this;
-    this.subscription$ = combineLatest([this.router.events, this.route.queryParams]).pipe(
-      map(() => {
-        let r = this.route;
-        while (r.firstChild) {
-          r = r.firstChild;
+        const parent = this;
+        this.subscription$ = combineLatest([this.router.events, this.route.queryParams]).pipe(
+            map(() => {
+                let r = this.route;
+                while (r.firstChild) {
+                    r = r.firstChild;
+                }
+
+                const urlSegments = this.router.url.split('/');
+
+                if (urlSegments[2] === 'saveframe') {
+                    parent.active = urlSegments[3];
+                    parent.page = 'category';
+                } else {
+                    parent.page = urlSegments[urlSegments.length - 1];
+                    if (parent.page === '') {
+                        parent.page = 'new';
+                    }
+                }
+            })
+        ).subscribe();
+
+        this.subscription$.add(this.api.entrySubject.subscribe({
+            next: entry => this.entry = entry
+        }));
+    }
+
+    ngOnDestroy() {
+        if (this.subscription$) {
+            this.subscription$.unsubscribe();
         }
+    }
 
-        const urlSegments = this.router.url.split('/');
+    download(name: string, printable_object): void {
+        download(name, printable_object);
+    }
 
-        if (urlSegments[2] === 'saveframe') {
-          parent.active = urlSegments[3];
-          parent.page = 'category';
+    endSession(): void {
+        this.api.clearDeposition();
+        this.sessionEnd.emit(true);
+    }
+
+    logEntry(): void {
+        console.log(this.entry);
+    }
+
+    timeRefresh(): void {
+        const iterations = 50;
+        // tslint:disable-next-line:no-console
+        console.time('Refresh');
+        for (let i = 0; i < iterations; i++) {
+            this.entry.refresh();
+        }
+        // tslint:disable-next-line:no-console
+        console.timeEnd('Refresh');
+    }
+
+    refresh(): void {
+        this.api.loadEntry(this.entry.entryID, true);
+        this.entry.refresh();
+        this.api.storeEntry(false);
+        localStorage.setItem('entry', JSON.stringify(this.entry));
+        localStorage.setItem('entryID', this.entry.entryID);
+        localStorage.setItem('schema', JSON.stringify(this.entry.schema));
+    }
+
+    scrollSideNav(): void {
+        let element: HTMLElement;
+        if (this.page === 'category') {
+            element = document.getElementById(this.active);
         } else {
-          parent.page = urlSegments[urlSegments.length - 1];
-          if (parent.page === '') {
-            parent.page = 'new';
-          }
+            element = document.getElementById(this.page);
         }
-      })
-    ).subscribe();
-
-    this.subscription$.add(this.api.entrySubject.subscribe(entry => this.entry = entry));
-  }
-
-  ngOnDestroy() {
-    if (this.subscription$) {
-      this.subscription$.unsubscribe();
+        if (element) {
+            element.parentElement.scrollIntoView({behavior: 'smooth'});
+        }
     }
-  }
-
-  download(name: string, printable_object): void {
-    download(name, printable_object);
-  }
-
-  endSession(): void {
-    this.api.clearDeposition();
-    this.sessionEnd.emit(true);
-  }
-
-  logEntry(): void {
-    console.log(this.entry);
-  }
-
-  timeRefresh(): void {
-    const iterations = 50;
-    // tslint:disable-next-line:no-console
-    console.time('Refresh');
-    for (let i = 0; i < iterations; i++ ) {
-      this.entry.refresh();
-    }
-    // tslint:disable-next-line:no-console
-    console.timeEnd('Refresh');
-  }
-
-  refresh(): void {
-    this.api.loadEntry(this.entry.entryID, true);
-    this.entry.refresh();
-    this.api.storeEntry(false);
-    localStorage.setItem('entry', JSON.stringify(this.entry));
-    localStorage.setItem('entryID', this.entry.entryID);
-    localStorage.setItem('schema', JSON.stringify(this.entry.schema));
-  }
-
-  scrollSideNav(): void {
-    let element: HTMLElement;
-    if (this.page === 'category') {
-      element = document.getElementById(this.active);
-    } else {
-      element = document.getElementById(this.page);
-    }
-    if (element) {
-      element.parentElement.scrollIntoView({behavior: 'smooth'});
-    }
-  }
 }
