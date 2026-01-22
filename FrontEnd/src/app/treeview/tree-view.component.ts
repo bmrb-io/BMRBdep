@@ -6,8 +6,8 @@ import {Entry} from '../nmrstar/entry';
 import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {environment} from '../../environments/environment';
-import {MatCard, MatCardTitle, MatCardContent} from '@angular/material/card';
-import {MatNavList, MatDivider, MatListItem} from '@angular/material/list';
+import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
+import {MatDivider, MatListItem, MatNavList} from '@angular/material/list';
 import {MatLine} from '@angular/material/core';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatIcon} from '@angular/material/icon';
@@ -61,7 +61,9 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       })
     ).subscribe();
 
-    this.subscription$.add(this.api.entrySubject.subscribe(entry => this.entry = entry));
+    this.subscription$.add(this.api.entrySubject.subscribe({
+      next: entry => this.entry = entry
+    }));
   }
 
   ngOnDestroy() {

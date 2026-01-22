@@ -34,15 +34,16 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     private api: ApiService,
     private router: Router,
     private dialog: MatDialog
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     // Get current deposition ID from localStorage
     this.currentDepositionId = localStorage.getItem('entryID');
 
     // Fetch authorized depositions from API
-    this.subscription$ = this.api.getAuthorizedDepositions().subscribe(
-      (depositions: Deposition[]) => {
+    this.subscription$ = this.api.getAuthorizedDepositions().subscribe({
+      next: (depositions: Deposition[]) => {
         this.depositions = depositions;
 
         // Add current deposition from localStorage if not already included
@@ -76,10 +77,10 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
 
         this.loading = false;
       },
-      () => {
+      error: () => {
         this.loading = false;
       }
-    );
+    });
   }
 
   ngOnDestroy() {
@@ -96,7 +97,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     }
     const auths = authorizedVia.map(auth => {
       if (auth === 'email') {
-       return 'E-mail address';
+        return 'E-mail address';
       }
       if (auth === 'orcid') {
         return 'ORCID iD';
@@ -116,13 +117,15 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     dialogRef.componentInstance.proceedMessage = 'Yes, load deposition';
     dialogRef.componentInstance.cancelMessage = 'Cancel';
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Clear local storage
-        this.api.clearDeposition();
+    dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Clear local storage
+          this.api.clearDeposition();
 
-        // Navigate to load endpoint
-        this.router.navigate(['/entry', 'load', deposition.deposition_id]).then();
+          // Navigate to load endpoint
+          this.router.navigate(['/entry', 'load', deposition.deposition_id]).then();
+        }
       }
     });
   }

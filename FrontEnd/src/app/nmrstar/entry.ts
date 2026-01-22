@@ -384,7 +384,7 @@ export class Entry {
               // The rule applies to a loop in this saveframe
               if (loopsByPrefix[rule['Tag category']]) {
                 loopsByPrefix[rule['Tag category']].setVisibility(rule);
-              // The rule applies to a saveframe elsewhere
+                // The rule applies to a saveframe elsewhere
               } else {
                 // If the rule applies to a different saveframe category, apply the rule to all of the saveframes in the category
                 if (rule['Sf category'] !== saveframe.category) {

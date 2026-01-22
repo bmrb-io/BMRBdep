@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions} from '@angular/material/dialog';
+import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatFormField, MatLabel} from '@angular/material/select';
 import {MatInput} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';

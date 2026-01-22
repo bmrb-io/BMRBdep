@@ -19,7 +19,9 @@ export class EntryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => this.entry = entry
+    });
   }
 
   ngOnDestroy() {

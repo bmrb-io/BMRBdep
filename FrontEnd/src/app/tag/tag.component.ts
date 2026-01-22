@@ -4,10 +4,10 @@ import {Tag} from '../nmrstar/tag';
 import {FormsModule} from '@angular/forms';
 import {NgClass} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
-import {MatSelect, MatOption} from '@angular/material/select';
+import {MatOption, MatSelect} from '@angular/material/select';
 import {MatInput} from '@angular/material/input';
-import {MatAutocompleteTrigger, MatAutocomplete} from '@angular/material/autocomplete';
-import {MatRadioGroup, MatRadioButton} from '@angular/material/radio';
+import {MatAutocomplete, MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 
 @Component({
   selector: 'app-tag',

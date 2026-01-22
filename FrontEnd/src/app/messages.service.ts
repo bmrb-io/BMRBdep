@@ -48,12 +48,14 @@ export class MessagesService {
       panelClass: MessageTypeLabel.get(message.messageType)
     });
 
-    this.snackBarRef.onAction().subscribe(() => {
-      let errorMessage = message.messageBody;
-      if (actualException) {
-        errorMessage = actualException;
+    this.snackBarRef.onAction().subscribe({
+      next: () => {
+        let errorMessage = message.messageBody;
+        if (actualException) {
+          errorMessage = actualException;
+        }
+        this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
       }
-      this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
     });
 
     // Log messages to the console if in development mode

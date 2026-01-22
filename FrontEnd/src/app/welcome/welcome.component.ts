@@ -6,7 +6,6 @@ import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
-import {MessagesService} from '../messages.service';
 import {MatButton} from '@angular/material/button';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatError, MatFormField, MatOption, MatSelect} from '@angular/material/select';
@@ -67,8 +66,10 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => {
+        this.entry = entry;
+      }
     });
   }
 

@@ -7,7 +7,7 @@ import {Subscription} from 'rxjs';
 import {MatButton} from '@angular/material/button';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SaveframeComponent} from '../saveframe/saveframe.component';
-import {MatCard, MatCardTitle, MatCardContent, MatCardActions} from '@angular/material/card';
+import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/material/card';
 
 @Component({
   selector: 'app-saveframe-editor',
@@ -30,16 +30,20 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-      this.reloadSaveframes();
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => {
+        this.entry = entry;
+        this.reloadSaveframes();
+      }
     });
 
     // Listen for the changing of the params string
     const parent = this;
-    this.subscription$.add(this.route.params.subscribe(function (params) {
-      parent.saveframeCategory = params['saveframe_category'];
-      parent.reloadSaveframes();
+    this.subscription$.add(this.route.params.subscribe({
+      next: function (params) {
+        parent.saveframeCategory = params['saveframe_category'];
+        parent.reloadSaveframes();
+      }
     }));
   }
 

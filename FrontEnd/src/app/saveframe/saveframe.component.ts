@@ -38,8 +38,10 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.route.params.subscribe((params: Params) => {
-      this.showCategoryLink = (!('saveframe_category' in params));
+    this.subscription$ = this.route.params.subscribe({
+      next: (params: Params) => {
+        this.showCategoryLink = (!('saveframe_category' in params));
+      }
     });
   }
 
@@ -82,13 +84,15 @@ export class SaveframeComponent implements OnInit, OnDestroy {
         ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
     }
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Delete the saveframe
-        this.saveframe.delete();
-        this.processChange();
+    this.dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Delete the saveframe
+          this.saveframe.delete();
+          this.processChange();
+        }
+        this.dialogRef = null;
       }
-      this.dialogRef = null;
     });
   }
 
@@ -107,13 +111,15 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     }
     this.dialogRef.componentInstance.proceedMessage = 'Clear data';
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Delete the saveframe
-        this.saveframe.clear();
-        this.processChange();
+    this.dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Delete the saveframe
+          this.saveframe.clear();
+          this.processChange();
+        }
+        this.dialogRef = null;
       }
-      this.dialogRef = null;
     });
   }
 }
