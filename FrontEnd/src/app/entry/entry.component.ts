@@ -7,7 +7,7 @@ import {SaveframeComponent} from '../saveframe/saveframe.component';
 @Component({
   selector: 'app-entry',
   templateUrl: './entry.component.html',
-  styleUrls: ['./entry.component.css'],
+  styleUrls: ['./entry.component.scss'],
   standalone: true,
   imports: [SaveframeComponent]
 })

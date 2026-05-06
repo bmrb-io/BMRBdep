@@ -22,7 +22,7 @@ export interface Deposition {
 @Component({
   selector: 'app-my-depositions',
   templateUrl: './my-depositions.component.html',
-  styleUrls: ['./my-depositions.component.css'],
+  styleUrls: ['./my-depositions.component.scss'],
   standalone: true,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink]
 })
