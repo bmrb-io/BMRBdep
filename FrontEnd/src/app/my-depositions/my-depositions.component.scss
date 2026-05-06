@@ -1,0 +1,54 @@
+@use '@angular/material' as mat;
+@use "../../custom-theme.scss" as theme;
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.loading-container p {
+  margin-top: 20px;
+  color: #666;
+}
+
+.no-depositions {
+  padding: 40px;
+  text-align: center;
+  color: #666;
+}
+
+.no-depositions p {
+  margin: 10px 0;
+}
+
+.current-deposition {
+  font-weight: 600;
+}
+
+.auth-reason {
+  font-size: 0.9em;
+  font-weight: normal;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.bmrb-id-badge {
+  display: inline-block;
+  margin-left: 0.6em;
+  padding: 0.15em 0.6em;
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
+  color: black;
+  border: 1px solid mat.m2-get-color-from-palette(theme.$custom-theme-primary, darker);
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+mat-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
