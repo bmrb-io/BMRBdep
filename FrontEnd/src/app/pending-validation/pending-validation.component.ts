@@ -29,7 +29,9 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
         parent.entry = entry;
         // Route straight to the entry if validated
         if (entry && entry.emailValidated) {
-          if (entry.firstIncompleteCategory) {
+          if (entry.deposited) {
+            parent.router.navigate(['/entry']).then();
+          } else if (entry.firstIncompleteCategory) {
             parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
           } else {
             parent.router.navigate(['/entry/', 'review']).then();
@@ -45,7 +47,9 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
           if (status) {
             parent.entry.emailValidated = true;
             parent.api.storeEntry(false);
-            if (parent.entry.firstIncompleteCategory) {
+            if (parent.entry.deposited) {
+              parent.router.navigate(['/entry']).then();
+            } else if (parent.entry.firstIncompleteCategory) {
               parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
             } else {
               parent.router.navigate(['/entry/', 'review']).then();
