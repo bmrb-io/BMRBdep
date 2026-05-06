@@ -99,7 +99,9 @@ def get_authorized_depositions():
             result.append({
                 'deposition_id': dep.deposition_id,
                 'nickname': dep.nickname,
-                'authorized_via': auth_reasons
+                'authorized_via': auth_reasons,
+                'entry_deposited': dep.entry_deposited,
+                'bmrbnum': dep.bmrbnum if dep.entry_deposited else None
             })
 
         return result

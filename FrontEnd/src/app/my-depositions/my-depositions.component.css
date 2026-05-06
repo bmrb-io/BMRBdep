@@ -31,6 +31,19 @@
   color: rgba(0, 0, 0, 0.6);
 }
 
+.bmrb-id-badge {
+  display: inline-block;
+  margin-left: 0.6em;
+  padding: 0.15em 0.6em;
+  background-color: #1976d2;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
 mat-icon {
   margin-right: 8px;
   vertical-align: middle;

@@ -35,6 +35,9 @@
                   }
                 </mat-icon>
                 {{ deposition.nickname }}
+                @if (deposition.entry_deposited && deposition.bmrbnum) {
+                  <span class="bmrb-id-badge">BMRB ID {{ deposition.bmrbnum }}</span>
+                }
                 @if (deposition.authorized_via && deposition.authorized_via.length > 0) {
                   <span class="auth-reason"> ({{ getAuthReasonText(deposition.authorized_via) }})</span>
                 }

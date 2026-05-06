@@ -15,6 +15,8 @@ export interface Deposition {
   deposition_id: string;
   nickname: string;
   authorized_via: string[];
+  entry_deposited?: boolean;
+  bmrbnum?: number;
 }
 
 @Component({
@@ -55,10 +57,16 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
           if (!isCurrentIncluded) {
             // Get nickname from localStorage entry
             let nickname = 'Current deposition';
+            let entryDeposited = false;
+            let bmrbnum: number | undefined;
             try {
               const entryData = JSON.parse(localStorage.getItem('entry'));
               if (entryData && entryData.deposition_nickname) {
                 nickname = entryData.deposition_nickname;
+              }
+              if (entryData && entryData.entry_deposited) {
+                entryDeposited = true;
+                bmrbnum = entryData.bmrbnum;
               }
             } catch (e) {
               // If parsing fails, use default nickname
@@ -68,7 +76,9 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
               {
                 deposition_id: this.currentDepositionId,
                 nickname: nickname,
-                authorized_via: []
+                authorized_via: [],
+                entry_deposited: entryDeposited,
+                bmrbnum: bmrbnum
               },
               ...this.depositions
             ];

@@ -116,7 +116,7 @@ export class Entry {
     return {
       entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
       deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
-      commit: this.commit
+      bmrbnum: this.bmrbnum, commit: this.commit
     };
   }
 
