@@ -14,7 +14,7 @@ dependencies = [
     "simplejson==3.20.1",
     "Flask-Mail==0.10.0", #test
     "requests==2.32.4", # For querying ORCID and PubMed
-    "pynmrstar==3.3.5", # For working with BMRB entries
+    "pynmrstar==3.5.1", # For working with BMRB entries
     "validate_email @ git+https://github.com/bmrb-io/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0", # For email validation
     "gitpython==3.1.45", # For managing depositions
     "filelock==3.12.0", # For managing depositions
