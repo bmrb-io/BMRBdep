@@ -1,14 +1,20 @@
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
+import {MatButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {SaveframeComponent} from '../saveframe/saveframe.component';
+import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/material/card';
 
 @Component({
   selector: 'app-saveframe-editor',
   templateUrl: './saveframe-editor.component.html',
-  styleUrls: ['./saveframe-editor.component.css']
+  styleUrls: ['./saveframe-editor.component.css'],
+  standalone: true,
+  imports: [MatButton, MatTooltip, RouterLink, SaveframeComponent, MatCard, MatCardTitle, MatCardContent, MatCardActions]
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
   saveframes: Saveframe[];
@@ -24,16 +30,20 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
-      this.reloadSaveframes();
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => {
+        this.entry = entry;
+        this.reloadSaveframes();
+      }
     });
 
     // Listen for the changing of the params string
     const parent = this;
-    this.subscription$.add(this.route.params.subscribe(function (params) {
-      parent.saveframeCategory = params['saveframe_category'];
-      parent.reloadSaveframes();
+    this.subscription$.add(this.route.params.subscribe({
+      next: function (params) {
+        parent.saveframeCategory = params['saveframe_category'];
+        parent.reloadSaveframes();
+      }
     }));
   }
 

@@ -1,0 +1,51 @@
+<div class="main-content">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>My Depositions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading) {
+        <div class="loading-container">
+          <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+          <p>Loading your depositions...</p>
+        </div>
+      }
+      @if (!loading && depositions.length === 0) {
+        <div class="no-depositions">
+          <p>No depositions found for that e-mail address.</p>
+          <p>You can create a new deposition by clicking <a routerLink="/">here</a>.</p>
+        </div>
+      }
+      @if (!loading && depositions.length > 0) {
+        <p>Click on a deposition to load it. Your current deposition is shown with a checkmark.</p>
+        <mat-nav-list>
+          @for (deposition of depositions; track deposition.deposition_id) {
+            <p>
+              <a mat-raised-button
+                 [disabled]="isCurrentDeposition(deposition.deposition_id)"
+                 [ngClass]="{'current-deposition': isCurrentDeposition(deposition.deposition_id)}"
+                 (click)="loadDeposition(deposition)"
+                 color="accent">
+                <mat-icon>
+                  @if (isCurrentDeposition(deposition.deposition_id)) {
+                    check_circle
+                  }
+                  @if (!isCurrentDeposition(deposition.deposition_id)) {
+                    folder
+                  }
+                </mat-icon>
+                {{ deposition.nickname }}
+                @if (deposition.entry_deposited && deposition.bmrbnum) {
+                  <span class="bmrb-id-badge">BMRB ID {{ deposition.bmrbnum }}</span>
+                }
+                @if (deposition.authorized_via && deposition.authorized_via.length > 0) {
+                  <span class="auth-reason"> ({{ getAuthReasonText(deposition.authorized_via) }})</span>
+                }
+              </a>
+            </p>
+          }
+        </mat-nav-list>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

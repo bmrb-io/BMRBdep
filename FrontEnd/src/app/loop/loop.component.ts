@@ -5,11 +5,17 @@ import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@an
 
 /* Import country updater code */
 import * as crs from '../javascript/crs.min';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatButton} from '@angular/material/button';
+import {NgClass} from '@angular/common';
+import {TagComponent} from '../tag/tag.component';
 
 @Component({
   selector: 'app-loop',
   templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.scss']
+  styleUrls: ['./loop.component.scss'],
+  standalone: true,
+  imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
   @Input() loop: Loop;
@@ -57,7 +63,9 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   helpClick(activeTag: LoopTag, el: HTMLElement) {
     if (this.activeTag !== activeTag) {
       this.activeTag = activeTag;
-      setTimeout(() => {el.scrollIntoView(false); }, 5);
+      setTimeout(() => {
+        el.scrollIntoView(false);
+      }, 5);
     } else {
       this.activeTag = null;
     }

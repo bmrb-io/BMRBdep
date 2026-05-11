@@ -43,3 +43,36 @@ span {
   text-align: right;
   float: right
 }
+
+.resume-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  margin-top: 1em;
+}
+
+.resume-option {
+  padding: 1em;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fafafa;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    color: #33527b;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 1em;
+  }
+
+  button {
+    margin-top: 0.5em;
+  }
+}

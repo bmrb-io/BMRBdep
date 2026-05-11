@@ -1,38 +1,50 @@
 <mat-toolbar>
-    <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
-        <div *ngIf="entry"
-             (click)="sidenav.toggle(); treeView.scrollSideNav()"
-             class="valign-center" matTooltip="Toggle the navigation menu.">
-            <mat-icon>menu</mat-icon>
-            <span style="vertical-align: bottom">Menu</span>
-        </div>
-        <ng-container *ngIf="entry">
-      <span *ngIf="entry && !entry.deposited" class="title-center">
-        BMRBdep - Deposition '{{entry.depositionNickname}}' in progress
-      </span>
-            <span *ngIf="entry && entry.deposited" class="title-center">
-        BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
-      </span>
-            <span *ngIf="!entry" class="title-center">BMRBdep</span>
-            <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
+  <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
+    @if (entry) {
+      <div
+        (click)="sidenav.toggle(); treeView.scrollSideNav()"
+        class="valign-center" matTooltip="Toggle the navigation menu.">
+        <mat-icon>menu</mat-icon>
+        <span style="vertical-align: bottom">Menu</span>
+      </div>
+    }
+    @if (entry) {
+      @if (entry && !entry.deposited) {
+        <span class="title-center">
+          BMRBdep - Deposition '{{entry.depositionNickname}}' in progress
+        </span>
+      }
+      @if (entry && entry.deposited) {
+        <span class="title-center">
+          BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
+        </span>
+      }
+      @if (!entry) {
+        <span class="title-center">BMRBdep</span>
+      }
+      <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
                   matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">End session</span>
-        </ng-container>
+    }
 
-      <span *ngIf="!entry" class="title-center pointer" routerLink="/">BMRBdep Home</span>
+    @if (!entry) {
+      <span class="title-center pointer" routerLink="/">BMRBdep Home</span>
+    }
 
+  </mat-toolbar-row>
+  @if ((loader.value$ | async)) {
+    <mat-toolbar-row class="loading-bar-holder">
+      <mat-progress-bar mode="indeterminate" [value]="loader.value$ | async"></mat-progress-bar>
     </mat-toolbar-row>
-    <mat-toolbar-row class="loading-bar-holder" *ngIf="(loader.value$ | async)">
-        <mat-progress-bar mode="indeterminate" [value]="loader.value$ | async"></mat-progress-bar>
-    </mat-toolbar-row>
+  }
 </mat-toolbar>
 
 <mat-sidenav-container> <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
-    <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false" [fixedInViewport]="true">
-        <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
-    </mat-sidenav>
+  <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false" [fixedInViewport]="true">
+    <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
+  </mat-sidenav>
 
-    <mat-sidenav-content>
-        <router-outlet></router-outlet>
-    </mat-sidenav-content>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
 </mat-sidenav-container>

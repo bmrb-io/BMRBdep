@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
 import json
 import logging
 import os
 import pathlib
 import shutil
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import List, BinaryIO, Optional
 
 import flask
@@ -15,6 +14,7 @@ import unidecode
 from dateutil.relativedelta import relativedelta
 from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
+from sqlalchemy import select
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
 from bmrbdep.exceptions import ServerError, RequestError
@@ -52,6 +52,7 @@ class DepositionRepo:
         self._initialize: bool = initialize
         self._read_only: bool = read_only
         self._modified_files: bool = False
+        self._cached_entry: pynmrstar.Entry | None = None
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         uuids = str(uuid)
@@ -131,6 +132,66 @@ class DepositionRepo:
             raise ServerError("Cannot access this attribute when repo opened read only.")
         return self._repo.head.object.hexsha
 
+    def _update_database_metadata(self):
+        """ Update the database with current metadata. """
+        if self._read_only:
+            return
+
+        # Import here to avoid circular imports
+        from bmrbdep.database import Deposition, get_db_session
+
+        try:
+            with get_db_session() as session:
+                # Get current entry data
+                try:
+                    contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
+                    author_emails = [_ for _ in contact_loop.get_tag('Email_address') if _ != "." and _ != "?" and _ is not None]
+                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
+                except Exception:
+                    # If we can't get entry data, just use empty lists
+                    author_emails = []
+                    author_orcids = []
+
+                # Parse creation_date
+                creation_date = None
+                if 'creation_date' in self._live_metadata:
+                    try:
+                        date_str = self._live_metadata['creation_date']
+                        creation_date = datetime.strptime(date_str, "%I:%M %p on %B %d, %Y")
+                    except ValueError as e:
+                        logging.warning(f"Failed to parse creation_date '{date_str}' for {self._uuid}: {e}")
+
+                # Check if the deposition already exists
+                stmt = select(Deposition).where(Deposition.deposition_id == str(self._uuid))
+                existing = session.execute(stmt).scalar_one_or_none()
+
+                if existing:
+                    # Update existing record
+                    existing.author_emails = author_emails
+                    existing.author_orcids = author_orcids
+                    existing.bmrbnum = self._live_metadata.get('bmrbnum')
+                    existing.creation_date = creation_date
+                    existing.nickname = self._live_metadata.get('deposition_nickname')
+                    existing.email_validated = self._live_metadata.get('email_validated', False)
+                    existing.entry_deposited = self._live_metadata.get('entry_deposited', False)
+                    existing.schema_version = self._live_metadata.get('schema_version')
+                else:
+                    # Create new record
+                    deposition = Deposition(
+                        deposition_id=str(self._uuid),
+                        author_emails=author_emails,
+                        author_orcids=author_orcids,
+                        bmrbnum=self._live_metadata.get('bmrbnum'),
+                        creation_date=creation_date,
+                        nickname=self._live_metadata.get('deposition_nickname'),
+                        email_validated=self._live_metadata.get('email_validated', False),
+                        entry_deposited=self._live_metadata.get('entry_deposited', False),
+                        schema_version=self._live_metadata.get('schema_version')
+                    )
+                    session.add(deposition)
+        except Exception as e:
+            logging.warning(f"Could not update database metadata for {self._uuid}: {e}")
+
     def deposit(self, final_entry: pynmrstar.Entry) -> int:
         """ Deposits an entry into ETS. """
 
@@ -140,7 +201,7 @@ class DepositionRepo:
         contact_emails: List[str] = final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(['Email_address'])
         if self.metadata['author_email'] not in contact_emails:
             raise RequestError('At least one contact person must have the email of the original deposition creator.')
-        existing_entry_id = self.get_entry().entry_id
+        existing_entry_id = self.entry.entry_id
 
         if existing_entry_id != final_entry.entry_id:
             raise RequestError('Invalid deposited entry. The ID must match that of this deposition.')
@@ -276,7 +337,7 @@ class DepositionRepo:
         today_date: datetime = datetime.now()
 
         # Set the accession and submission date
-        entry_saveframe: pynmrstar.saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
+        entry_saveframe: pynmrstar.Saveframe = final_entry.get_saveframes_by_category('entry_information')[0]
         entry_saveframe['Submission_date'] = today_str
         entry_saveframe['Accession_date'] = today_str
 
@@ -394,7 +455,7 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Write the final deposition to disk
         self.write_file('deposition.str', str(final_entry).encode(), root=True)
         self.metadata['entry_deposited'] = True
-        self.metadata['deposition_date'] = datetime.utcnow().strftime("%I:%M %p on %B %d, %Y")
+        self.metadata['deposition_date'] = datetime.now(timezone.utc).strftime("%I:%M %p on %B %d, %Y")
         self.metadata['bmrbnum'] = bmrbnum
         self.metadata['server_version_at_deposition'] = get_release()
         self.commit('Deposition submitted!')
@@ -402,8 +463,12 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Return the assigned BMRB ID
         return bmrbnum
 
-    def get_entry(self) -> pynmrstar.Entry:
+    @property
+    def entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
+
+        if self._cached_entry is not None:
+            return self._cached_entry
 
         entry_location = os.path.join(self._entry_dir, 'entry.str')
 
@@ -412,11 +477,14 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         except Exception as e:
             raise ServerError('Error loading an entry!\nError: %s\nEntry location:%s' % (repr(e), entry_location))
 
-    def write_entry(self, entry: pynmrstar.Entry) -> None:
+    @entry.setter
+    def entry(self, entry: pynmrstar.Entry) -> None:
         """ Save an entry in the standard place. """
 
         self.raise_write_errors()
         self.write_file('entry.str', str(entry).encode(), root=True)
+        self._cached_entry = entry
+        self._modified_files = True
 
     def get_file(self, path: str, root: bool = True) -> BinaryIO:
         """ Returns the current version of a file from the repo. """
@@ -515,29 +583,30 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def commit(self, message: str) -> bool:
         """ Commits the changes to the repository with a message. """
 
-        # Check if the metadata has changed
-        if self._live_metadata != self._original_metadata:
-            self.write_file('submission_info.json',
-                            json.dumps(self._live_metadata, indent=2, sort_keys=True).encode(),
-                            root=True)
-            self._original_metadata = self._live_metadata.copy()
-
         # No recorded changes
-        if not self._modified_files:
+        if not self._modified_files and self._live_metadata == self._original_metadata:
             return False
 
-        # See if they wrote the same value to an existing file
-        if not self._repo.untracked_files and not [item.a_path for item in self._repo.index.diff(None)]:
-            return False
-
-        # Store the IP of the user making the change
+        # Store the IP of the user making the change. We purposefully do this after checking for modified files, as we don't want
+        #  to update it just because a user loaded a deposition - only when they change one.
         try:
             self.metadata['last_ip'] = flask.request.environ['REMOTE_ADDR']
         except RuntimeError:
             pass
 
+        # Check if the metadata has changed
+        if self._live_metadata != self._original_metadata:
+            self.write_file('submission_info.json',
+                            json.dumps(self._live_metadata, indent=2, sort_keys=True).encode(),
+                            root=True)
+
+        # See if they wrote the same value to an existing file
+        if not self._repo.untracked_files and not [item.a_path for item in self._repo.index.diff(None)]:
+            return False
+
         # Add the changes, commit
         self._repo.git.add(all=True)
         self._repo.git.commit(message=message)
+        self._update_database_metadata()
         self._modified_files = False
         return True

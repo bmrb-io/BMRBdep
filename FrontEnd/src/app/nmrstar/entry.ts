@@ -49,6 +49,7 @@ export function entryFromJSON(jdata: Object): Entry {
   entry.emailValidated = jdata['email_validated'];
   entry.deposited = jdata['entry_deposited'];
   entry.depositionNickname = jdata['deposition_nickname'];
+  entry.bmrbnum = jdata['bmrbnum'];
 
   // This code upgrades the user session to the new commits-as-list format
   // It can be removed after 6 months (to allow clients caches to have cleared).
@@ -90,6 +91,7 @@ export class Entry {
   emailValidated: boolean;
   deposited: boolean;
   depositionNickname: string;
+  bmrbnum: number;
   firstIncompleteCategory: string;
   commit: Array<string>;
   unsaved: boolean;
@@ -104,6 +106,7 @@ export class Entry {
     this.emailValidated = false;
     this.deposited = false;
     this.depositionNickname = null;
+    this.bmrbnum = null;
     this.firstIncompleteCategory = null;
 
     this.updateCategories();
@@ -113,7 +116,7 @@ export class Entry {
     return {
       entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
       deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
-      commit: this.commit
+      bmrbnum: this.bmrbnum, commit: this.commit
     };
   }
 
@@ -384,7 +387,7 @@ export class Entry {
               // The rule applies to a loop in this saveframe
               if (loopsByPrefix[rule['Tag category']]) {
                 loopsByPrefix[rule['Tag category']].setVisibility(rule);
-              // The rule applies to a saveframe elsewhere
+                // The rule applies to a saveframe elsewhere
               } else {
                 // If the rule applies to a different saveframe category, apply the rule to all of the saveframes in the category
                 if (rule['Sf category'] !== saveframe.category) {

@@ -6,7 +6,6 @@ import os
 import socket
 import tempfile
 import traceback
-from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
 
@@ -18,14 +17,14 @@ from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeSerializer
-from itsdangerous.exc import BadData
 from validate_email import validate_email
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.database import init_db
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
+from bmrbdep.helpers import tokens
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -39,6 +38,9 @@ if application.debug or configuration['debug']:
 
 application.secret_key = configuration['secret_key']
 assert application.secret_key != "CHANGE_ME"
+
+# Configure session timeout for email sessions (2 weeks)
+application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(weeks=2)
 
 # Set up the mail interface
 application.config.update(
@@ -85,6 +87,18 @@ else:
 # Only log pynmrstar errors of level ERROR or above.
 #  Otherwise, the docker logs get super congested
 logging.getLogger('pynmrstar').setLevel(logging.ERROR)
+
+# If they upload NMR-STAR with empty strings, just map them to null rather than throw an exception
+pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
+
+# Ensure that the database is set up
+init_db()
+
+# We need the context in order to load the modules
+with application.app_context():
+    from bmrbdep.user_endpoints import user_endpoints
+
+application.register_blueprint(user_endpoints)
 
 # Set up error handling
 @application.errorhandler(ServerError)
@@ -196,7 +210,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                       recipients=[repo.metadata['author_email']],
                                       bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
-            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+            token = tokens.get_deposition_token(uuid)
 
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
@@ -231,7 +245,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
                                   recipients=[repo.metadata['author_email']],
                                   bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
-        token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+        token = tokens.get_deposition_token(uuid)
 
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
@@ -262,12 +276,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
-    serializer = URLSafeSerializer(application.config['SECRET_KEY'])
-    try:
-        deposition_data = serializer.loads(token)
-        deposition_id = deposition_data['deposition_id']
-    except (BadData, KeyError, TypeError):
-        raise RequestError('Invalid e-mail validation token. Please request a new e-mail validation message.')
+    deposition_id = tokens.verify_deposition_token(token)
 
     with depositions.DepositionRepo(deposition_id) as repo:
         if not repo.metadata['email_validated']:
@@ -294,14 +303,7 @@ def duplicate_deposition(uuid) -> Response:
                                                                     default_values=True, schema=schema)
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
-        merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
-
-        # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
-        #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
-        #   the tag. Alternatively, search for and fix all old entries with saveframes missing the '_Deleted' tag
-        for saveframe in entry_template:
-            if '_Deleted' not in saveframe or saveframe['_Deleted'] in pynmrstar.utils.definitions.NULL_VALUES:
-                saveframe.add_tag('_Deleted', 'no', update=True)
+        merge_entries(entry_template, repo.entry, schema, preserve_entry_information=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -319,7 +321,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
                                        }
-            new_repo.write_entry(entry_template)
+            new_repo.entry = entry_template
             new_repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
             # Delete data files when cloning
             for file_ in new_repo.get_data_file_list():
@@ -588,7 +590,7 @@ def new_deposition() -> Response:
                 pos += 1
 
         # Write out the NMR-STAR file, plus the schema being used
-        repo.write_entry(entry_template)
+        repo.entry = entry_template
         repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
 
         # Create the rest of the metadata
@@ -720,7 +722,7 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
-            existing_entry: pynmrstar.Entry = repo.get_entry()
+            existing_entry: pynmrstar.Entry = repo.entry
 
             # If they aren't making any changes
             try:
@@ -732,17 +734,13 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            # Next two lines can be removed after clients upgrade (06/01/2020)
-            if isinstance(entry_json['commit'], str):
-                entry_json['commit'] = [entry_json['commit']]
-
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
                     logging.exception('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
-            repo.write_entry(entry)
+            repo.entry = entry
             repo.commit("Entry updated.")
 
             return jsonify({'commit': repo.last_commit})
@@ -751,12 +749,13 @@ def fetch_or_store_deposition(uuid):
     elif request.method == "GET":
 
         with depositions.DepositionRepo(uuid) as repo:
-            entry: pynmrstar.Entry = repo.get_entry()
+            entry: pynmrstar.Entry = repo.entry
             schema_version: str = repo.metadata['schema_version']
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
             entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
+            bmrbnum: Optional[int] = repo.metadata.get('bmrbnum')
             commit: str = repo.last_commit
         try:
             schema: dict = get_schema(schema_version)
@@ -769,6 +768,7 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
+        entry['bmrbnum'] = bmrbnum
         entry['commit'] = [commit]
 
         return jsonify(entry)

@@ -38,12 +38,12 @@ COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/pyproject.toml /opt/w
 # Install Python dependencies inside venv
 RUN pip install --no-cache-dir .
 
-# Copy static files
+# Copy code and config
 COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./wsgi.conf /opt/wsgi/wsgi.conf
-COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
-COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./FrontEnd/dist/ /opt/wsgi/dist/
-
-# Copy backend code last for caching efficiency
 COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./version.txt /opt/wsgi/bmrbdep/
+
+# To rescan the entries: docker exec -it bmrbdep /opt/wsgi/rescan.sh
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./rescan.sh /opt/wsgi/rescan.sh
 
 CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf"]

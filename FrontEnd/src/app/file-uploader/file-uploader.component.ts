@@ -4,15 +4,22 @@ import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
 import {environment} from '../../environments/environment';
-import {ActivatedRoute, Params} from '@angular/router';
+import {ActivatedRoute, Params, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatButton} from '@angular/material/button';
+import {MatProgressBar} from '@angular/material/progress-bar';
+import {NgClass} from '@angular/common';
+import {MatFormField, MatOption, MatSelect} from '@angular/material/select';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-file-uploader',
   templateUrl: './file-uploader.component.html',
-  styleUrls: ['./file-uploader.component.scss']
+  styleUrls: ['./file-uploader.component.scss'],
+  standalone: true,
+  imports: [MatButton, RouterLink, MatProgressBar, NgClass, MatFormField, MatSelect, FormsModule, ReactiveFormsModule, MatOption]
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
 
@@ -36,19 +43,23 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.serverURL = environment.serverURL;
-    this.subscription$ = this.route.params.subscribe((params: Params) => {
-      if (params['saveframe_category'] === 'deposited_data_files') {
-        this.showCategoryLink = false;
+    this.subscription$ = this.route.params.subscribe({
+      next: (params: Params) => {
+        if (params['saveframe_category'] === 'deposited_data_files') {
+          this.showCategoryLink = false;
+        }
       }
     });
 
-    this.subscription$.add(this.api.entrySubject.subscribe(entry => {
-      if (entry) {
-        for (const file of entry.dataStore.dataFiles) {
-          if (entry.deposited) {
-            file.control.disable();
-          } else {
-            file.control.enable();
+    this.subscription$.add(this.api.entrySubject.subscribe({
+      next: entry => {
+        if (entry) {
+          for (const file of entry.dataStore.dataFiles) {
+            if (entry.deposited) {
+              file.control.disable();
+            } else {
+              file.control.enable();
+            }
           }
         }
       }
@@ -171,8 +182,8 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
     this.activeUploads += 1;
     this.uploadSubscriptionDict$[file.name] = this.api.uploadFile(file)
-      .subscribe(
-        event => {
+      .subscribe({
+        next: event => {
           if (event.type === HttpEventType.UploadProgress) {
             dataFile.percent = Math.round(100 * event.loaded / event.total);
           } else if (event instanceof HttpResponse) {
@@ -185,19 +196,19 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
             }
           }
         },
-        () => {
+        error: () => {
           this.entry.dataStore.deleteFile(dataFile.fileName);
           this.messagesService.sendMessage(new Message(`Failed to upload file ${dataFile.fileName}, please retry.`,
             MessageType.ErrorMessage, 15000));
           this.activeUploads -= 1;
         },
-        () => {
+        complete: () => {
           this.activeUploads -= 1;
           if (this.activeUploads === 0) {
             this.updateAndSaveDataFiles();
           }
         }
-      );
+      });
 
   }
 
@@ -208,16 +219,18 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     });
     this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the file '${fileName}'?`;
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (fileName in this.uploadSubscriptionDict$) {
-          this.uploadSubscriptionDict$[fileName].unsubscribe();
-          this.api.deleteFile(fileName, true);
-        } else {
-          this.api.deleteFile(fileName);
+    this.dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          if (fileName in this.uploadSubscriptionDict$) {
+            this.uploadSubscriptionDict$[fileName].unsubscribe();
+            this.api.deleteFile(fileName, true);
+          } else {
+            this.api.deleteFile(fileName);
+          }
         }
+        this.dialogRef = null;
       }
-      this.dialogRef = null;
     });
   }
 }

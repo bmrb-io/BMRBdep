@@ -1,12 +1,12 @@
 @use '@angular/material' as mat;
-@import "../../../custom-theme.scss";
+@use "../../../custom-theme.scss" as theme;
 
 table.alternating_color tr:nth-child(even) {
-  background-color: mat.get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
 }
 
 table.alternating_color tr:nth-child(even) .datum {
-  background-color: mat.get-color-from-palette($custom-theme-primary);
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
 }
 
 .datum {
