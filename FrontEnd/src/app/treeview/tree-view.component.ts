@@ -5,7 +5,6 @@ import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
 import {combineLatest, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-tree-view',
@@ -23,7 +22,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   constructor(private api: ApiService,
               private router: Router,
               private route: ActivatedRoute) {
-    this.developerMode = !environment.production;
+    this.developerMode = false;
     this.page = '?';
   }
 
