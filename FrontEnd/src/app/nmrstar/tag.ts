@@ -3,6 +3,7 @@ import {Loop} from './loop';
 import {Schema} from './schema';
 import {Entry} from './entry';
 import {checkValueIsNull} from './nmrstar';
+import {TagSchemaEntry} from './schemaTypes';
 
 export class Tag {
   name: string;
@@ -10,30 +11,31 @@ export class Tag {
 
   valid: boolean;
   disabled: boolean;
-  validationMessage: string;
+  validationMessage: string | null;
   dataType: string;
   interfaceType: string;
-  schemaValues: {};
+  schemaValues: TagSchemaEntry;
   display: string;
   fullyQualifiedTagName: string;
-  enums: Set<[string, string]>;
-  frameLink: [string, string][];
-  parent: object;
+  enums: Set<[string, string]> | null;
+  frameLink: [string, string][] = [];
+  parent!: object;
 
 
-  constructor(name: string, value: string, tagPrefix: string, schema: Schema) {
+  constructor(name: string, value: string | null, tagPrefix: string, schema: Schema) {
     this.name = name;
     if (checkValueIsNull(value)) {
       this.value = '';
     } else {
-      this.value = value;
+      this.value = value as string;
     }
 
     this.fullyQualifiedTagName = tagPrefix + '.' + this.name;
-    this.schemaValues = schema.getTag(this.fullyQualifiedTagName);
-    if (this.schemaValues) {
+    const schemaEntry = schema.getTag(this.fullyQualifiedTagName);
+    if (schemaEntry) {
+      this.schemaValues = schemaEntry;
       this.enums = this.schemaValues['enumerations'] ? new Set(this.schemaValues['enumerations']) : new Set();
-      this.display = this.schemaValues['User full view'];
+      this.display = this.schemaValues['User full view'] ?? 'H';
     } else {
       if (this.name !== '_Deleted') {
         console.warn('Tag exists in entry but not in schema!', this.fullyQualifiedTagName);
@@ -110,15 +112,12 @@ export class Tag {
     }
 
     // If this is a standard 'input' element, determine the data type
-    const dataTypeMap = {
+    const dataTypeMap: { [key: string]: string } = {
       'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
       'yyyy-mm-dd:hh:mm': 'datetime-local',
       'email': 'email', 'fax': 'tel', 'phone': 'tel'
     };
-    this.dataType = dataTypeMap[dt];
-    if (this.dataType === undefined) {
-      this.dataType = 'string';
-    }
+    this.dataType = (dt !== undefined && dataTypeMap[dt]) || 'string';
   }
 
   log(): void {
@@ -164,11 +163,11 @@ export class Tag {
       this.valid = false;
 
       this.frameLink = [];
-      const IDIndex = experimentLoop.getTagIndex('ID');
-      const nameTagIndex = experimentLoop.getTagIndex('Name');
-      const sampleLabelIndex = experimentLoop.getTagIndex('Sample_label');
-      const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label');
-      const spectrometerIndex = experimentLoop.getTagIndex('NMR_spectrometer_label');
+      const IDIndex = experimentLoop.getTagIndex('ID')!;
+      const nameTagIndex = experimentLoop.getTagIndex('Name')!;
+      const sampleLabelIndex = experimentLoop.getTagIndex('Sample_label')!;
+      const sampleConditionListIndex = experimentLoop.getTagIndex('Sample_condition_list_label')!;
+      const spectrometerIndex = experimentLoop.getTagIndex('NMR_spectrometer_label')!;
 
       for (const row of experimentLoop.data) {
         const sampleFrame = this.getEntry().getSaveframeByName(row[sampleLabelIndex].value.slice(1));
@@ -178,11 +177,11 @@ export class Tag {
         } else {
           sampleName = sampleFrame.tagDict['_Sample.Name'].value;
           if (checkValueIsNull(sampleName)) {
-            sampleName = sampleFrame.getTag('Sf_framecode').value + +' (Unnamed)';
+            sampleName = sampleFrame.getTag('Sf_framecode')!.value + +' (Unnamed)';
           }
         }
 
-        const sampleConditionsFrame: Saveframe = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1));
+        const sampleConditionsFrame = this.getEntry().getSaveframeByName(row[sampleConditionListIndex].value.slice(1));
         let sampleConditionsName: string;
         if (!sampleConditionsFrame) {
           sampleConditionsName = 'No sample conditions selected';
@@ -193,18 +192,18 @@ export class Tag {
           }
           sampleConditionsName = sampleConditionsFrame.tagDict['_Sample_condition_list.Name'].value;
           if (checkValueIsNull(sampleConditionsName)) {
-            sampleConditionsName = sampleConditionsFrame.getTag('Sf_framecode').value + ' (Unnamed)';
+            sampleConditionsName = sampleConditionsFrame.getTag('Sf_framecode')!.value + ' (Unnamed)';
           }
         }
 
-        const spectrometerSaveframe: Saveframe = this.getEntry().getSaveframeByName(row[spectrometerIndex].value.slice(1));
+        const spectrometerSaveframe = this.getEntry().getSaveframeByName(row[spectrometerIndex].value.slice(1));
         let spectrometerName: string;
         if (!spectrometerSaveframe) {
           spectrometerName = 'No spectrometer selected';
         } else {
           spectrometerName = spectrometerSaveframe.tagDict['_NMR_spectrometer.Name'].value;
           if (checkValueIsNull(spectrometerName)) {
-            spectrometerName = spectrometerSaveframe.getTag('Sf_framecode').value + ' (Unnamed)';
+            spectrometerName = spectrometerSaveframe.getTag('Sf_framecode')!.value + ' (Unnamed)';
           }
         }
 
@@ -246,14 +245,15 @@ export class Tag {
           }
 
           const temp = this.schemaValues['enumerations'] ? this.schemaValues['enumerations'] : [];
-          this.enums = new Set();
-          enumerationSet.forEach(item => this.enums.add([item, item]));
-          temp.forEach(item => this.enums.add(item));
+          const enums = new Set<[string, string]>();
+          this.enums = enums;
+          enumerationSet.forEach(item => enums.add([item, item]));
+          temp.forEach(item => enums.add(item));
         }
       }
 
       // Add in the native enumerations
-      if (this.schemaValues['enumerations']) {
+      if (this.schemaValues['enumerations'] && this.enums) {
         for (const enumeration of this.schemaValues['enumerations']) {
           this.enums.add(enumeration);
         }
@@ -292,7 +292,7 @@ export class Tag {
           continue;
         }
         const nameTag = sf.tagDict[sf.tagPrefix + '.Name'];
-        let displayName = null;
+        let displayName: string | null = null;
         if (nameTag) {
           displayName = nameTag.value;
         }
@@ -300,7 +300,7 @@ export class Tag {
           displayName = sf.name + ' (Unnamed)';
         }
 
-        this.frameLink.push(['$' + sf.name, displayName]);
+        this.frameLink.push(['$' + sf.name, displayName!]);
         if ('$' + sf.name === this.value) {
           matchedPointer = true;
         }
@@ -332,7 +332,7 @@ export class Tag {
       }
       // Check enums are matched
     } else if (this.interfaceType === 'closed_enum') {
-      if (this.enums.size === 0) {
+      if (!this.enums || this.enums.size === 0) {
         this.valid = false;
         this.validationMessage = 'There are currently no valid values for this tag.';
       } else {
@@ -366,18 +366,18 @@ export class Tag {
   }
 
   getEntry(): Entry {
-    return null;
+    throw new Error('Tag.getEntry called on base class — must be overridden by SaveframeTag or LoopTag.');
   }
 
   getParentSaveframe(): Saveframe {
-    return null;
+    throw new Error('Tag.getParentSaveframe called on base class — must be overridden by SaveframeTag or LoopTag.');
   }
 }
 
 export class SaveframeTag extends Tag {
   parent: Saveframe;
 
-  constructor(name: string, value: string, parent: Saveframe) {
+  constructor(name: string, value: string | null, parent: Saveframe) {
     super(name, value, parent.tagPrefix, parent.parent.schema);
     this.parent = parent;
   }
@@ -395,7 +395,7 @@ export class SaveframeTag extends Tag {
 export class LoopTag extends Tag {
   parent: Loop;
 
-  constructor(name: string, value: string, parent: Loop) {
+  constructor(name: string, value: string | null, parent: Loop) {
     super(name, value, parent.category, parent.parent.parent.schema);
     this.parent = parent;
   }

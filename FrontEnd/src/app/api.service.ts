@@ -1,6 +1,7 @@
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
+import {EntryJSON} from './nmrstar/schemaTypes';
 import {inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
@@ -252,7 +253,7 @@ export class ApiService implements OnDestroy {
     if (!skipMessage) {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
     }
-    this.http.get(entryURL).subscribe({
+    this.http.get<EntryJSON>(entryURL).subscribe({
       next: jsonData => {
         if (!skipMessage) {
           this.messagesService.clearMessage();
@@ -261,8 +262,8 @@ export class ApiService implements OnDestroy {
 
         // Verify that the NMR-STAR matches the uploaded files
         let filesOutOfSync = false;
-        if ('data_files' in jsonData) {
-          const files: string[] = jsonData['data_files'] as string[];
+        if (jsonData.data_files) {
+          const files: string[] = jsonData.data_files;
           for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;

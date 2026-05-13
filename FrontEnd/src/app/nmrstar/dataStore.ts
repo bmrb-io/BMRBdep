@@ -1,13 +1,14 @@
 import {UntypedFormControl} from '@angular/forms';
+import {FileUploadType} from './schemaTypes';
 
 export class DataFile {
-  dropDownList;
-  selectedItems;
-  fileName;
-  percent;
+  dropDownList: FileUploadType[];
+  selectedItems: unknown;
+  fileName: string;
+  percent: number;
   control: UntypedFormControl;
 
-  constructor(fileName: string, dropDownList: {}, selectedItems: {} = []) {
+  constructor(fileName: string, dropDownList: FileUploadType[], selectedItems: unknown = []) {
     this.fileName = fileName;
     this.dropDownList = dropDownList;
     this.selectedItems = selectedItems;
@@ -18,10 +19,10 @@ export class DataFile {
 
 export class DataFileStore {
   dataFiles: DataFile[];
-  dataFileMap: {};
-  dropDownList;
+  dataFileMap: { [filename: string]: DataFile };
+  dropDownList: FileUploadType[];
 
-  constructor(fileNames: string[], dropDownList) {
+  constructor(fileNames: string[], dropDownList: FileUploadType[]) {
     // Create the dataFiles objects
     this.dataFiles = [];
     this.dataFileMap = {};
@@ -31,9 +32,9 @@ export class DataFileStore {
     }
   }
 
-  addFile(filename: string = null, selected: {} = []): DataFile {
+  addFile(filename: string, selected: unknown = []): DataFile {
 
-    let dataFile;
+    let dataFile: DataFile;
 
     // File already exists
     if (this.dataFileMap[filename]) {
@@ -107,7 +108,7 @@ export class DataFileStore {
     return results;
   }
 
-  toJSON(): {} {
+  toJSON(): string[] {
     const filenames: string[] = [];
     for (const dataFile of this.dataFiles) {
       filenames.push(dataFile.fileName);
@@ -115,4 +116,3 @@ export class DataFileStore {
     return filenames;
   }
 }
-

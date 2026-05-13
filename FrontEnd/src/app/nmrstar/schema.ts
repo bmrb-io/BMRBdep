@@ -1,10 +1,20 @@
 import {checkValueIsNull} from './nmrstar';
+import {
+  FileUploadType,
+  OverrideRule,
+  RawSaveframeTable,
+  RawTagTable,
+  RawValueRows,
+  SaveframeSchemaEntry,
+  SchemaJSON,
+  SuperGroupDescription,
+  SuperGroupRecord,
+  TagSchemaEntry,
+  Tester,
+} from './schemaTypes';
 
 class NotNullChecker {
-  constructor() {
-  }
-
-  static test(value: string) {
+  static test(value: string): boolean {
     return !checkValueIsNull(value);
   }
 }
@@ -12,23 +22,23 @@ class NotNullChecker {
 export class Schema {
   /* Populated from parameters */
   version: string;
-  tags: {};
-  saveframes: {};
-  dataTypes = {};
-  fileUploadTypes;
-  overrides: {};
-  overridesDictList: {}[];
-  categorySuperGroups: {};
-  categorySupergroupsDictList: {}[][];
-  categorySuperGroupsDescription: {};
-  categorySuperGroupsDescriptionDict: {};
+  tags: RawTagTable | undefined;
+  saveframes: RawSaveframeTable | undefined;
+  dataTypes: { [dataType: string]: string } = {};
+  fileUploadTypes: FileUploadType[];
+  overrides: RawValueRows | undefined;
+  overridesDictList: OverrideRule[];
+  categorySuperGroups: RawValueRows | undefined;
+  categorySupergroupsDictList: SuperGroupRecord[][];
+  categorySuperGroupsDescription: RawValueRows;
+  categorySuperGroupsDescriptionDict: { [id: string]: SuperGroupDescription };
 
   /* Calculated during construction */
-  schema: {};
-  saveframeSchema: {};
+  schema: { [tagName: string]: TagSchemaEntry };
+  saveframeSchema: { [category: string]: SaveframeSchemaEntry };
 
 
-  toJSON(): {} {
+  toJSON(): object {
     return {
       version: this.version, tags: this.tags, saveframes: this.saveframes, data_types: this.dataTypes,
       overrides: this.overrides, file_upload_types: this.fileUploadTypes, category_supergroups: this.categorySuperGroups,
@@ -44,17 +54,17 @@ export class Schema {
     delete this.saveframes;
   }
 
-  constructor(json: object) {
+  constructor(json: SchemaJSON) {
 
-    this.version = json['version'];
-    this.tags = json['tags'];
-    this.dataTypes = json['data_types'];
-    this.overrides = json['overrides'];
-    this.categorySuperGroups = json['category_supergroups'];
-    this.categorySuperGroupsDescription = json['supergroup_descriptions'];
+    this.version = json.version;
+    this.tags = json.tags;
+    this.dataTypes = json.data_types;
+    this.overrides = json.overrides;
+    this.categorySuperGroups = json.category_supergroups;
+    this.categorySuperGroupsDescription = json.supergroup_descriptions;
     this.categorySuperGroupsDescriptionDict = {};
-    this.saveframes = json['saveframes'];
-    this.fileUploadTypes = json['file_upload_types'];
+    this.saveframes = json.saveframes;
+    this.fileUploadTypes = json.file_upload_types;
     this.schema = {};
     this.saveframeSchema = {};
     this.overridesDictList = [];
@@ -65,131 +75,132 @@ export class Schema {
     }
 
     // Assign the overrides to the appropriate tags
-    for (const overrideRecord of this.overrides['values']) {
+    for (const overrideRecord of this.overrides.values) {
 
       // Generate an override dictionary for a single override
-      const overrideDictionary = {};
-      for (let i = 0; i <= this.overrides['headers'].length; i++) {
+      const overrideDictionary: Record<string, unknown> = {};
+      for (let i = 0; i <= this.overrides.headers.length; i++) {
         if (overrideRecord[i] != null) {
-          overrideDictionary[this.overrides['headers'][i]] = overrideRecord[i];
+          overrideDictionary[this.overrides.headers[i]] = overrideRecord[i];
         }
       }
 
-      if (overrideDictionary['Override value'] === '*') {
-        overrideDictionary['Regex'] = NotNullChecker;
-      } else {
-        overrideDictionary['Regex'] = new RegExp('^' + overrideDictionary['Override value'] + '$');
-      }
+      const regex: Tester = overrideDictionary['Override value'] === '*'
+        ? NotNullChecker
+        : new RegExp('^' + (overrideDictionary['Override value'] as string) + '$');
+      overrideDictionary['Regex'] = regex;
 
-      overrideDictionary['Conditional tag prefix'] = overrideDictionary['Conditional tag'].split('.')[0];
+      const conditionalTag = overrideDictionary['Conditional tag'] as string;
+      overrideDictionary['Conditional tag prefix'] = conditionalTag.split('.')[0];
       if (overrideDictionary['Tag category'] !== '*') {
-        overrideDictionary['Tag category'] = '_' + overrideDictionary['Tag category'];
+        overrideDictionary['Tag category'] = '_' + (overrideDictionary['Tag category'] as string);
       }
 
 
-      this.overridesDictList.push(overrideDictionary);
+      this.overridesDictList.push(overrideDictionary as unknown as OverrideRule);
     }
 
     // Load the super group help data
-    for (const superGroup of this.categorySuperGroupsDescription['values']) {
+    for (const superGroup of this.categorySuperGroupsDescription.values) {
       // Generate an override dictionary for a single override
-      const superGroupRecord = {};
-      for (let i = 0; i <= this.categorySuperGroupsDescription['headers'].length; i++) {
-        if (this.categorySuperGroupsDescription['headers'][i]) {
-          superGroupRecord[this.categorySuperGroupsDescription['headers'][i]] = superGroup[i];
+      const superGroupRecord: Record<string, unknown> = {};
+      for (let i = 0; i <= this.categorySuperGroupsDescription.headers.length; i++) {
+        if (this.categorySuperGroupsDescription.headers[i]) {
+          superGroupRecord[this.categorySuperGroupsDescription.headers[i]] = superGroup[i];
         }
       }
-      this.categorySuperGroupsDescriptionDict[superGroup[0]] = superGroupRecord;
+      this.categorySuperGroupsDescriptionDict[superGroup[0] as string] = superGroupRecord as unknown as SuperGroupDescription;
     }
 
     // Build a data structure for the supergroups
-    const temporarySuperGroupList = [];
-    for (const supergroupRecord of this.categorySuperGroups['values']) {
+    const temporarySuperGroupList: SuperGroupRecord[] = [];
+    for (const supergroupRecord of this.categorySuperGroups.values) {
 
       // Generate an override dictionary for a single override
-      const superGroupRecord = {};
-      for (let i = 0; i <= this.categorySuperGroups['headers'].length; i++) {
-        if (this.categorySuperGroups['headers'][i]) {
-          superGroupRecord[this.categorySuperGroups['headers'][i]] = supergroupRecord[i];
+      const superGroupRecord: Record<string, unknown> = {};
+      for (let i = 0; i <= this.categorySuperGroups.headers.length; i++) {
+        if (this.categorySuperGroups.headers[i]) {
+          superGroupRecord[this.categorySuperGroups.headers[i]] = supergroupRecord[i];
         }
       }
-      temporarySuperGroupList.push(superGroupRecord);
+      temporarySuperGroupList.push(superGroupRecord as unknown as SuperGroupRecord);
     }
-    const temporaryGroupDict = {};
+    const temporaryGroupDict: { [key: string]: SuperGroupRecord[] } = {};
     for (const superRecord of temporarySuperGroupList) {
-      if (!(superRecord['category_super_group'] in temporaryGroupDict)) {
-        temporaryGroupDict[superRecord['category_super_group']] = [superRecord];
+      if (!(superRecord.category_super_group in temporaryGroupDict)) {
+        temporaryGroupDict[superRecord.category_super_group] = [superRecord];
       } else {
-        temporaryGroupDict[superRecord['category_super_group']].push(superRecord);
+        temporaryGroupDict[superRecord.category_super_group].push(superRecord);
       }
     }
     for (const superRecord of temporarySuperGroupList) {
-      if (!(this.categorySupergroupsDictList.indexOf(temporaryGroupDict[superRecord['category_super_group']]) > -1)) {
-        this.categorySupergroupsDictList.push(temporaryGroupDict[superRecord['category_super_group']]);
+      if (!(this.categorySupergroupsDictList.indexOf(temporaryGroupDict[superRecord.category_super_group]) > -1)) {
+        this.categorySupergroupsDictList.push(temporaryGroupDict[superRecord.category_super_group]);
       }
     }
 
     // Generate the tag schema dictionary and add it to the dictionary of tag schemas
-    const tagCol = this.tags['headers'].indexOf('Tag');
-    const dataTypeCol = this.tags['headers'].indexOf('BMRB data type');
-    const enumCol = this.tags['headers'].indexOf('enumerations');
-    for (const schemaTag of Object.keys(this.tags['values'])) {
-      const tagSchemaDictionary = {};
-      for (let i = 0; i <= this.tags['headers'].length; i++) {
-        if (this.tags['values'][schemaTag][i] != null) {
-          if (i === enumCol && this.tags['values'][schemaTag][enumCol].length > 0) {
-            for (let pos = 0; pos < this.tags['values'][schemaTag][enumCol].length; pos++) {
-              const singleEnum = this.tags['values'][schemaTag][enumCol][pos];
+    const tagCol = this.tags.headers.indexOf('Tag');
+    const dataTypeCol = this.tags.headers.indexOf('BMRB data type');
+    const enumCol = this.tags.headers.indexOf('enumerations');
+    for (const schemaTag of Object.keys(this.tags.values)) {
+      const tagSchemaDictionary: Record<string, unknown> = {};
+      for (let i = 0; i <= this.tags.headers.length; i++) {
+        if (this.tags.values[schemaTag][i] != null) {
+          if (i === enumCol && (this.tags.values[schemaTag][enumCol] as unknown[]).length > 0) {
+            const enumList = this.tags.values[schemaTag][enumCol] as unknown[];
+            for (let pos = 0; pos < enumList.length; pos++) {
+              const singleEnum = enumList[pos];
 
               // This code upgrades the enum format to the new enum,description format
               // It can be removed after 6 months (to allow clients caches to have cleared).
               // Can remove after: 06/01/2020
               if (typeof singleEnum === 'string' || singleEnum instanceof String) {
-                this.tags['values'][schemaTag][enumCol][pos] = [singleEnum, singleEnum];
+                enumList[pos] = [singleEnum, singleEnum];
               } else {
-
-
-                if (singleEnum[1] === '.') {
-                  singleEnum[1] = singleEnum[0];
+                const pair = singleEnum as [string, string];
+                if (pair[1] === '.') {
+                  pair[1] = pair[0];
                 }
               }
             }
 
           }
           if (i === dataTypeCol) {
-            tagSchemaDictionary['BMRB data type'] = this.tags['values'][schemaTag][i];
-            if (tagSchemaDictionary['BMRB data type'] === 'line' || tagSchemaDictionary['BMRB data type'] === 'text') {
+            const bmrbDataType = this.tags.values[schemaTag][i] as string;
+            tagSchemaDictionary['BMRB data type'] = bmrbDataType;
+            if (bmrbDataType === 'line' || bmrbDataType === 'text') {
               tagSchemaDictionary['Regex'] = NotNullChecker;
             } else {
-              tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[this.tags['values'][schemaTag][i]] + '$');
+              tagSchemaDictionary['Regex'] = new RegExp('^' + this.dataTypes[bmrbDataType] + '$');
             }
 
           } else {
-            tagSchemaDictionary[this.tags['headers'][i]] = this.tags['values'][schemaTag][i];
+            tagSchemaDictionary[this.tags.headers[i]] = this.tags.values[schemaTag][i];
           }
         }
       }
       // Don't show a default value of "?"
-      if (checkValueIsNull(tagSchemaDictionary['default value'])) {
+      if (checkValueIsNull(tagSchemaDictionary['default value'] as string)) {
         tagSchemaDictionary['default value'] = '';
       }
-      this.schema[this.tags['values'][schemaTag][tagCol]] = tagSchemaDictionary;
+      this.schema[this.tags.values[schemaTag][tagCol] as string] = tagSchemaDictionary as unknown as TagSchemaEntry;
     }
 
     // Generate the dictionary of saveframe-level info
-    for (const saveframeCategory of Object.keys(this.saveframes['values'])) {
-      const saveframeSchemaList = this.saveframes['values'][saveframeCategory];
-      const saveframeSchemaDictionary = {};
-      for (let i = 0; i <= this.saveframes['headers'].length; i++) {
+    for (const saveframeCategory of Object.keys(this.saveframes.values)) {
+      const saveframeSchemaList = this.saveframes.values[saveframeCategory];
+      const saveframeSchemaDictionary: Record<string, unknown> = {};
+      for (let i = 0; i <= this.saveframes.headers.length; i++) {
         if (saveframeSchemaList[i] != null) {
-          saveframeSchemaDictionary[this.saveframes['headers'][i]] = saveframeSchemaList[i];
+          saveframeSchemaDictionary[this.saveframes.headers[i]] = saveframeSchemaList[i];
         }
       }
-      this.saveframeSchema[saveframeCategory] = saveframeSchemaDictionary;
+      this.saveframeSchema[saveframeCategory] = saveframeSchemaDictionary as unknown as SaveframeSchemaEntry;
     }
   }
 
-  getTag(tagName: string): {} {
+  getTag(tagName: string): TagSchemaEntry | undefined {
     return this.schema[tagName];
   }
 

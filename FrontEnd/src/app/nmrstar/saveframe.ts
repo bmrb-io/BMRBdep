@@ -2,12 +2,13 @@ import {Entry} from './entry';
 import {Loop} from './loop';
 import {checkTagIsRequired, checkValueIsNull, cleanValue, isMixedCase} from './nmrstar';
 import {LoopTag, SaveframeTag} from './tag';
+import {OverrideRule, SaveframeJSON, SaveframeSchemaEntry, TagPair} from './schemaTypes';
 
-export function saveframeFromJSON(jdata: object, parent: Entry): Saveframe {
-  const test: Saveframe = new Saveframe(jdata['name'], jdata['category'], jdata['tag_prefix'], parent);
-  test.addTags(jdata['tags']);
-  for (const loopJSON of jdata['loops']) {
-    const newLoop = new Loop(loopJSON['category'], loopJSON['tags'], loopJSON['data'], test);
+export function saveframeFromJSON(jdata: SaveframeJSON, parent: Entry): Saveframe {
+  const test: Saveframe = new Saveframe(jdata.name, jdata.category, jdata.tag_prefix, parent);
+  test.addTags(jdata.tags);
+  for (const loopJSON of jdata.loops) {
+    const newLoop = new Loop(loopJSON.category, loopJSON.tags, loopJSON.data, test);
     test.addLoop(newLoop);
   }
   return test;
@@ -23,11 +24,11 @@ export class Saveframe {
   display: string;
   valid: boolean;
   deleted: boolean;
-  tagDict: {};
-  schemaValues: {};
+  tagDict: { [fqtn: string]: SaveframeTag };
+  schemaValues: SaveframeSchemaEntry;
   saveframesInCategory: number;
-  nextCategory: string;
-  previousCategory: string;
+  nextCategory: string | null;
+  previousCategory: string | null;
 
   constructor(name: string, category: string, tagPrefix: string, parent: Entry, tags: SaveframeTag[] = [], loops: Loop[] = []) {
     this.name = name;
@@ -43,11 +44,10 @@ export class Saveframe {
     this.saveframesInCategory = 0;
     this.nextCategory = null;
     this.previousCategory = null;
-    if (this.parent.schema) {
-      this.schemaValues = this.parent.schema.saveframeSchema[this.category];
-    }
-    // Add default values if a saveframe exists that the schema can't handle
-    if (!this.schemaValues) {
+    const fromSchema = this.parent.schema && this.parent.schema.saveframeSchema[this.category];
+    if (fromSchema) {
+      this.schemaValues = fromSchema;
+    } else {
       console.warn('Saveframe without category description:', this);
       this.schemaValues = {
         'ADIT replicable': false,
@@ -72,9 +72,9 @@ export class Saveframe {
       if (tag.name === 'Sf_framecode' || tag.name === 'Sf_category' || tag.name === '_Deleted') {
         continue;
       }
-      tag.value = null;
+      tag.value = '';
       if (tag.schemaValues['default value'] !== '?') {
-        tag.value = tag.schemaValues['default value'];
+        tag.value = tag.schemaValues['default value'] ?? '';
       }
     }
 
@@ -86,12 +86,12 @@ export class Saveframe {
   }
 
   delete() {
-    this.getTag('_Deleted').value = 'yes';
+    this.getTag('_Deleted')!.value = 'yes';
     this.deleted = true;
   }
 
   restore() {
-    this.getTag('_Deleted').value = 'no';
+    this.getTag('_Deleted')!.value = 'no';
     this.deleted = false;
   }
 
@@ -110,19 +110,19 @@ export class Saveframe {
       if (clearValues) {
         const newTag = newFrame.addTag(tag.name, '');
         if (newTag.schemaValues['default value'] !== '?') {
-          newTag.value = newTag.schemaValues['default value'];
+          newTag.value = newTag.schemaValues['default value'] ?? '';
         }
       } else {
         newFrame.addTag(tag.name, tag.value);
       }
     }
     // Set the framecode, category, and deleted tags regardless of clearValues argument
-    newFrame.getTag('Sf_framecode').value = frameName;
-    newFrame.getTag('Sf_category').value = this.category;
-    newFrame.getTag('_Deleted').value = 'no';
+    newFrame.getTag('Sf_framecode')!.value = frameName;
+    newFrame.getTag('Sf_category')!.value = this.category;
+    newFrame.getTag('_Deleted')!.value = 'no';
     // New saveframes should always require entering the label
     if (newFrame.getTag('Name')) {
-      newFrame.getTag('Name').value = '';
+      newFrame.getTag('Name')!.value = '';
     }
 
     // Copy the loops
@@ -143,19 +143,19 @@ export class Saveframe {
     return {category: this.category, name: this.name, tag_prefix: this.tagPrefix, tags: this.tags, loops: this.loops};
   }
 
-  addTag(name: string, value: string): SaveframeTag {
+  addTag(name: string, value: string | null): SaveframeTag {
     const newTag = new SaveframeTag(name, value, this);
     this.tags.push(newTag);
     this.tagDict[newTag.fullyQualifiedTagName] = newTag;
     return newTag;
   }
 
-  addTags(tagList: string[][]): void {
+  addTags(tagList: TagPair[]): void {
     for (const tagPair of tagList) {
-      if (tagPair[0]) {
+      if (Array.isArray(tagPair)) {
         this.addTag(tagPair[0], tagPair[1]);
       } else {
-        this.addTag(tagPair['name'], tagPair['value']);
+        this.addTag(tagPair.name, tagPair.value);
       }
     }
   }
@@ -170,7 +170,7 @@ export class Saveframe {
    * @param fqtn The fully qualified tag name.
    * @returns    The value of the queried tag, or null if not found
    */
-  getTagValue(fqtn: string, fullEntry = false): string {
+  getTagValue(fqtn: string, fullEntry = false): string | null {
     if (fqtn in this.tagDict) {
       return this.tagDict[fqtn].value;
     }
@@ -185,7 +185,7 @@ export class Saveframe {
     }
   }
 
-  getTag(tagName: string): SaveframeTag {
+  getTag(tagName: string): SaveframeTag | null {
     if (tagName in this.tagDict) {
       return this.tagDict[tagName];
     } else if ((this.tagPrefix + '.' + tagName) in this.tagDict) {
@@ -195,7 +195,7 @@ export class Saveframe {
     }
   }
 
-  getLoopByPrefix(tagPrefix): Loop {
+  getLoopByPrefix(tagPrefix: string): Loop | null {
     for (const loop of this.loops) {
       if (loop.category === tagPrefix) {
         return loop;
@@ -204,7 +204,7 @@ export class Saveframe {
     return null;
   }
 
-  getID(): string {
+  getID(): string | undefined {
     let entryIDTag = 'Entry_ID';
     if (this.category === 'entry_information') {
       entryIDTag = 'ID';
@@ -214,11 +214,12 @@ export class Saveframe {
         return tag['value'];
       }
     }
+    return undefined;
   }
 
   // Sets the visibility of all tags in the saveframe
   // Note that this is trusting that the rule actually applies to this saveframe
-  setVisibility(rule): void {
+  setVisibility(rule: OverrideRule): void {
 
     // Make sure this is a rule for the saveframe and not a rule for a child loop
     if (rule['Tag category'] === '*' || rule['Tag category'] === this.tagPrefix) {
@@ -227,14 +228,14 @@ export class Saveframe {
       if (rule['Tag'] === '*') {
         for (const tag of this.tags) {
           if (rule['Override view value'] === 'O') {
-            tag.display = tag.schemaValues['User full view'];
+            tag.display = tag.schemaValues['User full view'] ?? 'H';
           } else {
             tag.display = rule['Override view value'];
           }
         }
       } else {
         if (rule['Override view value'] === 'O') {
-          this.tagDict[rule['Tag']].display = this.tagDict[rule['Tag']].schemaValues['User full view'];
+          this.tagDict[rule['Tag']].display = this.tagDict[rule['Tag']].schemaValues['User full view'] ?? 'H';
         } else {
           if (this.tagDict[rule['Tag']] === undefined) {
             console.warn('Dictionary override rule specifies non-existent tag: ' + rule['Conditional tag'], rule);
@@ -256,7 +257,8 @@ export class Saveframe {
   refresh(): void {
 
     // Determine if deleted
-    this.deleted = this.getTag('_Deleted') && this.getTag('_Deleted').value === 'yes';
+    const deletedTag = this.getTag('_Deleted');
+    this.deleted = !!deletedTag && deletedTag.value === 'yes';
 
     // Update the tags
     for (const tag of this.tags) {
@@ -406,40 +408,40 @@ export class Saveframe {
       const nonstandardMonomer = this.getTag('Nstd_monomer');
 
       // There must be an X in the sequence if non-standard monomer selected
-      if (nonstandardMonomer && nonstandardMonomer.value === 'yes' && (!polymerCode.value.toUpperCase().includes('X'))) {
+      if (nonstandardMonomer?.value === 'yes' && polymerCode && !polymerCode.value.toUpperCase().includes('X')) {
         polymerCode.valid = false;
         polymerCode.validationMessage = 'You specified there is a non-standard monomer, but didn\'t indicate it in the sequence' +
           ' using an \'X\'';
       }
 
       // There must a non-standard monomer if X in residue sequence
-      if (polymerCode && polymerCode.value.toUpperCase().includes('X') && (nonstandardMonomer.value !== 'yes')) {
+      if (polymerCode?.value.toUpperCase().includes('X') && nonstandardMonomer && nonstandardMonomer.value !== 'yes') {
         nonstandardMonomer.valid = false;
         nonstandardMonomer.validationMessage = 'You specified there is a non-standard monomer with x/X in the polymer sequence, so this ' +
           'tag must be \'yes\'.';
       }
 
       // There must be details if there is a non-standard monomer
-      if (nonstandardMonomer && nonstandardMonomer.value === 'yes' && checkValueIsNull(entityDetails.value)) {
+      if (nonstandardMonomer?.value === 'yes' && entityDetails && checkValueIsNull(entityDetails.value)) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified there is a non-standard monomer, but didn\'t provide any details.';
       }
 
       // There must be details if there is a non-standard residue code
-      if (polymerCode && polymerCode.value.toUpperCase().includes('X') && checkValueIsNull(entityDetails.value)) {
+      if (polymerCode?.value.toUpperCase().includes('X') && entityDetails && checkValueIsNull(entityDetails.value)) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified there is a non-standard monomer, but didn\'t provide any details.';
       }
 
       // If polymer type is not one of the standard three, require more details
-      if (polymerType && (!checkValueIsNull(polymerType.value)) && checkValueIsNull(entityDetails.value) &&
-        (!(['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].indexOf(polymerType.value) >= 0))) {
+      if (polymerType && !checkValueIsNull(polymerType.value) && entityDetails && checkValueIsNull(entityDetails.value) &&
+        ['polypeptide(L)', 'polyribonucleotide', 'polydeoxyribonucleotide'].indexOf(polymerType.value) < 0) {
         entityDetails.valid = false;
         entityDetails.validationMessage = 'You specified a polymer type that requires more details.';
       }
 
       // If there are lower case letters, insist on non-standard tag
-      if (polymerCode && isMixedCase(polymerCode.value) && nonstandardMonomer.value !== 'yes') {
+      if (polymerCode && isMixedCase(polymerCode.value) && nonstandardMonomer?.value !== 'yes') {
         polymerCode.valid = false;
         polymerCode.validationMessage = 'Please use all upper or all lower case characters for standard residues. For non-standard ' +
           'residues, please indicate the non-standard residue using an x/X and provide details in the \'Other comments\' box.';
@@ -457,21 +459,21 @@ export class Saveframe {
         '_Chem_shift_reference.Other_shifts_flag'
       ];
       for (const tag of tagsToCheck) {
-        if (this.getTag(tag).value !== 'no') {
+        if (this.getTag(tag)!.value !== 'no') {
           allNo = false;
           break;
         }
       }
       if (allNo) {
         for (const tag of tagsToCheck) {
-          this.getTag(tag).valid = false;
-          this.getTag(tag).validationMessage = 'At least one chemical shift reference must be given.';
+          this.getTag(tag)!.valid = false;
+          this.getTag(tag)!.validationMessage = 'At least one chemical shift reference must be given.';
         }
       }
 
 
       // Update the chemical shift reference loop to be valid based on the chem shift reference saveframe
-      const referenceLoop = this.getLoopByPrefix('_Chem_shift_ref');
+      const referenceLoop = this.getLoopByPrefix('_Chem_shift_ref')!;
       const updateTags = ['_Chem_shift_reference.Proton_shifts_flag',
         '_Chem_shift_reference.Carbon_shifts_flag',
         '_Chem_shift_reference.Nitrogen_shifts_flag',
@@ -543,7 +545,7 @@ export class Saveframe {
 
             // Add the IUPAC rules
             if (tag.value.indexOf('IUPAC') >= 0) {
-              dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = shiftRatio;
+              dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].value = shiftRatio!;
               dataRow[referenceLoop.tags.indexOf('Indirect_shift_ratio')].disabled = true;
               dataRow[referenceLoop.tags.indexOf('Mol_common_name')].value = 'DSS';
               dataRow[referenceLoop.tags.indexOf('Mol_common_name')].disabled = true;
