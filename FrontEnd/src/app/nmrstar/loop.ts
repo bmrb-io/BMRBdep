@@ -43,10 +43,10 @@ export class Loop {
     this.empty = false;
 
     // Turn text nulls into logical nulls
-    for (let m = 0; m < data.length; m++) {
-      for (let n = 0; n < data[m].length; n++) {
-        if (checkValueIsNull(data[m][n])) {
-          data[m][n] = null;
+    for (const row of data) {
+      for (let n = 0; n < row.length; n++) {
+        if (checkValueIsNull(row[n])) {
+          row[n] = null;
         }
       }
     }

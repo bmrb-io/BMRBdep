@@ -26,8 +26,8 @@ export class DataFileStore {
     this.dataFiles = [];
     this.dataFileMap = {};
     this.dropDownList = dropDownList;
-    for (let i = 0; i < fileNames.length; i++) {
-      this.addFile(fileNames[i]).percent = 100;
+    for (const fileName of fileNames) {
+      this.addFile(fileName).percent = 100;
     }
   }
 
@@ -95,11 +95,11 @@ export class DataFileStore {
 
   getDataFileNamesByCategory(category: string): Set<[string, string]> {
     const results = new Set<[string, string]>();
-    for (let i = 0; i < this.dataFiles.length; i++) {
-      for (let n = 0; n < this.dataFiles[i].control.value.length; n++) {
-        for (const specificCategory of this.dataFiles[i].control.value[n][1]) {
+    for (const dataFile of this.dataFiles) {
+      for (const value of dataFile.control.value) {
+        for (const specificCategory of value[1]) {
           if (specificCategory === category) {
-            results.add([this.dataFiles[i].fileName, this.dataFiles[i].fileName]);
+            results.add([dataFile.fileName, dataFile.fileName]);
           }
         }
       }
@@ -109,8 +109,8 @@ export class DataFileStore {
 
   toJSON(): {} {
     const filenames: string[] = [];
-    for (let i = 0; i < this.dataFiles.length; i++) {
-      filenames.push(this.dataFiles[i].fileName);
+    for (const dataFile of this.dataFiles) {
+      filenames.push(dataFile.fileName);
     }
     return filenames;
   }

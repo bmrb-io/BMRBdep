@@ -511,23 +511,23 @@ export class Entry {
      */
     const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
     dfLoop.data = [];
-    for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
-      for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+    for (const dataFile of this.dataStore.dataFiles) {
+      for (let n = -1; n < dataFile.control.value.length; n++) {
         let contentDescription = null;
         let sfCategory = null;
 
         // Make sure there is at least an empty record for each file
         if (n === -1) {
-          if (this.dataStore.dataFiles[i].control.value.length !== 0) {
+          if (dataFile.control.value.length !== 0) {
             continue;
           }
         } else {
-          contentDescription = this.dataStore.dataFiles[i].control.value[n][0];
-          sfCategory = this.dataStore.dataFiles[i].control.value[n][1];
+          contentDescription = dataFile.control.value[n][0];
+          sfCategory = dataFile.control.value[n][1];
         }
         const newRow = dfLoop.addRow();
         newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length), dfLoop);
-        newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', dataFile.fileName, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', contentDescription, dfLoop);
         if (sfCategory === null) {
           newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', null, dfLoop);

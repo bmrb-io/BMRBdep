@@ -119,12 +119,12 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    for (let i = 0; i < event.dataTransfer.items.length; i++) {
+    for (const dtItem of Array.from(event.dataTransfer.items)) {
       try {
-        this.traverseFileTree(event.dataTransfer.items[i].webkitGetAsEntry(), undefined);
+        this.traverseFileTree(dtItem.webkitGetAsEntry(), undefined);
       } catch {
         try {
-          this.traverseFileTree((event.dataTransfer.items[i] as any).getAsEntry(), undefined);
+          this.traverseFileTree((dtItem as any).getAsEntry(), undefined);
         } catch {
           // Help the compiler not get upset about the current lack of getAsEntry()
           console.error('In theory, this error state is impossible.');
@@ -156,8 +156,8 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       // Get folder contents
       const dirReader = item.createReader();
       dirReader.readEntries(function (entries) {
-        for (let i = 0; i < entries.length; i++) {
-          files = files.concat(parent.traverseFileTree(entries[i], path + item.name + '/'));
+        for (const entry of entries) {
+          files = files.concat(parent.traverseFileTree(entry, path + item.name + '/'));
         }
       });
     }
@@ -165,8 +165,8 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
   uploadFiles(files: FileList) {
-    for (let i = 0; i < files.length; i++) {
-      if (!files[i].size) {
+    for (const file of Array.from(files)) {
+      if (!file.size) {
         this.messagesService.sendMessage(new Message(`It appears that you attempted to upload one or more folders or zero byte
         files. At the current time, uploading folders is only supported on modern browsers, and only via "drag and drop". Please either use
         a newer browser and drag and drop your folder(s), or tar or zip up your directory and then upload it. Uploading multiple files is
@@ -174,7 +174,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
           MessageType.NotificationMessage));
         continue;
       }
-      this.uploadFile(files[i]);
+      this.uploadFile(file);
     }
   }
 
