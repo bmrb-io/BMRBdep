@@ -42,10 +42,6 @@
           },
           "configurations": {
             "production": {
-              "outputPath": {
-                "base": "dist/production",
-                "browser": ""
-              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -65,10 +61,6 @@
               ]
             },
             "devprod": {
-              "outputPath": {
-                "base": "dist/devprod",
-                "browser": ""
-              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",
