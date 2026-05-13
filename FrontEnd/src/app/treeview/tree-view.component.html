@@ -21,7 +21,7 @@
                 @for (category of superGroupCat.children; track category) {
                   @if ((entry.showAll || category.display === 'Y') && category.display !== 'H') {
                     <mat-list-item
-                      [ngClass]="{'active': active==category.category && page==='category'}"
+                      [ngClass]="{'active': active===category.category && page==='category'}"
                       [matTooltip]="entry.schema.saveframeSchema[category.category]['group_view_help']"
                       [routerLink]="['/entry', 'saveframe', category.category]"
                       [id]="category.category">

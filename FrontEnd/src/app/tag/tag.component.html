@@ -58,10 +58,10 @@
         Error: {{tag.validationMessage}}</mat-option>
       }
       @for (val of tag.enums; track val) {
-        @if (tag.value != val[0]) {
+        @if (tag.value !== val[0]) {
           <mat-option [value]="val[0]" [matTooltip]="val[1]">{{val[0]}}</mat-option>
         }
-        @if (tag.value == val[0] && !tag.validationMessage) {
+        @if (tag.value === val[0] && !tag.validationMessage) {
           <mat-option [value]="tag.value" [matTooltip]="val[1]">{{tag.value}}</mat-option>
         }
       }

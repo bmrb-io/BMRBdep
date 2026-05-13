@@ -33,7 +33,7 @@
                 <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)"
                   color="primary" class="square-button">-
                 </button>
-                @if (file.percent == 100) {
+                @if (file.percent === 100) {
                   <a download
                     [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName"
                   target="_blank">{{file.fileName}}</a>
@@ -42,7 +42,7 @@
                 }
               </div>
             }
-            @if (file.fileName && file.percent != 100) {
+            @if (file.fileName && file.percent !== 100) {
               <mat-progress-bar mode="determinate"
                 [value]="file.percent" color="#33527b">Uploading file:
               </mat-progress-bar>
