@@ -19,7 +19,7 @@ fi
 host=`hostname`
 
 echo "Getting newest schema."
-if ! (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && uv run "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py); then
+if ! (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && ./.venv/bin/python "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py); then
   echo "Schema loader failed, quitting."
   exit 2
 fi

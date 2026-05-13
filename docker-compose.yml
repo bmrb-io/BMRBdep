@@ -13,4 +13,4 @@ services:
       - /projects/BMRB/depositions/bmrbdep:/opt/wsgi/depositions
       - /projects/BMRB/public/BMRBdep/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbdep/configuration.json
       - ./BackEnd/schema/schema_data/:/opt/wsgi/schema_data/
-      - ./FrontEnd/dist/:/opt/wsgi/dist/
+      - ./FrontEnd/dist/${ENVIRONMENT}/:/opt/wsgi/dist/
