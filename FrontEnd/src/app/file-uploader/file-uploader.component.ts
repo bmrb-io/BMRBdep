@@ -124,9 +124,9 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         this.traverseFileTree(dtItem.webkitGetAsEntry(), undefined);
       } catch {
         try {
-          this.traverseFileTree((dtItem as any).getAsEntry(), undefined);
+          const legacy = dtItem as DataTransferItem & { getAsEntry?(): FileSystemEntry };
+          this.traverseFileTree(legacy.getAsEntry(), undefined);
         } catch {
-          // Help the compiler not get upset about the current lack of getAsEntry()
           console.error('In theory, this error state is impossible.');
         }
       }
@@ -189,11 +189,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
           if (event.type === HttpEventType.UploadProgress) {
             dataFile.percent = Math.round(100 * event.loaded / event.total);
           } else if (event instanceof HttpResponse) {
-            this.entry.addCommit(event.body['commit'] as string);
+            this.entry.addCommit(event.body.commit);
             dataFile.percent = 100;
-            this.entry.dataStore.updateName(dataFile, event.body['filename'] as string);
-            if (!event.body['changed']) {
-              this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+            this.entry.dataStore.updateName(dataFile, event.body.filename);
+            if (!event.body.changed) {
+              this.messagesService.sendMessage(new Message(`The file '${event.body.filename}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
             }
           }

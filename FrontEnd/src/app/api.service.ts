@@ -13,6 +13,12 @@ import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
 import {Deposition} from './my-depositions/my-depositions.component';
 
+export interface FileUploadResponse {
+  commit: string;
+  filename: string;
+  changed: boolean;
+}
+
 function getTime(): number {
   return (new Date()).getTime();
 }
@@ -144,7 +150,7 @@ export class ApiService implements OnDestroy {
   }
 
   // file from event.target.files[0]
-  uploadFile(file: File): Observable<HttpEvent<any>> {
+  uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
@@ -156,8 +162,8 @@ export class ApiService implements OnDestroy {
       reportProgress: true,
     };
 
-    const req = new HttpRequest('POST', apiEndPoint, formData, options);
-    return this.http.request(req);
+    const req = new HttpRequest<FormData>('POST', apiEndPoint, formData, options);
+    return this.http.request<FileUploadResponse>(req);
   }
 
   deleteFile(fileName: string, verifyDeleted = false): void {
@@ -382,7 +388,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
+  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<unknown> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
@@ -524,7 +530,7 @@ export class ApiService implements OnDestroy {
     }));
   }
 
-  resendValidationEmail(): Observable<any> {
+  resendValidationEmail(): Observable<unknown> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/resend-validation-email`;
 
