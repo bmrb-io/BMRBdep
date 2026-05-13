@@ -126,7 +126,7 @@ your email when you created the deposition.">
           @if (!inputFile.files[0]) {
             <span>No file selected</span>
           }
-          <input type="file" hidden #inputFile (change)="fileChangeEvent(inputFile)"/>
+          <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
           @if (!inputFile.files[0]) {
             <button mat-raised-button color="accent" type="button" (click)="openInput()"
                     [id]="'fileUploadButton'">

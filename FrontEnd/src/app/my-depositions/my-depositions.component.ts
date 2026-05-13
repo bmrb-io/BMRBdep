@@ -65,7 +65,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
                 entryDeposited = true;
                 bmrbnum = entryData.bmrbnum;
               }
-            } catch (e) {
+            } catch {
               // If parsing fails, use default nickname
             }
 

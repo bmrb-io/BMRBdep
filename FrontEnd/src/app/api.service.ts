@@ -66,7 +66,7 @@ export class ApiService implements OnDestroy {
     try {
       rawJSON = JSON.parse(localStorage.getItem('entry'));
       schema = JSON.parse(localStorage.getItem('schema'));
-    } catch (err) {
+    } catch {
       console.error('Invalid cached entry!');
       rawJSON = null;
       schema = null;
@@ -270,7 +270,7 @@ export class ApiService implements OnDestroy {
           localStorage.setItem('entry', JSON.stringify(loadedEntry));
           localStorage.setItem('entryID', loadedEntry.entryID);
           localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
-        } catch (e) {
+        } catch {
           const message: Message = new Message('Error! Entry too large to load into browser storage. Please contact support ' +
             'for help. Your session will end since changes can\'t be saved in this state.', MessageType.ErrorMessage, undefined);
           this.messagesService.sendMessage(message);
