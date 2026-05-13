@@ -1,28 +1,49 @@
-FROM alpine:3.14
+FROM python:3.13-slim
+
 EXPOSE 9000
 WORKDIR /opt/wsgi
 
-RUN apk update && \
-    apk --no-cache add bash git ca-certificates wget uwsgi-http python3 uwsgi-python3 postgresql-libs && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev python3-dev && \
-    update-ca-certificates && \
-    apk --update add tzdata && \
-    cp /usr/share/zoneinfo/America/Chicago /etc/localtime && \
-    apk del tzdata && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache && \
-    cd /opt/wsgi && chown -R uwsgi:uwsgi .
+# Install system dependencies including uwsgi and git
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    git \
+    tzdata \
+ && rm -rf /var/lib/apt/lists/*
 
-COPY ./BackEnd/bmrbdep/requirements.txt /opt/wsgi/
-RUN pip3 install --no-cache-dir -r /opt/wsgi/requirements.txt
+# Set timezone
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-COPY ./wsgi.conf /opt/wsgi/wsgi.conf
-COPY ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
-COPY ./BackEnd/schema/schema_data/ /opt/wsgi/schema_data/
-COPY ./FrontEnd/dist/ /opt/wsgi/dist/
+# Create system group and user
+ENV SERVICE_NAME="uwsgi"
+RUN addgroup --gid 1001 --system $SERVICE_NAME && \
+    adduser --uid 1001 --gid 1001 --system --disabled-login --shell /bin/false $SERVICE_NAME && \
+    mkdir -p /var/log/$SERVICE_NAME && \
+    mkdir -p /opt/venv && \
+    chown $SERVICE_NAME:$SERVICE_NAME /var/log/$SERVICE_NAME /opt/venv /opt/wsgi
+USER $SERVICE_NAME
 
-CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf" ]
+# Create virtual environment
+ENV VENV_PATH="/opt/venv"
+RUN python3 -m venv $VENV_PATH
+ENV PATH="$VENV_PATH/bin:$PATH"
+
+# Upgrade pip inside venv
+RUN pip install --upgrade pip setuptools wheel uwsgi
+
+# Copy pyproject.toml early for caching
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/pyproject.toml /opt/wsgi/
+
+# Install Python dependencies inside venv
+RUN pip install --no-cache-dir .
+
+# Copy code and config
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./wsgi.conf /opt/wsgi/wsgi.conf
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./BackEnd/bmrbdep/ /opt/wsgi/bmrbdep/
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./version.txt /opt/wsgi/bmrbdep/
+
+# To rescan the entries: docker exec -it bmrbdep /opt/wsgi/rescan.sh
+COPY --chown=$SERVICE_NAME:$SERVICE_NAME ./rescan.sh /opt/wsgi/rescan.sh
+
+CMD ["uwsgi", "--ini", "/opt/wsgi/wsgi.conf"]

@@ -1,16 +1,24 @@
-import {Component, OnDestroy, OnInit, AfterViewInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from './api.service';
 import {versions} from 'environments/versions';
 import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {SidenavService} from './sidenav.service';
-import {MatSidenav} from '@angular/material/sidenav';
+import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
 import {LoadingBarService} from '@ngx-loading-bar/core';
+import {MatToolbar, MatToolbarRow} from '@angular/material/toolbar';
+import {AsyncPipe, NgClass} from '@angular/common';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatIcon} from '@angular/material/icon';
+import {RouterLink, RouterOutlet} from '@angular/router';
+import {MatProgressBar} from '@angular/material/progress-bar';
+import {TreeViewComponent} from './treeview/tree-view.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -29,7 +37,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
       '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
 
-    this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => this.entry = entry
+    });
   }
 
   ngAfterViewInit(): void {

@@ -6,7 +6,6 @@ import os
 import socket
 import tempfile
 import traceback
-from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
 
@@ -18,14 +17,14 @@ from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeSerializer
-from itsdangerous.exc import BadData
 from validate_email import validate_email
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.database import init_db
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
+from bmrbdep.helpers import tokens
 from bmrbdep.helpers.star_tools import merge_entries
 
 application = Flask(__name__)
@@ -40,22 +39,28 @@ if application.debug or configuration['debug']:
 application.secret_key = configuration['secret_key']
 assert application.secret_key != "CHANGE_ME"
 
+# Configure session timeout for email sessions (2 weeks)
+application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(weeks=2)
+
 # Set up the mail interface
 application.config.update(
     MAIL_SERVER=configuration['smtp']['server'],
-    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
+    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address'],
+    MAIL_PORT=configuration['smtp'].get('MAIL_PORT', 587),
+    MAIL_USE_TLS=configuration['smtp'].get('MAIL_USE_TLS', True),
+    MAIL_USE_SSL=configuration['smtp'].get('MAIL_USE_SSL', False),
+    MAIL_USERNAME=configuration['smtp']['MAIL_USERNAME'],
+    MAIL_PASSWORD=configuration['smtp']['MAIL_PASSWORD'],
 )
 mail = Mail(application)
 
 # Set up the SMTP error handler
 if configuration['smtp'].get('server') != 'CHANGE_ME':
 
-    # Don't send error e-mails in debugging mode
+    # Don't send error e-mails in debugging mode, but otherwise e-mail them
+    #  Using the same e-mail settings as for mailing deposition information
     if not configuration['debug']:
-        mail_handler = SMTPHandler(mailhost=configuration['smtp']['server'],
-                                   fromaddr=configuration['smtp']['from_address'],
-                                   toaddrs=configuration['smtp']['admins'],
-                                   subject='BMRB API Error occurred')
+        mail_handler = logging.StreamHandler()
         mail_handler.setLevel(logging.WARNING)
         application.logger.addHandler(mail_handler)
 
@@ -79,6 +84,21 @@ if configuration['debug']:
 else:
     logging.getLogger().setLevel('WARNING')
 
+# Only log pynmrstar errors of level ERROR or above.
+#  Otherwise, the docker logs get super congested
+logging.getLogger('pynmrstar').setLevel(logging.ERROR)
+
+# If they upload NMR-STAR with empty strings, just map them to null rather than throw an exception
+pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
+
+# Ensure that the database is set up
+init_db()
+
+# We need the context in order to load the modules
+with application.app_context():
+    from bmrbdep.user_endpoints import user_endpoints
+
+application.register_blueprint(user_endpoints)
 
 # Set up error handling
 @application.errorhandler(ServerError)
@@ -102,7 +122,8 @@ def handle_our_errors(exception: Union[ServerError, RequestError]):
 
 # noinspection PyUnusedLocal
 @application.errorhandler(werkzeug.exceptions.MethodNotAllowed)
-def handle_wrong_method(exception: werkzeug.exceptions.MethodNotAllowed):
+@application.errorhandler(werkzeug.exceptions.NotFound)
+def handle_scanner(exception: werkzeug.exceptions.MethodNotAllowed):
     logging.warning('Someone is vulnerability scanning us. Scan details'
                     f': {request.method}:{request.url}')
     return Response('🤨', status=404)
@@ -187,8 +208,9 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
             confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
                                       repo.metadata['deposition_nickname'],
                                       recipients=[repo.metadata['author_email']],
+                                      bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
-            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+            token = tokens.get_deposition_token(uuid)
 
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
@@ -221,8 +243,9 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
         confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
+                                  bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
-        token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+        token = tokens.get_deposition_token(uuid)
 
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
@@ -253,12 +276,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
-    serializer = URLSafeSerializer(application.config['SECRET_KEY'])
-    try:
-        deposition_data = serializer.loads(token)
-        deposition_id = deposition_data['deposition_id']
-    except (BadData, KeyError, TypeError):
-        raise RequestError('Invalid e-mail validation token. Please request a new e-mail validation message.')
+    deposition_id = tokens.verify_deposition_token(token)
 
     with depositions.DepositionRepo(deposition_id) as repo:
         if not repo.metadata['email_validated']:
@@ -285,14 +303,7 @@ def duplicate_deposition(uuid) -> Response:
                                                                     default_values=True, schema=schema)
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
-        merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
-
-        # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
-        #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
-        #   the tag. Alternatively, search for and fix all old entries with saveframes missing the '_Deleted' tag
-        for saveframe in entry_template:
-            if '_Deleted' not in saveframe or saveframe['_Deleted'] in pynmrstar.utils.definitions.NULL_VALUES:
-                saveframe.add_tag('_Deleted', 'no', update=True)
+        merge_entries(entry_template, repo.entry, schema, preserve_entry_information=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -310,7 +321,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
                                        }
-            new_repo.write_entry(entry_template)
+            new_repo.entry = entry_template
             new_repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
             # Delete data files when cloning
             for file_ in new_repo.get_data_file_list():
@@ -363,7 +374,7 @@ def new_deposition() -> Response:
         author_orcid = None
 
     # Check the e-mail
-    if not skip_email_validation:
+    if not skip_email_validation and not application.debug:
         try:
             if not validate_email(author_email):
                 raise RequestError("The e-mail you provided is not a valid e-mail. Please check the e-mail you "
@@ -432,6 +443,10 @@ def new_deposition() -> Response:
                 if data_type != 'chem_comp' and data_type != 'experiment_list':
                     data_file_loop.add_data([pos, 1, upload_filename, legal_data_categories[data_type], data_type])
                     pos += 1
+                    # Set the linked file automatically when uploaded data types are in the bootstrap entry
+                    for saveframe in entry_template.get_saveframes_by_category(data_type):
+                        if 'Data_file_name' in saveframe:
+                            saveframe['Data_file_name'] = upload_filename
         data_file_loop.add_missing_tags(all_tags=True, schema=schema)
         entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data'] = data_file_loop
 
@@ -450,9 +465,10 @@ def new_deposition() -> Response:
         sample_conditions['Val'] = [None, None, '1', None]
         sample_conditions['Val_units'] = ['K', 'pH', 'atm', 'M']
 
-    # Just add a single row to the entry author loop
+    # Just add a single row to the entry author loop if this is a new deposition and it isn't from a validated system like NAN
     author_loop: pynmrstar.Loop = entry_saveframe['_Entry_author']
-    author_loop.data.insert(0, ['.'] * len(author_loop.tags))
+    if not (request.environ['REMOTE_ADDR'] in configuration['local-ips'] and request_info.get('email_validated') == 'true'):
+        author_loop.data.insert(0, ['.'] * len(author_loop.tags))
 
     # Modify the contact_loop as needed
     contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
@@ -543,7 +559,9 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': configuration['debug'],
+                        # Skip the e-mail validation if coming from a system where the email is already validated
+                        'email_validated': configuration['debug'] or \
+                                           (request.environ['REMOTE_ADDR'] in configuration['local-ips'] and request_info.get('email_validated') == 'true'),
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
@@ -555,8 +573,27 @@ def new_deposition() -> Response:
     with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
         # Manually set the metadata during object creation - never should be done this way elsewhere
         repo._live_metadata = entry_meta
-        repo.write_entry(entry_template)
+
+        # If they uploaded files, add them to the repo
+        upload_data = entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data']
+        pos = len(upload_data.data) + 1
+        for file_name, file in request.files.to_dict().items():
+            if file_name == 'nmrstar_file':
+                continue
+            else:
+                filename = repo.write_file(filename=file_name, data=file.read())
+                upload_data.add_data([{'Data_file_ID': pos,
+                                       'Deposited_data_files_ID': 1,
+                                       'Data_file_name': filename,
+                                       'Data_file_content_type': 'Time-domain data (raw spectral data)',
+                                       'Data_file_Sf_category': "*"}])
+                pos += 1
+
+        # Write out the NMR-STAR file, plus the schema being used
+        repo.entry = entry_template
         repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
+
+        # Create the rest of the metadata
         if uploaded_entry:
             if entry_bootstrap:
                 entry_meta['bootstrap_entry'] = request_info['bootstrapID']
@@ -592,7 +629,9 @@ def deposit_entry(uuid) -> Response:
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                             ['Given_name', 'Family_name', 'Email_address'])]
-        message = Message("Your entry has been deposited!", recipients=contact_emails,
+        message = Message("Your entry has been deposited!",
+                          recipients=contact_emails,
+                          bcc=configuration['smtp'].get('logging_emails', []),
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
                        'deposition contents for reference. You may also use this file to start a new deposition. ' \
@@ -630,7 +669,7 @@ def file_operations(uuid, path: str) -> Response:
 
     if request.method == "GET":
         with depositions.DepositionRepo(uuid, read_only=True) as repo:
-            return send_file(repo.get_file(path, root=False), download_name=path)
+            return send_file(path_or_file=repo.get_file(path, root=False), download_name=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.delete_data_file(path):
@@ -683,7 +722,7 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
-            existing_entry: pynmrstar.Entry = repo.get_entry()
+            existing_entry: pynmrstar.Entry = repo.entry
 
             # If they aren't making any changes
             try:
@@ -695,17 +734,13 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            # Next two lines can be removed after clients upgrade (06/01/2020)
-            if isinstance(entry_json['commit'], str):
-                entry_json['commit'] = [entry_json['commit']]
-
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
                     logging.exception('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
-            repo.write_entry(entry)
+            repo.entry = entry
             repo.commit("Entry updated.")
 
             return jsonify({'commit': repo.last_commit})
@@ -714,12 +749,13 @@ def fetch_or_store_deposition(uuid):
     elif request.method == "GET":
 
         with depositions.DepositionRepo(uuid) as repo:
-            entry: pynmrstar.Entry = repo.get_entry()
+            entry: pynmrstar.Entry = repo.entry
             schema_version: str = repo.metadata['schema_version']
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
             entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
+            bmrbnum: Optional[int] = repo.metadata.get('bmrbnum')
             commit: str = repo.last_commit
         try:
             schema: dict = get_schema(schema_version)
@@ -732,6 +768,7 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
+        entry['bmrbnum'] = bmrbnum
         entry['commit'] = [commit]
 
         return jsonify(entry)

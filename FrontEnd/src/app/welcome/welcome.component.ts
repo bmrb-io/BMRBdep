@@ -1,17 +1,23 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {ApiService} from '../api.service';
-import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
-import {Message, MessagesService} from '../messages.service';
+import {MatButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatError, MatFormField, MatOption, MatSelect} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.scss']
+  styleUrls: ['./welcome.component.scss'],
+  standalone: true,
+  imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatTooltip, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   public entry: Entry;
@@ -23,7 +29,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router,
               public api: ApiService,
-              private messagingService: MessagesService,
               private sidenavService: SidenavService) {
     this.entry = null;
     this.skipEmailValidation = false;
@@ -40,6 +45,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   authorORCID = new UntypedFormControl('', [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
   bootstrapID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^[0-9]+$/)]);
   depositionType = new UntypedFormControl('macromolecule');
+  resumeEmail = new UntypedFormControl('', [Validators.required, Validators.email]);
 
   createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
     sessionType: this.sessionType,
@@ -60,8 +66,10 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => {
-      this.entry = entry;
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => {
+        this.entry = entry;
+      }
     });
   }
 
@@ -117,5 +125,11 @@ export class WelcomeComponent implements OnInit, OnDestroy {
           this.emailValidationError = true;
         }
       });
+  }
+
+  requestEmailAccess() {
+    if (this.resumeEmail.valid) {
+      this.api.sendEmailAccessToken(this.resumeEmail.value).then();
+    }
   }
 }

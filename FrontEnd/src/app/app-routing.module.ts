@@ -10,6 +10,7 @@ import {MolecularSystemComponent} from './molecular-system/molecular-system.comp
 import {PendingValidationComponent} from './pending-validation/pending-validation.component';
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {SupportComponent} from './support/support-component';
+import {MyDepositionsComponent} from './my-depositions/my-depositions.component';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
@@ -20,7 +21,8 @@ const routes: Routes = [
   {path: 'entry/restore', component: RestoreComponent},
   {path: 'entry/pending-verification', component: PendingValidationComponent},
   {path: 'help/molecular-assembly', component: MolecularSystemComponent},
-  {path: 'support', component: SupportComponent}
+  {path: 'support', component: SupportComponent},
+  {path: 'my-depositions', component: MyDepositionsComponent},
 ];
 
 @NgModule({

@@ -1,0 +1,27 @@
+@use '@angular/material' as mat;
+@use "../../custom-theme.scss" as theme;
+
+.bmrb-id-banner {
+  margin: 1.5em auto;
+  padding: 1.25em 1.5em;
+  max-width: 600px;
+  text-align: center;
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-primary);
+  color: black;
+  border: 1px solid mat.m2-get-color-from-palette(theme.$custom-theme-primary, darker);
+  border-radius: 5px;
+}
+
+.bmrb-id-label {
+  font-size: 1em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.bmrb-id-value {
+  font-size: 2.75em;
+  font-weight: 600;
+  margin-top: 0.15em;
+  letter-spacing: 0.02em;
+}

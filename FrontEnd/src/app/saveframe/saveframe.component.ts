@@ -2,16 +2,25 @@ import {ApiService} from '../api.service';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
-import {ActivatedRoute, Params} from '@angular/router';
+import {ActivatedRoute, Params, RouterLink} from '@angular/router';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
+import {FileUploaderComponent} from '../file-uploader/file-uploader.component';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton} from '@angular/material/button';
+import {NgClass} from '@angular/common';
+import {TagComponent} from '../tag/tag.component';
+import {LoopComponent} from '../loop/loop.component';
 
 @Component({
   selector: 'app-saveframe',
   templateUrl: './saveframe.component.html',
   styleUrls: ['./saveframe.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [FileUploaderComponent, MatTooltip, MatIcon, RouterLink, MatButton, NgClass, TagComponent, LoopComponent]
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
   @Input() saveframe: Saveframe;
@@ -29,8 +38,10 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.route.params.subscribe((params: Params) => {
-      this.showCategoryLink = (!('saveframe_category' in params));
+    this.subscription$ = this.route.params.subscribe({
+      next: (params: Params) => {
+        this.showCategoryLink = (!('saveframe_category' in params));
+      }
     });
   }
 
@@ -42,7 +53,9 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   helpClick(activeTag: SaveframeTag, el: HTMLElement) {
     if (this.activeTag !== activeTag) {
       this.activeTag = activeTag;
-      setTimeout(() => {el.scrollIntoView(false); }, 5);
+      setTimeout(() => {
+        el.scrollIntoView(false);
+      }, 5);
     } else {
       this.activeTag = null;
     }
@@ -71,13 +84,15 @@ export class SaveframeComponent implements OnInit, OnDestroy {
         ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
     }
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Delete the saveframe
-        this.saveframe.delete();
-        this.processChange();
+    this.dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Delete the saveframe
+          this.saveframe.delete();
+          this.processChange();
+        }
+        this.dialogRef = null;
       }
-      this.dialogRef = null;
     });
   }
 
@@ -96,13 +111,15 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     }
     this.dialogRef.componentInstance.proceedMessage = 'Clear data';
 
-    this.dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Delete the saveframe
-        this.saveframe.clear();
-        this.processChange();
+    this.dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          // Delete the saveframe
+          this.saveframe.clear();
+          this.processChange();
+        }
+        this.dialogRef = null;
       }
-      this.dialogRef = null;
     });
   }
 }

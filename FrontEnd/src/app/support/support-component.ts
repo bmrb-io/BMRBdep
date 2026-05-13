@@ -1,14 +1,20 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {UntypedFormControl, Validators} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, UntypedFormControl, Validators} from '@angular/forms';
 import {ApiService} from '../api.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {Entry} from '../nmrstar/entry';
+import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
+import {MatFormField} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-support',
   templateUrl: './support.component.html',
-  styleUrls: ['./support.component.scss']
+  styleUrls: ['./support.component.scss'],
+  standalone: true,
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {
 
@@ -29,7 +35,9 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe(entry => this.entry = entry);
+    this.subscription$ = this.api.entrySubject.subscribe({
+      next: entry => this.entry = entry
+    });
 
     if (history.state.data) {
       this.caughtException = history.state.data;

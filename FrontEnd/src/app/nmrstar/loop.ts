@@ -1,7 +1,6 @@
 import {checkValueIsNull, cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
-import {LoopTag, Tag} from './tag';
-import {sprintf} from 'sprintf-js';
+import {LoopTag} from './tag';
 
 export class Loop {
   category: string;
@@ -233,7 +232,7 @@ export class Loop {
     return this.empty;
   }
 
-  refresh(setDisabled= true): void {
+  refresh(setDisabled = true): void {
 
     // Update the child data tags
     for (const row of this.data) {
@@ -323,8 +322,6 @@ export class Loop {
 
     // Start the loop
     let returnString = '\n   loop_\n';
-    // Print the columns
-    const rowFormatString = '      %-s\n';
 
     // Check to make sure our category is set
     if (this.category === undefined) {
@@ -360,8 +357,8 @@ export class Loop {
       const loopCategory = this.category;
       for (const column in this.tags) {
         if ((this.displayTags[column] !== 'H' && widths[column] !== null) || this.tags[column] === 'Experiment_ID' ||
-          this.category === '_Upload_data' || this.tags[column] === 'ID' ) {
-          returnString += sprintf(rowFormatString, loopCategory + '.' + this.tags[column]);
+          this.category === '_Upload_data' || this.tags[column] === 'ID') {
+          returnString += `     ${loopCategory + '.' + this.tags[column]}\n`;
         }
       }
       returnString += '\n';
@@ -396,7 +393,7 @@ export class Loop {
             widths[n] = 3;
           }
           // Add the data to the return string
-          returnString += sprintf('%-' + widths[n] + 's', datumCopy);
+          returnString += datumCopy.padEnd(widths[n], ' ');
         }
 
         // End the row

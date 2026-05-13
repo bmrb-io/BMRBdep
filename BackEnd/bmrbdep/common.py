@@ -15,7 +15,7 @@ configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json
 
 # If we are running in docker, ignore the 'repo_path' and use the standard location
 try:
-    if '/docker' in open('/proc/self/cgroup', 'r').read():
+    if '/docker' in open('/proc/self/cgroup', 'r').read() or os.path.exists('/.dockerenv'):
         configuration['repo_path'] = '/opt/wsgi/depositions'
 except IOError:
     pass
@@ -82,19 +82,15 @@ def secure_full_path(path: str) -> Tuple[str, str]:
 
     return file_path, file_name
 
-
 def list_all_depositions() -> Iterable[str]:
+    repo = configuration['repo_path']
 
-    for first_character_dir in os.listdir(configuration['repo_path']):
-        first_char_path = os.path.join(configuration['repo_path'], first_character_dir)
-        if not os.path.isdir(first_char_path):
+    for level1 in os.scandir(repo):
+        if not level1.is_dir() or len(level1.name) != 1:
             continue
-        for second_character_dir in os.listdir(first_char_path):
-            second_char_path = os.path.join(first_char_path, second_character_dir)
-            if not os.path.isdir(second_char_path):
+        for level2 in os.scandir(level1.path):
+            if not level2.is_dir():
                 continue
-            for entry in os.listdir(second_char_path):
-                entry_dir = os.path.join(second_char_path, entry)
-                if not os.path.isdir(entry_dir):
-                    continue
-                yield entry
+            for level3 in os.scandir(level2.path):
+                if level3.is_dir():
+                    yield level3.name

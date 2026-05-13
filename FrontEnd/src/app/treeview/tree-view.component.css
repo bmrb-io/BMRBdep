@@ -2,3 +2,12 @@
   font-weight: bolder !important;
   background: rgba(0,0,0,.1) !important;
 }
+
+mat-list-item {
+  display: flex !important;
+  align-items: center !important;
+}
+
+mat-list-item mat-icon {
+  margin-right: 8px;
+}

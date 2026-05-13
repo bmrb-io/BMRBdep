@@ -1,11 +1,20 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
+import {FormsModule} from '@angular/forms';
+import {NgClass} from '@angular/common';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {MatAutocomplete, MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 
 @Component({
   selector: 'app-tag',
   templateUrl: './tag.component.html',
-  styleUrls: ['./tag.component.scss']
+  styleUrls: ['./tag.component.scss'],
+  standalone: true,
+  imports: [FormsModule, NgClass, MatTooltip, MatSelect, MatOption, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatRadioGroup, MatRadioButton]
 })
 export class TagComponent implements OnInit {
   @Input() tag: Tag;
@@ -29,7 +38,7 @@ export class TagComponent implements OnInit {
     }
   }
 
-  private filter() {
+  filter() {
     this.filteredOptions = [];
     for (const singleEnum of this.tag.enums) {
       if (singleEnum[0].toLowerCase().includes(this.tag.value.toLowerCase())) {

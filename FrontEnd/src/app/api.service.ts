@@ -11,6 +11,7 @@ import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-di
 import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
+import {Deposition} from './my-depositions/my-depositions.component';
 
 function getTime(): number {
   return (new Date()).getTime();
@@ -46,12 +47,14 @@ export class ApiService implements OnDestroy {
     this.entrySubject = new ReplaySubject<Entry>();
     this.firstSaveMessageSent = false;
 
-    this.subscription$ = this.entrySubject.subscribe(entry => {
-      this.cachedEntry = entry;
-      if (entry) {
-        this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
-      } else {
-        this.titleService.setTitle('BMRBdep');
+    this.subscription$ = this.entrySubject.subscribe({
+      next: entry => {
+        this.cachedEntry = entry;
+        if (entry) {
+          this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
+        } else {
+          this.titleService.setTitle('BMRBdep');
+        }
       }
     });
 
@@ -85,17 +88,17 @@ export class ApiService implements OnDestroy {
         }
       });
     } else {
-      this.subscription$.add(this.router.events.subscribe(
-        event => {
+      this.subscription$.add(this.router.events.subscribe({
+        next: event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && !this.cachedEntry) {
+              && this.router.url.indexOf('/my-depositions') < 0 && !this.cachedEntry) {
               this.subscription$.unsubscribe();
               router.navigate(['/']).then();
             }
           }
         }
-      ));
+      }));
     }
 
     // Used to open verification links in same tab
@@ -155,8 +158,8 @@ export class ApiService implements OnDestroy {
 
   deleteFile(fileName: string, verifyDeleted: boolean = false): void {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
-    this.http.delete(apiEndPoint).subscribe(
-      response => {
+    this.http.delete(apiEndPoint).subscribe({
+      next: response => {
         this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
@@ -164,7 +167,7 @@ export class ApiService implements OnDestroy {
         this.cachedEntry.addCommit(response['commit']);
         this.storeEntry(true);
       },
-      () => {
+      error: () => {
         // verifyDeleted will be set if they cancel an upload
         if (!verifyDeleted) {
           this.messagesService.sendMessage(new Message('Failed to delete file. Do you have an internet connection?',
@@ -176,33 +179,37 @@ export class ApiService implements OnDestroy {
           this.cachedEntry.refresh();
         }
       }
-    );
+    });
   }
 
   checkValidatedEmail(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
       // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
-      this.http.get(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe(response => {
+      this.http.get(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe({
+        next: response => {
           resolve(response['status']);
-        }, error => {
+        },
+        error: error => {
           this.handleError(error);
           reject();
         }
-      );
+      });
     }));
   }
 
   checkLastCommit(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
-      this.http.get(entryURL).subscribe(response => {
+      this.http.get(entryURL).subscribe({
+        next: response => {
           resolve(this.cachedEntry.checkCommit(response['commit']));
-        }, error => {
+        },
+        error: error => {
           this.handleError(error);
           reject();
         }
-      );
+      });
     }));
   }
 
@@ -215,15 +222,17 @@ export class ApiService implements OnDestroy {
     dialogRef.componentInstance.cancelMessage = 'No, cancel';
     dialogRef.componentInstance.inputBoxText = 'Enter a nickname for the new deposition';
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const formData = new FormData();
-        formData.append('deposition_nickname', dialogRef.componentInstance.name);
+    dialogRef.afterClosed().subscribe({
+      next: result => {
+        if (result) {
+          const formData = new FormData();
+          formData.append('deposition_nickname', dialogRef.componentInstance.name);
 
-        const duplicateURL = `${environment.serverURL}/${this.cachedEntry.entryID}/duplicate`;
-        this.http.post(duplicateURL, formData).subscribe(jsonData => {
-          this.router.navigate(['/entry', 'load', jsonData['deposition_id']]).then();
-        });
+          const duplicateURL = `${environment.serverURL}/${this.cachedEntry.entryID}/duplicate`;
+          this.http.post(duplicateURL, formData).subscribe(jsonData => {
+            this.router.navigate(['/entry', 'load', jsonData['deposition_id']]).then();
+          });
+        }
       }
     });
   }
@@ -233,8 +242,8 @@ export class ApiService implements OnDestroy {
     if (!skipMessage) {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
     }
-    this.http.get(entryURL).subscribe(
-      jsonData => {
+    this.http.get(entryURL).subscribe({
+      next: jsonData => {
         if (!skipMessage) {
           this.messagesService.clearMessage();
         }
@@ -243,7 +252,7 @@ export class ApiService implements OnDestroy {
         // Verify that the NMR-STAR matches the uploaded files
         let filesOutOfSync = false;
         if ('data_files' in jsonData) {
-          const files: Array<string> = jsonData['data_files'];
+          const files: string[] = jsonData['data_files'] as string[];
           for (const dataFile of files) {
             if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
               loadedEntry.dataStore.addFile(dataFile).percent = 100;
@@ -272,8 +281,8 @@ export class ApiService implements OnDestroy {
           this.saveEntry();
         }
       },
-      error => this.handleError(error)
-    );
+      error: error => this.handleError(error)
+    });
   }
 
   storeEntry(dirty: boolean = false): void {
@@ -301,8 +310,8 @@ export class ApiService implements OnDestroy {
     if (override) {
       jsonObject['force'] = true;
     }
-    this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe(
-      response => {
+    this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
+      next: response => {
         if ('error' in response && response['error'] === 'reload') {
 
           this.cachedEntry.unsaved = true;
@@ -352,7 +361,7 @@ export class ApiService implements OnDestroy {
           this.saveInProgress = false;
         }
       },
-      () => {
+      error: () => {
         if (this.cachedEntry.unsaved) {
           const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
           if (time_diff > 30 && time_diff < 180) {
@@ -366,7 +375,7 @@ export class ApiService implements OnDestroy {
         }
         this.saveInProgress = false;
       }
-    );
+    });
   }
 
   newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
@@ -405,11 +414,14 @@ export class ApiService implements OnDestroy {
     return new Promise((resolve, reject) => {
 
       this.http.post(environment.supportURL, jsonData)
-        .subscribe(responseJson => {
-          resolve(responseJson);
-        }, error => {
-          this.handleError(error);
-          reject();
+        .subscribe({
+          next: responseJson => {
+            resolve(responseJson);
+          },
+          error: error => {
+            this.handleError(error);
+            reject();
+          }
         });
     });
   }
@@ -450,16 +462,19 @@ export class ApiService implements OnDestroy {
     return new Promise((resolve, reject) => {
 
       this.http.post(apiEndPoint, body, options)
-        .subscribe(jsonData => {
-          this.clearDeposition();
-          this.messagesService.clearMessage();
-          resolve(jsonData['deposition_id']);
-        }, error => {
-          if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
-            reject('Invalid e-mail');
+        .subscribe({
+          next: jsonData => {
+            this.clearDeposition();
+            this.messagesService.clearMessage();
+            resolve(jsonData['deposition_id']);
+          },
+          error: error => {
+            if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
+              reject('Invalid e-mail');
+            }
+            this.handleError(error);
+            reject(error);
           }
-          this.handleError(error);
-          reject(error);
         });
     });
   }
@@ -481,23 +496,26 @@ export class ApiService implements OnDestroy {
       MessageType.NotificationMessage, 0));
 
     return new Promise(((resolve, reject) => {
-      this.http.post(apiEndPoint, formData).subscribe(jsonData => {
-        if (!checkValueIsNull(feedback)) {
-          this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
+      this.http.post(apiEndPoint, formData).subscribe({
+        next: jsonData => {
+          if (!checkValueIsNull(feedback)) {
+            this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
+          }
+
+          // Trigger everything watching the entry to see that it changed - because "deposited" changed
+          this.cachedEntry.deposited = true;
+          this.cachedEntry.refresh();
+          this.storeEntry();
+
+          this.messagesService.sendMessage(new Message('Submission accepted!',
+            MessageType.NotificationMessage, 15000));
+          this.router.navigate(['/entry']).then();
+          resolve(jsonData['status']);
+        },
+        error: error => {
+          this.handleError(error);
+          reject();
         }
-
-        // Trigger everything watching the entry to see that it changed - because "deposited" changed
-        this.cachedEntry.deposited = true;
-        this.cachedEntry.refresh();
-        this.storeEntry();
-
-        this.messagesService.sendMessage(new Message('Submission accepted!',
-          MessageType.NotificationMessage, 15000));
-        this.router.navigate(['/entry']).then();
-        resolve(jsonData['status']);
-      }, error => {
-        this.handleError(error);
-        reject();
       });
     }));
   }
@@ -541,4 +559,38 @@ export class ApiService implements OnDestroy {
   }
 
 
+  sendEmailAccessToken(email: string) {
+
+    const apiEndPoint = `${environment.serverURL}/request-email-access`;
+
+    const body = new FormData();
+    body.append('email', email);
+
+    return new Promise(((resolve, reject) => {
+      this.http.post(apiEndPoint, body).subscribe({
+        next: jsonData => {
+          console.log(jsonData);
+
+          this.messagesService.sendMessage(new Message('Email sent. Please check your inbox and also check your spam folder if you don\'t see it.',
+            MessageType.NotificationMessage, 15000));
+          resolve(jsonData['status']);
+        },
+        error: error => {
+          this.handleError(error);
+          reject();
+        }
+      });
+    }));
+  }
+
+  getAuthorizedDepositions(): Observable<Deposition[]> {
+    const apiEndPoint = `${environment.serverURL}/authorized-depositions`;
+    return this.http.get<Deposition[]>(apiEndPoint, {withCredentials: true})
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          this.handleError(error);
+          return of([]);
+        })
+      );
+  }
 }
