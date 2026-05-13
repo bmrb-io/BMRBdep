@@ -25,7 +25,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
-  serverURL: String = null;
+  serverURL: string = null;
   showCategoryLink: boolean;
   uploadSubscriptionDict$: {};
   subscription$: Subscription;

@@ -20,7 +20,7 @@ export class Message {
 
   constructor(messageBody: string,
               messageType: MessageType = MessageType.NotificationMessage,
-              messageTimeout: number = 15000) {
+              messageTimeout = 15000) {
     this.messageBody = messageBody;
     this.messageType = messageType;
     this.messageTimeout = messageTimeout;

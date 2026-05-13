@@ -1,4 +1,4 @@
-@if (tag.interfaceType == 'country') {
+@if (tag.interfaceType === 'country') {
   <label>
     <select
       [(ngModel)]="tag.value"
@@ -13,7 +13,7 @@
   </label>
 }
 
-@if (tag.interfaceType == 'state') {
+@if (tag.interfaceType === 'state') {
   <label>
     <select
       [(ngModel)]="tag.value"
@@ -29,7 +29,7 @@
 }
 
 
-@if (tag.interfaceType == 'standard') {
+@if (tag.interfaceType === 'standard') {
   <label>
     <input
       [(ngModel)]="tag.value"
@@ -46,7 +46,7 @@
   </label>
 }
 
-@if (tag.interfaceType == 'closed_enum') {
+@if (tag.interfaceType === 'closed_enum') {
   <label>
     <mat-select [(ngModel)]="tag.value"
       [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
@@ -69,7 +69,7 @@
   </label>
 }
 
-@if (tag.interfaceType == 'sf_pointer' || tag.interfaceType == 'experiment_pointer') {
+@if (tag.interfaceType === 'sf_pointer' || tag.interfaceType === 'experiment_pointer') {
   <label>
     <mat-select [(ngModel)]="tag.value"
       [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
@@ -84,7 +84,7 @@
   </label>
 }
 
-@if (tag.interfaceType == 'open_enum') {
+@if (tag.interfaceType === 'open_enum') {
   <label>
     <input matInput
       [(ngModel)]="tag.value"
@@ -104,7 +104,7 @@
 }
 
 
-@if (tag.interfaceType == 'yes_no') {
+@if (tag.interfaceType === 'yes_no') {
   <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
     [matTooltip]="tag.validationMessage">
     <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled" (change)="validateTag()">
@@ -114,7 +114,7 @@
   </div>
 }
 
-@if (tag.interfaceType == 'text') {
+@if (tag.interfaceType === 'text') {
   <label>
     <textarea [(ngModel)]="tag.value"
       [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"

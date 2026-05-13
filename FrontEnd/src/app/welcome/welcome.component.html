@@ -101,7 +101,7 @@ your email when you created the deposition.">
       </mat-form-field>
 
 
-      @if (sessionType.value == 'bmrb_id') {
+      @if (sessionType.value === 'bmrb_id') {
         <mat-form-field>
           <label>
             <input matInput
@@ -115,7 +115,7 @@ your email when you created the deposition.">
         </mat-form-field>
       }
 
-      @if (sessionType.value == 'file') {
+      @if (sessionType.value === 'file') {
         <div>
           @if (inputFile.files[0]) {
             <span>{{inputFile.files[0].name}}</span>
@@ -136,7 +136,7 @@ your email when you created the deposition.">
             </button>
           }
           <p></p>
-          @if (sessionType.value == 'file' && inputFile.files[0]) {
+          @if (sessionType.value === 'file' && inputFile.files[0]) {
             <button mat-raised-button color="primary">
               Click here to start a new deposition from {{inputFile.files[0]?.name}}.
             </button>
@@ -146,13 +146,13 @@ your email when you created the deposition.">
 
       <br>
 
-        @if (sessionType.value == 'bmrb_id') {
+        @if (sessionType.value === 'bmrb_id') {
           <button mat-raised-button color="primary">
             Click here to start a new deposition from an existing entry.
           </button>
         }
 
-        @if (sessionType.value == 'new') {
+        @if (sessionType.value === 'new') {
           <button mat-raised-button color="primary">
             Click here to start a new deposition from scratch.
           </button>

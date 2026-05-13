@@ -14,7 +14,7 @@
       <mat-nav-list>
         @for (superGroupCat of entry.superGroups; track superGroupCat) {
           @for (category of superGroupCat.children; track category) {
-            @if ((!category.valid  && category.display != 'H')) {
+            @if ((!category.valid  && category.display !== 'H')) {
               <p>
                 <a mat-raised-button [routerLink]="['/entry', 'saveframe', category.category]" color="accent"
                   matTooltip="Jump to this section.">

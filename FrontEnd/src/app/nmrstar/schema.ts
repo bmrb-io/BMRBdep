@@ -17,9 +17,9 @@ export class Schema {
   dataTypes = {};
   fileUploadTypes;
   overrides: {};
-  overridesDictList: Array<{}>;
+  overridesDictList: {}[];
   categorySuperGroups: {};
-  categorySupergroupsDictList: Array<Array<{}>>;
+  categorySupergroupsDictList: {}[][];
   categorySuperGroupsDescription: {};
   categorySuperGroupsDescriptionDict: {};
 
@@ -44,7 +44,7 @@ export class Schema {
     delete this.saveframes;
   }
 
-  constructor(json: Object) {
+  constructor(json: object) {
 
     this.version = json['version'];
     this.tags = json['tags'];

@@ -1,9 +1,9 @@
 <ng-container>
-  @if (saveframe.category == 'deposited_data_files') {
+  @if (saveframe.category === 'deposited_data_files') {
     <app-file-uploader
     [entry]="saveframe.parent"></app-file-uploader>
   } @else {
-    @if (saveframe.display == 'Y' || (saveframe.parent.showAll && saveframe.display == 'N')) {
+    @if (saveframe.display === 'Y' || (saveframe.parent.showAll && saveframe.display === 'N')) {
       <div>
         <table>
           <colgroup>
@@ -15,7 +15,7 @@
             @if (saveframe.tags[0]) {
               <th (contextmenu)="saveframe.log()">
                 <a class="header-text">{{saveframe.tags[0].schemaValues['ADIT category view name']}}
-                  @if (saveframe.category == 'assembly') {
+                  @if (saveframe.category === 'assembly') {
                     <mat-icon routerLink="/help/molecular-assembly"
                       class="pointer" matTooltip="Molecular assembly help">help_outline
                     </mat-icon>
@@ -71,10 +71,10 @@
           </thead>
           <tbody>
             @for (saveframeTag of saveframe.tags; track saveframeTag) {
-              @if (saveframeTag.display == 'Y' || (saveframe.parent.showAll && saveframeTag.display == 'N')) {
+              @if (saveframeTag.display === 'Y' || (saveframe.parent.showAll && saveframeTag.display === 'N')) {
                 <tr
                   (contextmenu)="saveframeTag.log()">
-                  @if (saveframeTag.display == 'Y') {
+                  @if (saveframeTag.display === 'Y') {
                     <td class="tag-description"
                       [matTooltip]="saveframeTag.schemaValues['Interface'] + ' Click for more information.'"
                       [innerHTML]="saveframeTag.schemaValues['Prompt'] + '<span class=\'mandatory\'>*</span>'"
@@ -100,7 +100,7 @@
             <div class='tag-info-box'>
               <b [innerHTML]="activeTag.schemaValues['Prompt']"></b>
               <p [innerHTML]="activeTag.schemaValues['Interface']"></p>
-              @if (activeTag.schemaValues['Example'] != '?') {
+              @if (activeTag.schemaValues['Example'] !== '?') {
                 <p
                   [innerHTML]="'<b>Example:</b> ' + activeTag.schemaValues['Example']"></p>
                 }
@@ -112,7 +112,7 @@
             }
           </div>
           @for (loop of saveframe.loops; track loop) {
-            @if (loop.display == 'Y' || (loop.display == 'N' && saveframe.parent.showAll)) {
+            @if (loop.display === 'Y' || (loop.display === 'N' && saveframe.parent.showAll)) {
               <app-loop
               [loop]='loop'></app-loop>
             }

@@ -12,7 +12,7 @@
       @if (saveframeTag.value || saveframe.parent.showAll) {
         <tr class="highlight">
           <td><span class="uneditable">{{saveframe.tagPrefix + '.' + saveframeTag.name}}</span></td>
-          @if (saveframeTag.name != "Sf_framecode") {
+          @if (saveframeTag.name !== "Sf_framecode") {
             <td>
               <div>
                 @if (saveframeTag.value && saveframeTag.value.indexOf("$")==0) {

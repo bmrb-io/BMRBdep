@@ -17,8 +17,8 @@ export class Tag {
   display: string;
   fullyQualifiedTagName: string;
   enums: Set<[string, string]>;
-  frameLink: Array<[string, string]>;
-  parent: Object;
+  frameLink: [string, string][];
+  parent: object;
 
 
   constructor(name: string, value: string, tagPrefix: string, schema: Schema) {

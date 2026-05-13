@@ -25,7 +25,7 @@ jump between sections by clicking on the 'Menu' button on the top left.">Next se
           <app-saveframe [saveframe]='saveframe'
           (sfReload)="reloadSaveframes($event)"></app-saveframe>
         }
-        @if (saveframes[0].display == 'N' && !entry.showAll) {
+        @if (saveframes[0].display === 'N' && !entry.showAll) {
           <p>All tags in this category are optional, and you have
             chosen to hide non-mandatory tags. To view these tags, please
           click the 'Display non-mandatory tags' toggle in the navigation menu.</p>

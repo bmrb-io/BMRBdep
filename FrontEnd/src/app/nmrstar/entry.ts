@@ -10,13 +10,13 @@ class SuperCategoryInfo {
   displayHelp: string;
   valid: boolean;
   display: string;
-  children: Array<CategoryInfo>;
+  children: CategoryInfo[];
 
   constructor(superCategory: string,
               displayName: string,
               displayHelp: string,
-              valid: boolean = true,
-              display: string = 'H') {
+              valid = true,
+              display = 'H') {
     this.superCategory = superCategory;
     this.displayName = displayName;
     this.displayHelp = displayHelp;
@@ -34,8 +34,8 @@ class CategoryInfo {
 
   constructor(category: string,
               displayName: string,
-              valid: boolean = true,
-              display: string = 'H') {
+              valid = true,
+              display = 'H') {
     this.category = category;
     this.displayName = displayName;
     this.valid = valid;
@@ -43,7 +43,7 @@ class CategoryInfo {
   }
 }
 
-export function entryFromJSON(jdata: Object): Entry {
+export function entryFromJSON(jdata: object): Entry {
   const entry = new Entry(jdata['entry_id']);
   entry.schema = new Schema(jdata['schema']);
   entry.emailValidated = jdata['email_validated'];
@@ -81,7 +81,7 @@ export class Entry {
   entryID: string;
   saveframes: Saveframe[];
   schema: Schema;
-  superGroups: Array<SuperCategoryInfo>;
+  superGroups: SuperCategoryInfo[];
   enumerationTies: {};
   source: string;
   dataStore: DataFileStore;
@@ -93,7 +93,7 @@ export class Entry {
   depositionNickname: string;
   bmrbnum: number;
   firstIncompleteCategory: string;
-  commit: Array<string>;
+  commit: string[];
   unsaved: boolean;
 
   constructor(dataName: string) {
@@ -133,7 +133,7 @@ export class Entry {
 
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
-  addSaveframe(saveframe: Saveframe, position: number = -1, refresh: boolean = true): void {
+  addSaveframe(saveframe: Saveframe, position = -1, refresh = true): void {
     if (position < 0) {
       this.saveframes.push(saveframe);
     } else {

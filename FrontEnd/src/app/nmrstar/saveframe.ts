@@ -3,7 +3,7 @@ import {Loop} from './loop';
 import {checkTagIsRequired, checkValueIsNull, cleanValue, isMixedCase} from './nmrstar';
 import {LoopTag, SaveframeTag} from './tag';
 
-export function saveframeFromJSON(jdata: Object, parent: Entry): Saveframe {
+export function saveframeFromJSON(jdata: object, parent: Entry): Saveframe {
   const test: Saveframe = new Saveframe(jdata['name'], jdata['category'], jdata['tag_prefix'], parent);
   test.addTags(jdata['tags']);
   for (const loopJSON of jdata['loops']) {
@@ -95,7 +95,7 @@ export class Saveframe {
     this.deleted = false;
   }
 
-  duplicate(clearValues: boolean = false): Saveframe {
+  duplicate(clearValues = false): Saveframe {
     let frameIndex = this.parent.getSaveframesByCategory(this.category).length + 1;
     let frameName = this.category + '_' + frameIndex;
     while (this.parent.getSaveframeByName(frameName)) {
@@ -170,7 +170,7 @@ export class Saveframe {
    * @param fqtn The fully qualified tag name.
    * @returns    The value of the queried tag, or null if not found
    */
-  getTagValue(fqtn: string, fullEntry: boolean = false): string {
+  getTagValue(fqtn: string, fullEntry = false): string {
     if (fqtn in this.tagDict) {
       return this.tagDict[fqtn].value;
     }

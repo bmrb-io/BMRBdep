@@ -99,7 +99,7 @@ export class Loop {
     return found;
   }
 
-  addRow(): Array<LoopTag> {
+  addRow(): LoopTag[] {
     const newRow = [];
     for (const tag of this.tags) {
       const newTag = new LoopTag(tag, null, this);
@@ -131,7 +131,7 @@ export class Loop {
   }
 
   // Creates a duplicate of this loop, or an empty loop of the same type
-  duplicate(clearValues: boolean = false): Loop {
+  duplicate(clearValues = false): Loop {
     const newLoop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
     if (!clearValues) {

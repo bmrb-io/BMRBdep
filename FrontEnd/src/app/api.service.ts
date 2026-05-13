@@ -156,7 +156,7 @@ export class ApiService implements OnDestroy {
     return this.http.request(req);
   }
 
-  deleteFile(fileName: string, verifyDeleted: boolean = false): void {
+  deleteFile(fileName: string, verifyDeleted = false): void {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
     this.http.delete(apiEndPoint).subscribe({
       next: response => {
@@ -237,7 +237,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  loadEntry(entryID: string, skipMessage: boolean = false): void {
+  loadEntry(entryID: string, skipMessage = false): void {
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
@@ -285,7 +285,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  storeEntry(dirty: boolean = false): void {
+  storeEntry(dirty = false): void {
 
     if (this.cachedEntry) {
       // Saves an entry locally, and mark it as dirty first if need be
@@ -300,7 +300,7 @@ export class ApiService implements OnDestroy {
     }
   }
 
-  saveEntry(override: boolean = true): void {
+  saveEntry(override = true): void {
 
     const saveOriginTime = this.lastChangeTime;
     this.saveInProgress = true;
@@ -378,7 +378,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newSupportRequest(comment: string, subject: string = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
+  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<any> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
@@ -430,7 +430,7 @@ export class ApiService implements OnDestroy {
                 depositionNickname: string,
                 depositionType: string,
                 orcid: string = null,
-                skipEmailValidation: boolean = false,
+                skipEmailValidation = false,
                 file: File = null,
                 bootstrapID: string = null): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;

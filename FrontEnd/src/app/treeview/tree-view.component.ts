@@ -86,13 +86,11 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   timeRefresh(): void {
     const iterations = 50;
-    // tslint:disable-next-line:no-console
-    console.time('Refresh');
+       console.time('Refresh');
     for (let i = 0; i < iterations; i++) {
       this.entry.refresh();
     }
-    // tslint:disable-next-line:no-console
-    console.timeEnd('Refresh');
+       console.timeEnd('Refresh');
   }
 
   refresh(): void {
