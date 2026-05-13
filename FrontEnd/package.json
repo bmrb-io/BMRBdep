@@ -7,6 +7,7 @@
     "start": "ng serve --hmr",
     "prebuild.prod": "ts-node -O '{\"module\": \"commonjs\"}' git.version.ts",
     "build.prod": "ng build --configuration production",
+    "build.devprod": "ng build --configuration devprod",
     "test": "ng test",
     "lint": "ng lint"
   },
