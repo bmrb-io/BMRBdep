@@ -17,6 +17,8 @@ When making frontend-only changes you typically work inside `FrontEnd/`, but bui
 
 `npm`/`ng` commands run from `FrontEnd/`. The repo-root scripts (`run_locally.sh`, `build_angular.sh`) handle the cd for you. Production builds also expect a Python venv in `BackEnd/` for the schema loader.
 
+**Node is not on the system `PATH`.** Before any `npm`/`ng` command, run `source FrontEnd/node_env/bin/activate` in the shell — that nodeenv puts `node`/`npm` on `PATH`. Without it `npm` is "command not found."
+
 | Task | Command (run from) |
 | --- | --- |
 | Local dev (frontend + backend together) | `./run_locally.sh` (repo root) |
