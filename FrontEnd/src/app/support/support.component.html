@@ -11,7 +11,8 @@
           <li><a href="https://bmrb.io/software/tablegen/" target="_blank">Data table generators</a></li>
           <li><a href="https://bmrb.io/software/starch/" target="_blank">Format conversion STARch</a></li>
           <li><a href="https://bmrb.io/validate/" target="_blank">Validation tools</a></li>
-          <li><a href="https://bmrb.io/deposit/shifts_example_help.shtml" target="_blank">NMR-STAR Chemical shift format details</a></li>
+          <li><a href="https://bmrb.io/deposit/shifts_example_help.shtml" target="_blank">NMR-STAR Chemical shift format
+            details</a></li>
           <li><a href="https://bmrb.io/software/ambi/" target="_blank">Ambiguity code assignment tool</a></li>
         </ul>
       </mat-card-content>
@@ -30,11 +31,11 @@
     <mat-card-content>
       @if (!caughtException) {
         <p>Use this form to report a bug or get support with any aspect of the BMRBdep system. We will respond,
-        if appropriate, via e-mail.</p>
+          if appropriate, via e-mail.</p>
       }
       @if (caughtException) {
         <p>Details on the exception you encountered have been captured and will be sent along
-        with this request. Please include any other relevant details about when the error occurred.</p>
+          with this request. Please include any other relevant details about when the error occurred.</p>
       }
 
       <mat-form-field class="content-box" color="accent">
@@ -60,7 +61,7 @@
         Click here to submit.
       </button>
       @if (notificationMessage) {
-        <p>{{notificationMessage}}</p>
+        <p>{{ notificationMessage }}</p>
       }
     </mat-card-content>
   </mat-card>

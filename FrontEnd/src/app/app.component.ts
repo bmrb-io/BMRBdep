@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from './api.service';
 import {versions} from 'environments/versions';
 import {Entry} from './nmrstar/entry';
@@ -21,15 +21,17 @@ import {TreeViewComponent} from './treeview/tree-view.component';
   imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
+  private api = inject(ApiService);
+  private sidenavService = inject(SidenavService);
+  loader = inject(LoadingBarService);
+
 
   sidenav_open: boolean;
   entry: Entry;
   subscription$: Subscription;
   @ViewChild('sidenav') public sidenav: MatSidenav;
 
-  constructor(private api: ApiService,
-              private sidenavService: SidenavService,
-              public loader: LoadingBarService) {
+  constructor() {
     this.sidenav_open = false;
   }
 

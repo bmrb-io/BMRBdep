@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, inject, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Tag} from '../nmrstar/tag';
 import {FormsModule} from '@angular/forms';
@@ -17,14 +17,13 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
   imports: [FormsModule, NgClass, MatTooltip, MatSelect, MatOption, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatRadioGroup, MatRadioButton]
 })
 export class TagComponent implements OnInit {
+  private api = inject(ApiService);
+
   @Input() tag: Tag;
   @Input() unique_identifier: string;
   filteredOptions: [string, string][];
 
   public height: number;
-
-  constructor(private api: ApiService) {
-  }
 
   ngOnInit() {
     if (this.tag.interfaceType === 'text') {

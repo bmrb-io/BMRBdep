@@ -1,7 +1,7 @@
 @if (entry) {
   <mat-card appearance="outlined" class="nav-card">
     <mat-card-title (dblclick)="developerMode=true;logEntry()">
-      Deposition "{{entry.depositionNickname}}" Navigation
+      Deposition "{{ entry.depositionNickname }}" Navigation
     </mat-card-title>
     <mat-card-content>
       <mat-nav-list>
@@ -9,11 +9,11 @@
           @for (superGroupCat of entry.superGroups; track superGroupCat) {
             @if ((superGroupCat.display === 'Y' || (entry.showAll && superGroupCat.display !== 'H'))) {
               <div>
-                <h3 matLine [matTooltip]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+                <h3 matLine [matTooltip]="superGroupCat.displayHelp">{{ superGroupCat.displayName }}
                   @if (superGroupCat.superCategory === 'assembly_supercategory') {
                     <mat-icon routerLink="/help/molecular-assembly"
-                      class="pointer"
-                      matTooltip="Molecular assembly help">help_outline
+                              class="pointer"
+                              matTooltip="Molecular assembly help">help_outline
                     </mat-icon>
                   }
                 </h3>
@@ -37,7 +37,7 @@
                       @if (category.valid) {
                         <span class="cdk-visually-hidden">Completed</span>
                       }
-                      {{category.displayName}}
+                      {{ category.displayName }}
                     </mat-list-item>
                   }
                 }
@@ -50,38 +50,38 @@
           <h3 matLine>Deposition options</h3>
           @if (!entry.emailValidated) {
             <mat-list-item [ngClass]="{'active': page==='pending-verification'}"
-                       routerLink="/entry/pending-verification" id="pending-verification" matTooltip="Complete the e-mail
+                           routerLink="/entry/pending-verification" id="pending-verification" matTooltip="Complete the e-mail
 validation step.">
               Verify your email
             </mat-list-item>
           }
           <mat-list-item [ngClass]="{'active': page==='my-depositions'}"
-            routerLink="/my-depositions" id="my-depositions"
-                       matTooltip="View and switch between your accessible depositions.">
+                         routerLink="/my-depositions" id="my-depositions"
+                         matTooltip="View and switch between your accessible depositions.">
             My depositions
           </mat-list-item>
           <mat-list-item [ngClass]="{'active': page==='new'}"
-            routerLink="/" id="new"
-                       matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
+                         routerLink="/" id="new"
+                         matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
 deposition to a new deposition if your other deposition is very similar.">
             Create new deposition
           </mat-list-item>
           @if (entry.hasDeleted && !entry.deposited) {
             <mat-list-item [ngClass]="{'active': page==='restore'}"
-              routerLink="/entry/restore" id="restore"
-              matTooltip="View and restore deleted sections">
+                           routerLink="/entry/restore" id="restore"
+                           matTooltip="View and restore deleted sections">
               View and restore deleted sections
             </mat-list-item>
           }
           @if (entry.deposited) {
             <mat-list-item [ngClass]="{'active': page==='entry'}"
-              routerLink="/entry" id="entry" matTooltip="Review entire deposition.">
+                           routerLink="/entry" id="entry" matTooltip="Review entire deposition.">
               View full deposition
             </mat-list-item>
           }
           @if (!entry.deposited) {
             <mat-list-item [ngClass]="{'active': page==='review'}" matTooltip="Deposit entry to the BMRB." id="review"
-              routerLink="/entry/review">
+                           routerLink="/entry/review">
               @if (entry.valid) {
                 <mat-icon>done</mat-icon>
               }
@@ -98,12 +98,12 @@ deposition to a new deposition if your other deposition is very similar.">
             </mat-list-item>
           }
           <mat-list-item routerLink="/" (click)="endSession()"
-                       matTooltip="Log out from this deposition. You can resume it later by following the link sent to
+                         matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">
             End session
           </mat-list-item>
           <mat-list-item [ngClass]="{'active': page==='support'}"
-            routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
+                         routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
             Support
           </mat-list-item>
         </div>
@@ -120,7 +120,7 @@ your email when you created the deposition.">
               <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
               <mat-list-item>
                 <mat-slide-toggle [(ngModel)]="entry.showAll"
-                  (ngModelChange)="entry.updateCategories()">Display non-mandatory tags
+                                  (ngModelChange)="entry.updateCategories()">Display non-mandatory tags
                 </mat-slide-toggle>
               </mat-list-item>
             </div>

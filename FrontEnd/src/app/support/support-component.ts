@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule, ReactiveFormsModule, UntypedFormControl, Validators} from '@angular/forms';
 import {ApiService} from '../api.service';
 import {Location} from '@angular/common';
@@ -17,6 +17,9 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private location = inject(Location);
+
 
   messageControl = new UntypedFormControl('', [Validators.required]);
   emailControl = new UntypedFormControl('', [Validators.required]);
@@ -26,8 +29,7 @@ export class SupportComponent implements OnInit, OnDestroy {
   subscription$: Subscription;
   caughtException: {};
 
-  constructor(private api: ApiService,
-              private location: Location) {
+  constructor() {
     this.submitted = false;
     this.notificationMessage = null;
     this.entry = null;

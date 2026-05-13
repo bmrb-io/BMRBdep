@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
@@ -22,6 +22,10 @@ import {FormsModule} from '@angular/forms';
   imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatLine, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   active: string;
   developerMode: boolean;
   entry: Entry;
@@ -29,9 +33,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   @Output() sessionEnd = new EventEmitter<boolean>();
   subscription$: Subscription;
 
-  constructor(private api: ApiService,
-              private router: Router,
-              private route: ActivatedRoute) {
+  constructor() {
     this.developerMode = false;
     this.page = '?';
   }
@@ -86,11 +88,11 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   timeRefresh(): void {
     const iterations = 50;
-       console.time('Refresh');
+    console.time('Refresh');
     for (let i = 0; i < iterations; i++) {
       this.entry.refresh();
     }
-       console.timeEnd('Refresh');
+    console.timeEnd('Refresh');
   }
 
   refresh(): void {

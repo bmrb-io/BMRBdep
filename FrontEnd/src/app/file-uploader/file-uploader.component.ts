@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../api.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
@@ -22,6 +22,11 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
   imports: [MatButton, RouterLink, MatProgressBar, NgClass, MatFormField, MatSelect, FormsModule, ReactiveFormsModule, MatOption]
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private messagesService = inject(MessagesService);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
+
 
   @Input() entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
@@ -32,10 +37,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   public activeUploads;
   private dialogRef: MatDialogRef<ConfirmationDialogComponent>;
 
-  constructor(private api: ApiService,
-              private messagesService: MessagesService,
-              private route: ActivatedRoute,
-              private dialog: MatDialog) {
+  constructor() {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
     this.activeUploads = 0;

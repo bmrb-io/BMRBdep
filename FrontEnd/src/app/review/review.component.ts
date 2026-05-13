@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {MessagesService} from '../messages.service';
 import {Location} from '@angular/common';
@@ -23,16 +23,15 @@ import {MatInput} from '@angular/material/input';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatCardActions]
 })
 export class ReviewComponent implements OnInit, OnDestroy {
+  api = inject(ApiService);
+  private messagesService = inject(MessagesService);
+  private location = inject(Location);
+  private dialog = inject(MatDialog);
+
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   entry: Entry;
   subscription$: Subscription;
   messageControl = new UntypedFormControl('');
-
-  constructor(public api: ApiService,
-              private messagesService: MessagesService,
-              private location: Location,
-              private dialog: MatDialog) {
-  }
 
   ngOnInit() {
     this.subscription$ = this.api.entrySubject.subscribe({

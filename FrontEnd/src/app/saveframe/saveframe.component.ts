@@ -1,5 +1,5 @@
 import {ApiService} from '../api.service';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params, RouterLink} from '@angular/router';
@@ -23,6 +23,10 @@ import {LoopComponent} from '../loop/loop.component';
   imports: [FileUploaderComponent, MatTooltip, MatIcon, RouterLink, MatButton, NgClass, TagComponent, LoopComponent]
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
+  api = inject(ApiService);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
+
   @Input() saveframe: Saveframe;
   @Output() sfReload = new EventEmitter<string>();
   activeTag: SaveframeTag;
@@ -30,9 +34,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   subscription$: Subscription;
 
-  constructor(public api: ApiService,
-              private route: ActivatedRoute,
-              private dialog: MatDialog) {
+  constructor() {
     this.activeTag = null;
     this.showCategoryLink = false;
   }

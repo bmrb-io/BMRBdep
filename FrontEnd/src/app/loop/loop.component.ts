@@ -1,7 +1,7 @@
 import {ApiService} from '../api.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {AfterViewChecked, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 
 /* Import country updater code */
 import * as crs from '../javascript/crs.min';
@@ -18,12 +18,14 @@ import {TagComponent} from '../tag/tag.component';
   imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent implements OnInit, AfterViewChecked {
+  private api = inject(ApiService);
+  private changeDetector = inject(ChangeDetectorRef);
+
   @Input() loop: Loop;
   activeTag: LoopTag;
   crsInit: boolean;
 
-  constructor(private api: ApiService,
-              private changeDetector: ChangeDetectorRef) {
+  constructor() {
     this.activeTag = null;
     this.crsInit = false;
   }

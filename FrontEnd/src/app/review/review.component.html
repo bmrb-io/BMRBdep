@@ -14,24 +14,25 @@
       <mat-nav-list>
         @for (superGroupCat of entry.superGroups; track superGroupCat) {
           @for (category of superGroupCat.children; track category) {
-            @if ((!category.valid  && category.display !== 'H')) {
+            @if ((!category.valid && category.display !== 'H')) {
               <p>
                 <a mat-raised-button [routerLink]="['/entry', 'saveframe', category.category]" color="accent"
-                  matTooltip="Jump to this section.">
-                {{entry.schema.saveframeSchema[category.category]['category_group_view_name']}}</a>
+                   matTooltip="Jump to this section.">
+                  {{ entry.schema.saveframeSchema[category.category]['category_group_view_name'] }}</a>
               </p>
             }
           }
         }
         @if (!entry.emailValidated) {
           <a mat-raised-button [routerLink]="['/entry', 'pending-verification']" color="accent">
-          Verify Email Address</a>
+            Verify Email Address</a>
         }
       </mat-nav-list>
       @if (entry.valid && entry.emailValidated) {
         <mat-form-field class="content-box" color="accent">
           <label>
-            <input matInput placeholder="Do you have any feedback on the BMRBdep system?" [formControl]="messageControl">
+            <input matInput placeholder="Do you have any feedback on the BMRBdep system?"
+                   [formControl]="messageControl">
           </label>
         </mat-form-field>
       }
@@ -39,10 +40,12 @@
     <mat-card-actions>
       @if (api.saveInProgress) {
         <h5>You cannot deposit until you have finished uploading the data files / metadata changes. Please wait
-        for the deposition system to stop displaying a progress bar at the top of the page before continuing.</h5>
+          for the deposition system to stop displaying a progress bar at the top of the page before continuing.</h5>
       }
-      <button mat-raised-button class="saveframe-button" [disabled]="!(entry.valid && entry.emailValidated && !api.saveInProgress && !entry.unsaved)" color="accent"
-        (click)="submitEntry()">Submit deposition to BMRB
+      <button mat-raised-button class="saveframe-button"
+              [disabled]="!(entry.valid && entry.emailValidated && !api.saveInProgress && !entry.unsaved)"
+              color="accent"
+              (click)="submitEntry()">Submit deposition to BMRB
       </button>
       <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
     </mat-card-actions>

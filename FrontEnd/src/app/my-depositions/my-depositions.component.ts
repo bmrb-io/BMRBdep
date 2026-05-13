@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Router, RouterLink} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -27,17 +27,14 @@ export interface Deposition {
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink]
 })
 export class MyDepositionsComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+
   depositions: Deposition[] = [];
   currentDepositionId: string | null = null;
   loading = true;
   subscription$: Subscription;
-
-  constructor(
-    private api: ApiService,
-    private router: Router,
-    private dialog: MatDialog
-  ) {
-  }
 
   ngOnInit() {
     // Get current deposition ID from localStorage

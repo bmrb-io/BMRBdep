@@ -1,11 +1,11 @@
 @if (entry) {
   <table class="full_width">
     <colgroup>
-    <col class="index-column">
-    <col class="file-status-column">
-    <col class="file-type-column">
-  </colgroup>
-  <thead>
+      <col class="index-column">
+      <col class="file-status-column">
+      <col class="file-type-column">
+    </colgroup>
+    <thead>
     <tr>
       <th colspan="2" (contextmenu)="logFileUploadSaveframe()">
         <a class="header-text">Deposit data files</a>
@@ -14,63 +14,64 @@
         <div class="right-float">
           @if (showCategoryLink) {
             <button mat-raised-button color="accent"
-              [routerLink]="['/entry', 'saveframe', 'deposited_data_files']">
+                    [routerLink]="['/entry', 'saveframe', 'deposited_data_files']">
               View sections of this category
             </button>
           }
         </div>
       </th>
     </tr>
-  </thead>
-  <tbody>
-    @for (file of entry.dataStore.dataFiles; track file; let i = $index) {
-      <tr>
-        <td><p class="center-text">{{i + 1}}</p></td>
-        <td>
-          <div class="file-upload">
-            @if (file.fileName) {
-              <div>
-                <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)"
-                  color="primary" class="square-button">-
-                </button>
-                @if (file.percent === 100) {
-                  <a download
-                    [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName"
-                  target="_blank">{{file.fileName}}</a>
-                } @else {
-                  {{file.fileName}}
-                }
-              </div>
-            }
-            @if (file.fileName && file.percent !== 100) {
-              <mat-progress-bar mode="determinate"
-                [value]="file.percent" color="#33527b">Uploading file:
-              </mat-progress-bar>
-            }
-          </div>
-        </td>
-        <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
-          <div class="file-upload">
-            <mat-form-field>
-              <mat-select (selectionChange)="updateAndSaveDataFiles()" [formControl]="file.control"
-                placeholder="Please select the data type(s) for this file."
-                multiple required>
-                @for (dataType of file.dropDownList; track dataType) {
-                  <mat-option [value]="dataType"
-                  title="{{dataType[3]}}">{{dataType[0]}}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </td>
-      </tr>
-    }
+    </thead>
+    <tbody>
+      @for (file of entry.dataStore.dataFiles; track file; let i = $index) {
+        <tr>
+          <td><p class="center-text">{{ i + 1 }}</p></td>
+          <td>
+            <div class="file-upload">
+              @if (file.fileName) {
+                <div>
+                  <button mat-raised-button [disabled]="entry.deposited" (click)="deleteFile(file.fileName)"
+                          color="primary" class="square-button">-
+                  </button>
+                  @if (file.percent === 100) {
+                    <a download
+                       [href]="serverURL + '/' + entry.entryID + '/file/' + file.fileName"
+                       target="_blank">{{ file.fileName }}</a>
+                  } @else {
+                    {{ file.fileName }}
+                  }
+                </div>
+              }
+              @if (file.fileName && file.percent !== 100) {
+                <mat-progress-bar mode="determinate"
+                                  [value]="file.percent" color="#33527b">Uploading file:
+                </mat-progress-bar>
+              }
+            </div>
+          </td>
+          <td [ngClass]="{'invisible': true, 'invalid': !file.control.value.length}">
+            <div class="file-upload">
+              <mat-form-field>
+                <mat-select (selectionChange)="updateAndSaveDataFiles()" [formControl]="file.control"
+                            placeholder="Please select the data type(s) for this file."
+                            multiple required>
+                  @for (dataType of file.dropDownList; track dataType) {
+                    <mat-option [value]="dataType"
+                                title="{{dataType[3]}}">{{ dataType[0] }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </td>
+        </tr>
+      }
     <tr>
       <td colspan="1"></td>
       <td colspan="1">
         <input type="file" hidden #inputFile (change)="selectFile($event)" multiple/>
         <button mat-raised-button color="primary" (click)="openInput()" id="fileUploadButton"
-          [disabled]="entry.deposited">
+                [disabled]="entry.deposited">
           Please select a file to upload.
         </button>
       </td>
@@ -82,6 +83,6 @@
         </div>
       </td>
     </tr>
-  </tbody>
-</table>
+    </tbody>
+  </table>
 }

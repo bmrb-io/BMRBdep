@@ -1,6 +1,6 @@
 import {ApiService} from '../api.service';
 import {Entry} from '../nmrstar/entry';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
@@ -17,14 +17,16 @@ import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/ma
   imports: [MatButton, MatTooltip, RouterLink, SaveframeComponent, MatCard, MatCardTitle, MatCardContent, MatCardActions]
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private api = inject(ApiService);
+
   saveframes: Saveframe[];
   entry: Entry;
   saveframeCategory: string;
   subscription$: Subscription;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private api: ApiService) {
+  constructor() {
     this.saveframes = [];
   }
 

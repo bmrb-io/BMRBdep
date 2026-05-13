@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
@@ -10,14 +10,13 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./load-entry.component.css']
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
 
   subscription$: Subscription;
   subscription2$: Subscription;
-
-  constructor(private api: ApiService,
-              private route: ActivatedRoute,
-              private router: Router) {
-  }
 
   ngOnInit() {
     const parent: LoadEntryComponent = this;

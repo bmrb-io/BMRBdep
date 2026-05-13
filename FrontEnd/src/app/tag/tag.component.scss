@@ -32,10 +32,10 @@ textarea {
   min-width: 100%;
 }
 
-::ng-deep .mat-mdc-option{
+::ng-deep .mat-mdc-option {
   max-width: 3000px;
 }
 
-::ng-deep  .closed_enum_option {
+::ng-deep .closed_enum_option {
   min-width: calc(100% + 2em) !important;
 }

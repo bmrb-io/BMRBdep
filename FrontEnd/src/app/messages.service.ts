@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
@@ -31,12 +31,11 @@ export class Message {
   providedIn: 'root'
 })
 export class MessagesService {
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
+
 
   snackBarRef: MatSnackBarRef<SimpleSnackBar>;
-
-  constructor(private snackBar: MatSnackBar,
-              private router: Router) {
-  }
 
   sendMessage(message: Message, actualException = null) {
     let action = null;

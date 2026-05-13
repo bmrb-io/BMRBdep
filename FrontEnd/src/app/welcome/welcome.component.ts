@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {ApiService} from '../api.service';
 import {FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
@@ -20,6 +20,10 @@ import {MatCheckbox} from '@angular/material/checkbox';
   imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatTooltip, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  api = inject(ApiService);
+  private sidenavService = inject(SidenavService);
+
   public entry: Entry;
   @ViewChild('inputFile') fileUploadElement: ElementRef;
   public skipEmailValidation: boolean;
@@ -27,9 +31,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   public production;
   private subscription$: Subscription;
 
-  constructor(private router: Router,
-              public api: ApiService,
-              private sidenavService: SidenavService) {
+  constructor() {
     this.entry = null;
     this.skipEmailValidation = false;
     this.emailValidationError = false;

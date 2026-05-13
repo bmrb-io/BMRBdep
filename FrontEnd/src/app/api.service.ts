@@ -1,7 +1,7 @@
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Entry, entryFromJSON} from './nmrstar/entry';
-import {Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
@@ -21,6 +21,13 @@ function getTime(): number {
   providedIn: 'root'
 })
 export class ApiService implements OnDestroy {
+  private http = inject(HttpClient);
+  private messagesService = inject(MessagesService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private titleService = inject(Title);
+  private dialog = inject(MatDialog);
+
 
   public entrySubject: ReplaySubject<Entry>;
   private cachedEntry: Entry;
@@ -37,12 +44,9 @@ export class ApiService implements OnDestroy {
     })
   };
 
-  constructor(private http: HttpClient,
-              private messagesService: MessagesService,
-              private router: Router,
-              private route: ActivatedRoute,
-              private titleService: Title,
-              private dialog: MatDialog) {
+  constructor() {
+    const router = this.router;
+
 
     this.entrySubject = new ReplaySubject<Entry>();
     this.firstSaveMessageSent = false;

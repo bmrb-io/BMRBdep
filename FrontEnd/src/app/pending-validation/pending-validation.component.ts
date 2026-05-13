@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
@@ -14,13 +14,12 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatButton]
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private router = inject(Router);
+
 
   entry: Entry;
   subscription$: Subscription;
-
-  constructor(private api: ApiService,
-              private router: Router) {
-  }
 
   ngOnInit() {
     const parent: PendingValidationComponent = this;

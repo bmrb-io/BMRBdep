@@ -11,19 +11,19 @@
     @if (entry) {
       @if (entry && !entry.deposited) {
         <span class="title-center">
-          BMRBdep - Deposition '{{entry.depositionNickname}}' in progress
+          BMRBdep - Deposition '{{ entry.depositionNickname }}' in progress
         </span>
       }
       @if (entry && entry.deposited) {
         <span class="title-center">
-          BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
+          BMRBdep - Deposition '{{ entry.depositionNickname }}' completed and deposited
         </span>
       }
       @if (!entry) {
         <span class="title-center">BMRBdep</span>
       }
       <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
-                  matTooltip="Log out from this deposition. You can resume it later by following the link sent to
+            matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">End session</span>
     }
 
@@ -39,7 +39,8 @@ your email when you created the deposition.">End session</span>
   }
 </mat-toolbar>
 
-<mat-sidenav-container> <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
+<mat-sidenav-container>
+  <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
   <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false" [fixedInViewport]="true">
     <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
   </mat-sidenav>
