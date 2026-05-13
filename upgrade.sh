@@ -9,7 +9,5 @@ source node_env/bin/activate
 npm install
 deactivate_node
 
-cd "${SCRIPT_DIR}/BackEnd" || exit
-source env/bin/activate
-pip3 install -r bmrbdep/requirements.txt
-deactivate
+cd "${SCRIPT_DIR}/BackEnd/bmrbdep" || exit
+uv sync

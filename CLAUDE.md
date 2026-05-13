@@ -15,7 +15,7 @@ When making frontend-only changes you typically work inside `FrontEnd/`, but bui
 
 ## Common commands
 
-`npm`/`ng` commands run from `FrontEnd/`. The repo-root scripts (`run_locally.sh`, `build_angular.sh`) handle the cd for you. Production builds also expect a Python venv in `BackEnd/` for the schema loader.
+`npm`/`ng` commands run from `FrontEnd/`. The repo-root scripts (`run_locally.sh`, `build_angular.sh`) handle the cd for you. Backend Python is managed by [`uv`](https://docs.astral.sh/uv/): `BackEnd/bmrbdep/.venv` is created/maintained by `uv sync` (run from `BackEnd/bmrbdep/`), and anything that needs a Python env (e.g. the schema loader) is invoked via `uv run` from that directory.
 
 **Node is not on the system `PATH`.** Before any `npm`/`ng` command, run `source FrontEnd/node_env/bin/activate` in the shell — that nodeenv puts `node`/`npm` on `PATH`. Without it `npm` is "command not found."
 

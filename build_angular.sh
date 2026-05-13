@@ -19,13 +19,10 @@ fi
 host=`hostname`
 
 echo "Getting newest schema."
-(
-source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
+if ! (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && uv run "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py); then
   echo "Schema loader failed, quitting."
   exit 2
 fi
-)
 
 echo "Compiling angular."
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
