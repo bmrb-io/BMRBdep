@@ -119,8 +119,10 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     if (!dataTransfer) {
       return;
     }
-    if (typeof dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
-      typeof dataTransfer.items[0].webkitGetAsEntry !== 'function') {
+    const firstItem = dataTransfer.items[0] as (DataTransferItem & { getAsEntry?(): FileSystemEntry }) | undefined;
+    if (!firstItem ||
+      (typeof firstItem.webkitGetAsEntry !== 'function' &&
+        typeof firstItem.getAsEntry !== 'function')) {
       // Fall back to just uploading the top level files
       this.uploadFiles(dataTransfer.files);
       return;
@@ -147,11 +149,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
 
-  traverseFileTree(item: FileSystemEntry, path: string): File[] {
-    // This takes a list of File or Directory items, and recursively explores the directories, adding all files
-    //  within them for upload.
+  traverseFileTree(item: FileSystemEntry, path: string): void {
+    // Recursively walk a dropped File/Directory tree, uploading each file we encounter.
+    // Returns nothing — the FileSystemEntry APIs are async-callback based, so accumulating
+    // and returning the file list isn't possible; uploads are kicked off in-place instead.
 
-    const files: File[] = [];
     const parent = this;
     path = path || '';
 
@@ -174,7 +176,6 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         }
       });
     }
-    return files;
   }
 
   uploadFiles(files: FileList) {
