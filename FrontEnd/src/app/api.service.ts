@@ -28,6 +28,40 @@ export interface FileUploadResponse {
   changed: boolean;
 }
 
+export interface CommitResponse {
+  commit: string;
+}
+
+export interface ValidationStatusResponse {
+  status: boolean;
+  commit: string;
+}
+
+export interface SaveEntryReloadResponse {
+  error: 'reload';
+}
+
+export type SaveEntryResponse = CommitResponse | SaveEntryReloadResponse;
+
+export interface DepositionIdResponse {
+  deposition_id: string;
+}
+
+export interface ResendValidationEmailResponse {
+  status: 'validated' | 'unvalidated';
+}
+
+export interface EmailAccessTokenResponse {
+  status: string;
+}
+
+export interface ZendeskRequestResponse {
+  request: {
+    id: number;
+    [key: string]: unknown;
+  };
+}
+
 function getTime(): number {
   return (new Date()).getTime();
 }
@@ -247,13 +281,13 @@ export class ApiService implements OnDestroy {
 
   deleteFile(fileName: string, verifyDeleted = false): void {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
-    this.http.delete(apiEndPoint).subscribe({
+    this.http.delete<CommitResponse>(apiEndPoint).subscribe({
       next: response => {
         this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
-        this.cachedEntry.addCommit(response['commit']);
+        this.cachedEntry.addCommit(response.commit);
         this.storeEntry(true);
       },
       error: () => {
@@ -275,9 +309,9 @@ export class ApiService implements OnDestroy {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
       // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
-      this.http.get(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe({
+      this.http.get<ValidationStatusResponse>(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe({
         next: response => {
-          resolve(response['status']);
+          resolve(response.status);
         },
         error: error => {
           this.handleError(error);
@@ -290,9 +324,9 @@ export class ApiService implements OnDestroy {
   checkLastCommit(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
-      this.http.get(entryURL).subscribe({
+      this.http.get<ValidationStatusResponse>(entryURL).subscribe({
         next: response => {
-          resolve(this.cachedEntry.checkCommit(response['commit']));
+          resolve(this.cachedEntry.checkCommit(response.commit));
         },
         error: error => {
           this.handleError(error);
@@ -318,8 +352,8 @@ export class ApiService implements OnDestroy {
           formData.append('deposition_nickname', dialogRef.componentInstance.name);
 
           const duplicateURL = `${environment.serverURL}/${this.cachedEntry.entryID}/duplicate`;
-          this.http.post(duplicateURL, formData).subscribe(jsonData => {
-            this.router.navigate(['/entry', 'load', jsonData['deposition_id']]).then();
+          this.http.post<DepositionIdResponse>(duplicateURL, formData).subscribe(jsonData => {
+            this.router.navigate(['/entry', 'load', jsonData.deposition_id]).then();
           });
         }
       }
@@ -403,9 +437,9 @@ export class ApiService implements OnDestroy {
     if (override) {
       jsonObject['force'] = true;
     }
-    this.http.put(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
+    this.http.put<SaveEntryResponse>(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
       next: response => {
-        if ('error' in response && response['error'] === 'reload') {
+        if ('error' in response) {
 
           this.cachedEntry.unsaved = true;
           const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -445,7 +479,7 @@ export class ApiService implements OnDestroy {
             this.firstSaveMessageSent = true;
           }
 
-          this.cachedEntry.addCommit(response['commit']);
+          this.cachedEntry.addCommit(response.commit);
           if (saveOriginTime === this.lastChangeTime) {
             this.cachedEntry.unsaved = false;
             this.lastChangeTime = null;
@@ -471,7 +505,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<unknown> {
+  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<ZendeskRequestResponse> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
@@ -506,7 +540,7 @@ export class ApiService implements OnDestroy {
 
     return new Promise((resolve, reject) => {
 
-      this.http.post(environment.supportURL, jsonData)
+      this.http.post<ZendeskRequestResponse>(environment.supportURL, jsonData)
         .subscribe({
           next: responseJson => {
             resolve(responseJson);
@@ -554,12 +588,12 @@ export class ApiService implements OnDestroy {
 
     return new Promise((resolve, reject) => {
 
-      this.http.post(apiEndPoint, body, options)
+      this.http.post<DepositionIdResponse>(apiEndPoint, body, options)
         .subscribe({
           next: jsonData => {
             this.clearDeposition();
             this.messagesService.clearMessage();
-            resolve(jsonData['deposition_id']);
+            resolve(jsonData.deposition_id);
           },
           error: error => {
             if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
@@ -572,7 +606,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  depositEntry(feedback: string = null): Promise<boolean> {
+  depositEntry(feedback: string = null): Promise<void> {
 
     if (!this.cachedEntry.valid) {
       this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
@@ -589,8 +623,8 @@ export class ApiService implements OnDestroy {
       MessageType.NotificationMessage, 0));
 
     return new Promise(((resolve, reject) => {
-      this.http.post(apiEndPoint, formData).subscribe({
-        next: jsonData => {
+      this.http.post<CommitResponse>(apiEndPoint, formData).subscribe({
+        next: () => {
           if (!checkValueIsNull(feedback)) {
             this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
           }
@@ -603,7 +637,7 @@ export class ApiService implements OnDestroy {
           this.messagesService.sendMessage(new Message('Submission accepted!',
             MessageType.NotificationMessage, 15000));
           this.router.navigate(['/entry']).then();
-          resolve(jsonData['status']);
+          resolve();
         },
         error: error => {
           this.handleError(error);
@@ -613,13 +647,13 @@ export class ApiService implements OnDestroy {
     }));
   }
 
-  resendValidationEmail(): Observable<unknown> {
+  resendValidationEmail(): Observable<ResendValidationEmailResponse | null> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/resend-validation-email`;
 
     this.messagesService.sendMessage(new Message('Requesting new validation e-mail...',
       MessageType.NotificationMessage, 0));
-    return this.http.get(apiEndPoint)
+    return this.http.get<ResendValidationEmailResponse>(apiEndPoint)
       .pipe(
         map(jsonData => {
           this.messagesService.clearMessage();
@@ -652,7 +686,7 @@ export class ApiService implements OnDestroy {
   }
 
 
-  sendEmailAccessToken(email: string) {
+  sendEmailAccessToken(email: string): Promise<string> {
 
     const apiEndPoint = `${environment.serverURL}/request-email-access`;
 
@@ -660,13 +694,13 @@ export class ApiService implements OnDestroy {
     body.append('email', email);
 
     return new Promise(((resolve, reject) => {
-      this.http.post(apiEndPoint, body).subscribe({
+      this.http.post<EmailAccessTokenResponse>(apiEndPoint, body).subscribe({
         next: jsonData => {
           console.log(jsonData);
 
           this.messagesService.sendMessage(new Message('Email sent. Please check your inbox and also check your spam folder if you don\'t see it.',
             MessageType.NotificationMessage, 15000));
-          resolve(jsonData['status']);
+          resolve(jsonData.status);
         },
         error: error => {
           this.handleError(error);
