@@ -3,13 +3,14 @@ import {ApiService} from '../api.service';
 import {Router, RouterLink} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
-import {Subscription} from 'rxjs';
+import {Subscription, take} from 'rxjs';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatNavList} from '@angular/material/list';
 import {MatIcon} from '@angular/material/icon';
 import {NgClass} from '@angular/common';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatButton} from '@angular/material/button';
+import {Entry} from '../nmrstar/entry';
 
 export interface Deposition {
   deposition_id: string;
@@ -37,45 +38,33 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
   subscription$: Subscription;
 
   ngOnInit() {
-    // Get current deposition ID from localStorage
-    this.currentDepositionId = localStorage.getItem('entryID');
+    // Grab the current in-memory entry (if any) so we can splice it in if the server list lacks it.
+    this.subscription$ = this.api.entrySubject.pipe(take(1)).subscribe({
+      next: (entry: Entry | null) => {
+        this.currentDepositionId = entry ? entry.entryID : null;
+        this.loadDepositionList(entry);
+      }
+    });
+  }
 
-    // Fetch authorized depositions from API
-    this.subscription$ = this.api.getAuthorizedDepositions().subscribe({
+  private loadDepositionList(currentEntry: Entry | null): void {
+    this.subscription$.add(this.api.getAuthorizedDepositions().subscribe({
       next: (depositions: Deposition[]) => {
         this.depositions = depositions;
 
-        // Add current deposition from localStorage if not already included
         if (this.currentDepositionId) {
           const isCurrentIncluded = depositions.some(
             dep => dep.deposition_id === this.currentDepositionId
           );
 
           if (!isCurrentIncluded) {
-            // Get nickname from localStorage entry
-            let nickname = 'Current deposition';
-            let entryDeposited = false;
-            let bmrbnum: number | undefined;
-            try {
-              const entryData = JSON.parse(localStorage.getItem('entry'));
-              if (entryData && entryData.deposition_nickname) {
-                nickname = entryData.deposition_nickname;
-              }
-              if (entryData && entryData.entry_deposited) {
-                entryDeposited = true;
-                bmrbnum = entryData.bmrbnum;
-              }
-            } catch {
-              // If parsing fails, use default nickname
-            }
-
             this.depositions = [
               {
                 deposition_id: this.currentDepositionId,
-                nickname: nickname,
+                nickname: currentEntry?.depositionNickname || 'Current deposition',
                 authorized_via: [],
-                entry_deposited: entryDeposited,
-                bmrbnum: bmrbnum
+                entry_deposited: currentEntry?.deposited ?? false,
+                bmrbnum: currentEntry?.bmrbnum ?? undefined,
               },
               ...this.depositions
             ];
@@ -87,7 +76,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
       error: () => {
         this.loading = false;
       }
-    });
+    }));
   }
 
   ngOnDestroy() {

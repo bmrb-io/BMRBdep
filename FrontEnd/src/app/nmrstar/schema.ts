@@ -46,14 +46,6 @@ export class Schema {
     };
   }
 
-  /* Delete unnecessary un-parsed schema data. Only run once serialized and saved locally. */
-  cleanUp(): void {
-    delete this.tags;
-    delete this.overrides;
-    delete this.categorySuperGroups;
-    delete this.saveframes;
-  }
-
   constructor(json: SchemaJSON) {
 
     this.version = json.version;

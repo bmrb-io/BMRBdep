@@ -13,6 +13,14 @@ import {MatDialog} from '@angular/material/dialog';
 import {Loop} from './nmrstar/loop';
 import {checkValueIsNull} from './nmrstar/nmrstar';
 import {Deposition} from './my-depositions/my-depositions.component';
+import {StorageService} from './storage.service';
+
+interface BroadcastMessage {
+  type: 'mutated' | 'loaded' | 'cleared';
+  entryID?: string;
+}
+
+const BROADCAST_CHANNEL = 'bmrbdep';
 
 export interface FileUploadResponse {
   commit: string;
@@ -34,16 +42,18 @@ export class ApiService implements OnDestroy {
   private route = inject(ActivatedRoute);
   private titleService = inject(Title);
   private dialog = inject(MatDialog);
+  private storage = inject(StorageService);
 
 
   public entrySubject: ReplaySubject<Entry>;
   private cachedEntry: Entry;
   private subscription$: Subscription;
-  private entryChangeCheckTimer;
   private saveTimer;
   private lastChangeTime: number;
   private firstSaveMessageSent;
   public saveInProgress: boolean;
+  private broadcast: BroadcastChannel;
+  private conflictDialogOpen = false;
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -52,9 +62,6 @@ export class ApiService implements OnDestroy {
   };
 
   constructor() {
-    const router = this.router;
-
-
     this.entrySubject = new ReplaySubject<Entry>();
     this.firstSaveMessageSent = false;
 
@@ -69,10 +76,36 @@ export class ApiService implements OnDestroy {
       }
     });
 
+    this.broadcast = new BroadcastChannel(BROADCAST_CHANNEL);
+    this.broadcast.onmessage = ev => this.handleBroadcast(ev.data as BroadcastMessage);
+
+    this.hydrateFromStorage();
+
+    // Used to open verification links in same tab
+    window.name = 'BMRBdep';
+
+    this.lastChangeTime = null;
+    this.saveInProgress = false;
+    this.saveTimer = setInterval(() => {
+      // If there is an active entry, that is old enough to need saving
+      if (this.cachedEntry && this.cachedEntry.unsaved && this.lastChangeTime !== null && !this.saveInProgress) {
+        this.saveEntry();
+      }
+    }, 5000);
+  }
+
+  ngOnDestroy() {
+    this.subscription$.unsubscribe();
+    clearInterval(this.saveTimer);
+    this.broadcast.close();
+  }
+
+  private async hydrateFromStorage(): Promise<void> {
     let rawJSON, schema;
     try {
-      rawJSON = JSON.parse(localStorage.getItem('entry'));
-      schema = JSON.parse(localStorage.getItem('schema'));
+      const [rawEntry, rawSchema] = await Promise.all([this.storage.get('entry'), this.storage.get('schema')]);
+      rawJSON = rawEntry ? JSON.parse(rawEntry) : null;
+      schema = rawSchema ? JSON.parse(rawSchema) : null;
     } catch {
       console.error('Invalid cached entry!');
       rawJSON = null;
@@ -105,48 +138,93 @@ export class ApiService implements OnDestroy {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
               && this.router.url.indexOf('/my-depositions') < 0 && !this.cachedEntry) {
               this.subscription$.unsubscribe();
-              router.navigate(['/']).then();
+              this.router.navigate(['/']).then();
             }
           }
         }
       }));
     }
-
-    // Used to open verification links in same tab
-    window.name = 'BMRBdep';
-
-    this.entryChangeCheckTimer = setInterval(() => {
-      const savedID = localStorage.getItem('entryID');
-
-      // First check that the entry hasn't changed
-      if (savedID && this.cachedEntry && savedID !== this.cachedEntry.entryID) {
-        this.entrySubject.next(null);
-        this.router.navigate(['/']).then();
-        this.messagesService.sendMessage(new Message('You were signed out on this tab because you loaded a different' +
-          ' deposition in another tab.', MessageType.NotificationMessage, 60000));
-      }
-    }, 100);
-
-    this.lastChangeTime = null;
-    this.saveInProgress = false;
-    this.saveTimer = setInterval(() => {
-      // If there is an active entry, that is old enough to need saving
-      if (this.cachedEntry && this.cachedEntry.unsaved && this.lastChangeTime !== null && !this.saveInProgress) {
-        this.saveEntry();
-      }
-    }, 5000);
   }
 
-  ngOnDestroy() {
-    this.subscription$.unsubscribe();
-    clearInterval(this.saveTimer);
-    clearInterval(this.entryChangeCheckTimer);
+  private handleBroadcast(msg: BroadcastMessage): void {
+    if (!msg?.type) {
+      return;
+    }
+    if (msg.type === 'cleared') {
+      if (this.cachedEntry) {
+        this.entrySubject.next(null);
+      }
+      return;
+    }
+    if (msg.type === 'loaded' && msg.entryID) {
+      // Another tab loaded a deposition — sync this tab so the two never diverge.
+      if (!this.cachedEntry || this.cachedEntry.entryID !== msg.entryID) {
+        this.loadEntry(msg.entryID, true);
+      }
+      return;
+    }
+    if (msg.type === 'mutated' && msg.entryID) {
+      this.handleRemoteMutation(msg.entryID);
+    }
+  }
+
+  private async handleRemoteMutation(entryID: string): Promise<void> {
+    if (!this.cachedEntry || this.cachedEntry.entryID !== entryID) {
+      return;
+    }
+    if (this.cachedEntry.unsaved) {
+      // Both tabs have diverging edits — surface the conflict instead of silently dropping one side.
+      this.showCrossTabConflict();
+      return;
+    }
+    try {
+      const [rawEntry, rawSchema] = await Promise.all([this.storage.get('entry'), this.storage.get('schema')]);
+      if (!rawEntry || !rawSchema) {
+        return;
+      }
+      const parsed = JSON.parse(rawEntry);
+      parsed['schema'] = JSON.parse(rawSchema);
+      const refreshed = entryFromJSON(parsed);
+      // The IDB record may have `unsaved: true` because the *other* tab is mid-edit. This tab
+      // is just a mirror; clearing the flag prevents the next broadcast from being misread as
+      // a local-vs-remote conflict, and avoids two tabs autosaving the same pending change.
+      refreshed.unsaved = false;
+      this.entrySubject.next(refreshed);
+    } catch {
+      console.error('Failed to refresh entry after cross-tab update.');
+    }
+  }
+
+  private showCrossTabConflict(): void {
+    if (this.conflictDialogOpen) {
+      return;
+    }
+    this.conflictDialogOpen = true;
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
+    dialogRef.componentInstance.confirmMessage = 'This deposition was just modified in another tab. Load those changes (losing ' +
+      'unsaved edits made in this tab) or push your changes from this tab (overwriting what the other tab wrote)?';
+    dialogRef.componentInstance.proceedMessage = 'Load changes from other tab';
+    dialogRef.componentInstance.cancelMessage = 'Push my changes';
+    dialogRef.afterClosed().subscribe(result => {
+      this.conflictDialogOpen = false;
+      if (result) {
+        this.loadEntry(this.cachedEntry.entryID, true);
+      } else if (result === false) {
+        this.saveEntry(true);
+      }
+    });
+  }
+
+  private postBroadcast(msg: BroadcastMessage): void {
+    try {
+      this.broadcast.postMessage(msg);
+    } catch (e) {
+      console.error('BroadcastChannel post failed', e);
+    }
   }
 
   clearDeposition(): void {
-    localStorage.removeItem('entry');
-    localStorage.removeItem('entryID');
-    localStorage.removeItem('schema');
+    this.storage.clearAll().then(() => this.postBroadcast({type: 'cleared'}));
     this.entrySubject.next(null);
   }
 
@@ -273,16 +351,15 @@ export class ApiService implements OnDestroy {
         }
 
         this.entrySubject.next(loadedEntry);
-        try {
-          localStorage.setItem('entry', JSON.stringify(loadedEntry));
-          localStorage.setItem('entryID', loadedEntry.entryID);
-          localStorage.setItem('schema', JSON.stringify(loadedEntry.schema));
-        } catch {
-          const message: Message = new Message('Error! Entry too large to load into browser storage. Please contact support ' +
-            'for help. Your session will end since changes can\'t be saved in this state.', MessageType.ErrorMessage, undefined);
-          this.messagesService.sendMessage(message);
-          this.clearDeposition();
-        }
+        Promise.all([
+          this.storage.set('entry', JSON.stringify(loadedEntry)),
+          this.storage.set('entryID', loadedEntry.entryID),
+          this.storage.set('schema', JSON.stringify(loadedEntry.schema)),
+        ]).then(() => {
+          this.postBroadcast({type: 'loaded', entryID: loadedEntry.entryID});
+        }).catch(err => {
+          console.error('Failed to persist loaded entry to IndexedDB', err);
+        });
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
@@ -304,8 +381,13 @@ export class ApiService implements OnDestroy {
         this.cachedEntry.unsaved = dirty;
         this.lastChangeTime = getTime();
       }
-      localStorage.setItem('entry', JSON.stringify(this.cachedEntry));
-      localStorage.setItem('entryID', this.cachedEntry.entryID);
+      const entryID = this.cachedEntry.entryID;
+      const serialized = JSON.stringify(this.cachedEntry);
+      Promise.all([
+        this.storage.set('entry', serialized),
+        this.storage.set('entryID', entryID),
+      ]).then(() => this.postBroadcast({type: 'mutated', entryID}))
+        .catch(err => console.error('Failed to persist entry to IndexedDB', err));
     } else {
       console.error('Asked to storeEntry, but no entry cached!');
     }
