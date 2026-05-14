@@ -1,5 +1,5 @@
 import {Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
@@ -22,7 +22,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
   imports: [MatButton, RouterLink, MatProgressBar, NgClass, MatFormField, MatSelect, FormsModule, ReactiveFormsModule, MatOption]
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private messagesService = inject(MessagesService);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
@@ -53,7 +53,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.subscription$.add(this.api.entrySubject.subscribe({
+    this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => {
         if (entry) {
           for (const file of entry.dataStore.dataFiles) {
@@ -81,7 +81,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.entry.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   // At the drag drop area
@@ -196,7 +196,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     const dataFile = this.entry.dataStore.addFile(file.name);
 
     this.activeUploads += 1;
-    this.uploadSubscriptionDict$[file.name] = this.api.uploadFile(file)
+    this.uploadSubscriptionDict$[file.name] = this.persistence.uploadFile(file)
       .subscribe({
         next: event => {
           if (event.type === HttpEventType.UploadProgress) {
@@ -241,9 +241,9 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         if (result) {
           if (fileName in this.uploadSubscriptionDict$) {
             this.uploadSubscriptionDict$[fileName].unsubscribe();
-            this.api.deleteFile(fileName, true);
+            this.persistence.deleteFile(fileName, true);
           } else {
-            this.api.deleteFile(fileName);
+            this.persistence.deleteFile(fileName);
           }
         }
         this.dialogRef = null;

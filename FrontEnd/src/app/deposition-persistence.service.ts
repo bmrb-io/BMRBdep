@@ -1,19 +1,16 @@
-import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
+import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {Entry, entryFromJSON, EntrySerialized} from './nmrstar/entry';
 import {EntryJSON} from './nmrstar/schemaTypes';
 import {inject, Injectable, OnDestroy} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
+import {HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {Loop} from './nmrstar/loop';
-import {checkValueIsNull} from './nmrstar/nmrstar';
-import {Deposition} from './my-depositions/my-depositions.component';
 import {StorageService} from './storage.service';
+import {ApiErrorHandler} from './api-error-handler.service';
 
 interface BroadcastMessage {
   type: 'mutated' | 'loaded' | 'cleared';
@@ -43,41 +40,19 @@ export interface SaveEntryReloadResponse {
 
 export type SaveEntryResponse = CommitResponse | SaveEntryReloadResponse;
 
-export interface DepositionIdResponse {
-  deposition_id: string;
-}
-
-export interface ResendValidationEmailResponse {
-  status: 'validated' | 'unvalidated';
-}
-
-export interface EmailAccessTokenResponse {
-  status: string;
-}
-
-export interface ZendeskRequestResponse {
-  request: {
-    id: number;
-    [key: string]: unknown;
-  };
-}
-
 function getTime(): number {
   return (new Date()).getTime();
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ApiService implements OnDestroy {
+@Injectable({providedIn: 'root'})
+export class DepositionPersistenceService implements OnDestroy {
   private http = inject(HttpClient);
   private messagesService = inject(MessagesService);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private titleService = inject(Title);
   private dialog = inject(MatDialog);
   private storage = inject(StorageService);
-
+  private errorHandler = inject(ApiErrorHandler);
 
   public entrySubject: ReplaySubject<Entry | null>;
   private cachedEntry: Entry | null = null;
@@ -132,6 +107,17 @@ export class ApiService implements OnDestroy {
     this.subscription$.unsubscribe();
     clearInterval(this.saveTimer);
     this.broadcast.close();
+  }
+
+  get currentEntry(): Entry | null {
+    return this.cachedEntry;
+  }
+
+  getEntryID(): string | null {
+    if (this.cachedEntry === null) {
+      return null;
+    }
+    return this.cachedEntry.entryID;
   }
 
   private async hydrateFromStorage(): Promise<void> {
@@ -265,7 +251,6 @@ export class ApiService implements OnDestroy {
     this.entrySubject.next(null);
   }
 
-  // file from event.target.files[0]
   uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
@@ -327,7 +312,7 @@ export class ApiService implements OnDestroy {
           resolve(response.status);
         },
         error: error => {
-          this.handleError(error);
+          this.errorHandler.handle(error);
           reject();
         }
       });
@@ -346,35 +331,11 @@ export class ApiService implements OnDestroy {
           resolve(this.cachedEntry!.checkCommit(response.commit));
         },
         error: error => {
-          this.handleError(error);
+          this.errorHandler.handle(error);
           reject();
         }
       });
     }));
-  }
-
-
-  cloneDeposition() {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
-    dialogRef.componentInstance.confirmMessage = 'This will create a new deposition pre-filled with all of the data from the current' +
-      ' deposition, except any uploaded data files. Are you sure you want to proceed?';
-    dialogRef.componentInstance.proceedMessage = 'Yes, create new deposition';
-    dialogRef.componentInstance.cancelMessage = 'No, cancel';
-    dialogRef.componentInstance.inputBoxText = 'Enter a nickname for the new deposition';
-
-    dialogRef.afterClosed().subscribe({
-      next: result => {
-        if (result && this.cachedEntry) {
-          const formData = new FormData();
-          formData.append('deposition_nickname', dialogRef.componentInstance.name);
-
-          const duplicateURL = `${environment.serverURL}/${this.cachedEntry.entryID}/duplicate`;
-          this.http.post<DepositionIdResponse>(duplicateURL, formData).subscribe(jsonData => {
-            this.router.navigate(['/entry', 'load', jsonData.deposition_id]).then();
-          });
-        }
-      }
-    });
   }
 
   loadEntry(entryID: string, skipMessage = false): void {
@@ -420,7 +381,7 @@ export class ApiService implements OnDestroy {
           this.saveEntry();
         }
       },
-      error: error => this.handleError(error)
+      error: error => this.errorHandler.handle(error)
     });
   }
 
@@ -525,222 +486,5 @@ export class ApiService implements OnDestroy {
         this.saveInProgress = false;
       }
     });
-  }
-
-  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string | null = null): Promise<ZendeskRequestResponse> {
-
-    // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
-
-    let userName = 'Unknown User';
-    if (this.cachedEntry) {
-      const contactLoop: Loop = this.cachedEntry.getLoopsByCategory('_Contact_person')[0];
-      userEmail = contactLoop.data[0][contactLoop.tags.indexOf('Email_address')].value;
-      userName = contactLoop.data[0][contactLoop.tags.indexOf('Given_name')].value + ' ' +
-        contactLoop.data[0][contactLoop.tags.indexOf('Family_name')].value;
-      if (userName.length < 2) {
-        userName = 'Unknown User';
-      }
-      comment = `${comment}\n\nDeposition ID: ${this.cachedEntry.entryID}`;
-    } else {
-      if (!userEmail) {
-        throw new Error('Invalid function use. Please provide user e-mail if no active deposition session.');
-      }
-    }
-
-    const jsonData = {
-      'request': {
-        'requester': {
-          'name': userName,
-          'email': userEmail
-        },
-        'subject': subject,
-        'comment': {
-          'body': comment
-        }
-      }
-    };
-
-    return new Promise((resolve, reject) => {
-
-      this.http.post<ZendeskRequestResponse>(environment.supportURL, jsonData)
-        .subscribe({
-          next: responseJson => {
-            resolve(responseJson);
-          },
-          error: error => {
-            this.handleError(error);
-            reject();
-          }
-        });
-    });
-  }
-
-  newDeposition(authorEmail: string,
-                depositionNickname: string,
-                depositionType: string,
-                orcid: string | null = null,
-                skipEmailValidation = false,
-                file: File | null = null,
-                bootstrapID: string | null = null): Promise<string> {
-    const apiEndPoint = `${environment.serverURL}/new`;
-    this.messagesService.sendMessage(new Message('Creating deposition...',
-      MessageType.NotificationMessage, 0));
-
-    const body = new FormData();
-    body.append('email', authorEmail);
-    body.append('deposition_nickname', depositionNickname);
-    body.append('deposition_type', depositionType);
-    if (skipEmailValidation) {
-      body.append('skip_validation', 'true');
-    }
-    if (orcid) {
-      body.append('orcid', orcid);
-    }
-    if (file) {
-      body.append('nmrstar_file', file);
-    }
-    if (bootstrapID) {
-      body.append('bootstrapID', bootstrapID);
-    }
-
-    const options = {
-      params: new HttpParams(),
-      reportProgress: true,
-    };
-
-    return new Promise((resolve, reject) => {
-
-      this.http.post<DepositionIdResponse>(apiEndPoint, body, options)
-        .subscribe({
-          next: jsonData => {
-            this.clearDeposition();
-            this.messagesService.clearMessage();
-            resolve(jsonData.deposition_id);
-          },
-          error: error => {
-            if (error.error && error.error.error && error.error.error.includes('invalid') && error.error.error.includes('e-mail')) {
-              reject('Invalid e-mail');
-            }
-            this.handleError(error);
-            reject(error);
-          }
-        });
-    });
-  }
-
-  depositEntry(feedback: string | null = null): Promise<void> {
-
-    if (!this.cachedEntry || !this.cachedEntry.valid) {
-      this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
-        MessageType.ErrorMessage, 15000));
-      return Promise.resolve();
-    }
-    const entry = this.cachedEntry;
-
-    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
-
-    const formData = new FormData();
-    formData.append('deposition_contents', this.cachedEntry.print());
-
-    this.messagesService.sendMessage(new Message('Submitting deposition...',
-      MessageType.NotificationMessage, 0));
-
-    return new Promise(((resolve, reject) => {
-      this.http.post<CommitResponse>(apiEndPoint, formData).subscribe({
-        next: () => {
-          if (!checkValueIsNull(feedback)) {
-            this.newSupportRequest(feedback!, 'BMRBdep Feedback Message').then();
-          }
-
-          // Trigger everything watching the entry to see that it changed - because "deposited" changed
-          entry.deposited = true;
-          entry.refresh();
-          this.storeEntry();
-
-          this.messagesService.sendMessage(new Message('Submission accepted!',
-            MessageType.NotificationMessage, 15000));
-          this.router.navigate(['/entry']).then();
-          resolve();
-        },
-        error: error => {
-          this.handleError(error);
-          reject();
-        }
-      });
-    }));
-  }
-
-  resendValidationEmail(): Observable<ResendValidationEmailResponse | null> {
-
-    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/resend-validation-email`;
-
-    this.messagesService.sendMessage(new Message('Requesting new validation e-mail...',
-      MessageType.NotificationMessage, 0));
-    return this.http.get<ResendValidationEmailResponse>(apiEndPoint)
-      .pipe(
-        map(jsonData => {
-          this.messagesService.clearMessage();
-          return jsonData;
-        }),
-        // Convert the error into something we can handle
-        catchError((error: HttpErrorResponse) => this.handleError(error))
-      );
-  }
-
-  getEntryID(): string | null {
-    if (this.cachedEntry === null) {
-      return null;
-    }
-    return this.cachedEntry.entryID;
-  }
-
-  handleError(error: HttpErrorResponse): Observable<null> {
-    if (error.error && error.error.error) {
-      this.messagesService.sendMessage(new Message(error.error.error, MessageType.ErrorMessage, 15000), error.error.error);
-    } else {
-      this.messagesService.sendMessage(new Message('A network or server exception occurred.', MessageType.ErrorMessage, 15000),
-        error.message);
-    }
-    if (!environment.production) {
-      throw error;
-    }
-
-    return of(null);
-  }
-
-
-  sendEmailAccessToken(email: string): Promise<string> {
-
-    const apiEndPoint = `${environment.serverURL}/request-email-access`;
-
-    const body = new FormData();
-    body.append('email', email);
-
-    return new Promise(((resolve, reject) => {
-      this.http.post<EmailAccessTokenResponse>(apiEndPoint, body).subscribe({
-        next: jsonData => {
-          console.log(jsonData);
-
-          this.messagesService.sendMessage(new Message('Email sent. Please check your inbox and also check your spam folder if you don\'t see it.',
-            MessageType.NotificationMessage, 15000));
-          resolve(jsonData.status);
-        },
-        error: error => {
-          this.handleError(error);
-          reject();
-        }
-      });
-    }));
-  }
-
-  getAuthorizedDepositions(): Observable<Deposition[]> {
-    const apiEndPoint = `${environment.serverURL}/authorized-depositions`;
-    return this.http.get<Deposition[]>(apiEndPoint, {withCredentials: true})
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          this.handleError(error);
-          return of([]);
-        })
-      );
   }
 }

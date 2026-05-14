@@ -18,11 +18,11 @@
           <div>
             <a mat-raised-button color="primary"
                matTooltip="Create a new deposition with the same contents as the currently
-active deposition." (click)="api.cloneDeposition()">
+active deposition." (click)="lifecycle.cloneDeposition()">
               Clone deposition</a>
           </div>
           <div>
-            <button mat-raised-button color="primary" (click)="api.clearDeposition()"
+            <button mat-raised-button color="primary" (click)="persistence.clearDeposition()"
                     matTooltip="Log out from this deposition. You can resume it later by following the link sent to
 your email when you created the deposition.">
               End your session for this deposition

@@ -1,5 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {MessagesService} from '../messages.service';
 import {Location} from '@angular/common';
 import {Entry} from '../nmrstar/entry';
@@ -23,7 +24,8 @@ import {MatInput} from '@angular/material/input';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatCardActions]
 })
 export class ReviewComponent implements OnInit, OnDestroy {
-  api = inject(ApiService);
+  persistence = inject(DepositionPersistenceService);
+  private lifecycle = inject(DepositionLifecycleService);
   private messagesService = inject(MessagesService);
   private location = inject(Location);
   private dialog = inject(MatDialog);
@@ -34,7 +36,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
   messageControl = new FormControl<string>('', {nonNullable: true});
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     });
   }
@@ -63,7 +65,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
       next: result => {
         if (result) {
           // Submit the entry!
-          this.api.depositEntry(this.messageControl.value).then();
+          this.lifecycle.depositEntry(this.messageControl.value).then();
         }
         this.dialogRef = null;
       }

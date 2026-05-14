@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ApiService} from './api.service';
+import {DepositionPersistenceService} from './deposition-persistence.service';
 import {versions} from 'environments/versions';
 import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
@@ -21,7 +21,7 @@ import {TreeViewComponent} from './treeview/tree-view.component';
   imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private sidenavService = inject(SidenavService);
   loader = inject(LoadingBarService);
 
@@ -39,7 +39,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
       '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
 
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     });
   }
@@ -55,6 +55,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   clearEntry(): void {
-    this.api.clearDeposition();
+    this.persistence.clearDeposition();
   }
 }

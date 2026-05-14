@@ -1,5 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {AuthService} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
@@ -28,7 +29,8 @@ export interface Deposition {
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink]
 })
 export class MyDepositionsComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
+  private auth = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
 
@@ -39,7 +41,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Grab the current in-memory entry (if any) so we can splice it in if the server list lacks it.
-    this.subscription$ = this.api.entrySubject.pipe(take(1)).subscribe({
+    this.subscription$ = this.persistence.entrySubject.pipe(take(1)).subscribe({
       next: (entry: Entry | null) => {
         this.currentDepositionId = entry ? entry.entryID : null;
         this.loadDepositionList(entry);
@@ -48,7 +50,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
   }
 
   private loadDepositionList(currentEntry: Entry | null): void {
-    this.subscription$.add(this.api.getAuthorizedDepositions().subscribe({
+    this.subscription$.add(this.auth.getAuthorizedDepositions().subscribe({
       next: (depositions: Deposition[]) => {
         this.depositions = depositions;
 
@@ -117,7 +119,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
       next: result => {
         if (result) {
           // Clear local storage
-          this.api.clearDeposition();
+          this.persistence.clearDeposition();
 
           // Navigate to load endpoint
           this.router.navigate(['/entry', 'load', deposition.deposition_id]).then();

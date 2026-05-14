@@ -1,4 +1,4 @@
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Entry} from '../nmrstar/entry';
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -19,7 +19,7 @@ import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/ma
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
 
   saveframes: Saveframe[];
   entry: Entry | null = null;
@@ -32,7 +32,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => {
         this.entry = entry;
         this.reloadSaveframes();
@@ -83,7 +83,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
     }
     this.entry.restoreByCategory(category);
     this.entry.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
     this.reloadSaveframes();
   }
 }

@@ -1,6 +1,8 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
+import {AuthService} from '../auth.service';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
@@ -21,7 +23,9 @@ import {MatCheckbox} from '@angular/material/checkbox';
 })
 export class WelcomeComponent implements OnInit, OnDestroy {
   private router = inject(Router);
-  api = inject(ApiService);
+  persistence = inject(DepositionPersistenceService);
+  lifecycle = inject(DepositionLifecycleService);
+  private auth = inject(AuthService);
   private sidenavService = inject(SidenavService);
 
   public entry: Entry | null;
@@ -68,7 +72,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => {
         this.entry = entry;
       }
@@ -109,8 +113,8 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       fileElement = this.fileUploadElement.nativeElement.files[0];
     }
 
-    this.api.clearDeposition();
-    this.api.newDeposition(values.authorEmail, values.depositionNickname, values.depositionType, values.authorORCID,
+    this.persistence.clearDeposition();
+    this.lifecycle.newDeposition(values.authorEmail, values.depositionNickname, values.depositionType, values.authorORCID,
       this.skipEmailValidation, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
@@ -126,7 +130,7 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
   requestEmailAccess() {
     if (this.resumeEmail.valid) {
-      this.api.sendEmailAccessToken(this.resumeEmail.value).then();
+      this.auth.sendEmailAccessToken(this.resumeEmail.value).then();
     }
   }
 }

@@ -1,4 +1,4 @@
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
 import {AfterViewChecked, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
@@ -18,7 +18,7 @@ import {TagComponent} from '../tag/tag.component';
   imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent implements AfterViewChecked {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private changeDetector = inject(ChangeDetectorRef);
 
   @Input() loop!: Loop;
@@ -44,7 +44,7 @@ export class LoopComponent implements AfterViewChecked {
   addRow() {
     this.loop.addRow();
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
     // Reload the country-autofill code
     if (this.loop.category === '_Contact_person') {
       this.changeDetector.detectChanges();
@@ -56,7 +56,7 @@ export class LoopComponent implements AfterViewChecked {
   deleteRow(row_id: number) {
     this.loop.deleteRow(row_id);
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   helpClick(activeTag: LoopTag, el: HTMLElement) {
@@ -77,6 +77,6 @@ export class LoopComponent implements AfterViewChecked {
   copyAuthors(): void {
     this.loop.copyAuthors();
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 }

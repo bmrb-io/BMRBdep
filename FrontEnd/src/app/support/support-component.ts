@@ -1,6 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {SupportService} from '../support.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {Entry} from '../nmrstar/entry';
@@ -17,7 +18,8 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
+  private support = inject(SupportService);
   private location = inject(Location);
 
 
@@ -37,7 +39,7 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     });
 
@@ -61,7 +63,7 @@ export class SupportComponent implements OnInit, OnDestroy {
         supportMessage += 'User message: ' + this.messageControl.value;
       }
     }
-    this.api.newSupportRequest(supportMessage, undefined, this.emailControl.value).then(() => {
+    this.support.newSupportRequest(supportMessage, undefined, this.emailControl.value).then(() => {
       this.messageControl.disable();
       this.notificationMessage = 'Your message has been sent to BMRB support.';
     }, () => {

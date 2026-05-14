@@ -1,4 +1,4 @@
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
@@ -23,7 +23,7 @@ import {LoopComponent} from '../loop/loop.component';
   imports: [FileUploaderComponent, MatTooltip, MatIcon, RouterLink, MatButton, NgClass, TagComponent, LoopComponent]
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
-  api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
 
@@ -69,7 +69,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     const nextCategory = this.saveframe.nextCategory;
     this.saveframe.parent.refresh();
     this.sfReload.emit(nextCategory);
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   deleteSaveframe(): void {

@@ -1,5 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 import {Subscription, timer} from 'rxjs';
@@ -14,7 +15,8 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatButton]
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
+  private lifecycle = inject(DepositionLifecycleService);
   private router = inject(Router);
 
 
@@ -22,7 +24,7 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
   subscription$!: Subscription;
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => {
         this.entry = entry;
         // Route straight to the entry if validated
@@ -41,10 +43,10 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
     // Check the validation status every 2.5 seconds
     this.subscription$.add(timer(0, 2500).subscribe({
       next: () => {
-        this.api.checkValidatedEmail().then(status => {
+        this.persistence.checkValidatedEmail().then(status => {
           if (status && this.entry) {
             this.entry.emailValidated = true;
-            this.api.storeEntry(false);
+            this.persistence.storeEntry(false);
             if (this.entry.deposited) {
               this.router.navigate(['/entry']).then();
             } else if (this.entry.firstIncompleteCategory) {
@@ -65,6 +67,6 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
   }
 
   resendValidationEmail(): void {
-    this.api.resendValidationEmail().subscribe();
+    this.lifecycle.resendValidationEmail().subscribe();
   }
 }

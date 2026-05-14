@@ -1,5 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 
@@ -10,7 +10,7 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./load-entry.component.css']
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -21,9 +21,9 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription$ = this.route.params.subscribe({
       next: params => {
-        this.api.loadEntry(params['entry']);
+        this.persistence.loadEntry(params['entry']);
 
-        this.subscription2$ = this.api.entrySubject.subscribe(entry => {
+        this.subscription2$ = this.persistence.entrySubject.subscribe(entry => {
           // Wait for the specific entry we want to load
           if (entry && entry.entryID === params['entry']) {
             if (entry.emailValidated) {

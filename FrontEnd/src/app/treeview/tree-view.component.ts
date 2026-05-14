@@ -1,5 +1,5 @@
 import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
@@ -22,7 +22,7 @@ import {FormsModule} from '@angular/forms';
   imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatLine, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
+  private persistence = inject(DepositionPersistenceService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -61,7 +61,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       })
     ).subscribe();
 
-    this.subscription$.add(this.api.entrySubject.subscribe({
+    this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     }));
   }
@@ -77,7 +77,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   endSession(): void {
-    this.api.clearDeposition();
+    this.persistence.clearDeposition();
     this.sessionEnd.emit(true);
   }
 
@@ -101,9 +101,9 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     if (!this.entry) {
       return;
     }
-    this.api.loadEntry(this.entry.entryID, true);
+    this.persistence.loadEntry(this.entry.entryID, true);
     this.entry.refresh();
-    this.api.storeEntry(false);
+    this.persistence.storeEntry(false);
   }
 
   scrollSideNav(): void {
