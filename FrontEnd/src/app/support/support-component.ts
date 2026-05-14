@@ -1,5 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {FormsModule, ReactiveFormsModule, UntypedFormControl, Validators} from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ApiService} from '../api.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
@@ -21,8 +21,8 @@ export class SupportComponent implements OnInit, OnDestroy {
   private location = inject(Location);
 
 
-  messageControl = new UntypedFormControl('', [Validators.required]);
-  emailControl = new UntypedFormControl('', [Validators.required]);
+  messageControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
+  emailControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
   submitted: boolean;
   entry: Entry;
   notificationMessage: string;
@@ -43,7 +43,7 @@ export class SupportComponent implements OnInit, OnDestroy {
 
     if (history.state.data) {
       this.caughtException = history.state.data;
-      this.messageControl = new UntypedFormControl('');
+      this.messageControl = new FormControl<string>('', {nonNullable: true});
     }
   }
 

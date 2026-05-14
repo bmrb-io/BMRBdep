@@ -6,7 +6,7 @@ import {Entry} from '../nmrstar/entry';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
-import {FormsModule, ReactiveFormsModule, UntypedFormControl} from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatNavList} from '@angular/material/list';
 import {MatButton} from '@angular/material/button';
@@ -31,7 +31,7 @@ export class ReviewComponent implements OnInit, OnDestroy {
   dialogRef: MatDialogRef<ConfirmationDialogComponent>;
   entry: Entry;
   subscription$: Subscription;
-  messageControl = new UntypedFormControl('');
+  messageControl = new FormControl<string>('', {nonNullable: true});
 
   ngOnInit() {
     this.subscription$ = this.api.entrySubject.subscribe({

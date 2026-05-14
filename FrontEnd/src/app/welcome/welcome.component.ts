@@ -1,7 +1,7 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {ApiService} from '../api.service';
-import {FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Entry} from '../nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
@@ -38,18 +38,18 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.production = environment.production;
   }
 
-  sessionType = new UntypedFormControl('', [Validators.required]);
-  authorEmail = new UntypedFormControl('', [
-    Validators.required,
-    Validators.email,
-  ]);
-  depositionNickname = new UntypedFormControl('', [Validators.required]);
-  authorORCID = new UntypedFormControl('', [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]);
-  bootstrapID = new UntypedFormControl('', [Validators.required, Validators.pattern(/^[0-9]+$/)]);
-  depositionType = new UntypedFormControl('macromolecule');
-  resumeEmail = new UntypedFormControl('', [Validators.required, Validators.email]);
+  sessionType = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
+  authorEmail = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.email],
+  });
+  depositionNickname = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
+  authorORCID = new FormControl<string>('', {nonNullable: true, validators: [Validators.pattern(/^\d{4}-\d{4}-\d{4}-(\d{3}X|\d{4})$/)]});
+  bootstrapID = new FormControl<string>('', {nonNullable: true, validators: [Validators.required, Validators.pattern(/^[0-9]+$/)]});
+  depositionType = new FormControl<string>('macromolecule', {nonNullable: true});
+  resumeEmail = new FormControl<string>('', {nonNullable: true, validators: [Validators.required, Validators.email]});
 
-  createDepositionForm: UntypedFormGroup = new UntypedFormGroup({
+  createDepositionForm = new FormGroup({
     sessionType: this.sessionType,
     authorEmail: this.authorEmail,
     depositionNickname: this.depositionNickname,
@@ -57,12 +57,12 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     depositionType: this.depositionType
   });
 
-  getEmailErrorMessage(emailForm: UntypedFormControl) {
+  getEmailErrorMessage(emailForm: FormControl<string>) {
     return emailForm.hasError('required') ? 'You must enter your email address.' :
       emailForm.hasError('email') ? 'Not a valid email address.' : '';
   }
 
-  getBootstrapErrorMessage(bootstrapForm: UntypedFormControl) {
+  getBootstrapErrorMessage(bootstrapForm: FormControl<string>) {
     return bootstrapForm.hasError('required') ? 'You must enter the ID of an existing entry.' :
       bootstrapForm.hasError('pattern') ? 'Not a valid BMRB ID. BMRB IDs consist only of numbers. (For example: 15000)' : '';
   }
@@ -88,29 +88,29 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     this.fileUploadElement.nativeElement.click();
   }
 
-  new(f: UntypedFormGroup) {
+  new(f: typeof this.createDepositionForm) {
 
     if (!f.valid) {
       return;
     }
 
-    let bootstrapID = null;
-    if (f.value.sessionType === 'bmrb_id') {
+    const values = f.getRawValue();
+
+    let bootstrapID: string | null = null;
+    if (values.sessionType === 'bmrb_id') {
       if (!this.bootstrapID.value) {
         return;
       }
-      if (f.value.sessionType === 'bmrb_id') {
-        bootstrapID = this.bootstrapID.value;
-      }
+      bootstrapID = this.bootstrapID.value;
     }
 
-    let fileElement = null;
-    if (f.value.sessionType === 'file') {
+    let fileElement: File | null = null;
+    if (values.sessionType === 'file') {
       fileElement = this.fileUploadElement.nativeElement.files[0];
     }
 
     this.api.clearDeposition();
-    this.api.newDeposition(f.value.authorEmail, f.value.depositionNickname, f.value.depositionType, f.value.authorORCID,
+    this.api.newDeposition(values.authorEmail, values.depositionNickname, values.depositionType, values.authorORCID,
       this.skipEmailValidation, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {

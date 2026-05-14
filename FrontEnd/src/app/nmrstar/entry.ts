@@ -3,7 +3,7 @@ import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
-import {EntryJSON} from './schemaTypes';
+import {EntryJSON, FileUploadType} from './schemaTypes';
 
 class SuperCategoryInfo {
   superCategory: string;
@@ -585,7 +585,7 @@ export class Entry {
       }
     }
 
-    const dataBuilder: { [filename: string]: unknown[] } = {};
+    const dataBuilder: { [filename: string]: FileUploadType[] } = {};
     const nameList: string[] = [];
     const dataDescriptionRow = dataLoop.tags.indexOf('Data_file_content_type');
     const dataFileNameRow = dataLoop.tags.indexOf('Data_file_name');

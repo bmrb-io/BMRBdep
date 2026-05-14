@@ -26,10 +26,16 @@ export interface RawValueRows {
   values: unknown[][];
 }
 
-export interface FileUploadType {
-  /* [description, exts, category, ...] — see DataFile.dropDownList consumers */
-  [index: number]: unknown;
-}
+/* Server tuple shape from schema_loader.get_data_file_types:
+   [type_description, sf_categories, interview_tag, description]. sf_categories
+   is the list of NMR-STAR saveframe categories this file type can attach to;
+   entries may be null when the mapping is unspecified. */
+export type FileUploadType = [
+  string,
+  (string | null)[],
+  string,
+  string,
+];
 
 export interface SchemaJSON {
   version: string;

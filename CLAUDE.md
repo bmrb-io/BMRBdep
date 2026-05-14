@@ -29,6 +29,8 @@ When making frontend-only changes you typically work inside `FrontEnd/`, but bui
 | Unit tests | `npm test` (`FrontEnd/`) — Karma + Jasmine, see `FrontEnd/karma.conf.js` |
 | Full deploy build | `./build_angular.sh` or `./build_angular.sh production` (repo root) |
 
+**To sanity-check a change compiles**, run `npm run build.prod` from `FrontEnd/` (after sourcing `node_env`). Only `production` and `devprod` are defined in `angular.json` — there is no `development` build configuration, and `tsc --noEmit` alone misses Angular template type errors that the compiler catches.
+
 The dev server proxies nothing — `FrontEnd/src/environments/environment.ts` hardcodes `http://localhost:9000/deposition` as the API root, so the Flask backend must be running locally for any deposition flow to work. On `*bmrb*` hostnames the API root becomes the relative `/deposition`.
 
 There are three environment files in `FrontEnd/src/environments/`: `environment.ts` (dev), `environment.devprod.ts`, `environment.prod.ts`. `production: true` in any of them disables `console.log`/`warn` and freezes `console`.

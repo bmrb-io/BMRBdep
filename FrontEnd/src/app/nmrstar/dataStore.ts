@@ -1,19 +1,19 @@
-import {UntypedFormControl} from '@angular/forms';
+import {FormControl} from '@angular/forms';
 import {FileUploadType} from './schemaTypes';
 
 export class DataFile {
   dropDownList: FileUploadType[];
-  selectedItems: unknown;
+  selectedItems: FileUploadType[];
   fileName: string;
   percent: number;
-  control: UntypedFormControl;
+  control: FormControl<FileUploadType[]>;
 
-  constructor(fileName: string, dropDownList: FileUploadType[], selectedItems: unknown = []) {
+  constructor(fileName: string, dropDownList: FileUploadType[], selectedItems: FileUploadType[] = []) {
     this.fileName = fileName;
     this.dropDownList = dropDownList;
     this.selectedItems = selectedItems;
     this.percent = 0;
-    this.control = new UntypedFormControl(selectedItems);
+    this.control = new FormControl<FileUploadType[]>(selectedItems, {nonNullable: true});
   }
 }
 
@@ -32,7 +32,7 @@ export class DataFileStore {
     }
   }
 
-  addFile(filename: string, selected: unknown = []): DataFile {
+  addFile(filename: string, selected: FileUploadType[] = []): DataFile {
 
     let dataFile: DataFile;
 
