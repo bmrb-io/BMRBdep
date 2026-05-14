@@ -131,7 +131,8 @@ export interface EntryJSON {
   email_validated: boolean;
   entry_deposited: boolean;
   deposition_nickname: string;
-  bmrbnum: number;
+  /* Backend sends Optional[int] — null until a BMRB ID is assigned at deposition time. */
+  bmrbnum: number | null;
   /* Older cached entries stored a single string; current backend sends an array. */
   commit: string | string[];
   unsaved?: boolean;
