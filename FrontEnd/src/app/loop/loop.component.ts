@@ -1,7 +1,7 @@
 import {ApiService} from '../api.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {AfterViewChecked, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {AfterViewChecked, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
 
 /* Import country updater code */
 import * as crs from '../javascript/crs.min';
@@ -17,7 +17,7 @@ import {TagComponent} from '../tag/tag.component';
   standalone: true,
   imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
-export class LoopComponent implements OnInit, AfterViewChecked {
+export class LoopComponent implements AfterViewChecked {
   private api = inject(ApiService);
   private changeDetector = inject(ChangeDetectorRef);
 
@@ -28,9 +28,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   constructor() {
     this.activeTag = null;
     this.crsInit = false;
-  }
-
-  ngOnInit() {
   }
 
   // Load the country autofill code

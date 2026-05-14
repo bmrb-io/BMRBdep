@@ -40,7 +40,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    const parent = this;
     this.subscription$ = combineLatest([this.router.events, this.route.queryParams]).pipe(
       map(() => {
         let r = this.route;
@@ -51,12 +50,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         const urlSegments = this.router.url.split('/');
 
         if (urlSegments[2] === 'saveframe') {
-          parent.active = urlSegments[3];
-          parent.page = 'category';
+          this.active = urlSegments[3];
+          this.page = 'category';
         } else {
-          parent.page = urlSegments[urlSegments.length - 1];
-          if (parent.page === '') {
-            parent.page = 'new';
+          this.page = urlSegments[urlSegments.length - 1];
+          if (this.page === '') {
+            this.page = 'new';
           }
         }
       })

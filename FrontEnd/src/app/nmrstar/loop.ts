@@ -14,7 +14,7 @@ export class Loop {
   valid: boolean;
   empty: boolean;
 
-  toJSON(): {} {
+  toJSON(): object {
 
     // Turn the loop tags into a simple array of values
     const reducedData = [];
@@ -298,8 +298,6 @@ export class Loop {
 
   print(): string {
 
-    const parent = this;
-
     // Check for totally empty loops
     if (this.checkEmpty()) {
       return '';
@@ -312,14 +310,14 @@ export class Loop {
 
     // Can't print data without columns
     if (this.tags.length === 0) {
-      throw new Error(`Impossible to print data if there are no associated tags. Loop: '${parent.category}'.`);
+      throw new Error(`Impossible to print data if there are no associated tags. Loop: '${this.category}'.`);
     }
 
     // Make sure that if there is data, it is the same width as the column tags
     if (this.data.length > 0) {
       for (let n = 0; n < this.data.length; n++) {
         if (this.tags.length !== this.data[n].length) {
-          throw new Error(`The number of column tags must match width of the data. Row: ${n} Loop: '${parent.category}'.`);
+          throw new Error(`The number of column tags must match width of the data. Row: ${n} Loop: '${this.category}'.`);
         }
       }
     }
@@ -477,7 +475,7 @@ export class Loop {
 
     // Copy the data
     for (const row in this.data) {
-      if (this.data.hasOwnProperty(row)) {
+      if (Object.hasOwn(this.data, row)) {
         this.data[row][citationGivenNameCol].value = entryAuthors.data[row][entryGivenNameCol].value;
         this.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
         this.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;

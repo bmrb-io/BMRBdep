@@ -19,11 +19,9 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
   subscription2$!: Subscription;
 
   ngOnInit() {
-    const parent: LoadEntryComponent = this;
-
     this.subscription$ = this.route.params.subscribe({
       next: params => {
-        parent.api.loadEntry(params['entry']);
+        this.api.loadEntry(params['entry']);
 
         this.subscription2$ = this.api.entrySubject.subscribe(entry => {
           // Wait for the specific entry we want to load

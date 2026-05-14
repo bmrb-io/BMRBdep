@@ -40,11 +40,10 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
     });
 
     // Listen for the changing of the params string
-    const parent = this;
     this.subscription$.add(this.route.params.subscribe({
-      next: function (params) {
-        parent.saveframeCategory = params['saveframe_category'];
-        parent.reloadSaveframes();
+      next: (params) => {
+        this.saveframeCategory = params['saveframe_category'];
+        this.reloadSaveframes();
       }
     }));
   }

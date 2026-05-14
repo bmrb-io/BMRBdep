@@ -22,18 +22,17 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
   subscription$!: Subscription;
 
   ngOnInit() {
-    const parent: PendingValidationComponent = this;
     this.subscription$ = this.api.entrySubject.subscribe({
       next: entry => {
-        parent.entry = entry;
+        this.entry = entry;
         // Route straight to the entry if validated
         if (entry && entry.emailValidated) {
           if (entry.deposited) {
-            parent.router.navigate(['/entry']).then();
+            this.router.navigate(['/entry']).then();
           } else if (entry.firstIncompleteCategory) {
-            parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
+            this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
           } else {
-            parent.router.navigate(['/entry/', 'review']).then();
+            this.router.navigate(['/entry/', 'review']).then();
           }
         }
       }
@@ -42,16 +41,16 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
     // Check the validation status every 2.5 seconds
     this.subscription$.add(timer(0, 2500).subscribe({
       next: () => {
-        parent.api.checkValidatedEmail().then(status => {
-          if (status && parent.entry) {
-            parent.entry.emailValidated = true;
-            parent.api.storeEntry(false);
-            if (parent.entry.deposited) {
-              parent.router.navigate(['/entry']).then();
-            } else if (parent.entry.firstIncompleteCategory) {
-              parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
+        this.api.checkValidatedEmail().then(status => {
+          if (status && this.entry) {
+            this.entry.emailValidated = true;
+            this.api.storeEntry(false);
+            if (this.entry.deposited) {
+              this.router.navigate(['/entry']).then();
+            } else if (this.entry.firstIncompleteCategory) {
+              this.router.navigate(['/entry/', 'saveframe', this.entry.firstIncompleteCategory]).then();
             } else {
-              parent.router.navigate(['/entry/', 'review']).then();
+              this.router.navigate(['/entry/', 'review']).then();
             }
           }
         });

@@ -154,25 +154,24 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     // Returns nothing — the FileSystemEntry APIs are async-callback based, so accumulating
     // and returning the file list isn't possible; uploads are kicked off in-place instead.
 
-    const parent = this;
     path = path || '';
 
     if (item.isFile) {
       // Get file
-      (item as FileSystemFileEntry).file(function (file: File) {
+      (item as FileSystemFileEntry).file((file: File) => {
         console.log('File:', path + file.name, item);
 
         // Don't upload hidden files, this will just confuse the user
         if (!file.name.startsWith('.')) {
-          parent.uploadFile(file);
+          this.uploadFile(file);
         }
       });
     } else if (item.isDirectory) {
       // Get folder contents
       const dirReader = (item as FileSystemDirectoryEntry).createReader();
-      dirReader.readEntries(function (entries: FileSystemEntry[]) {
+      dirReader.readEntries((entries: FileSystemEntry[]) => {
         for (const entry of entries) {
-          parent.traverseFileTree(entry, path + item.name + '/');
+          this.traverseFileTree(entry, path + item.name + '/');
         }
       });
     }

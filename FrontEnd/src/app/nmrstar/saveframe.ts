@@ -139,7 +139,7 @@ export class Saveframe {
     return newFrame;
   }
 
-  toJSON(): {} {
+  toJSON(): object {
     return {category: this.category, name: this.name, tag_prefix: this.tagPrefix, tags: this.tags, loops: this.loops};
   }
 

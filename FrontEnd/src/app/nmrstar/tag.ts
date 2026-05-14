@@ -124,7 +124,7 @@ export class Tag {
     console.log(this);
   }
 
-  toJSON(): {} {
+  toJSON(): object {
     // Clone object to prevent accidentally performing modification on the original object
 
     if (!checkValueIsNull(this.value)) {
