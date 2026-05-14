@@ -31,6 +31,9 @@ module.exports = defineConfig([
           style: "kebab-case",
         },
       ],
+      // Allow explicit primitive type annotations on initialized members; the explicit form
+      // documents intent and stays useful when initializers later change shape.
+      "@typescript-eslint/no-inferrable-types": "off",
     },
   },
   {

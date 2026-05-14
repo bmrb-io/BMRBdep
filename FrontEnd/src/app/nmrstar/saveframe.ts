@@ -24,7 +24,7 @@ export class Saveframe {
   display: string;
   valid: boolean;
   deleted: boolean;
-  tagDict: { [fqtn: string]: SaveframeTag };
+  tagDict: Record<string, SaveframeTag>;
   schemaValues: SaveframeSchemaEntry;
   saveframesInCategory: number;
   nextCategory: string | null;

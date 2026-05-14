@@ -1,9 +1,9 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "importHelpers": true,
     "esModuleInterop": true,
     "module": "es2020",

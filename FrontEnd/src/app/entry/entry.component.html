@@ -1,14 +1,16 @@
 <div class="main-content">
   <h2>Deposition review</h2>
-  @if (entry.deposited && entry.bmrbnum) {
-    <div class="bmrb-id-banner">
-      <div class="bmrb-id-label">Assigned BMRB Entry ID</div>
-      <div class="bmrb-id-value">{{ entry.bmrbnum }}</div>
-    </div>
-  }
-  @for (sf of entry.saveframes; track sf) {
-    @if (!sf.deleted) {
-      <app-saveframe [saveframe]='sf'></app-saveframe>
+  @if (entry) {
+    @if (entry.deposited && entry.bmrbnum) {
+      <div class="bmrb-id-banner">
+        <div class="bmrb-id-label">Assigned BMRB Entry ID</div>
+        <div class="bmrb-id-value">{{ entry.bmrbnum }}</div>
+      </div>
+    }
+    @for (sf of entry.saveframes; track sf) {
+      @if (!sf.deleted) {
+        <app-saveframe [saveframe]='sf'></app-saveframe>
+      }
     }
   }
 </div>

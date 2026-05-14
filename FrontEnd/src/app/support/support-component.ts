@@ -24,10 +24,10 @@ export class SupportComponent implements OnInit, OnDestroy {
   messageControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
   emailControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
   submitted: boolean;
-  entry: Entry;
-  notificationMessage: string;
-  subscription$: Subscription;
-  caughtException: {};
+  entry: Entry | null;
+  notificationMessage: string | null;
+  subscription$!: Subscription;
+  caughtException: { url?: string; message?: string } | null;
 
   constructor() {
     this.submitted = false;
@@ -56,7 +56,7 @@ export class SupportComponent implements OnInit, OnDestroy {
   sendRequest() {
     let supportMessage = this.messageControl.value;
     if (this.caughtException) {
-      supportMessage = `User reporting an exception.\nException URL: ${this.caughtException['url']}\nException message: ${this.caughtException['message']}\n`;
+      supportMessage = `User reporting an exception.\nException URL: ${this.caughtException.url}\nException message: ${this.caughtException.message}\n`;
       if (this.messageControl.value) {
         supportMessage += 'User message: ' + this.messageControl.value;
       }

@@ -27,12 +27,12 @@ export class SaveframeComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
 
-  @Input() saveframe: Saveframe;
-  @Output() sfReload = new EventEmitter<string>();
-  activeTag: SaveframeTag;
+  @Input() saveframe!: Saveframe;
+  @Output() sfReload = new EventEmitter<string | null>();
+  activeTag: SaveframeTag | null;
   showCategoryLink: boolean;
-  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
-  subscription$: Subscription;
+  dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
+  subscription$!: Subscription;
 
   constructor() {
     this.activeTag = null;
@@ -77,7 +77,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
-    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    const nameTag: SaveframeTag | null = this.saveframe.getTag('Name');
     if (nameTag && nameTag.value) {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the section '${nameTag.value}'?` +
         ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
@@ -103,7 +103,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
-    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    const nameTag: SaveframeTag | null = this.saveframe.getTag('Name');
     if (nameTag && nameTag.value) {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to clear all data in the section '${nameTag.value}'?` +
         ' There is no way to undo this action later.';

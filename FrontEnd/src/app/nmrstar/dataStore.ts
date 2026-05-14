@@ -19,7 +19,7 @@ export class DataFile {
 
 export class DataFileStore {
   dataFiles: DataFile[];
-  dataFileMap: { [filename: string]: DataFile };
+  dataFileMap: Record<string, DataFile>;
   dropDownList: FileUploadType[];
 
   constructor(fileNames: string[], dropDownList: FileUploadType[]) {

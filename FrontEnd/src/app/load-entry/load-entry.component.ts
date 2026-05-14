@@ -15,8 +15,8 @@ export class LoadEntryComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
 
-  subscription$: Subscription;
-  subscription2$: Subscription;
+  subscription$!: Subscription;
+  subscription2$!: Subscription;
 
   ngOnInit() {
     const parent: LoadEntryComponent = this;

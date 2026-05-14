@@ -35,10 +35,10 @@ export class MessagesService {
   private router = inject(Router);
 
 
-  snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  snackBarRef!: MatSnackBarRef<SimpleSnackBar>;
 
-  sendMessage(message: Message, actualException = null) {
-    let action = null;
+  sendMessage(message: Message, actualException: string | null = null) {
+    let action: string | undefined;
     if (message.messageType === MessageType.ErrorMessage) {
       action = 'Notify Us';
     }

@@ -15,8 +15,8 @@ export class RestoreComponent implements OnInit, OnDestroy {
   api = inject(ApiService);
 
 
-  entry: Entry;
-  subscription$: Subscription;
+  entry: Entry | null = null;
+  subscription$!: Subscription;
 
   ngOnInit() {
     this.subscription$ = this.api.entrySubject.subscribe({

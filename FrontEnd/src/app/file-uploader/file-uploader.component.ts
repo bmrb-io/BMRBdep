@@ -28,14 +28,14 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
 
 
-  @Input() entry: Entry;
-  @ViewChild('inputFile') fileUploadElement: ElementRef;
-  serverURL: string = null;
+  @Input() entry!: Entry;
+  @ViewChild('inputFile') fileUploadElement!: ElementRef;
+  serverURL: string | null = null;
   showCategoryLink: boolean;
-  uploadSubscriptionDict$: {};
-  subscription$: Subscription;
-  public activeUploads;
-  private dialogRef: MatDialogRef<ConfirmationDialogComponent>;
+  uploadSubscriptionDict$: Record<string, Subscription>;
+  subscription$!: Subscription;
+  public activeUploads: number;
+  private dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
 
   constructor() {
     this.showCategoryLink = true;
@@ -86,7 +86,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   // At the drag drop area
   // (dragover)="onDragOverFile($event)"
-  onDragOverFile(event) {
+  onDragOverFile(event: DragEvent) {
     event.stopPropagation();
     event.preventDefault();
   }
@@ -102,8 +102,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   // At the file input element
   // (change)="selectFile($event)"
-  selectFile(event) {
-    this.uploadFiles(event.target.files);
+  selectFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.uploadFiles(input.files);
+    }
     this.fileUploadElement.nativeElement.value = '';
   }
 
@@ -112,20 +115,30 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
   processUploadEventAndUpload(event: DragEvent) {
-    if (typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
-      typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function') {
+    const dataTransfer = event.dataTransfer;
+    if (!dataTransfer) {
+      return;
+    }
+    if (typeof dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
+      typeof dataTransfer.items[0].webkitGetAsEntry !== 'function') {
       // Fall back to just uploading the top level files
-      this.uploadFiles(event.dataTransfer.files);
+      this.uploadFiles(dataTransfer.files);
       return;
     }
 
-    for (const dtItem of Array.from(event.dataTransfer.items)) {
+    for (const dtItem of Array.from(dataTransfer.items)) {
       try {
-        this.traverseFileTree(dtItem.webkitGetAsEntry(), undefined);
+        const entry = dtItem.webkitGetAsEntry();
+        if (entry) {
+          this.traverseFileTree(entry, '');
+        }
       } catch {
         try {
           const legacy = dtItem as DataTransferItem & { getAsEntry?(): FileSystemEntry };
-          this.traverseFileTree(legacy.getAsEntry(), undefined);
+          const entry = legacy.getAsEntry?.();
+          if (entry) {
+            this.traverseFileTree(entry, '');
+          }
         } catch {
           console.error('In theory, this error state is impossible.');
         }
@@ -134,17 +147,17 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
 
-  traverseFileTree(item, path: string) {
+  traverseFileTree(item: FileSystemEntry, path: string): File[] {
     // This takes a list of File or Directory items, and recursively explores the directories, adding all files
     //  within them for upload.
 
-    let files = [];
+    const files: File[] = [];
     const parent = this;
     path = path || '';
 
     if (item.isFile) {
       // Get file
-      item.file(function (file) {
+      (item as FileSystemFileEntry).file(function (file: File) {
         console.log('File:', path + file.name, item);
 
         // Don't upload hidden files, this will just confuse the user
@@ -154,10 +167,10 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       });
     } else if (item.isDirectory) {
       // Get folder contents
-      const dirReader = item.createReader();
-      dirReader.readEntries(function (entries) {
+      const dirReader = (item as FileSystemDirectoryEntry).createReader();
+      dirReader.readEntries(function (entries: FileSystemEntry[]) {
         for (const entry of entries) {
-          files = files.concat(parent.traverseFileTree(entry, path + item.name + '/'));
+          parent.traverseFileTree(entry, path + item.name + '/');
         }
       });
     }
@@ -178,7 +191,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  uploadFile(file) {
+  uploadFile(file: File) {
 
     const dataFile = this.entry.dataStore.addFile(file.name);
 
@@ -187,8 +200,10 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       .subscribe({
         next: event => {
           if (event.type === HttpEventType.UploadProgress) {
-            dataFile.percent = Math.round(100 * event.loaded / event.total);
-          } else if (event instanceof HttpResponse) {
+            if (event.total) {
+              dataFile.percent = Math.round(100 * event.loaded / event.total);
+            }
+          } else if (event instanceof HttpResponse && event.body) {
             this.entry.addCommit(event.body.commit);
             dataFile.percent = 100;
             this.entry.dataStore.updateName(dataFile, event.body.filename);

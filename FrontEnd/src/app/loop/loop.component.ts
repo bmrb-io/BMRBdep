@@ -21,8 +21,8 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   private api = inject(ApiService);
   private changeDetector = inject(ChangeDetectorRef);
 
-  @Input() loop: Loop;
-  activeTag: LoopTag;
+  @Input() loop!: Loop;
+  activeTag: LoopTag | null;
   crsInit: boolean;
 
   constructor() {
@@ -56,7 +56,7 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   }
 
   // Delete a row of data
-  deleteRow(row_id) {
+  deleteRow(row_id: number) {
     this.loop.deleteRow(row_id);
     this.loop.parent.parent.refresh();
     this.api.storeEntry(true);

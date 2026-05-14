@@ -13,12 +13,12 @@ export interface RawTagTable {
   headers: string[];
   /* Tag rows keyed by tag name; each row is a value-per-header array. Enumerations
      have a nested shape — see TagSchemaEntry['enumerations']. */
-  values: { [tagName: string]: unknown[] };
+  values: Record<string, unknown[]>;
 }
 
 export interface RawSaveframeTable {
   headers: string[];
-  values: { [category: string]: unknown[] };
+  values: Record<string, unknown[]>;
 }
 
 export interface RawValueRows {
@@ -40,7 +40,7 @@ export type FileUploadType = [
 export interface SchemaJSON {
   version: string;
   tags: RawTagTable;
-  data_types: { [dataType: string]: string };
+  data_types: Record<string, string>;
   overrides: RawValueRows;
   category_supergroups: RawValueRows;
   supergroup_descriptions: RawValueRows;

@@ -19,17 +19,17 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 export class TagComponent implements OnInit {
   private api = inject(ApiService);
 
-  @Input() tag: Tag;
-  @Input() unique_identifier: string;
-  filteredOptions: [string, string][];
+  @Input() tag!: Tag;
+  @Input() unique_identifier!: string;
+  filteredOptions: [string, string][] = [];
 
-  public height: number;
+  public height: number = 0;
 
   ngOnInit() {
     if (this.tag.interfaceType === 'text') {
       this.recalculateHeight();
     }
-    if (this.tag.interfaceType === 'open_enum') {
+    if (this.tag.interfaceType === 'open_enum' && this.tag.enums) {
       this.filteredOptions = [];
       for (const singleEnum of this.tag.enums) {
         this.filteredOptions.push(singleEnum);
@@ -39,6 +39,9 @@ export class TagComponent implements OnInit {
 
   filter() {
     this.filteredOptions = [];
+    if (!this.tag.enums) {
+      return;
+    }
     for (const singleEnum of this.tag.enums) {
       if (singleEnum[0].toLowerCase().includes(this.tag.value.toLowerCase())) {
         this.filteredOptions.push(singleEnum);

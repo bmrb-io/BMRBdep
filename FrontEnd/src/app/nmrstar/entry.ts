@@ -5,6 +5,18 @@ import {LoopTag} from './tag';
 import {Loop} from './loop';
 import {EntryJSON, FileUploadType} from './schemaTypes';
 
+export interface EntrySerialized {
+  entry_id: string;
+  saveframes: Saveframe[];
+  email_validated: boolean;
+  deposition_nickname: string | null;
+  entry_deposited: boolean;
+  unsaved: boolean;
+  bmrbnum: number | null;
+  commit: string[];
+  force?: boolean;
+}
+
 class SuperCategoryInfo {
   superCategory: string;
   displayName: string;
@@ -79,7 +91,7 @@ export class Entry {
   saveframes: Saveframe[];
   schema!: Schema;
   superGroups: SuperCategoryInfo[] = [];
-  enumerationTies: { [tieGroup: string]: Set<string> };
+  enumerationTies: Record<string, Set<string>>;
   dataStore!: DataFileStore;
   valid: boolean;
   showAll: boolean;
@@ -108,7 +120,7 @@ export class Entry {
     this.updateCategories();
   }
 
-  toJSON(): {} {
+  toJSON(): EntrySerialized {
     return {
       entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
       deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
@@ -160,7 +172,7 @@ export class Entry {
         categories.add(sf.category);
       }
     }
-    const categoryStatusDict: { [category: string]: CategoryInfo } = {};
+    const categoryStatusDict: Record<string, CategoryInfo> = {};
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     //  Also, set the first invalid saveframe in the process
@@ -376,7 +388,7 @@ export class Entry {
               }
               // See if the rule applies to a child loop
             } else {
-              const loopsByPrefix: { [category: string]: Loop } = {};
+              const loopsByPrefix: Record<string, Loop> = {};
               for (const loop of saveframe.loops) {
                 loopsByPrefix[loop.category] = loop;
               }
@@ -585,7 +597,7 @@ export class Entry {
       }
     }
 
-    const dataBuilder: { [filename: string]: FileUploadType[] } = {};
+    const dataBuilder: Record<string, FileUploadType[]> = {};
     const nameList: string[] = [];
     const dataDescriptionRow = dataLoop.tags.indexOf('Data_file_content_type');
     const dataFileNameRow = dataLoop.tags.indexOf('Data_file_name');

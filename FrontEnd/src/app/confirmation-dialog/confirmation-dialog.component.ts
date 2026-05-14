@@ -15,11 +15,11 @@ import {MatButton} from '@angular/material/button';
 export class ConfirmationDialogComponent {
   dialogRef = inject<MatDialogRef<ConfirmationDialogComponent>>(MatDialogRef);
 
-  public confirmMessage: string;
+  public confirmMessage = '';
   public proceedMessage: string;
   public cancelMessage: string;
-  public inputBoxText: string;
-  public name: string;
+  public inputBoxText: string | null;
+  public name = '';
 
   constructor() {
     this.proceedMessage = 'Proceed';

@@ -24,12 +24,12 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   api = inject(ApiService);
   private sidenavService = inject(SidenavService);
 
-  public entry: Entry;
-  @ViewChild('inputFile') fileUploadElement: ElementRef;
+  public entry: Entry | null;
+  @ViewChild('inputFile') fileUploadElement!: ElementRef;
   public skipEmailValidation: boolean;
   public emailValidationError: boolean;
-  public production;
-  private subscription$: Subscription;
+  public production: boolean;
+  private subscription$!: Subscription;
 
   constructor() {
     this.entry = null;

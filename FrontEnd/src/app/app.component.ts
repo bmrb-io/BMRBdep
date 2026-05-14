@@ -27,9 +27,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   sidenav_open: boolean;
-  entry: Entry;
-  subscription$: Subscription;
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  entry: Entry | null = null;
+  subscription$!: Subscription;
+  @ViewChild('sidenav') public sidenav!: MatSidenav;
 
   constructor() {
     this.sidenav_open = false;

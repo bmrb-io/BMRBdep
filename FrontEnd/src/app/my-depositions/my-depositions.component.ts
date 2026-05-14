@@ -35,7 +35,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
   depositions: Deposition[] = [];
   currentDepositionId: string | null = null;
   loading = true;
-  subscription$: Subscription;
+  subscription$!: Subscription;
 
   ngOnInit() {
     // Grab the current in-memory entry (if any) so we can splice it in if the server list lacks it.

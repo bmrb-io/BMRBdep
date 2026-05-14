@@ -112,7 +112,7 @@ export class Tag {
     }
 
     // If this is a standard 'input' element, determine the data type
-    const dataTypeMap: { [key: string]: string } = {
+    const dataTypeMap: Record<string, string> = {
       'int': 'number', 'float': 'number', 'yyyy-mm-dd': 'date',
       'yyyy-mm-dd:hh:mm': 'datetime-local',
       'email': 'email', 'fax': 'tel', 'phone': 'tel'

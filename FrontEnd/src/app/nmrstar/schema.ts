@@ -24,18 +24,18 @@ export class Schema {
   version: string;
   tags: RawTagTable | undefined;
   saveframes: RawSaveframeTable | undefined;
-  dataTypes: { [dataType: string]: string } = {};
+  dataTypes: Record<string, string> = {};
   fileUploadTypes: FileUploadType[];
   overrides: RawValueRows | undefined;
   overridesDictList: OverrideRule[];
   categorySuperGroups: RawValueRows | undefined;
   categorySupergroupsDictList: SuperGroupRecord[][];
   categorySuperGroupsDescription: RawValueRows;
-  categorySuperGroupsDescriptionDict: { [id: string]: SuperGroupDescription };
+  categorySuperGroupsDescriptionDict: Record<string, SuperGroupDescription>;
 
   /* Calculated during construction */
-  schema: { [tagName: string]: TagSchemaEntry };
-  saveframeSchema: { [category: string]: SaveframeSchemaEntry };
+  schema: Record<string, TagSchemaEntry>;
+  saveframeSchema: Record<string, SaveframeSchemaEntry>;
 
 
   toJSON(): object {
@@ -117,7 +117,7 @@ export class Schema {
       }
       temporarySuperGroupList.push(superGroupRecord as unknown as SuperGroupRecord);
     }
-    const temporaryGroupDict: { [key: string]: SuperGroupRecord[] } = {};
+    const temporaryGroupDict: Record<string, SuperGroupRecord[]> = {};
     for (const superRecord of temporarySuperGroupList) {
       if (!(superRecord.category_super_group in temporaryGroupDict)) {
         temporaryGroupDict[superRecord.category_super_group] = [superRecord];

@@ -1,6 +1,6 @@
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {Entry, entryFromJSON} from './nmrstar/entry';
+import {Entry, entryFromJSON, EntrySerialized} from './nmrstar/entry';
 import {EntryJSON} from './nmrstar/schemaTypes';
 import {inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
@@ -79,14 +79,14 @@ export class ApiService implements OnDestroy {
   private storage = inject(StorageService);
 
 
-  public entrySubject: ReplaySubject<Entry>;
-  private cachedEntry: Entry;
-  private subscription$: Subscription;
-  private saveTimer;
-  private lastChangeTime: number;
-  private firstSaveMessageSent;
-  public saveInProgress: boolean;
-  private broadcast: BroadcastChannel;
+  public entrySubject: ReplaySubject<Entry | null>;
+  private cachedEntry: Entry | null = null;
+  private subscription$!: Subscription;
+  private saveTimer!: ReturnType<typeof setInterval>;
+  private lastChangeTime: number | null = null;
+  private firstSaveMessageSent: boolean = false;
+  public saveInProgress: boolean = false;
+  private broadcast!: BroadcastChannel;
   private conflictDialogOpen = false;
 
   private JSONOptions = {
@@ -96,7 +96,7 @@ export class ApiService implements OnDestroy {
   };
 
   constructor() {
-    this.entrySubject = new ReplaySubject<Entry>();
+    this.entrySubject = new ReplaySubject<Entry | null>();
     this.firstSaveMessageSent = false;
 
     this.subscription$ = this.entrySubject.subscribe({
@@ -241,6 +241,9 @@ export class ApiService implements OnDestroy {
     dialogRef.componentInstance.cancelMessage = 'Push my changes';
     dialogRef.afterClosed().subscribe(result => {
       this.conflictDialogOpen = false;
+      if (!this.cachedEntry) {
+        return;
+      }
       if (result) {
         this.loadEntry(this.cachedEntry.entryID, true);
       } else if (result === false) {
@@ -284,6 +287,9 @@ export class ApiService implements OnDestroy {
     this.http.delete<CommitResponse>(apiEndPoint).subscribe({
       next: response => {
         this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
+        if (!this.cachedEntry) {
+          return;
+        }
         this.cachedEntry.dataStore.deleteFile(fileName);
         this.cachedEntry.updateUploadedData();
         this.cachedEntry.refresh();
@@ -297,6 +303,9 @@ export class ApiService implements OnDestroy {
             MessageType.ErrorMessage, 15000));
         } else {
           this.messagesService.clearMessage();
+          if (!this.cachedEntry) {
+            return;
+          }
           this.cachedEntry.dataStore.deleteFile(fileName);
           this.cachedEntry.updateUploadedData();
           this.cachedEntry.refresh();
@@ -307,6 +316,10 @@ export class ApiService implements OnDestroy {
 
   checkValidatedEmail(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
+      if (!this.cachedEntry) {
+        reject(new Error('No active entry.'));
+        return;
+      }
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
       // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
       this.http.get<ValidationStatusResponse>(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe({
@@ -323,10 +336,14 @@ export class ApiService implements OnDestroy {
 
   checkLastCommit(): Promise<boolean> {
     return new Promise(((resolve, reject) => {
+      if (!this.cachedEntry) {
+        reject(new Error('No active entry.'));
+        return;
+      }
       const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
       this.http.get<ValidationStatusResponse>(entryURL).subscribe({
         next: response => {
-          resolve(this.cachedEntry.checkCommit(response.commit));
+          resolve(this.cachedEntry!.checkCommit(response.commit));
         },
         error: error => {
           this.handleError(error);
@@ -347,7 +364,7 @@ export class ApiService implements OnDestroy {
 
     dialogRef.afterClosed().subscribe({
       next: result => {
-        if (result) {
+        if (result && this.cachedEntry) {
           const formData = new FormData();
           formData.append('deposition_nickname', dialogRef.componentInstance.name);
 
@@ -429,19 +446,24 @@ export class ApiService implements OnDestroy {
 
   saveEntry(override = true): void {
 
+    if (!this.cachedEntry) {
+      return;
+    }
+    const entry = this.cachedEntry;
+
     const saveOriginTime = this.lastChangeTime;
     this.saveInProgress = true;
 
-    const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}`;
-    const jsonObject = this.cachedEntry.toJSON();
+    const entryURL = `${environment.serverURL}/${entry.entryID}`;
+    const jsonObject: EntrySerialized = entry.toJSON();
     if (override) {
-      jsonObject['force'] = true;
+      jsonObject.force = true;
     }
     this.http.put<SaveEntryResponse>(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
       next: response => {
         if ('error' in response) {
 
-          this.cachedEntry.unsaved = true;
+          entry.unsaved = true;
           const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
             disableClose: false
           });
@@ -455,7 +477,7 @@ export class ApiService implements OnDestroy {
 
           dialogRef.afterClosed().subscribe(result => {
             if (result) {
-              this.loadEntry(this.cachedEntry.entryID, true);
+              this.loadEntry(entry.entryID, true);
             } else if (result === false) {
               this.saveEntry(true);
             } else if (result === undefined) {
@@ -468,8 +490,8 @@ export class ApiService implements OnDestroy {
 
         } else {
           // Commit is successful!
-          const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
-          if (this.cachedEntry.unsaved && time_diff > 30) {
+          const time_diff: number = this.lastChangeTime === null ? 0 : Math.round((getTime() - this.lastChangeTime) / 1000);
+          if (entry.unsaved && time_diff > 30) {
             this.messagesService.sendMessage(new Message('Successfully saved pending changes! You are back online.'));
           }
 
@@ -479,9 +501,9 @@ export class ApiService implements OnDestroy {
             this.firstSaveMessageSent = true;
           }
 
-          this.cachedEntry.addCommit(response.commit);
+          entry.addCommit(response.commit);
           if (saveOriginTime === this.lastChangeTime) {
-            this.cachedEntry.unsaved = false;
+            entry.unsaved = false;
             this.lastChangeTime = null;
           }
           this.storeEntry(false);
@@ -489,8 +511,8 @@ export class ApiService implements OnDestroy {
         }
       },
       error: () => {
-        if (this.cachedEntry.unsaved) {
-          const time_diff: number = Math.round((getTime() - this.lastChangeTime) / 1000);
+        if (entry.unsaved) {
+          const time_diff: number = this.lastChangeTime === null ? 0 : Math.round((getTime() - this.lastChangeTime) / 1000);
           if (time_diff > 30 && time_diff < 180) {
             this.messagesService.sendMessage(new Message('Unable to save changes for the last ' + time_diff + ' seconds. ' +
               'Perhaps you have lost your internet connection? Changes can still be made to the deposition, but please don\'t close this tab ' +
@@ -505,7 +527,7 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string = null): Promise<ZendeskRequestResponse> {
+  newSupportRequest(comment: string, subject = 'BMRBdep Support Request', userEmail: string | null = null): Promise<ZendeskRequestResponse> {
 
     // Reference: https://developer.zendesk.com/rest_api/docs/support/requests#create-request
 
@@ -556,10 +578,10 @@ export class ApiService implements OnDestroy {
   newDeposition(authorEmail: string,
                 depositionNickname: string,
                 depositionType: string,
-                orcid: string = null,
+                orcid: string | null = null,
                 skipEmailValidation = false,
-                file: File = null,
-                bootstrapID: string = null): Promise<string> {
+                file: File | null = null,
+                bootstrapID: string | null = null): Promise<string> {
     const apiEndPoint = `${environment.serverURL}/new`;
     this.messagesService.sendMessage(new Message('Creating deposition...',
       MessageType.NotificationMessage, 0));
@@ -606,13 +628,14 @@ export class ApiService implements OnDestroy {
     });
   }
 
-  depositEntry(feedback: string = null): Promise<void> {
+  depositEntry(feedback: string | null = null): Promise<void> {
 
-    if (!this.cachedEntry.valid) {
+    if (!this.cachedEntry || !this.cachedEntry.valid) {
       this.messagesService.sendMessage(new Message('Can not submit deposition: it is still incomplete!',
         MessageType.ErrorMessage, 15000));
-      return;
+      return Promise.resolve();
     }
+    const entry = this.cachedEntry;
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/deposit`;
 
@@ -626,12 +649,12 @@ export class ApiService implements OnDestroy {
       this.http.post<CommitResponse>(apiEndPoint, formData).subscribe({
         next: () => {
           if (!checkValueIsNull(feedback)) {
-            this.newSupportRequest(feedback, 'BMRBdep Feedback Message').then();
+            this.newSupportRequest(feedback!, 'BMRBdep Feedback Message').then();
           }
 
           // Trigger everything watching the entry to see that it changed - because "deposited" changed
-          this.cachedEntry.deposited = true;
-          this.cachedEntry.refresh();
+          entry.deposited = true;
+          entry.refresh();
           this.storeEntry();
 
           this.messagesService.sendMessage(new Message('Submission accepted!',
@@ -664,14 +687,14 @@ export class ApiService implements OnDestroy {
       );
   }
 
-  getEntryID(): string {
+  getEntryID(): string | null {
     if (this.cachedEntry === null) {
       return null;
     }
     return this.cachedEntry.entryID;
   }
 
-  handleError(error: HttpErrorResponse): Observable<null> | null {
+  handleError(error: HttpErrorResponse): Observable<null> {
     if (error.error && error.error.error) {
       this.messagesService.sendMessage(new Message(error.error.error, MessageType.ErrorMessage, 15000), error.error.error);
     } else {

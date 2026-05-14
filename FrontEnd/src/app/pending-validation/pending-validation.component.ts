@@ -18,8 +18,8 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
 
-  entry: Entry;
-  subscription$: Subscription;
+  entry: Entry | null = null;
+  subscription$!: Subscription;
 
   ngOnInit() {
     const parent: PendingValidationComponent = this;
@@ -43,7 +43,7 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
     this.subscription$.add(timer(0, 2500).subscribe({
       next: () => {
         parent.api.checkValidatedEmail().then(status => {
-          if (status) {
+          if (status && parent.entry) {
             parent.entry.emailValidated = true;
             parent.api.storeEntry(false);
             if (parent.entry.deposited) {

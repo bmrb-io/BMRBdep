@@ -22,9 +22,9 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
 
   saveframes: Saveframe[];
-  entry: Entry;
-  saveframeCategory: string;
-  subscription$: Subscription;
+  entry: Entry | null = null;
+  saveframeCategory: string = '';
+  subscription$!: Subscription;
 
   constructor() {
     this.saveframes = [];
@@ -55,7 +55,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  reloadSaveframes(nextCategory: string = null): void {
+  reloadSaveframes(nextCategory: string | null = null): void {
 
     if (this.entry === null || !this.saveframeCategory) {
       this.saveframes = [];
@@ -79,6 +79,9 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
   }
 
   restoreCategory(category: string): void {
+    if (!this.entry) {
+      return;
+    }
     this.entry.restoreByCategory(category);
     this.entry.refresh();
     this.api.storeEntry(true);

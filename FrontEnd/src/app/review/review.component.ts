@@ -28,9 +28,9 @@ export class ReviewComponent implements OnInit, OnDestroy {
   private location = inject(Location);
   private dialog = inject(MatDialog);
 
-  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
-  entry: Entry;
-  subscription$: Subscription;
+  dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
+  entry: Entry | null = null;
+  subscription$!: Subscription;
   messageControl = new FormControl<string>('', {nonNullable: true});
 
   ngOnInit() {
@@ -48,6 +48,9 @@ export class ReviewComponent implements OnInit, OnDestroy {
   }
 
   submitEntry(): void {
+    if (!this.entry) {
+      return;
+    }
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });

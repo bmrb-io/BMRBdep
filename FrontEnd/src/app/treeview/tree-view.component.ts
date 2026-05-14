@@ -26,12 +26,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  active: string;
+  active: string = '';
   developerMode: boolean;
-  entry: Entry;
+  entry: Entry | null = null;
   page: string;
   @Output() sessionEnd = new EventEmitter<boolean>();
-  subscription$: Subscription;
+  subscription$!: Subscription;
 
   constructor() {
     this.developerMode = false;
@@ -73,7 +73,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  download(name: string, printable_object): void {
+  download(name: string, printable_object: Entry): void {
     download(name, printable_object);
   }
 
@@ -87,6 +87,9 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   timeRefresh(): void {
+    if (!this.entry) {
+      return;
+    }
     const iterations = 50;
     console.time('Refresh');
     for (let i = 0; i < iterations; i++) {
@@ -96,19 +99,22 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
+    if (!this.entry) {
+      return;
+    }
     this.api.loadEntry(this.entry.entryID, true);
     this.entry.refresh();
     this.api.storeEntry(false);
   }
 
   scrollSideNav(): void {
-    let element: HTMLElement;
+    let element: HTMLElement | null;
     if (this.page === 'category') {
       element = document.getElementById(this.active);
     } else {
       element = document.getElementById(this.page);
     }
-    if (element) {
+    if (element && element.parentElement) {
       element.parentElement.scrollIntoView({behavior: 'smooth'});
     }
   }
