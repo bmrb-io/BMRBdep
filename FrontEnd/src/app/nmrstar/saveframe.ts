@@ -66,10 +66,28 @@ export class Saveframe {
     console.log(this);
   }
 
+  get uniqueId(): string {
+    const tag = this.getTag('_Unique_ID');
+    if (tag && tag.value) {
+      return tag.value;
+    }
+    // Defensive: should never happen after migration, but guarantees a stable ID
+    // for the lifetime of this object so dirty-tracking and per-saveframe PUTs
+    // still work.
+    const fresh = crypto.randomUUID();
+    if (tag) {
+      tag.value = fresh;
+    } else {
+      this.addTag('_Unique_ID', fresh);
+    }
+    return fresh;
+  }
+
   clear(): void {
     // Copy the tags
     for (const tag of this.tags) {
-      if (tag.name === 'Sf_framecode' || tag.name === 'Sf_category' || tag.name === '_Deleted') {
+      if (tag.name === 'Sf_framecode' || tag.name === 'Sf_category' || tag.name === '_Deleted'
+          || tag.name === '_Unique_ID') {
         continue;
       }
       tag.value = '';
@@ -120,6 +138,13 @@ export class Saveframe {
     newFrame.getTag('Sf_framecode')!.value = frameName;
     newFrame.getTag('Sf_category')!.value = this.category;
     newFrame.getTag('_Deleted')!.value = 'no';
+    // Always assign a fresh unique ID so the server treats this as a new saveframe
+    const uniqueIdTag = newFrame.getTag('_Unique_ID');
+    if (uniqueIdTag) {
+      uniqueIdTag.value = crypto.randomUUID();
+    } else {
+      newFrame.addTag('_Unique_ID', crypto.randomUUID());
+    }
     // New saveframes should always require entering the label
     if (newFrame.getTag('Name')) {
       newFrame.getTag('Name')!.value = '';

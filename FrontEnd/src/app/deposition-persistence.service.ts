@@ -1,5 +1,6 @@
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {Entry, entryFromJSON, EntrySerialized} from './nmrstar/entry';
+import {Saveframe} from './nmrstar/saveframe';
 import {EntryJSON} from './nmrstar/schemaTypes';
 import {inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
@@ -63,6 +64,10 @@ export class DepositionPersistenceService implements OnDestroy {
   public saveInProgress: boolean = false;
   private broadcast!: BroadcastChannel;
   private conflictDialogOpen = false;
+  // Per-saveframe last-saved JSON snapshots, keyed by Saveframe.uniqueId.
+  // Used to compute which saveframes are dirty so incremental save only sends
+  // those. Repopulated on load, mutated only on successful save responses.
+  private savedSaveframeSnapshots = new Map<string, string>();
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -134,6 +139,7 @@ export class DepositionPersistenceService implements OnDestroy {
     if (rawJSON !== null && schema !== null) {
       rawJSON['schema'] = schema;
       const entry = entryFromJSON(rawJSON);
+      this.seedSnapshots(entry);
       this.entrySubject.next(entry);
       this.checkLastCommit().then(foundCommit => {
         if (!foundCommit) {
@@ -209,6 +215,7 @@ export class DepositionPersistenceService implements OnDestroy {
       // is just a mirror; clearing the flag prevents the next broadcast from being misread as
       // a local-vs-remote conflict, and avoids two tabs autosaving the same pending change.
       refreshed.unsaved = false;
+      this.seedSnapshots(refreshed);
       this.entrySubject.next(refreshed);
     } catch {
       console.error('Failed to refresh entry after cross-tab update.');
@@ -362,6 +369,7 @@ export class DepositionPersistenceService implements OnDestroy {
           }
         }
 
+        this.seedSnapshots(loadedEntry);
         this.entrySubject.next(loadedEntry);
         Promise.all([
           this.storage.set('entry', JSON.stringify(loadedEntry)),
@@ -405,25 +413,67 @@ export class DepositionPersistenceService implements OnDestroy {
     }
   }
 
+  private seedSnapshots(entry: Entry): void {
+    this.savedSaveframeSnapshots = new Map();
+    for (const sf of entry.saveframes) {
+      // Touch uniqueId before serializing: the getter is self-healing and will
+      // add a `_Unique_ID` tag if the saveframe doesn't have one yet, so the
+      // serialized snapshot must be taken after.
+      const id = sf.uniqueId;
+      this.savedSaveframeSnapshots.set(id, JSON.stringify(sf));
+    }
+  }
+
+  private getDirtySaveframes(entry: Entry): { dirty: Saveframe[]; snapshots: Map<string, string> } {
+    const dirty: Saveframe[] = [];
+    const snapshots = new Map<string, string>();
+    for (const sf of entry.saveframes) {
+      const id = sf.uniqueId;
+      const current = JSON.stringify(sf);
+      if (this.savedSaveframeSnapshots.get(id) !== current) {
+        dirty.push(sf);
+        // Snapshot what we are *about* to send. If the user edits this saveframe
+        // again before the request completes, the snapshot won't match the post-edit
+        // value and the next save will correctly flag it dirty again.
+        snapshots.set(id, current);
+      }
+    }
+    return {dirty, snapshots};
+  }
+
   saveEntry(override = true): void {
 
     if (!this.cachedEntry) {
       return;
     }
     const entry = this.cachedEntry;
+    const {dirty, snapshots} = this.getDirtySaveframes(entry);
+
+    // Nothing to send — clear the unsaved flag and be done.
+    if (dirty.length === 0) {
+      if (entry.unsaved) {
+        entry.unsaved = false;
+        this.lastChangeTime = null;
+        this.storeEntry(false);
+      }
+      return;
+    }
 
     const saveOriginTime = this.lastChangeTime;
     this.saveInProgress = true;
 
-    const entryURL = `${environment.serverURL}/${entry.entryID}`;
-    const jsonObject: EntrySerialized = entry.toJSON();
+    const body: {commit: string[]; saveframes: Saveframe[]; force?: boolean} = {
+      commit: entry.commit,
+      saveframes: dirty,
+    };
     if (override) {
-      jsonObject.force = true;
+      body.force = true;
     }
-    this.http.put<SaveEntryResponse>(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
+    const url = `${environment.serverURL}/${entry.entryID}/saveframes`;
+
+    this.http.put<SaveEntryResponse>(url, JSON.stringify(body), this.JSONOptions).subscribe({
       next: response => {
         if ('error' in response) {
-
           entry.unsaved = true;
           const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
             disableClose: false
@@ -440,17 +490,20 @@ export class DepositionPersistenceService implements OnDestroy {
             if (result) {
               this.loadEntry(entry.entryID, true);
             } else if (result === false) {
-              this.saveEntry(true);
-            } else if (result === undefined) {
-              // Nothing needs to happen here, the next save will trigger the same message
-              // Preserving the clause just to make it clear there is an "escape" condition where the user
-              // doesn't select either option.
+              // User chose to overwrite the server. Fall back to the full-entry PUT
+              // so every saveframe (including ones the server has and we don't) is
+              // replaced wholesale.
+              this.saveEntryFull(true);
             }
             this.saveInProgress = false;
           });
 
         } else {
-          // Commit is successful!
+          // Commit is successful — update snapshots for the saveframes we just sent.
+          for (const [uniqueId, snapshot] of snapshots) {
+            this.savedSaveframeSnapshots.set(uniqueId, snapshot);
+          }
+
           const time_diff: number = this.lastChangeTime === null ? 0 : Math.round((getTime() - this.lastChangeTime) / 1000);
           if (entry.unsaved && time_diff > 30) {
             this.messagesService.sendMessage(new Message('Successfully saved pending changes! You are back online.'));
@@ -483,6 +536,54 @@ export class DepositionPersistenceService implements OnDestroy {
               'you have a working internet connection. If so, please contact support. If this message persists and you keep making changes, you may lose them!', MessageType.ErrorMessage));
           }
         }
+        this.saveInProgress = false;
+      }
+    });
+  }
+
+  /**
+   * Fallback path: full-entry PUT to the legacy endpoint. Used when the user
+   * elects to overwrite divergent server state — the incremental endpoint can
+   * only replace saveframes the client knows about, so a true "push everything"
+   * needs the full payload.
+   */
+  private saveEntryFull(override: boolean): void {
+    if (!this.cachedEntry) {
+      return;
+    }
+    const entry = this.cachedEntry;
+    const saveOriginTime = this.lastChangeTime;
+    this.saveInProgress = true;
+
+    const entryURL = `${environment.serverURL}/${entry.entryID}`;
+    const jsonObject: EntrySerialized = entry.toJSON();
+    if (override) {
+      jsonObject.force = true;
+    }
+    this.http.put<SaveEntryResponse>(entryURL, JSON.stringify(jsonObject), this.JSONOptions).subscribe({
+      next: response => {
+        if ('error' in response) {
+          // A force=true full PUT should not get a reload response, but if the server
+          // is in an unexpected state, surface the same conflict prompt rather than
+          // silently failing.
+          entry.unsaved = true;
+          this.saveInProgress = false;
+          this.messagesService.sendMessage(new Message(
+            'Server reported a conflict on full-entry save. Please reload the page.',
+            MessageType.ErrorMessage));
+        } else {
+          // After a full push, every saveframe on the server matches the client.
+          this.seedSnapshots(entry);
+          entry.addCommit(response.commit);
+          if (saveOriginTime === this.lastChangeTime) {
+            entry.unsaved = false;
+            this.lastChangeTime = null;
+          }
+          this.storeEntry(false);
+          this.saveInProgress = false;
+        }
+      },
+      error: () => {
         this.saveInProgress = false;
       }
     });

@@ -37,7 +37,7 @@ export class Tag {
       this.enums = this.schemaValues['enumerations'] ? new Set(this.schemaValues['enumerations']) : new Set();
       this.display = this.schemaValues['User full view'] ?? 'H';
     } else {
-      if (this.name !== '_Deleted') {
+      if (this.name !== '_Deleted' && this.name !== '_Unique_ID') {
         console.warn('Tag exists in entry but not in schema!', this.fullyQualifiedTagName);
       }
       this.schemaValues = {
