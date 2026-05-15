@@ -63,6 +63,8 @@ export class TagComponent implements OnInit {
       } else {
         this.height = 4;
       }
+    } else {
+      this.height = 4;
     }
   }
 
