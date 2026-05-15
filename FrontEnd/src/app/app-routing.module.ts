@@ -11,11 +11,12 @@ import {PendingValidationComponent} from './pending-validation/pending-validatio
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {SupportComponent} from './support/support-component';
 import {MyDepositionsComponent} from './my-depositions/my-depositions.component';
+import {confirmLoadEntryGuard} from './confirm-load-entry.guard';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
   {path: 'entry', component: EntryComponent},
-  {path: 'entry/load/:entry', component: LoadEntryComponent},
+  {path: 'entry/load/:entry', component: LoadEntryComponent, canActivate: [confirmLoadEntryGuard]},
   {path: 'entry/saveframe/:saveframe_category', component: SaveframeEditorComponent},
   {path: 'entry/review', component: ReviewComponent},
   {path: 'entry/restore', component: RestoreComponent},
