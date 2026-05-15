@@ -139,8 +139,23 @@ export class DepositionPersistenceService implements OnDestroy {
     if (rawJSON !== null && schema !== null) {
       rawJSON['schema'] = schema;
       const entry = entryFromJSON(rawJSON);
-      this.seedSnapshots(entry);
+      // Only seed snapshots if the cached entry is clean. The snapshot map is
+      // the in-memory record of "what the server has"; if the entry was unsaved
+      // when persisted, the IDB copy already diverges from the server, and
+      // seeding from it would make every saveframe look clean, causing the next
+      // save to early-return without pushing anything. Leaving the map empty
+      // marks every saveframe dirty so the post-refresh save sends them all.
+      if (!entry.unsaved) {
+        this.seedSnapshots(entry);
+      }
       this.entrySubject.next(entry);
+      // Arm lastChangeTime up front whenever we have local unsaved changes so the
+      // retry interval will keep trying even if the check-valid request fails
+      // (e.g. offline at refresh time) — the .then() chain below would otherwise
+      // never run, leaving lastChangeTime null and the retry timer disabled.
+      if (entry.unsaved) {
+        this.lastChangeTime = getTime();
+      }
       this.checkLastCommit().then(foundCommit => {
         if (!foundCommit) {
           if (entry.unsaved) {
@@ -156,7 +171,7 @@ export class DepositionPersistenceService implements OnDestroy {
             this.saveEntry();
           }
         }
-      });
+      }).catch(() => { /* retry timer will pick it up */ });
     } else {
       this.subscription$.add(this.router.events.subscribe({
         next: event => {
