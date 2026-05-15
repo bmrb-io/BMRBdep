@@ -77,8 +77,14 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   endSession(): void {
-    this.persistence.clearDeposition();
-    this.sessionEnd.emit(true);
+    this.persistence.confirmDiscardUnsaved('end this session').then(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+      this.persistence.clearDeposition();
+      this.sessionEnd.emit(true);
+      this.router.navigate(['/']).then();
+    });
   }
 
   logEntry(): void {
@@ -101,9 +107,15 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     if (!this.entry) {
       return;
     }
-    this.persistence.loadEntry(this.entry.entryID, true);
-    this.entry.refresh();
-    this.persistence.storeEntry(false);
+    const entry = this.entry;
+    this.persistence.confirmDiscardUnsaved('reload this entry from the server').then(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+      this.persistence.loadEntry(entry.entryID, true);
+      entry.refresh();
+      this.persistence.storeEntry(false);
+    });
   }
 
   scrollSideNav(): void {

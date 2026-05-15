@@ -10,7 +10,7 @@ import {MatToolbar, MatToolbarRow} from '@angular/material/toolbar';
 import {AsyncPipe, NgClass} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatIcon} from '@angular/material/icon';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import {Router, RouterLink, RouterOutlet} from '@angular/router';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {TreeViewComponent} from './treeview/tree-view.component';
 
@@ -23,6 +23,7 @@ import {TreeViewComponent} from './treeview/tree-view.component';
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private persistence = inject(DepositionPersistenceService);
   private sidenavService = inject(SidenavService);
+  private router = inject(Router);
   loader = inject(LoadingBarService);
 
 
@@ -55,6 +56,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   clearEntry(): void {
-    this.persistence.clearDeposition();
+    this.persistence.confirmDiscardUnsaved('end this session').then(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+      this.persistence.clearDeposition();
+      this.router.navigate(['/']).then();
+    });
   }
 }

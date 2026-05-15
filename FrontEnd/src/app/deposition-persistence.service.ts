@@ -258,6 +258,29 @@ export class DepositionPersistenceService implements OnDestroy {
     this.entrySubject.next(null);
   }
 
+  /**
+   * Resolves true if the caller is safe to proceed with a destructive action
+   * (end session, load a different entry, etc.). If there is an active entry
+   * with unsaved local changes, prompts the user to confirm first.
+   *
+   * `actionDescription` is interpolated into the prompt; phrase it so it works
+   * after "if you …" — e.g. "end this session", "load a different deposition".
+   */
+  confirmDiscardUnsaved(actionDescription: string): Promise<boolean> {
+    if (!this.cachedEntry?.unsaved) {
+      return Promise.resolve(true);
+    }
+    return new Promise<boolean>(resolve => {
+      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
+      dialogRef.componentInstance.confirmMessage =
+        'You have local changes that have not yet been saved to the server (perhaps because you are offline or a recent ' +
+        `save failed). If you ${actionDescription} now, those changes will be lost. Continue anyway?`;
+      dialogRef.componentInstance.proceedMessage = 'Yes, discard changes';
+      dialogRef.componentInstance.cancelMessage = 'Cancel';
+      dialogRef.afterClosed().subscribe({next: result => resolve(result === true)});
+    });
+  }
+
   uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
 
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
