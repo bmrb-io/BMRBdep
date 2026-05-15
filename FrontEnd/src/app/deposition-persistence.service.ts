@@ -446,6 +446,14 @@ export class DepositionPersistenceService implements OnDestroy {
         this.storage.set('entryID', entryID),
       ]).then(() => this.postBroadcast({type: 'mutated', entryID}))
         .catch(err => console.error('Failed to persist entry to IndexedDB', err));
+      // Kick off a save immediately on user-initiated changes so the server picks
+      // them up on blur rather than after the 5s retry tick. The saveInProgress
+      // guard coalesces rapid edits; the post-save check in saveEntry catches
+      // anything that landed during the in-flight request, and the interval
+      // timer remains the backstop for offline / failed saves.
+      if (dirty && !this.saveInProgress) {
+        this.saveEntry();
+      }
     } else {
       console.error('Asked to storeEntry, but no entry cached!');
     }
@@ -560,6 +568,12 @@ export class DepositionPersistenceService implements OnDestroy {
           }
           this.storeEntry(false);
           this.saveInProgress = false;
+          // A change landed while the request was in flight (lastChangeTime
+          // advanced past saveOriginTime). Fire another save now rather than
+          // waiting for the 5s retry tick.
+          if (entry.unsaved) {
+            this.saveEntry();
+          }
         }
       },
       error: () => {
