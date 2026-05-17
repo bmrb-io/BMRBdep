@@ -19,6 +19,10 @@ mat-sidenav-container {
   height: calc(100% - 64px);
 }
 
+mat-sidenav {
+  max-width: 33vw;
+}
+
 .valign-center {
   display: inline-flex;
   vertical-align: middle;

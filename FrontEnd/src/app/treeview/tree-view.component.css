@@ -11,3 +11,14 @@ mat-list-item {
 mat-list-item mat-icon {
   margin-right: 8px;
 }
+
+.nav-card {
+  margin: 16px;
+}
+
+.nav-card mat-card-title {
+  padding: 8px 0;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
