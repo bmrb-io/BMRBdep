@@ -22,10 +22,10 @@ active deposition." (click)="lifecycle.cloneDeposition()">
               Clone deposition</a>
           </div>
           <div>
-            <button mat-raised-button color="primary" (click)="persistence.clearDeposition()"
-                    matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">
-              End your session for this deposition
+            <button mat-raised-button color="primary" (click)="closeActiveDeposition()"
+                    matTooltip="Close this deposition in this tab. You can reopen it later by following the link sent
+to your e-mail when you created it, or from My Depositions.">
+              Close this deposition
             </button>
           </div>
         </div>

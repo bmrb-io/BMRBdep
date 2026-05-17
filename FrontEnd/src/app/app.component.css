@@ -29,3 +29,84 @@ mat-sidenav {
   align-items: center;
   cursor: pointer;
 }
+
+.deposition-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 8px;
+  height: 36px;
+  min-height: 36px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.dep-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px 0 0;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(0, 0, 0, 0.78);
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 240px;
+  white-space: nowrap;
+}
+
+.dep-chip.active {
+  background: #ffeb3b;
+  border-color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.92);
+}
+
+.dep-chip-body {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 16px 0 0 16px;
+}
+
+.dep-chip.active .dep-chip-body {
+  font-weight: 500;
+}
+
+.dep-chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.dep-chip-dirty {
+  color: #d32f2f;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.dep-chip-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  padding: 0;
+}
+
+.dep-chip-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.85);
+}

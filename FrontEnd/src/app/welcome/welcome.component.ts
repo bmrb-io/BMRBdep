@@ -113,13 +113,11 @@ export class WelcomeComponent implements OnInit, OnDestroy {
       fileElement = this.fileUploadElement.nativeElement.files[0];
     }
 
-    this.persistence.clearDeposition();
     this.lifecycle.newDeposition(values.authorEmail, values.depositionNickname, values.depositionType, values.authorORCID,
       this.skipEmailValidation, fileElement, bootstrapID).then(
       deposition_id => {
         this.router.navigate(['/entry', 'load', deposition_id]).then(() => {
           this.sidenavService.open().then();
-          location.reload();
         });
       }, error => {
         if (error === 'Invalid e-mail') {
@@ -132,5 +130,14 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     if (this.resumeEmail.valid) {
       this.auth.sendEmailAccessToken(this.resumeEmail.value).then();
     }
+  }
+
+  closeActiveDeposition() {
+    const entryID = this.persistence.getEntryID();
+    if (!entryID) return;
+    this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
+      if (!confirmed) return;
+      this.persistence.closeDeposition(entryID).then();
+    });
   }
 }

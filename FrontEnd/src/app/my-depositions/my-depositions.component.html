@@ -10,27 +10,28 @@
           <p>Loading your depositions...</p>
         </div>
       }
-      @if (!loading && depositions.length === 0) {
+      @if (showEmptyState) {
         <div class="no-depositions">
-          <p>No depositions found for that e-mail address.</p>
+          <p>{{ emptyStateMessage }}</p>
           <p>You can create a new deposition by clicking <a routerLink="/">here</a>.</p>
         </div>
       }
       @if (!loading && depositions.length > 0) {
-        <p>Click on a deposition to load it. Your current deposition is shown with a checkmark.</p>
+        <p>Click on a deposition to open it. The active deposition is shown with a checkmark; depositions already open in this tab show a folder-open icon.</p>
         <mat-nav-list>
           @for (deposition of depositions; track deposition.deposition_id) {
             <p>
               <a mat-raised-button
-                 [disabled]="isCurrentDeposition(deposition.deposition_id)"
-                 [ngClass]="{'current-deposition': isCurrentDeposition(deposition.deposition_id)}"
+                 [disabled]="isActiveDeposition(deposition.deposition_id)"
+                 [ngClass]="{'current-deposition': isActiveDeposition(deposition.deposition_id)}"
                  (click)="loadDeposition(deposition)"
                  color="accent">
                 <mat-icon>
-                  @if (isCurrentDeposition(deposition.deposition_id)) {
+                  @if (isActiveDeposition(deposition.deposition_id)) {
                     check_circle
-                  }
-                  @if (!isCurrentDeposition(deposition.deposition_id)) {
+                  } @else if (isOpenDeposition(deposition.deposition_id)) {
+                    folder_open
+                  } @else {
                     folder
                   }
                 </mat-icon>

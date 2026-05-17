@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DepositionPersistenceService} from './deposition-persistence.service';
+import {DepositionPersistenceService, OpenDepositionView} from './deposition-persistence.service';
 import {versions} from 'environments/versions';
 import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
@@ -29,7 +29,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   sidenav_open: boolean;
   entry: Entry | null = null;
-  subscription$!: Subscription;
+  openDepositions: OpenDepositionView[] = [];
+  subscription$ = new Subscription();
   @ViewChild('sidenav') public sidenav!: MatSidenav;
 
   constructor() {
@@ -40,9 +41,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     console.info('Running git commit: ' + versions.branch + ':' + versions.revision +
       '. View commit on GitHub: https://github.com/bmrb-io/BMRBDep/commit/' + versions.revision);
 
-    this.subscription$ = this.persistence.entrySubject.subscribe({
+    this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
-    });
+    }));
+    this.subscription$.add(this.persistence.openDepositionsSubject.subscribe({
+      next: views => this.openDepositions = views
+    }));
   }
 
   ngAfterViewInit(): void {
@@ -50,18 +54,38 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    if (this.subscription$) {
-      this.subscription$.unsubscribe();
-    }
+    this.subscription$.unsubscribe();
   }
 
   clearEntry(): void {
-    this.persistence.confirmDiscardUnsaved('end this session').then(confirmed => {
-      if (!confirmed) {
-        return;
+    this.persistence.signOut().then(done => {
+      if (done) {
+        this.router.navigate(['/']).then();
       }
-      this.persistence.clearDeposition();
-      this.router.navigate(['/']).then();
     });
+  }
+
+  activateDeposition(entryID: string): void {
+    if (this.entry?.entryID === entryID) return;
+    this.persistence.setActive(entryID);
+    if (!this.router.url.startsWith('/entry')) {
+      this.router.navigate(['/entry']).then();
+    }
+  }
+
+  closeChip(event: Event, entryID: string): void {
+    event.stopPropagation();
+    this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
+      if (!confirmed) return;
+      this.persistence.closeDeposition(entryID).then(() => {
+        if (this.persistence.getOpenDepositionRecords().length === 0) {
+          this.router.navigate(['/']).then();
+        }
+      });
+    });
+  }
+
+  trackChip(_index: number, view: OpenDepositionView): string {
+    return view.entryID;
   }
 }

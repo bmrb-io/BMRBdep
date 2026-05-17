@@ -1,7 +1,8 @@
-import {Observable, ReplaySubject, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, ReplaySubject, Subscription} from 'rxjs';
 import {Entry, entryFromJSON, EntrySerialized} from './nmrstar/entry';
 import {Saveframe} from './nmrstar/saveframe';
-import {EntryJSON} from './nmrstar/schemaTypes';
+import {EntryJSON, SchemaJSON} from './nmrstar/schemaTypes';
+import {Schema} from './nmrstar/schema';
 import {inject, Injectable, OnDestroy} from '@angular/core';
 import {HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpRequest} from '@angular/common/http';
 import {environment} from '../environments/environment';
@@ -10,15 +11,26 @@ import {NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {StorageService} from './storage.service';
+import {OpenDepositionRecord, StorageService} from './storage.service';
+
+/**
+ * Per-tab view of an open deposition, used to render the toolbar tab strip
+ * and similar UI. Mirrors {@link OpenDepositionRecord} but adds `unsaved`,
+ * which is intentionally per-tab and not persisted to IDB (two tabs can
+ * disagree about whether they have local unsaved edits).
+ */
+export interface OpenDepositionView extends OpenDepositionRecord {
+  unsaved: boolean;
+}
 import {ApiErrorHandler} from './api-error-handler.service';
 
 interface BroadcastMessage {
-  type: 'mutated' | 'loaded' | 'cleared';
-  entryID?: string;
+  type: 'mutated' | 'loaded' | 'closed';
+  entryID: string;
 }
 
 const BROADCAST_CHANNEL = 'bmrbdep';
+const ACTIVE_ENTRY_SESSION_KEY = 'bmrbdep.activeEntryID';
 
 export interface FileUploadResponse {
   commit: string;
@@ -41,8 +53,31 @@ export interface SaveEntryReloadResponse {
 
 export type SaveEntryResponse = CommitResponse | SaveEntryReloadResponse;
 
+interface DepositionState {
+  entry: Entry;
+  // Per-saveframe last-saved JSON snapshots, keyed by Saveframe.uniqueId.
+  // Used to compute which saveframes are dirty so incremental save only sends
+  // those. Repopulated on load, mutated only on successful save responses.
+  savedSaveframeSnapshots: Map<string, string>;
+  lastChangeTime: number | null;
+  saveInProgress: boolean;
+  // True for non-active depositions hydrated from storage; cleared when the
+  // deposition is made active and a fresh commit check fires.
+  needsCommitCheck: boolean;
+}
+
 function getTime(): number {
   return (new Date()).getTime();
+}
+
+function entryToRecord(entry: Entry, schemaVersion: string): OpenDepositionRecord {
+  return {
+    entryID: entry.entryID,
+    schemaVersion,
+    nickname: entry.depositionNickname,
+    deposited: entry.deposited,
+    bmrbnum: entry.bmrbnum,
+  };
 }
 
 @Injectable({providedIn: 'root'})
@@ -55,19 +90,37 @@ export class DepositionPersistenceService implements OnDestroy {
   private storage = inject(StorageService);
   private errorHandler = inject(ApiErrorHandler);
 
+  // Emits the active deposition's Entry (or null when none is active). The
+  // ~15 component subscribers continue to consume "the active deposition"
+  // via this subject — implicit-active routing.
   public entrySubject: ReplaySubject<Entry | null>;
-  private cachedEntry: Entry | null = null;
-  private subscription$!: Subscription;
+
+  // Per-tab open set + active pointer.
+  private openDepositions = new Map<string, DepositionState>();
+  private activeEntryID: string | null = null;
+
+  // Drives the toolbar tab strip and other open-set consumers.
+  public openDepositionsSubject = new BehaviorSubject<OpenDepositionView[]>([]);
+
+  // Resolves once the initial IDB hydration pass is complete. Consumers that
+  // need to distinguish "no open depositions" from "haven't checked yet" (e.g.
+  // the My Depositions empty-state) should await this before drawing decisions
+  // off `openDepositionsSubject.value`.
+  public hydrationComplete: Promise<void>;
+  private resolveHydration!: () => void;
+
+  // Deduplicated per-version schema cache. Schemas are immutable per
+  // deposition once issued by the server, so we can safely reuse a Schema
+  // instance across every open deposition on the same version.
+  private schemaCache = new Map<string, Schema>();
+
+  private subscription$ = new Subscription();
   private saveTimer!: ReturnType<typeof setInterval>;
-  private lastChangeTime: number | null = null;
   private firstSaveMessageSent: boolean = false;
-  public saveInProgress: boolean = false;
   private broadcast!: BroadcastChannel;
-  private conflictDialogOpen = false;
-  // Per-saveframe last-saved JSON snapshots, keyed by Saveframe.uniqueId.
-  // Used to compute which saveframes are dirty so incremental save only sends
-  // those. Repopulated on load, mutated only on successful save responses.
-  private savedSaveframeSnapshots = new Map<string, string>();
+  // Suppress overlapping conflict dialogs per deposition rather than globally —
+  // a flurry of failed background saves shouldn't spawn N dialogs for one entry.
+  private conflictDialogOpen = new Set<string>();
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -77,18 +130,7 @@ export class DepositionPersistenceService implements OnDestroy {
 
   constructor() {
     this.entrySubject = new ReplaySubject<Entry | null>();
-    this.firstSaveMessageSent = false;
-
-    this.subscription$ = this.entrySubject.subscribe({
-      next: entry => {
-        this.cachedEntry = entry;
-        if (entry) {
-          this.titleService.setTitle(`BMRBdep: ${entry.depositionNickname}`);
-        } else {
-          this.titleService.setTitle('BMRBdep');
-        }
-      }
-    });
+    this.hydrationComplete = new Promise<void>(resolve => { this.resolveHydration = resolve; });
 
     this.broadcast = new BroadcastChannel(BROADCAST_CHANNEL);
     this.broadcast.onmessage = ev => this.handleBroadcast(ev.data as BroadcastMessage);
@@ -98,12 +140,12 @@ export class DepositionPersistenceService implements OnDestroy {
     // Used to open verification links in same tab
     window.name = 'BMRBdep';
 
-    this.lastChangeTime = null;
-    this.saveInProgress = false;
     this.saveTimer = setInterval(() => {
-      // If there is an active entry, that is old enough to need saving
-      if (this.cachedEntry && this.cachedEntry.unsaved && this.lastChangeTime !== null && !this.saveInProgress) {
-        this.saveEntry();
+      // Walk every open deposition and save the ones with armed unsaved edits.
+      for (const [entryID, state] of this.openDepositions) {
+        if (state.entry.unsaved && state.lastChangeTime !== null && !state.saveInProgress) {
+          this.saveEntry(true, entryID);
+        }
       }
     }, 5000);
   }
@@ -115,174 +157,132 @@ export class DepositionPersistenceService implements OnDestroy {
   }
 
   get currentEntry(): Entry | null {
-    return this.cachedEntry;
+    return this.activeEntryID ? this.openDepositions.get(this.activeEntryID)?.entry ?? null : null;
   }
 
   getEntryID(): string | null {
-    if (this.cachedEntry === null) {
-      return null;
-    }
-    return this.cachedEntry.entryID;
+    return this.activeEntryID;
   }
 
-  private async hydrateFromStorage(): Promise<void> {
-    let rawJSON, schema;
-    try {
-      const [rawEntry, rawSchema] = await Promise.all([this.storage.get('entry'), this.storage.get('schema')]);
-      rawJSON = rawEntry ? JSON.parse(rawEntry) : null;
-      schema = rawSchema ? JSON.parse(rawSchema) : null;
-    } catch {
-      console.error('Invalid cached entry!');
-      rawJSON = null;
-      schema = null;
+  getOpenDepositionRecords(): OpenDepositionView[] {
+    return this.openDepositionsSubject.value;
+  }
+
+  anyUnsaved(): boolean {
+    for (const state of this.openDepositions.values()) {
+      if (state.entry.unsaved) return true;
     }
-    if (rawJSON !== null && schema !== null) {
-      rawJSON['schema'] = schema;
-      const entry = entryFromJSON(rawJSON);
-      // Only seed snapshots if the cached entry is clean. The snapshot map is
-      // the in-memory record of "what the server has"; if the entry was unsaved
-      // when persisted, the IDB copy already diverges from the server, and
-      // seeding from it would make every saveframe look clean, causing the next
-      // save to early-return without pushing anything. Leaving the map empty
-      // marks every saveframe dirty so the post-refresh save sends them all.
-      if (!entry.unsaved) {
-        this.seedSnapshots(entry);
-      }
-      this.entrySubject.next(entry);
-      // Arm lastChangeTime up front whenever we have local unsaved changes so the
-      // retry interval will keep trying even if the check-valid request fails
-      // (e.g. offline at refresh time) — the .then() chain below would otherwise
-      // never run, leaving lastChangeTime null and the retry timer disabled.
-      if (entry.unsaved) {
-        this.lastChangeTime = getTime();
-      }
-      this.checkLastCommit().then(foundCommit => {
-        if (!foundCommit) {
-          if (entry.unsaved) {
-            this.messagesService.sendMessage(new Message('You have unsaved local changes (perhaps from working offline) but ' +
-              'we must reload your entry due to a change to your deposition that occurred on the server. Unfortunately this means ' +
-              'that your most recent changes may be lost. Please review your entry in entirety before depositing to make sure that it is ' +
-              'up to date.', MessageType.ErrorMessage));
+    return false;
+  }
+
+  isOpen(entryID: string): boolean {
+    return this.openDepositions.has(entryID);
+  }
+
+  private getState(entryID: string | null): DepositionState | null {
+    if (!entryID) return null;
+    return this.openDepositions.get(entryID) ?? null;
+  }
+
+  /**
+   * Flip the active deposition slot. Persists to sessionStorage so a tab
+   * refresh restores the same active entry, emits on `entrySubject`, and
+   * updates the document title.
+   *
+   * If the target was hydrated from storage and never had its commit checked,
+   * fire the check now (deferred from hydrate to avoid prompt storms when
+   * multiple depositions are restored).
+   */
+  setActive(entryID: string | null): void {
+    if (entryID && !this.openDepositions.has(entryID)) {
+      console.error(`setActive called with unknown entryID ${entryID}`);
+      return;
+    }
+    this.activeEntryID = entryID;
+    if (entryID) {
+      try {
+        sessionStorage.setItem(ACTIVE_ENTRY_SESSION_KEY, entryID);
+      } catch { /* sessionStorage can be unavailable in private windows */ }
+      const state = this.openDepositions.get(entryID)!;
+      this.titleService.setTitle(`BMRBdep: ${state.entry.depositionNickname}`);
+      this.entrySubject.next(state.entry);
+      if (state.needsCommitCheck) {
+        state.needsCommitCheck = false;
+        this.checkLastCommit(entryID).then(foundCommit => {
+          if (!foundCommit) {
+            this.refetchEntry(entryID, true);
           }
-          this.loadEntry(entry.entryID, true);
-        } else {
-          // The stored entry is unsaved, so save it now!
-          if (entry.unsaved) {
-            this.saveEntry();
-          }
-        }
-      }).catch(() => { /* retry timer will pick it up */ });
+        }).catch(() => { /* retry timer / next activation will pick it up */ });
+      }
     } else {
-      this.subscription$.add(this.router.events.subscribe({
-        next: event => {
-          if (event instanceof NavigationEnd) {
-            if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && this.router.url.indexOf('/my-depositions') < 0 && !this.cachedEntry) {
-              this.subscription$.unsubscribe();
-              this.router.navigate(['/']).then();
-            }
-          }
-        }
-      }));
+      try {
+        sessionStorage.removeItem(ACTIVE_ENTRY_SESSION_KEY);
+      } catch { /* ignore */ }
+      this.titleService.setTitle('BMRBdep');
+      this.entrySubject.next(null);
     }
   }
 
-  private handleBroadcast(msg: BroadcastMessage): void {
-    if (!msg?.type) {
-      return;
-    }
-    if (msg.type === 'cleared') {
-      if (this.cachedEntry) {
-        this.entrySubject.next(null);
-      }
-      return;
-    }
-    if (msg.type === 'loaded' && msg.entryID) {
-      // Another tab loaded a deposition — sync this tab so the two never diverge.
-      if (!this.cachedEntry || this.cachedEntry.entryID !== msg.entryID) {
-        this.loadEntry(msg.entryID, true);
-      }
-      return;
-    }
-    if (msg.type === 'mutated' && msg.entryID) {
-      this.handleRemoteMutation(msg.entryID);
-    }
-  }
-
-  private async handleRemoteMutation(entryID: string): Promise<void> {
-    if (!this.cachedEntry || this.cachedEntry.entryID !== entryID) {
-      return;
-    }
-    if (this.cachedEntry.unsaved) {
-      // Both tabs have diverging edits — surface the conflict instead of silently dropping one side.
-      this.showCrossTabConflict();
-      return;
-    }
+  /**
+   * Close a deposition: drops it from this tab's open set, removes its IDB
+   * record, broadcasts the close so peer tabs drop it too, and (if it was
+   * active) promotes another open deposition to active.
+   */
+  async closeDeposition(entryID: string): Promise<void> {
+    const state = this.openDepositions.get(entryID);
+    if (!state) return;
+    this.openDepositions.delete(entryID);
     try {
-      const [rawEntry, rawSchema] = await Promise.all([this.storage.get('entry'), this.storage.get('schema')]);
-      if (!rawEntry || !rawSchema) {
-        return;
-      }
-      const parsed = JSON.parse(rawEntry);
-      parsed['schema'] = JSON.parse(rawSchema);
-      const refreshed = entryFromJSON(parsed);
-      // The IDB record may have `unsaved: true` because the *other* tab is mid-edit. This tab
-      // is just a mirror; clearing the flag prevents the next broadcast from being misread as
-      // a local-vs-remote conflict, and avoids two tabs autosaving the same pending change.
-      refreshed.unsaved = false;
-      this.seedSnapshots(refreshed);
-      this.entrySubject.next(refreshed);
-    } catch {
-      console.error('Failed to refresh entry after cross-tab update.');
-    }
-  }
-
-  private showCrossTabConflict(): void {
-    if (this.conflictDialogOpen) {
-      return;
-    }
-    this.conflictDialogOpen = true;
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
-    dialogRef.componentInstance.confirmMessage = 'This deposition was just modified in another tab. Load those changes (losing ' +
-      'unsaved edits made in this tab) or push your changes from this tab (overwriting what the other tab wrote)?';
-    dialogRef.componentInstance.proceedMessage = 'Load changes from other tab';
-    dialogRef.componentInstance.cancelMessage = 'Push my changes';
-    dialogRef.afterClosed().subscribe(result => {
-      this.conflictDialogOpen = false;
-      if (!this.cachedEntry) {
-        return;
-      }
-      if (result) {
-        this.loadEntry(this.cachedEntry.entryID, true);
-      } else if (result === false) {
-        this.saveEntry(true);
-      }
-    });
-  }
-
-  private postBroadcast(msg: BroadcastMessage): void {
-    try {
-      this.broadcast.postMessage(msg);
+      await this.storage.deleteEntry(entryID);
+      const list = await this.storage.getOpenDepositions();
+      const next = list.filter(r => r.entryID !== entryID);
+      await this.storage.setOpenDepositions(next);
     } catch (e) {
-      console.error('BroadcastChannel post failed', e);
+      console.error('Failed to remove deposition from storage', e);
+    }
+    this.postBroadcast({type: 'closed', entryID});
+    this.emitOpenDepositions();
+    if (this.activeEntryID === entryID) {
+      const fallback = this.openDepositions.keys().next().value ?? null;
+      this.setActive(fallback);
     }
   }
 
-  clearDeposition(): void {
-    this.storage.clearAll().then(() => this.postBroadcast({type: 'cleared'}));
-    this.entrySubject.next(null);
+  /**
+   * Closes every open deposition. If any have unsaved local changes, prompts
+   * once with an aggregate message; the user can cancel to abort the whole
+   * operation. Returns true if everything closed, false if cancelled.
+   */
+  async signOut(): Promise<boolean> {
+    const openIDs = Array.from(this.openDepositions.keys());
+    if (openIDs.length === 0) return true;
+    if (this.anyUnsaved()) {
+      const confirmed = await new Promise<boolean>(resolve => {
+        const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
+        dialogRef.componentInstance.confirmMessage =
+          'You have local changes in one or more open depositions that have not yet been saved to the server. ' +
+          'If you sign out now, those changes will be lost. Continue anyway?';
+        dialogRef.componentInstance.proceedMessage = 'Yes, discard changes';
+        dialogRef.componentInstance.cancelMessage = 'Cancel';
+        dialogRef.afterClosed().subscribe({next: result => resolve(result === true)});
+      });
+      if (!confirmed) return false;
+    }
+    for (const id of openIDs) {
+      await this.closeDeposition(id);
+    }
+    return true;
   }
 
   /**
    * Resolves true if the caller is safe to proceed with a destructive action
-   * (end session, load a different entry, etc.). If there is an active entry
-   * with unsaved local changes, prompts the user to confirm first.
-   *
-   * `actionDescription` is interpolated into the prompt; phrase it so it works
-   * after "if you …" — e.g. "end this session", "load a different deposition".
+   * (close a deposition, sign out, etc.). Prompts when the deposition has
+   * unsaved local changes. `actionDescription` is interpolated after "if you …"
+   * — e.g. "close this deposition", "sign out".
    */
-  confirmDiscardUnsaved(actionDescription: string): Promise<boolean> {
-    if (!this.cachedEntry?.unsaved) {
+  confirmDiscardUnsaved(actionDescription: string, entryID: string | null = this.activeEntryID): Promise<boolean> {
+    const state = this.getState(entryID);
+    if (!state?.entry.unsaved) {
       return Promise.resolve(true);
     }
     return new Promise<boolean>(resolve => {
@@ -297,7 +297,6 @@ export class DepositionPersistenceService implements OnDestroy {
   }
 
   uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
-
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
     const formData = new FormData();
@@ -313,18 +312,20 @@ export class DepositionPersistenceService implements OnDestroy {
   }
 
   deleteFile(fileName: string, verifyDeleted = false): void {
-    const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file/${fileName}`;
+    const entryID = this.activeEntryID;
+    const state = this.getState(entryID);
+    if (!state || !entryID) return;
+    const apiEndPoint = `${environment.serverURL}/${entryID}/file/${fileName}`;
     this.http.delete<CommitResponse>(apiEndPoint).subscribe({
       next: response => {
         this.messagesService.sendMessage(new Message('File \'' + fileName + '\' deleted.'));
-        if (!this.cachedEntry) {
-          return;
-        }
-        this.cachedEntry.dataStore.deleteFile(fileName);
-        this.cachedEntry.updateUploadedData();
-        this.cachedEntry.refresh();
-        this.cachedEntry.addCommit(response.commit);
-        this.storeEntry(true);
+        const current = this.getState(entryID);
+        if (!current) return;
+        current.entry.dataStore.deleteFile(fileName);
+        current.entry.updateUploadedData();
+        current.entry.refresh();
+        current.entry.addCommit(response.commit);
+        this.storeEntry(true, entryID);
       },
       error: () => {
         // verifyDeleted will be set if they cancel an upload
@@ -333,24 +334,24 @@ export class DepositionPersistenceService implements OnDestroy {
             MessageType.ErrorMessage, 15000));
         } else {
           this.messagesService.clearMessage();
-          if (!this.cachedEntry) {
-            return;
-          }
-          this.cachedEntry.dataStore.deleteFile(fileName);
-          this.cachedEntry.updateUploadedData();
-          this.cachedEntry.refresh();
+          const current = this.getState(entryID);
+          if (!current) return;
+          current.entry.dataStore.deleteFile(fileName);
+          current.entry.updateUploadedData();
+          current.entry.refresh();
         }
       }
     });
   }
 
-  checkValidatedEmail(): Promise<boolean> {
+  checkValidatedEmail(entryID: string | null = this.activeEntryID): Promise<boolean> {
     return new Promise(((resolve, reject) => {
-      if (!this.cachedEntry) {
+      const state = this.getState(entryID);
+      if (!state || !entryID) {
         reject(new Error('No active entry.'));
         return;
       }
-      const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
+      const entryURL = `${environment.serverURL}/${entryID}/check-valid`;
       // This fake header is just there for sake of https://github.com/aitboudad/ngx-loading-bar#http-client
       this.http.get<ValidationStatusResponse>(entryURL, {headers: {ignoreLoadingBar: ''}}).subscribe({
         next: response => {
@@ -364,16 +365,17 @@ export class DepositionPersistenceService implements OnDestroy {
     }));
   }
 
-  checkLastCommit(): Promise<boolean> {
+  checkLastCommit(entryID: string | null = this.activeEntryID): Promise<boolean> {
     return new Promise(((resolve, reject) => {
-      if (!this.cachedEntry) {
+      const state = this.getState(entryID);
+      if (!state || !entryID) {
         reject(new Error('No active entry.'));
         return;
       }
-      const entryURL = `${environment.serverURL}/${this.cachedEntry.entryID}/check-valid`;
+      const entryURL = `${environment.serverURL}/${entryID}/check-valid`;
       this.http.get<ValidationStatusResponse>(entryURL).subscribe({
         next: response => {
-          resolve(this.cachedEntry!.checkCommit(response.commit));
+          resolve(state.entry.checkCommit(response.commit));
         },
         error: error => {
           this.errorHandler.handle(error);
@@ -383,7 +385,30 @@ export class DepositionPersistenceService implements OnDestroy {
     }));
   }
 
+  /**
+   * Refetch an entry from the server, replacing the in-memory copy if any.
+   * Use this when the caller explicitly wants fresh server state (e.g. the
+   * tree-view "Refresh" button, or conflict-resolution after a divergent save).
+   * `loadEntry` short-circuits when the entry is already open, so it can't
+   * stand in for a forced refetch.
+   */
+  refetchEntry(entryID: string, skipMessage = false): void {
+    this.openDepositions.delete(entryID);
+    this.loadEntry(entryID, skipMessage);
+  }
+
+  /**
+   * Load a deposition. If it is already open in this tab, just make it
+   * active. Otherwise fetch from the server, dedup the schema, add to the
+   * open set, persist, and make active. Broadcasts to peer tabs so any
+   * tab that already has this entry open can refresh in place.
+   */
   loadEntry(entryID: string, skipMessage = false): void {
+    if (this.openDepositions.has(entryID)) {
+      this.setActive(entryID);
+      return;
+    }
+
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
@@ -393,7 +418,11 @@ export class DepositionPersistenceService implements OnDestroy {
         if (!skipMessage) {
           this.messagesService.clearMessage();
         }
+        const schemaJson = jsonData.schema;
+        const schema = this.resolveSchema(schemaJson.version, schemaJson);
+        // entryFromJSON expects schema bundled; reuse the cached instance.
         const loadedEntry: Entry = entryFromJSON(jsonData);
+        loadedEntry.schema = schema;
 
         // Verify that the NMR-STAR matches the uploaded files
         let filesOutOfSync = false;
@@ -407,106 +436,114 @@ export class DepositionPersistenceService implements OnDestroy {
           }
         }
 
-        this.seedSnapshots(loadedEntry);
-        this.entrySubject.next(loadedEntry);
-        Promise.all([
-          this.storage.set('entry', JSON.stringify(loadedEntry)),
-          this.storage.set('entryID', loadedEntry.entryID),
-          this.storage.set('schema', JSON.stringify(loadedEntry.schema)),
-        ]).then(() => {
-          this.postBroadcast({type: 'loaded', entryID: loadedEntry.entryID});
+        const state: DepositionState = {
+          entry: loadedEntry,
+          savedSaveframeSnapshots: new Map(),
+          lastChangeTime: null,
+          saveInProgress: false,
+          needsCommitCheck: false,
+        };
+        this.seedSnapshots(state);
+        this.openDepositions.set(entryID, state);
+
+        this.persistEntry(state, schemaJson).then(() => {
+          this.postBroadcast({type: 'loaded', entryID});
         }).catch(err => {
           console.error('Failed to persist loaded entry to IndexedDB', err);
         });
+
+        this.emitOpenDepositions();
+        this.setActive(entryID);
 
         // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
         if (filesOutOfSync) {
           console.warn('Files detected as uploaded which are not present in NMR-STAR. Triggering re-save.');
           loadedEntry.updateUploadedData();
           loadedEntry.refresh();
-          this.saveEntry();
+          this.saveEntry(true, entryID);
         }
       },
       error: error => this.errorHandler.handle(error)
     });
   }
 
-  storeEntry(dirty = false): void {
+  /**
+   * Persist an entry and (if not already cached) its schema to IDB, plus
+   * refresh the openDepositions index. Read-modify-write on the index is
+   * idempotent by entryID so concurrent loads in two tabs converge.
+   */
+  private async persistEntry(state: DepositionState, schemaJson: SchemaJSON | null): Promise<void> {
+    const entry = state.entry;
+    const entrySerialized = JSON.stringify(entry);
+    const entryJson = JSON.parse(entrySerialized);
+    delete entryJson.schema;
+    const version = entry.schema.version;
 
-    if (this.cachedEntry) {
-      // Saves an entry locally, and mark it as dirty first if need be
-      if (dirty) {
-        this.cachedEntry.unsaved = dirty;
-        this.lastChangeTime = getTime();
-      }
-      const entryID = this.cachedEntry.entryID;
-      const serialized = JSON.stringify(this.cachedEntry);
-      Promise.all([
-        this.storage.set('entry', serialized),
-        this.storage.set('entryID', entryID),
-      ]).then(() => this.postBroadcast({type: 'mutated', entryID}))
-        .catch(err => console.error('Failed to persist entry to IndexedDB', err));
-      // Kick off a save immediately on user-initiated changes so the server picks
-      // them up on blur rather than after the 5s retry tick. The saveInProgress
-      // guard coalesces rapid edits; the post-save check in saveEntry catches
-      // anything that landed during the in-flight request, and the interval
-      // timer remains the backstop for offline / failed saves.
-      if (dirty && !this.saveInProgress) {
-        this.saveEntry();
-      }
-    } else {
+    const tasks: Promise<unknown>[] = [
+      this.storage.setEntry(entry.entryID, JSON.stringify(entryJson)),
+    ];
+    if (schemaJson && !(await this.storage.hasSchema(version))) {
+      tasks.push(this.storage.setSchema(version, JSON.stringify(schemaJson)));
+    }
+    await Promise.all(tasks);
+
+    const list = await this.storage.getOpenDepositions();
+    const next = list.filter(r => r.entryID !== entry.entryID);
+    next.push(entryToRecord(entry, version));
+    await this.storage.setOpenDepositions(next);
+  }
+
+  storeEntry(dirty = false, entryID: string | null = this.activeEntryID): void {
+    const state = this.getState(entryID);
+    if (!state || !entryID) {
       console.error('Asked to storeEntry, but no entry cached!');
-    }
-  }
-
-  private seedSnapshots(entry: Entry): void {
-    this.savedSaveframeSnapshots = new Map();
-    for (const sf of entry.saveframes) {
-      // Touch uniqueId before serializing: the getter is self-healing and will
-      // add a `_Unique_ID` tag if the saveframe doesn't have one yet, so the
-      // serialized snapshot must be taken after.
-      const id = sf.uniqueId;
-      this.savedSaveframeSnapshots.set(id, JSON.stringify(sf));
-    }
-  }
-
-  private getDirtySaveframes(entry: Entry): { dirty: Saveframe[]; snapshots: Map<string, string> } {
-    const dirty: Saveframe[] = [];
-    const snapshots = new Map<string, string>();
-    for (const sf of entry.saveframes) {
-      const id = sf.uniqueId;
-      const current = JSON.stringify(sf);
-      if (this.savedSaveframeSnapshots.get(id) !== current) {
-        dirty.push(sf);
-        // Snapshot what we are *about* to send. If the user edits this saveframe
-        // again before the request completes, the snapshot won't match the post-edit
-        // value and the next save will correctly flag it dirty again.
-        snapshots.set(id, current);
-      }
-    }
-    return {dirty, snapshots};
-  }
-
-  saveEntry(override = true): void {
-
-    if (!this.cachedEntry) {
       return;
     }
-    const entry = this.cachedEntry;
-    const {dirty, snapshots} = this.getDirtySaveframes(entry);
+    if (dirty) {
+      state.entry.unsaved = dirty;
+      state.lastChangeTime = getTime();
+    }
+    const entrySerialized = JSON.stringify(state.entry);
+    const entryJson = JSON.parse(entrySerialized);
+    delete entryJson.schema;
+    this.storage.setEntry(entryID, JSON.stringify(entryJson))
+      .then(() => this.postBroadcast({type: 'mutated', entryID}))
+      .catch(err => console.error('Failed to persist entry to IndexedDB', err));
+    // Refresh the index (nickname / deposited / bmrbnum can change).
+    this.storage.getOpenDepositions().then(list => {
+      const next = list.filter(r => r.entryID !== entryID);
+      next.push(entryToRecord(state.entry, state.entry.schema.version));
+      return this.storage.setOpenDepositions(next);
+    }).catch(err => console.error('Failed to update openDepositions index', err));
+    this.emitOpenDepositions();
+    // Kick off a save immediately on user-initiated changes so the server picks
+    // them up on blur rather than after the 5s retry tick. The saveInProgress
+    // guard coalesces rapid edits; the post-save check in saveEntry catches
+    // anything that landed during the in-flight request, and the interval
+    // timer remains the backstop for offline / failed saves.
+    if (dirty && !state.saveInProgress) {
+      this.saveEntry(true, entryID);
+    }
+  }
+
+  saveEntry(override = true, entryID: string | null = this.activeEntryID): void {
+    const state = this.getState(entryID);
+    if (!state || !entryID) return;
+    const entry = state.entry;
+    const {dirty, snapshots} = this.getDirtySaveframes(state);
 
     // Nothing to send — clear the unsaved flag and be done.
     if (dirty.length === 0) {
       if (entry.unsaved) {
         entry.unsaved = false;
-        this.lastChangeTime = null;
-        this.storeEntry(false);
+        state.lastChangeTime = null;
+        this.storeEntry(false, entryID);
       }
       return;
     }
 
-    const saveOriginTime = this.lastChangeTime;
-    this.saveInProgress = true;
+    const saveOriginTime = state.lastChangeTime;
+    state.saveInProgress = true;
 
     const body: {commit: string[]; saveframes: Saveframe[]; force?: boolean} = {
       commit: entry.commit,
@@ -515,42 +552,49 @@ export class DepositionPersistenceService implements OnDestroy {
     if (override) {
       body.force = true;
     }
-    const url = `${environment.serverURL}/${entry.entryID}/saveframes`;
+    const url = `${environment.serverURL}/${entryID}/saveframes`;
 
     this.http.put<SaveEntryResponse>(url, JSON.stringify(body), this.JSONOptions).subscribe({
       next: response => {
         if ('error' in response) {
           entry.unsaved = true;
+          if (this.conflictDialogOpen.has(entryID)) {
+            state.saveInProgress = false;
+            return;
+          }
+          this.conflictDialogOpen.add(entryID);
           const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
             disableClose: false
           });
 
-          dialogRef.componentInstance.confirmMessage = 'Changes to this deposition have been detected on the server - changes most ' +
-            ' likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
+          const nickname = entry.depositionNickname ?? entryID;
+          dialogRef.componentInstance.confirmMessage = `Changes to deposition "${nickname}" have been detected on the server - changes most ` +
+            'likely made from a different tab, browser, or computer. Would you like to load the changes from the server, ' +
             'losing your most recent changes, or push your changes to the server, overriding what is stored there? (If you are ' +
-            'unsure, load changes from the server.) Note that you should only edit one deposition at a time, in one tab.';
+            'unsure, load changes from the server.)';
           dialogRef.componentInstance.proceedMessage = 'Load changes from server';
           dialogRef.componentInstance.cancelMessage = 'Push changes to server';
 
           dialogRef.afterClosed().subscribe(result => {
+            this.conflictDialogOpen.delete(entryID);
             if (result) {
-              this.loadEntry(entry.entryID, true);
+              this.refetchEntry(entryID, true);
             } else if (result === false) {
               // User chose to overwrite the server. Fall back to the full-entry PUT
               // so every saveframe (including ones the server has and we don't) is
               // replaced wholesale.
-              this.saveEntryFull(true);
+              this.saveEntryFull(true, entryID);
             }
-            this.saveInProgress = false;
+            state.saveInProgress = false;
           });
 
         } else {
           // Commit is successful — update snapshots for the saveframes we just sent.
           for (const [uniqueId, snapshot] of snapshots) {
-            this.savedSaveframeSnapshots.set(uniqueId, snapshot);
+            state.savedSaveframeSnapshots.set(uniqueId, snapshot);
           }
 
-          const time_diff: number = this.lastChangeTime === null ? 0 : Math.round((getTime() - this.lastChangeTime) / 1000);
+          const time_diff: number = state.lastChangeTime === null ? 0 : Math.round((getTime() - state.lastChangeTime) / 1000);
           if (entry.unsaved && time_diff > 30) {
             this.messagesService.sendMessage(new Message('Successfully saved pending changes! You are back online.'));
           }
@@ -562,23 +606,23 @@ export class DepositionPersistenceService implements OnDestroy {
           }
 
           entry.addCommit(response.commit);
-          if (saveOriginTime === this.lastChangeTime) {
+          if (saveOriginTime === state.lastChangeTime) {
             entry.unsaved = false;
-            this.lastChangeTime = null;
+            state.lastChangeTime = null;
           }
-          this.storeEntry(false);
-          this.saveInProgress = false;
+          this.storeEntry(false, entryID);
+          state.saveInProgress = false;
           // A change landed while the request was in flight (lastChangeTime
           // advanced past saveOriginTime). Fire another save now rather than
           // waiting for the 5s retry tick.
           if (entry.unsaved) {
-            this.saveEntry();
+            this.saveEntry(true, entryID);
           }
         }
       },
       error: () => {
         if (entry.unsaved) {
-          const time_diff: number = this.lastChangeTime === null ? 0 : Math.round((getTime() - this.lastChangeTime) / 1000);
+          const time_diff: number = state.lastChangeTime === null ? 0 : Math.round((getTime() - state.lastChangeTime) / 1000);
           if (time_diff > 30 && time_diff < 180) {
             this.messagesService.sendMessage(new Message('Unable to save changes for the last ' + time_diff + ' seconds. ' +
               'Perhaps you have lost your internet connection? Changes can still be made to the deposition, but please don\'t close this tab ' +
@@ -588,7 +632,7 @@ export class DepositionPersistenceService implements OnDestroy {
               'you have a working internet connection. If so, please contact support. If this message persists and you keep making changes, you may lose them!', MessageType.ErrorMessage));
           }
         }
-        this.saveInProgress = false;
+        state.saveInProgress = false;
       }
     });
   }
@@ -599,15 +643,14 @@ export class DepositionPersistenceService implements OnDestroy {
    * only replace saveframes the client knows about, so a true "push everything"
    * needs the full payload.
    */
-  private saveEntryFull(override: boolean): void {
-    if (!this.cachedEntry) {
-      return;
-    }
-    const entry = this.cachedEntry;
-    const saveOriginTime = this.lastChangeTime;
-    this.saveInProgress = true;
+  private saveEntryFull(override: boolean, entryID: string): void {
+    const state = this.getState(entryID);
+    if (!state) return;
+    const entry = state.entry;
+    const saveOriginTime = state.lastChangeTime;
+    state.saveInProgress = true;
 
-    const entryURL = `${environment.serverURL}/${entry.entryID}`;
+    const entryURL = `${environment.serverURL}/${entryID}`;
     const jsonObject: EntrySerialized = entry.toJSON();
     if (override) {
       jsonObject.force = true;
@@ -619,25 +662,276 @@ export class DepositionPersistenceService implements OnDestroy {
           // is in an unexpected state, surface the same conflict prompt rather than
           // silently failing.
           entry.unsaved = true;
-          this.saveInProgress = false;
+          state.saveInProgress = false;
           this.messagesService.sendMessage(new Message(
             'Server reported a conflict on full-entry save. Please reload the page.',
             MessageType.ErrorMessage));
         } else {
           // After a full push, every saveframe on the server matches the client.
-          this.seedSnapshots(entry);
+          this.seedSnapshots(state);
           entry.addCommit(response.commit);
-          if (saveOriginTime === this.lastChangeTime) {
+          if (saveOriginTime === state.lastChangeTime) {
             entry.unsaved = false;
-            this.lastChangeTime = null;
+            state.lastChangeTime = null;
           }
-          this.storeEntry(false);
-          this.saveInProgress = false;
+          this.storeEntry(false, entryID);
+          state.saveInProgress = false;
         }
       },
       error: () => {
-        this.saveInProgress = false;
+        state.saveInProgress = false;
       }
     });
+  }
+
+  /**
+   * Hydrate open depositions and active pointer from IDB + sessionStorage.
+   * Schemas are deduped via `resolveSchema`. Non-active depositions defer
+   * their commit check to `setActive` to avoid hydrate-time prompt storms.
+   */
+  private async hydrateFromStorage(): Promise<void> {
+    let records: OpenDepositionRecord[];
+    try {
+      records = await this.storage.getOpenDepositions();
+    } catch {
+      console.error('Failed to read openDepositions index from IDB');
+      records = [];
+    }
+
+    if (records.length === 0) {
+      this.subscription$.add(this.router.events.subscribe({
+        next: event => {
+          if (event instanceof NavigationEnd) {
+            if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
+              && this.router.url.indexOf('/my-depositions') < 0 && !this.currentEntry) {
+              this.subscription$.unsubscribe();
+              this.router.navigate(['/']).then();
+            }
+          }
+        }
+      }));
+      this.emitOpenDepositions();
+      this.entrySubject.next(null);
+      this.resolveHydration();
+      return;
+    }
+
+    let storedActive: string | null = null;
+    try {
+      storedActive = sessionStorage.getItem(ACTIVE_ENTRY_SESSION_KEY);
+    } catch { /* sessionStorage unavailable — fall back to first */ }
+
+    for (const record of records) {
+      try {
+        const [rawEntry, rawSchema] = await Promise.all([
+          this.storage.getEntry(record.entryID),
+          this.storage.getSchema(record.schemaVersion),
+        ]);
+        if (!rawEntry || !rawSchema) {
+          // IDB invariant broken — refetch this entry from the server (it will land in
+          // the open set with the right schema on response).
+          console.warn(`Missing IDB record for entry ${record.entryID} or schema ${record.schemaVersion}; refetching.`);
+          this.loadEntry(record.entryID, true);
+          continue;
+        }
+        const schemaJson = JSON.parse(rawSchema) as SchemaJSON;
+        const schema = this.resolveSchema(record.schemaVersion, schemaJson);
+        const entryJson = JSON.parse(rawEntry);
+        entryJson.schema = schemaJson;
+        const entry = entryFromJSON(entryJson);
+        entry.schema = schema;
+
+        const state: DepositionState = {
+          entry,
+          savedSaveframeSnapshots: new Map(),
+          lastChangeTime: null,
+          saveInProgress: false,
+          needsCommitCheck: true,
+        };
+        // Only seed snapshots if the cached entry is clean. The snapshot map is
+        // the in-memory record of "what the server has"; if the entry was unsaved
+        // when persisted, the IDB copy already diverges from the server, and
+        // seeding from it would make every saveframe look clean, causing the next
+        // save to early-return without pushing anything. Leaving the map empty
+        // marks every saveframe dirty so the post-refresh save sends them all.
+        if (!entry.unsaved) {
+          this.seedSnapshots(state);
+        } else {
+          // Arm lastChangeTime so the retry timer keeps pushing this deposition
+          // even if no UI interaction occurs (e.g. came back online after refresh).
+          state.lastChangeTime = getTime();
+        }
+        this.openDepositions.set(record.entryID, state);
+      } catch (e) {
+        console.error(`Failed to hydrate deposition ${record.entryID}`, e);
+      }
+    }
+
+    this.emitOpenDepositions();
+
+    const fallback = this.openDepositions.keys().next().value ?? null;
+    const active = (storedActive && this.openDepositions.has(storedActive)) ? storedActive : fallback;
+    this.setActive(active);
+
+    // For unsaved depositions other than the freshly-activated one, kick a save
+    // attempt — the timer will pick them up too but this gives an immediate try.
+    for (const [entryID, state] of this.openDepositions) {
+      if (entryID !== active && state.entry.unsaved) {
+        this.saveEntry(true, entryID);
+      }
+    }
+
+    this.resolveHydration();
+  }
+
+  /**
+   * Resolve a Schema for a given version. Returns the cached instance if any.
+   * Otherwise constructs from the provided JSON, caches, and returns. Throws
+   * if no cached schema exists and no fallback was provided.
+   */
+  private resolveSchema(version: string, fallbackJson: SchemaJSON | null): Schema {
+    const cached = this.schemaCache.get(version);
+    if (cached) return cached;
+    if (!fallbackJson) {
+      throw new Error(`Schema version ${version} not cached and no fallback provided`);
+    }
+    const schema = new Schema(fallbackJson);
+    this.schemaCache.set(version, schema);
+    return schema;
+  }
+
+  private emitOpenDepositions(): void {
+    const views: OpenDepositionView[] = [];
+    for (const state of this.openDepositions.values()) {
+      views.push({
+        ...entryToRecord(state.entry, state.entry.schema.version),
+        unsaved: state.entry.unsaved,
+      });
+    }
+    this.openDepositionsSubject.next(views);
+  }
+
+  private handleBroadcast(msg: BroadcastMessage): void {
+    if (!msg?.type || !msg.entryID) return;
+    const entryID = msg.entryID;
+    if (msg.type === 'closed') {
+      const state = this.openDepositions.get(entryID);
+      if (!state) return;
+      this.openDepositions.delete(entryID);
+      this.emitOpenDepositions();
+      if (this.activeEntryID === entryID) {
+        const fallback = this.openDepositions.keys().next().value ?? null;
+        this.setActive(fallback);
+      }
+      return;
+    }
+    if (msg.type === 'loaded' || msg.type === 'mutated') {
+      // Per user constraint: inactive tabs never auto-switch. If we have this
+      // entry open, refresh its in-memory copy; otherwise ignore entirely.
+      if (this.openDepositions.has(entryID)) {
+        this.handleRemoteMutation(entryID);
+      }
+      return;
+    }
+  }
+
+  private async handleRemoteMutation(entryID: string): Promise<void> {
+    const state = this.openDepositions.get(entryID);
+    if (!state) return;
+    if (state.entry.unsaved) {
+      // Both tabs have diverging edits — surface the conflict instead of silently dropping one side.
+      this.showCrossTabConflict(entryID);
+      return;
+    }
+    try {
+      const [rawEntry, rawSchema] = await Promise.all([
+        this.storage.getEntry(entryID),
+        this.storage.getSchema(state.entry.schema.version),
+      ]);
+      if (!rawEntry || !rawSchema) return;
+      const schemaJson = JSON.parse(rawSchema) as SchemaJSON;
+      const schema = this.resolveSchema(schemaJson.version, schemaJson);
+      const parsed = JSON.parse(rawEntry);
+      parsed.schema = schemaJson;
+      const refreshed = entryFromJSON(parsed);
+      refreshed.schema = schema;
+      // The IDB record may have `unsaved: true` because the *other* tab is mid-edit. This tab
+      // is just a mirror; clearing the flag prevents the next broadcast from being misread as
+      // a local-vs-remote conflict, and avoids two tabs autosaving the same pending change.
+      refreshed.unsaved = false;
+      const newState: DepositionState = {
+        entry: refreshed,
+        savedSaveframeSnapshots: new Map(),
+        lastChangeTime: null,
+        saveInProgress: false,
+        needsCommitCheck: false,
+      };
+      this.seedSnapshots(newState);
+      this.openDepositions.set(entryID, newState);
+      this.emitOpenDepositions();
+      if (this.activeEntryID === entryID) {
+        this.entrySubject.next(refreshed);
+      }
+    } catch {
+      console.error('Failed to refresh entry after cross-tab update.');
+    }
+  }
+
+  private showCrossTabConflict(entryID: string): void {
+    if (this.conflictDialogOpen.has(entryID)) return;
+    const state = this.openDepositions.get(entryID);
+    if (!state) return;
+    this.conflictDialogOpen.add(entryID);
+    const nickname = state.entry.depositionNickname ?? entryID;
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
+    dialogRef.componentInstance.confirmMessage = `Deposition "${nickname}" was just modified in another tab. Load those changes (losing ` +
+      'unsaved edits made in this tab) or push your changes from this tab (overwriting what the other tab wrote)?';
+    dialogRef.componentInstance.proceedMessage = 'Load changes from other tab';
+    dialogRef.componentInstance.cancelMessage = 'Push my changes';
+    dialogRef.afterClosed().subscribe(result => {
+      this.conflictDialogOpen.delete(entryID);
+      if (!this.openDepositions.has(entryID)) return;
+      if (result) {
+        this.refetchEntry(entryID, true);
+      } else if (result === false) {
+        this.saveEntry(true, entryID);
+      }
+    });
+  }
+
+  private postBroadcast(msg: BroadcastMessage): void {
+    try {
+      this.broadcast.postMessage(msg);
+    } catch (e) {
+      console.error('BroadcastChannel post failed', e);
+    }
+  }
+
+  private seedSnapshots(state: DepositionState): void {
+    state.savedSaveframeSnapshots = new Map();
+    for (const sf of state.entry.saveframes) {
+      // Touch uniqueId before serializing: the getter is self-healing and will
+      // add a `_Unique_ID` tag if the saveframe doesn't have one yet, so the
+      // serialized snapshot must be taken after.
+      const id = sf.uniqueId;
+      state.savedSaveframeSnapshots.set(id, JSON.stringify(sf));
+    }
+  }
+
+  private getDirtySaveframes(state: DepositionState): { dirty: Saveframe[]; snapshots: Map<string, string> } {
+    const dirty: Saveframe[] = [];
+    const snapshots = new Map<string, string>();
+    for (const sf of state.entry.saveframes) {
+      const id = sf.uniqueId;
+      const current = JSON.stringify(sf);
+      if (state.savedSaveframeSnapshots.get(id) !== current) {
+        dirty.push(sf);
+        // Snapshot what we are *about* to send. If the user edits this saveframe
+        // again before the request completes, the snapshot won't match the post-edit
+        // value and the next save will correctly flag it dirty again.
+        snapshots.set(id, current);
+      }
+    }
+    return {dirty, snapshots};
   }
 }

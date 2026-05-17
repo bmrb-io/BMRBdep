@@ -98,9 +98,9 @@ deposition to a new deposition if your other deposition is very similar.">
             </mat-list-item>
           }
           <mat-list-item (click)="endSession()" class="pointer"
-                         matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">
-            End session
+                         matTooltip="Close this deposition in this tab. You can reopen it later by following the link sent to
+your email when you created the deposition, or from My Depositions.">
+            Close this deposition
           </mat-list-item>
           <mat-list-item [ngClass]="{'active': page==='support'}"
                          routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">

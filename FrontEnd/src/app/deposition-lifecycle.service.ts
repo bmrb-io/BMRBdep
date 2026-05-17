@@ -68,7 +68,6 @@ export class DepositionLifecycleService {
       this.http.post<DepositionIdResponse>(apiEndPoint, body, options)
         .subscribe({
           next: jsonData => {
-            this.persistence.clearDeposition();
             this.messagesService.clearMessage();
             resolve(jsonData.deposition_id);
           },

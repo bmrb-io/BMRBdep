@@ -23,8 +23,8 @@
         <span class="title-center">BMRBdep</span>
       }
       <span class="title-right pointer" (click)="clearEntry()"
-            matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">End session</span>
+            matTooltip="Close all open depositions in this tab. You can resume any of them later by following the link sent to
+your email when you created the deposition, or from My Depositions.">Sign out</span>
     }
 
     @if (!entry) {
@@ -32,6 +32,28 @@ your email when you created the deposition.">End session</span>
     }
 
   </mat-toolbar-row>
+  @if (openDepositions.length > 1) {
+    <mat-toolbar-row class="deposition-tabs">
+      @for (dep of openDepositions; track trackChip($index, dep)) {
+        <span class="dep-chip" [ngClass]="{'active': dep.entryID === entry?.entryID, 'unsaved': dep.unsaved}">
+          <button class="dep-chip-body"
+                  type="button"
+                  (click)="activateDeposition(dep.entryID)"
+                  [matTooltip]="(dep.nickname || dep.entryID) + (dep.unsaved ? ' (unsaved changes)' : '')">
+            @if (dep.unsaved) {
+              <span class="dep-chip-dirty" aria-label="Unsaved changes">●</span>
+            }
+            <span class="dep-chip-label">{{ dep.nickname || dep.entryID }}</span>
+          </button>
+          <button class="dep-chip-close"
+                  type="button"
+                  (click)="closeChip($event, dep.entryID)"
+                  matTooltip="Close this deposition in this tab."
+                  aria-label="Close deposition">×</button>
+        </span>
+      }
+    </mat-toolbar-row>
+  }
   @if ((loader.value$ | async)) {
     <mat-toolbar-row class="loading-bar-holder">
       <mat-progress-bar mode="indeterminate" [value]="loader.value$ | async"></mat-progress-bar>

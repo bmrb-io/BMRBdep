@@ -11,6 +11,11 @@ export interface EmailAccessTokenResponse {
   status: string;
 }
 
+export interface SessionInfo {
+  email?: string;
+  orcid?: string;
+}
+
 @Injectable({providedIn: 'root'})
 export class AuthService {
   private http = inject(HttpClient);
@@ -49,6 +54,14 @@ export class AuthService {
           this.errorHandler.handle(error);
           return of([]);
         })
+      );
+  }
+
+  getSessionInfo(): Observable<SessionInfo> {
+    const apiEndPoint = `${environment.serverURL}/session-info`;
+    return this.http.get<SessionInfo>(apiEndPoint, {withCredentials: true})
+      .pipe(
+        catchError(() => of({} as SessionInfo))
       );
   }
 }
