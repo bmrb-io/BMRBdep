@@ -70,8 +70,12 @@ mat-sidenav {
   background: transparent;
   color: inherit;
   font: inherit;
-  cursor: pointer;
+  cursor: grab;
   border-radius: 16px 0 0 16px;
+}
+
+.dep-chip-body:active {
+  cursor: grabbing;
 }
 
 .dep-chip.active .dep-chip-body {
@@ -109,4 +113,25 @@ mat-sidenav {
 .dep-chip-close:hover {
   background: rgba(0, 0, 0, 0.1);
   color: rgba(0, 0, 0, 0.85);
+}
+
+/* CDK drag-drop: keep the floating chip preview readable and leave a tidy
+   placeholder gap so neighboring chips don't jump as the drop target moves. */
+.cdk-drag-preview.dep-chip {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  opacity: 0.95;
+}
+
+.cdk-drag-placeholder.dep-chip {
+  opacity: 0.25;
+  background: rgba(0, 0, 0, 0.08);
+  border-style: dashed;
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.deposition-tabs.cdk-drop-list-dragging .dep-chip:not(.cdk-drag-placeholder) {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
 }

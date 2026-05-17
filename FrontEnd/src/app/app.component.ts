@@ -13,12 +13,13 @@ import {MatIcon} from '@angular/material/icon';
 import {Router, RouterLink, RouterOutlet} from '@angular/router';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {TreeViewComponent} from './treeview/tree-view.component';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe]
+  imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe, CdkDropList, CdkDrag, CdkDragHandle]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private persistence = inject(DepositionPersistenceService);
@@ -87,5 +88,15 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackChip(_index: number, view: OpenDepositionView): string {
     return view.entryID;
+  }
+
+  onChipDrop(event: CdkDragDrop<OpenDepositionView[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+    // Reorder the local view immediately so the chip doesn't snap back while
+    // the service's emit catches up.
+    const reordered = [...this.openDepositions];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    this.openDepositions = reordered;
+    this.persistence.reorderDepositions(reordered.map(v => v.entryID));
   }
 }

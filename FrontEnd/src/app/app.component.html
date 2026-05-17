@@ -33,10 +33,14 @@ your email when you created the deposition, or from My Depositions.">Sign out</s
 
   </mat-toolbar-row>
   @if (openDepositions.length > 1) {
-    <mat-toolbar-row class="deposition-tabs">
+    <mat-toolbar-row class="deposition-tabs"
+                     cdkDropList
+                     cdkDropListOrientation="horizontal"
+                     (cdkDropListDropped)="onChipDrop($event)">
       @for (dep of openDepositions; track trackChip($index, dep)) {
-        <span class="dep-chip" [ngClass]="{'active': dep.entryID === entry?.entryID, 'unsaved': dep.unsaved}">
-          <button class="dep-chip-body"
+        <span class="dep-chip" cdkDrag
+              [ngClass]="{'active': dep.entryID === entry?.entryID, 'unsaved': dep.unsaved}">
+          <button class="dep-chip-body" cdkDragHandle
                   type="button"
                   (click)="activateDeposition(dep.entryID)"
                   [matTooltip]="(dep.nickname || dep.entryID) + (dep.unsaved ? ' (unsaved changes)' : '')">

@@ -234,9 +234,7 @@ export class DepositionPersistenceService implements OnDestroy {
     this.openDepositions.delete(entryID);
     try {
       await this.storage.deleteEntry(entryID);
-      const list = await this.storage.getOpenDepositions();
-      const next = list.filter(r => r.entryID !== entryID);
-      await this.storage.setOpenDepositions(next);
+      await this.persistIndex();
     } catch (e) {
       console.error('Failed to remove deposition from storage', e);
     }
@@ -469,8 +467,8 @@ export class DepositionPersistenceService implements OnDestroy {
 
   /**
    * Persist an entry and (if not already cached) its schema to IDB, plus
-   * refresh the openDepositions index. Read-modify-write on the index is
-   * idempotent by entryID so concurrent loads in two tabs converge.
+   * refresh the openDepositions index. The index is rewritten from the
+   * in-memory Map order so user-applied reordering survives saves.
    */
   private async persistEntry(state: DepositionState, schemaJson: SchemaJSON | null): Promise<void> {
     const entry = state.entry;
@@ -486,11 +484,44 @@ export class DepositionPersistenceService implements OnDestroy {
       tasks.push(this.storage.setSchema(version, JSON.stringify(schemaJson)));
     }
     await Promise.all(tasks);
+    await this.persistIndex();
+  }
 
-    const list = await this.storage.getOpenDepositions();
-    const next = list.filter(r => r.entryID !== entry.entryID);
-    next.push(entryToRecord(entry, version));
-    await this.storage.setOpenDepositions(next);
+  /**
+   * Snapshot the in-memory openDepositions Map to the IDB index. Map insertion
+   * order is the single source of truth for chip-strip / my-depositions
+   * ordering; persisting in that order keeps a user reorder stable across
+   * reloads and across mutations from save flows.
+   */
+  private persistIndex(): Promise<void> {
+    const list: OpenDepositionRecord[] = [];
+    for (const state of this.openDepositions.values()) {
+      list.push(entryToRecord(state.entry, state.entry.schema.version));
+    }
+    return this.storage.setOpenDepositions(list);
+  }
+
+  /**
+   * Reorder the open-deposition Map to match the supplied entryID sequence.
+   * Unknown IDs are dropped and currently-open IDs not mentioned are appended
+   * to the end, so callers can pass a partial order without losing entries.
+   */
+  reorderDepositions(orderedIDs: string[]): void {
+    const reordered = new Map<string, DepositionState>();
+    for (const id of orderedIDs) {
+      const state = this.openDepositions.get(id);
+      if (state) {
+        reordered.set(id, state);
+      }
+    }
+    for (const [id, state] of this.openDepositions) {
+      if (!reordered.has(id)) {
+        reordered.set(id, state);
+      }
+    }
+    this.openDepositions = reordered;
+    this.emitOpenDepositions();
+    this.persistIndex().catch(err => console.error('Failed to persist openDepositions reorder', err));
   }
 
   storeEntry(dirty = false, entryID: string | null = this.activeEntryID): void {
@@ -509,12 +540,9 @@ export class DepositionPersistenceService implements OnDestroy {
     this.storage.setEntry(entryID, JSON.stringify(entryJson))
       .then(() => this.postBroadcast({type: 'mutated', entryID}))
       .catch(err => console.error('Failed to persist entry to IndexedDB', err));
-    // Refresh the index (nickname / deposited / bmrbnum can change).
-    this.storage.getOpenDepositions().then(list => {
-      const next = list.filter(r => r.entryID !== entryID);
-      next.push(entryToRecord(state.entry, state.entry.schema.version));
-      return this.storage.setOpenDepositions(next);
-    }).catch(err => console.error('Failed to update openDepositions index', err));
+    // Refresh the index (nickname / deposited / bmrbnum can change). Use the
+    // Map-order snapshot so the touched entry doesn't get shuffled around.
+    this.persistIndex().catch(err => console.error('Failed to update openDepositions index', err));
     this.emitOpenDepositions();
     // Kick off a save immediately on user-initiated changes so the server picks
     // them up on blur rather than after the 5s retry tick. The saveInProgress
