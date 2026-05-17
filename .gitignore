@@ -58,3 +58,4 @@ orcid.py
 /docker_build
 version.txt
 .angular
+BMRBDep.egg-info
