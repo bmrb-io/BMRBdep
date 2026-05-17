@@ -820,7 +820,7 @@ def store_saveframes(uuid) -> Response:
         try:
             sf_id = sf.get_tag('_Unique_ID')[0]
         except IndexError:
-            raise RequestError("Saveframe '%s' is missing a %s tag." % (sf.name, UNIQUE_ID_TAG))
+            raise RequestError("Saveframe '%s' is missing a %s tag." % (sf.name, '_Unique_ID'))
         incoming_ids.append(sf_id)
 
     with depositions.DepositionRepo(uuid) as repo:
