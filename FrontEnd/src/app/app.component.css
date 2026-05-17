@@ -33,12 +33,20 @@ mat-sidenav {
 .deposition-tabs {
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   gap: 6px;
   overflow-x: auto;
   padding: 4px 8px;
   height: 36px;
   min-height: 36px;
   background: rgba(0, 0, 0, 0.04);
+}
+
+.deposition-tabs-label {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-right: 4px;
 }
 
 .dep-chip {

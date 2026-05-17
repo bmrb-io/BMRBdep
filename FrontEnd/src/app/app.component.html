@@ -37,6 +37,7 @@ your email when you created the deposition, or from My Depositions.">Sign out</s
                      cdkDropList
                      cdkDropListOrientation="horizontal"
                      (cdkDropListDropped)="onChipDrop($event)">
+      <span class="deposition-tabs-label">Open depositions:</span>
       @for (dep of openDepositions; track trackChip($index, dep)) {
         <span class="dep-chip" cdkDrag
               [ngClass]="{'active': dep.entryID === entry?.entryID, 'unsaved': dep.unsaved}">
