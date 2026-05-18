@@ -56,16 +56,25 @@ The frontend implements its own in-memory NMR-STAR model. **Read these to unders
 
 `Entry.refresh()` re-runs validation and rebuilds the category tree; call it after any structural change. `Entry.print()` serializes to NMR-STAR text for deposition.
 
-### ApiService is the persistence engine (`FrontEnd/src/app/api.service.ts`)
-`ApiService` is the single owner of the active deposition. Key behaviors to be aware of before changing it:
+### Persistence is split across several services
+The single old `ApiService` has been broken up. The interesting ones to know about:
 
-- **`entrySubject: ReplaySubject<Entry>`** — every component subscribes to this to get the current entry. Pushing a new `Entry` or `null` is how you trigger global re-render.
-- **Local cache + auto-save loop** — entries (and the schema) are serialized to `localStorage` under `entry`/`entryID`/`schema`. A `setInterval` (every 5s) detects `cachedEntry.unsaved` and `PUT`s to `${serverURL}/${entryID}`.
-- **Cross-tab guard** — a 100ms interval compares `localStorage.entryID` to the in-memory entry; mismatch → sign out the current tab and route to `/`.
+- **`DepositionPersistenceService`** (`deposition-persistence.service.ts`) — owns the open-deposition set, drives save/load, and emits `entrySubject`.
+- **`DepositionLifecycleService`** (`deposition-lifecycle.service.ts`) — higher-level flows: create, deposit, restore, sign out.
+- **`StorageService`** (`storage.service.ts`) — thin wrapper over IndexedDB (DB `bmrbdep`). Holds the entry JSON, schema JSON, and the open-depositions index.
+- **`AuthService`** (`auth.service.ts`) — authentication helpers.
+- **`ApiErrorHandler`** (`api-error-handler.service.ts`) — surfaces `error.error.error` from the backend to `MessagesService`.
+
+Key behaviors of `DepositionPersistenceService` to be aware of before changing it:
+
+- **`entrySubject: ReplaySubject<Entry | null>`** — every component subscribes to this to get the *currently active* deposition. Pushing a new `Entry` or `null` is how you trigger global re-render.
+- **Multi-deposition open set** — `openDepositions: Map<string, DepositionState>` holds every deposition open in this tab; `activeEntryID` is the one currently emitted on `entrySubject`. The toolbar tab strip and similar UI subscribe to `openDepositionsSubject`.
+- **Storage layout** — entries (and their schemas) live in **IndexedDB** via `StorageService`. The per-tab *active* entry pointer goes to `sessionStorage` (`bmrbdep.activeEntryID`) so a tab refresh restores the same active entry. There is no `localStorage` involvement anymore.
+- **Auto-save loop** — `setInterval` (every 5s) walks `openDepositions` and `PUT`s each entry whose `unsaved` flag is set. `storeEntry(dirty=true)` also kicks off an immediate `saveEntry` for the dirtied entry; the interval is the backstop for offline / failed saves.
+- **Cross-tab coordination** — a `BroadcastChannel` (`bmrbdep`) carries `mutated`/`loaded`/`closed` messages so peer tabs can refresh or drop entries. No polling involved.
 - **Commit-based conflict resolution** — every server response includes a `commit` hash. `Entry.commit` is a sliding window of the last 15. On load, `checkLastCommit()` decides whether to reuse the cached entry or refetch. On save, if the server replies with `{error: 'reload'}` the user is prompted to either pull server changes or force-push local (`force: true`).
-- **Error handling** — `handleError()` surfaces `error.error.error` from the backend to `MessagesService`; in non-production it re-throws so it shows in the console.
 
-If you add a new mutation, the pattern is: mutate `cachedEntry`, call `entry.refresh()`, then `this.storeEntry(true)` to mark dirty (the save loop picks it up). Don't call `saveEntry()` directly unless you need an immediate flush.
+If you add a new mutation, the pattern is: mutate the active `Entry`, call `entry.refresh()`, then `persistence.storeEntry(true)` to mark dirty. That triggers an immediate `saveEntry` and the interval picks up anything that misses. Don't call `saveEntry()` directly unless you need to flush a specific entry by ID.
 
 ### UI shell
 `AppComponent` owns the layout: a `MatToolbar`, a `MatSidenav` containing `TreeViewComponent` (the supergroup/category tree built from `entry.superGroups`), and a `RouterOutlet`. `SidenavService` exposes the sidenav reference so child components can open/close it. `MessagesService` drives the snack bar.
@@ -81,8 +90,8 @@ If you add a new mutation, the pattern is: mutate `cachedEntry`, call `entry.ref
 ## Things that will bite you
 
 - **Don't mutate an `Entry` without calling `refresh()`** — validation flags, the category tree, and `firstIncompleteCategory` will be stale and the sidebar/tree will show wrong state.
-- **`localStorage` is the source of truth across reloads.** If you change the shape of what `Entry.toJSON()` produces, you must either bump a version field or handle older cached entries (see the `commit`-as-string upgrade shim in `entryFromJSON` for the pattern).
-- **Schema is large.** `Schema.cleanUp()` deletes the un-parsed fields after first serialization to keep `localStorage` under quota; if you need a field post-cleanup, add it to the survivors in `toJSON()` first.
+- **IndexedDB is the source of truth across reloads** (via `StorageService`). If you change the shape of what `Entry.toJSON()` produces, you must either bump a version field or handle older cached entries (see the `commit`-as-string upgrade shim in `entryFromJSON` for the pattern).
+- **Schema is large.** `Schema.toJSON()` only emits the fields needed to reconstruct the parsed schema — derived fields (`schema`, `saveframeSchema`, etc.) are intentionally left out to keep the IDB payload small. If you need a new field to survive a round-trip, add it to `toJSON()` first.
 - **Backend URL is environment-derived at module load** (`FrontEnd/src/environments/environment.ts` inspects `window.location.hostname`). Don't hardcode `/deposition` or `localhost:9000` elsewhere.
 - **Production builds disable `console.log` and `console.warn`** (but not `console.error`) and `Object.freeze(console)`. Don't rely on logs to debug a prod build.
 - **`build_angular.sh` checks `id -u == 17473`** (bmrbsvc) — it's intended for the deploy host, not local laptops. Use `npm run build.prod` directly when iterating.
