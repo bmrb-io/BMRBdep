@@ -1,15 +1,11 @@
-import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {AuthService} from '../auth.service';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Entry} from '../nmrstar/entry';
-import {Subscription} from 'rxjs';
 import {environment} from '../../environments/environment';
 import {SidenavService} from '../sidenav.service';
 import {MatButton} from '@angular/material/button';
-import {MatTooltip} from '@angular/material/tooltip';
 import {MatError, MatFormField, MatOption, MatSelect} from '@angular/material/select';
 import {MatInput} from '@angular/material/input';
 import {MatCheckbox} from '@angular/material/checkbox';
@@ -19,24 +15,20 @@ import {MatCheckbox} from '@angular/material/checkbox';
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss'],
   standalone: true,
-  imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatTooltip, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
+  imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
 })
-export class WelcomeComponent implements OnInit, OnDestroy {
+export class WelcomeComponent {
   private router = inject(Router);
-  persistence = inject(DepositionPersistenceService);
   lifecycle = inject(DepositionLifecycleService);
   private auth = inject(AuthService);
   private sidenavService = inject(SidenavService);
 
-  public entry: Entry | null;
   @ViewChild('inputFile') fileUploadElement!: ElementRef;
   public skipEmailValidation: boolean;
   public emailValidationError: boolean;
   public production: boolean;
-  private subscription$!: Subscription;
 
   constructor() {
-    this.entry = null;
     this.skipEmailValidation = false;
     this.emailValidationError = false;
     this.production = environment.production;
@@ -69,18 +61,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   getBootstrapErrorMessage(bootstrapForm: FormControl<string>) {
     return bootstrapForm.hasError('required') ? 'You must enter the ID of an existing entry.' :
       bootstrapForm.hasError('pattern') ? 'Not a valid BMRB ID. BMRB IDs consist only of numbers. (For example: 15000)' : '';
-  }
-
-  ngOnInit() {
-    this.subscription$ = this.persistence.entrySubject.subscribe({
-      next: entry => {
-        this.entry = entry;
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.subscription$.unsubscribe();
   }
 
   // No-op handler so Angular re-runs change detection when a file is picked,
@@ -130,14 +110,5 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     if (this.resumeEmail.valid) {
       this.auth.sendEmailAccessToken(this.resumeEmail.value).then();
     }
-  }
-
-  closeActiveDeposition() {
-    const entryID = this.persistence.getEntryID();
-    if (!entryID) return;
-    this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
-      if (!confirmed) return;
-      this.persistence.closeDeposition(entryID).then();
-    });
   }
 }

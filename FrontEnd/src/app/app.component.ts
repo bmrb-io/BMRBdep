@@ -67,11 +67,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   activateDeposition(entryID: string): void {
-    if (this.entry?.entryID === entryID) return;
-    this.persistence.setActive(entryID);
-    if (!this.router.url.startsWith('/entry')) {
-      this.router.navigate(['/entry']).then();
-    }
+    this.router.navigate(['/entry', 'load', entryID]).then();
   }
 
   closeChip(event: Event, entryID: string): void {

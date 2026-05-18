@@ -32,7 +32,7 @@ your email when you created the deposition, or from My Depositions.">Sign out</s
     }
 
   </mat-toolbar-row>
-  @if (openDepositions.length > 1) {
+  @if (openDepositions.length >= 1) {
     <mat-toolbar-row class="deposition-tabs"
                      cdkDropList
                      cdkDropListOrientation="horizontal"
