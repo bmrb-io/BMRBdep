@@ -44,7 +44,7 @@ your email when you created the deposition, or from My Depositions.">Sign out</s
           <button class="dep-chip-body" cdkDragHandle
                   type="button"
                   (click)="activateDeposition(dep.entryID)"
-                  [matTooltip]="(dep.nickname || dep.entryID) + (dep.unsaved ? ' (unsaved changes)' : '')">
+                  [matTooltip]="(dep.entryID === entry?.entryID ? 'Currently viewing' : 'Click to switch · drag to reorder') + (dep.unsaved ? ' · unsaved changes' : '')">
             @if (dep.unsaved) {
               <span class="dep-chip-dirty" aria-label="Unsaved changes">●</span>
             }
