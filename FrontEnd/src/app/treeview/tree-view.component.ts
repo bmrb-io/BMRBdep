@@ -1,5 +1,6 @@
 import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
@@ -23,6 +24,7 @@ import {FormsModule} from '@angular/forms';
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
   private persistence = inject(DepositionPersistenceService);
+  protected lifecycle = inject(DepositionLifecycleService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 

@@ -97,6 +97,11 @@ deposition to a new deposition if your other deposition is very similar.">
               Deposit current entry
             </mat-list-item>
           }
+          <mat-list-item (click)="lifecycle.cloneDeposition()" class="pointer"
+                         matTooltip="Create a new deposition pre-filled with all of the data from this deposition,
+except any uploaded data files.">
+            Clone deposition
+          </mat-list-item>
           <mat-list-item (click)="endSession()" class="pointer"
                          matTooltip="Close this deposition in this tab. You can reopen it later by following the link sent to
 your email when you created the deposition, or from My Depositions.">
