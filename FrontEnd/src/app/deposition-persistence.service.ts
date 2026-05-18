@@ -11,7 +11,7 @@ import {NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {OpenDepositionRecord, StorageService} from './storage.service';
+import {isStorageQuotaError, OpenDepositionRecord, StorageService} from './storage.service';
 
 /**
  * Per-tab view of an open deposition, used to render the toolbar tab strip
@@ -412,7 +412,7 @@ export class DepositionPersistenceService implements OnDestroy {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
     }
     this.http.get<EntryJSON>(entryURL).subscribe({
-      next: jsonData => {
+      next: async jsonData => {
         if (!skipMessage) {
           this.messagesService.clearMessage();
         }
@@ -444,11 +444,23 @@ export class DepositionPersistenceService implements OnDestroy {
         this.seedSnapshots(state);
         this.openDepositions.set(entryID, state);
 
-        this.persistEntry(state, schemaJson).then(() => {
-          this.postBroadcast({type: 'loaded', entryID});
-        }).catch(err => {
-          console.error('Failed to persist loaded entry to IndexedDB', err);
-        });
+        // Block the load on the IDB write. If it fails (most commonly quota
+        // exceeded) we'd rather refuse the load than leave an in-memory entry
+        // that silently won't survive a refresh.
+        try {
+          await this.persistEntry(state, schemaJson);
+        } catch (err) {
+          this.openDepositions.delete(entryID);
+          // Best-effort cleanup: the entry blob and/or the index may have
+          // landed before the failure. If these also fail (still quota) the
+          // catches swallow it — in-memory state is the part that matters.
+          this.storage.deleteEntry(entryID).catch(() => { /* ignore */ });
+          this.persistIndex().catch(() => { /* ignore */ });
+          this.emitOpenDepositions();
+          this.handleStorageFailure(err, 'load this deposition');
+          return;
+        }
+        this.postBroadcast({type: 'loaded', entryID});
 
         this.emitOpenDepositions();
         this.setActive(entryID);
@@ -463,6 +475,35 @@ export class DepositionPersistenceService implements OnDestroy {
       },
       error: error => this.errorHandler.handle(error)
     });
+  }
+
+  /**
+   * Surface an IDB write failure on the load path to the user and get them
+   * off the now-dead /entry/load/:id route. Quota-exceeded gets a tailored
+   * message since the user can act on it (close other depositions, free up
+   * browser storage); anything else gets a generic message.
+   */
+  private handleStorageFailure(err: unknown, action: string): void {
+    if (isStorageQuotaError(err)) {
+      this.messagesService.sendMessage(new Message(
+        `Your browser's local storage for this site is full, so we could not ${action}. ` +
+        'Please close one or more open depositions (or free up browser storage for this site) and try again. ' +
+        'The deposition was not opened so that you do not lose work to a failed save.',
+        MessageType.ErrorMessage, 30000));
+    } else {
+      console.error('IndexedDB write failed', err);
+      this.messagesService.sendMessage(new Message(
+        `Your browser blocked the local save needed to ${action}, so the deposition was not opened. ` +
+        'Please try again, and contact support if the problem persists.',
+        MessageType.ErrorMessage, 30000));
+    }
+    // The user is sitting on /entry/load/:id waiting on an entrySubject emission
+    // that will never come. Send them somewhere sensible.
+    if (this.activeEntryID) {
+      this.router.navigate(['/entry']).then();
+    } else {
+      this.router.navigate(['/']).then();
+    }
   }
 
   /**

@@ -20,6 +20,19 @@ export interface OpenDepositionRecord {
   bmrbnum: number | null;
 }
 
+/**
+ * True if `err` is an IDB quota-exceeded error. Covers the modern
+ * `QuotaExceededError` name plus Firefox's legacy `NS_ERROR_DOM_QUOTA_REACHED`
+ * and the historical numeric codes (22, 1014).
+ */
+export function isStorageQuotaError(err: unknown): boolean {
+  if (!(err instanceof DOMException)) return false;
+  return err.name === 'QuotaExceededError' ||
+    err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+    err.code === 22 ||
+    err.code === 1014;
+}
+
 @Injectable({providedIn: 'root'})
 export class StorageService {
   private readonly ready: Promise<IDBDatabase>;
