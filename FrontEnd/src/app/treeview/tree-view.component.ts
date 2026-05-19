@@ -89,6 +89,14 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         this.sessionEnd.emit(true);
         if (this.persistence.getOpenDepositionRecords().length === 0) {
           this.router.navigate(['/']).then();
+          return;
+        }
+        // endSession always closes the active deposition; route the promoted
+        // sibling through /entry/load so it lands on the right saveframe rather
+        // than the closed entry's stale URL.
+        const newActive = this.persistence.getEntryID();
+        if (newActive) {
+          this.router.navigate(['/entry', 'load', newActive]).then();
         }
       });
     });
@@ -120,8 +128,6 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         return;
       }
       this.persistence.refetchEntry(entry.entryID, true);
-      entry.refresh();
-      this.persistence.storeEntry(false);
     });
   }
 

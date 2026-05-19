@@ -40,7 +40,7 @@ your email when you created the deposition, or from My Depositions.">Sign out</s
       <span class="deposition-tabs-label">Open depositions:</span>
       @for (dep of openDepositions; track trackChip($index, dep)) {
         <span class="dep-chip" cdkDrag
-              [ngClass]="{'active': dep.entryID === entry?.entryID, 'unsaved': dep.unsaved}">
+              [ngClass]="{'active': dep.entryID === entry?.entryID}">
           <button class="dep-chip-body" cdkDragHandle
                   type="button"
                   (click)="activateDeposition(dep.entryID)"

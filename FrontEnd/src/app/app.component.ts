@@ -72,11 +72,22 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   closeChip(event: Event, entryID: string): void {
     event.stopPropagation();
+    const wasActive = this.entry?.entryID === entryID;
     this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
       if (!confirmed) return;
       this.persistence.closeDeposition(entryID).then(() => {
         if (this.persistence.getOpenDepositionRecords().length === 0) {
           this.router.navigate(['/']).then();
+          return;
+        }
+        // The URL still points at the closed deposition's saveframe path. Route
+        // through /entry/load so the new active lands on its first incomplete
+        // category (or review / pending-verification) just like a fresh load.
+        if (wasActive) {
+          const newActive = this.persistence.getEntryID();
+          if (newActive) {
+            this.router.navigate(['/entry', 'load', newActive]).then();
+          }
         }
       });
     });

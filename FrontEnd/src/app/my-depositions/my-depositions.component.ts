@@ -61,9 +61,9 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
       this.hydrationDone = true;
       this.recomputeDepositions();
     });
-    this.auth.getSessionInfo().subscribe({
+    this.subscription$.add(this.auth.getSessionInfo().subscribe({
       next: info => this.sessionInfo = info,
-    });
+    }));
     this.subscription$.add(this.auth.getAuthorizedDepositions().subscribe({
       next: (depositions: Deposition[]) => {
         this.serverDepositions = depositions;
@@ -110,7 +110,6 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
    */
   private recomputeDepositions(): void {
     const merged: Deposition[] = [];
-    const seen = new Set<string>();
     for (const view of this.openViews) {
       if (this.serverDepositions.some(d => d.deposition_id === view.entryID)) continue;
       merged.push({
@@ -120,10 +119,8 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
         entry_deposited: view.deposited,
         bmrbnum: view.bmrbnum ?? undefined,
       });
-      seen.add(view.entryID);
     }
     for (const dep of this.serverDepositions) {
-      if (seen.has(dep.deposition_id)) continue;
       merged.push(dep);
     }
     this.depositions = merged;
