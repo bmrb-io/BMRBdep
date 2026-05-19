@@ -34,6 +34,9 @@
               "src/styles.scss"
             ],
             "scripts": [],
+            "allowedCommonJsDependencies": [
+              "country-region-selector"
+            ],
             "extractLicenses": false,
             "sourceMap": true,
             "optimization": false,
