@@ -31,10 +31,8 @@
         </mat-nav-list>
         @if (entry.valid && entry.emailValidated) {
           <mat-form-field class="content-box" color="accent">
-            <label>
-              <input matInput placeholder="Do you have any feedback on the BMRBdep system?"
-                     [formControl]="messageControl">
-            </label>
+            <input matInput placeholder="Do you have any feedback on the BMRBdep system?"
+                   [formControl]="messageControl">
           </mat-form-field>
         }
       </mat-card-content>
@@ -48,7 +46,7 @@
                 color="accent"
                 (click)="submitEntry()">Submit deposition to BMRB
         </button>
-        <a mat-raised-button (click)="goBack()" color="accent">Return to previous page</a>
+        <button type="button" mat-raised-button (click)="goBack()" color="accent">Return to previous page</button>
       </mat-card-actions>
     </mat-card>
   }

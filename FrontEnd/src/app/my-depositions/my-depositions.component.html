@@ -21,7 +21,8 @@
         <mat-nav-list>
           @for (deposition of depositions; track deposition.deposition_id) {
             <p>
-              <a mat-raised-button
+              <button mat-raised-button
+                 type="button"
                  [disabled]="isActiveDeposition(deposition.deposition_id)"
                  [ngClass]="{'current-deposition': isActiveDeposition(deposition.deposition_id)}"
                  (click)="loadDeposition(deposition)"
@@ -42,7 +43,7 @@
                 @if (deposition.authorized_via && deposition.authorized_via.length > 0) {
                   <span class="auth-reason"> ({{ getAuthReasonText(deposition.authorized_via) }})</span>
                 }
-              </a>
+              </button>
             </p>
           }
         </mat-nav-list>

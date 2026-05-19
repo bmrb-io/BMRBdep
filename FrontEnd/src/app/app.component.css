@@ -30,6 +30,15 @@ mat-sidenav {
   cursor: pointer;
 }
 
+button.valign-center,
+button.title-right {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
 .deposition-tabs {
   display: flex;
   flex-wrap: nowrap;

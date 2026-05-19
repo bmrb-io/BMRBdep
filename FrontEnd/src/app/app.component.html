@@ -1,12 +1,12 @@
 <mat-toolbar>
   <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
     @if (entry) {
-      <div
+      <button type="button"
         (click)="sidenav.toggle(); treeView.scrollSideNav()"
         class="valign-center" matTooltip="Toggle the navigation menu.">
         <mat-icon>menu</mat-icon>
         <span style="vertical-align: bottom">Menu</span>
-      </div>
+      </button>
     }
     @if (entry) {
       @if (entry && !entry.deposited) {
@@ -22,9 +22,9 @@
       @if (!entry) {
         <span class="title-center">BMRBdep</span>
       }
-      <span class="title-right pointer" (click)="clearEntry()"
-            matTooltip="Close all open depositions in this tab. You can resume any of them later by following the link sent to
-your email when you created the deposition, or from My Depositions.">Sign out</span>
+      <button type="button" class="title-right pointer" (click)="clearEntry()"
+              matTooltip="Close all open depositions in this tab. You can resume any of them later by following the link sent to
+your email when you created the deposition, or from My Depositions.">Sign out</button>
     }
 
     @if (!entry) {

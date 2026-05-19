@@ -39,21 +39,17 @@
       }
 
       <mat-form-field class="content-box" color="accent">
-        <label>
-          @if (!caughtException) {
-            <input matInput placeholder="Please enter your message." required [formControl]="messageControl">
-          }
-          @if (caughtException) {
-            <input matInput placeholder="Please enter your message." [formControl]="messageControl">
-          }
-        </label>
+        @if (!caughtException) {
+          <input matInput placeholder="Please enter your message." required [formControl]="messageControl">
+        }
+        @if (caughtException) {
+          <input matInput placeholder="Please enter your message." [formControl]="messageControl">
+        }
       </mat-form-field>
 
       @if (entry === null) {
         <mat-form-field class="content-box" color="accent">
-          <label>
-            <input matInput placeholder="Please enter your e-mail." required [formControl]="emailControl">
-          </label>
+          <input matInput placeholder="Please enter your e-mail." required [formControl]="emailControl">
         </mat-form-field>
       }
 
