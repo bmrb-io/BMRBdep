@@ -41,7 +41,7 @@ fi
 echo "Compiling angular (${ENVIRONMENT})."
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if ! npm ci; then
+if ! npm install --no-save; then
   echo "npm install failed, quitting."
   exit 3
 fi
