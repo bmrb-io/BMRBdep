@@ -36,7 +36,7 @@ if [[ $1 == "production" || $host == "bmrb-prod.nmrbox.org" ]]; then
     exit 3
   fi
 else
-  if ! npm run ng build --configuration=devprod; then
+  if ! npm run build.devprod; then
     echo "Angular build failed, quitting."
     exit 3
   fi

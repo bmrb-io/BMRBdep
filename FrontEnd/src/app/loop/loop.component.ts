@@ -4,7 +4,7 @@ import {LoopTag} from '../nmrstar/tag';
 import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 
 /* Import country updater code */
-import * as crs from '../javascript/crs.min';
+import * as crs from 'country-region-selector';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatButton} from '@angular/material/button';
 import {NgClass} from '@angular/common';
