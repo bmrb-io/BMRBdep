@@ -1,4 +1,5 @@
 import {BehaviorSubject, Observable, ReplaySubject, Subscription} from 'rxjs';
+import {finalize} from 'rxjs/operators';
 import {Entry, entryFromJSON, EntrySerialized} from './nmrstar/entry';
 import {Saveframe} from './nmrstar/saveframe';
 import {EntryJSON, SchemaJSON} from './nmrstar/schemaTypes';
@@ -121,6 +122,10 @@ export class DepositionPersistenceService implements OnDestroy {
   // Suppress overlapping conflict dialogs per deposition rather than globally —
   // a flurry of failed background saves shouldn't spawn N dialogs for one entry.
   private conflictDialogOpen = new Set<string>();
+  // Count of in-flight file uploads across all open depositions. Gates the
+  // deposit button so the user can't submit while a large upload is still
+  // streaming to the server.
+  private activeUploads = 0;
 
   private JSONOptions = {
     headers: new HttpHeaders({
@@ -173,6 +178,17 @@ export class DepositionPersistenceService implements OnDestroy {
       if (state.entry.unsaved) return true;
     }
     return false;
+  }
+
+  /**
+   * True while any background work that should block a deposit is in flight —
+   * primarily file uploads (which can be long), but also an in-progress
+   * incremental saveframe save on the active deposition.
+   */
+  get saveInProgress(): boolean {
+    if (this.activeUploads > 0) return true;
+    const state = this.getState(this.activeEntryID);
+    return !!state?.saveInProgress;
   }
 
   isOpen(entryID: string): boolean {
@@ -306,7 +322,10 @@ export class DepositionPersistenceService implements OnDestroy {
     };
 
     const req = new HttpRequest<FormData>('POST', apiEndPoint, formData, options);
-    return this.http.request<FileUploadResponse>(req);
+    this.activeUploads += 1;
+    return this.http.request<FileUploadResponse>(req).pipe(
+      finalize(() => { this.activeUploads -= 1; })
+    );
   }
 
   deleteFile(fileName: string, verifyDeleted = false): void {
