@@ -14,3 +14,5 @@ services:
     volumes:
       - /projects/BMRB/depositions/bmrbig/${ENVIRONMENT}:/opt/wsgi/depositions
       - /projects/BMRB/public/bmrbig/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbdep/configuration.json
+      - ./BackEnd/schema/schema_data/:/opt/wsgi/schema_data/
+      - ./FrontEnd/dist/:/opt/wsgi/dist/
