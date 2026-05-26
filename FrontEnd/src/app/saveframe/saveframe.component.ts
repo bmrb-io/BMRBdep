@@ -1,5 +1,5 @@
-import {ApiService} from '../api.service';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params, RouterLink} from '@angular/router';
@@ -23,16 +23,18 @@ import {LoopComponent} from '../loop/loop.component';
   imports: [FileUploaderComponent, MatTooltip, MatIcon, RouterLink, MatButton, NgClass, TagComponent, LoopComponent]
 })
 export class SaveframeComponent implements OnInit, OnDestroy {
-  @Input() saveframe: Saveframe;
-  @Output() sfReload = new EventEmitter<string>();
-  activeTag: SaveframeTag;
-  showCategoryLink: boolean;
-  dialogRef: MatDialogRef<ConfirmationDialogComponent>;
-  subscription$: Subscription;
+  private persistence = inject(DepositionPersistenceService);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
 
-  constructor(public api: ApiService,
-              private route: ActivatedRoute,
-              private dialog: MatDialog) {
+  @Input() saveframe!: Saveframe;
+  @Output() sfReload = new EventEmitter<string | null>();
+  activeTag: SaveframeTag | null;
+  showCategoryLink: boolean;
+  dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
+  subscription$!: Subscription;
+
+  constructor() {
     this.activeTag = null;
     this.showCategoryLink = false;
   }
@@ -67,7 +69,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     const nextCategory = this.saveframe.nextCategory;
     this.saveframe.parent.refresh();
     this.sfReload.emit(nextCategory);
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   deleteSaveframe(): void {
@@ -75,7 +77,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
-    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    const nameTag: SaveframeTag | null = this.saveframe.getTag('Name');
     if (nameTag && nameTag.value) {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to delete the section '${nameTag.value}'?` +
         ' You can always restore it later using the "Restore deleted section" panel in the navigation menu.';
@@ -101,7 +103,7 @@ export class SaveframeComponent implements OnInit, OnDestroy {
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false
     });
-    const nameTag: SaveframeTag = this.saveframe.getTag('Name');
+    const nameTag: SaveframeTag | null = this.saveframe.getTag('Name');
     if (nameTag && nameTag.value) {
       this.dialogRef.componentInstance.confirmMessage = `Are you sure you want to clear all data in the section '${nameTag.value}'?` +
         ' There is no way to undo this action later.';

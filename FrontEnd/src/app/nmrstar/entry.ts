@@ -3,6 +3,19 @@ import {Schema} from './schema';
 import {DataFileStore} from './dataStore';
 import {LoopTag} from './tag';
 import {Loop} from './loop';
+import {EntryJSON, FileUploadType} from './schemaTypes';
+
+export interface EntrySerialized {
+  entry_id: string;
+  saveframes: Saveframe[];
+  email_validated: boolean;
+  deposition_nickname: string | null;
+  entry_deposited: boolean;
+  unsaved: boolean;
+  bmrbnum: number | null;
+  commit: string[];
+  force?: boolean;
+}
 
 class SuperCategoryInfo {
   superCategory: string;
@@ -10,13 +23,13 @@ class SuperCategoryInfo {
   displayHelp: string;
   valid: boolean;
   display: string;
-  children: Array<CategoryInfo>;
+  children: CategoryInfo[];
 
   constructor(superCategory: string,
               displayName: string,
               displayHelp: string,
-              valid: boolean = true,
-              display: string = 'H') {
+              valid = true,
+              display = 'H') {
     this.superCategory = superCategory;
     this.displayName = displayName;
     this.displayHelp = displayHelp;
@@ -34,8 +47,8 @@ class CategoryInfo {
 
   constructor(category: string,
               displayName: string,
-              valid: boolean = true,
-              display: string = 'H') {
+              valid = true,
+              display = 'H') {
     this.category = category;
     this.displayName = displayName;
     this.valid = valid;
@@ -43,30 +56,26 @@ class CategoryInfo {
   }
 }
 
-export function entryFromJSON(jdata: Object): Entry {
-  const entry = new Entry(jdata['entry_id']);
-  entry.schema = new Schema(jdata['schema']);
-  entry.emailValidated = jdata['email_validated'];
-  entry.deposited = jdata['entry_deposited'];
-  entry.depositionNickname = jdata['deposition_nickname'];
-  entry.bmrbnum = jdata['bmrbnum'];
+export function entryFromJSON(jdata: EntryJSON): Entry {
+  const entry = new Entry(jdata.entry_id);
+  entry.schema = new Schema(jdata.schema);
+  entry.emailValidated = jdata.email_validated;
+  entry.deposited = jdata.entry_deposited;
+  entry.depositionNickname = jdata.deposition_nickname;
+  entry.bmrbnum = jdata.bmrbnum;
 
   // This code upgrades the user session to the new commits-as-list format
   // It can be removed after 6 months (to allow clients caches to have cleared).
   // Can remove after: 06/01/2020
-  if (typeof jdata['commit'] === 'string' || jdata['commit'] instanceof String) {
-    entry.commit = [jdata['commit'] as string];
+  if (typeof jdata.commit === 'string' || jdata.commit instanceof String) {
+    entry.commit = [jdata.commit as string];
   } else {
-    entry.commit = jdata['commit'];
+    entry.commit = jdata.commit;
   }
 
-  if ('unsaved' in jdata) {
-    entry.unsaved = jdata['unsaved'] as boolean;
-  } else {
-    entry.unsaved = false;
-  }
+  entry.unsaved = jdata.unsaved ?? false;
 
-  for (const saveframeJSON of jdata['saveframes']) {
+  for (const saveframeJSON of jdata.saveframes) {
     const newFrame = saveframeFromJSON(saveframeJSON, entry);
     entry.addSaveframe(newFrame, -1, false);
   }
@@ -80,21 +89,20 @@ export function entryFromJSON(jdata: Object): Entry {
 export class Entry {
   entryID: string;
   saveframes: Saveframe[];
-  schema: Schema;
-  superGroups: Array<SuperCategoryInfo>;
-  enumerationTies: {};
-  source: string;
-  dataStore: DataFileStore;
+  schema!: Schema;
+  superGroups: SuperCategoryInfo[] = [];
+  enumerationTies: Record<string, Set<string>>;
+  dataStore!: DataFileStore;
   valid: boolean;
   showAll: boolean;
   hasDeleted: boolean;
   emailValidated: boolean;
   deposited: boolean;
-  depositionNickname: string;
-  bmrbnum: number;
-  firstIncompleteCategory: string;
-  commit: Array<string>;
-  unsaved: boolean;
+  depositionNickname: string | null;
+  bmrbnum: number | null;
+  firstIncompleteCategory: string | null;
+  commit!: string[];
+  unsaved: boolean = false;
 
   constructor(dataName: string) {
     this.entryID = dataName;
@@ -112,7 +120,7 @@ export class Entry {
     this.updateCategories();
   }
 
-  toJSON(): {} {
+  toJSON(): EntrySerialized {
     return {
       entry_id: this.entryID, saveframes: this.saveframes, email_validated: this.emailValidated,
       deposition_nickname: this.depositionNickname, entry_deposited: this.deposited, unsaved: this.unsaved,
@@ -133,7 +141,7 @@ export class Entry {
 
   /* Add a new saveframe to the saveframe list.
      Optionally specify position if not at end. */
-  addSaveframe(saveframe: Saveframe, position: number = -1, refresh: boolean = true): void {
+  addSaveframe(saveframe: Saveframe, position = -1, refresh = true): void {
     if (position < 0) {
       this.saveframes.push(saveframe);
     } else {
@@ -164,7 +172,7 @@ export class Entry {
         categories.add(sf.category);
       }
     }
-    const categoryStatusDict = {};
+    const categoryStatusDict: Record<string, CategoryInfo> = {};
 
     // Then check all of the saveframes in each category to determine if the category group is valid and needs to be displayed
     //  Also, set the first invalid saveframe in the process
@@ -177,7 +185,7 @@ export class Entry {
         console.error('A saveframe exists with an invalid category:', category);
         continue;
       }
-      const prettyName = this.schema.saveframeSchema[category]['category_group_view_name'];
+      const prettyName = this.schema.saveframeSchema[category]['category_group_view_name'] ?? '';
 
       const matchingSaveframes = this.getSaveframesByCategory(category);
 
@@ -210,7 +218,7 @@ export class Entry {
     }
 
     // Update a record of which supergroup categories are valid and should be displayed
-    const categoryOrder = [];
+    const categoryOrder: string[] = [];
     this.superGroups = [];
     if (this.schema) {
       for (const supergroup of this.schema.categorySupergroupsDictList) {
@@ -252,7 +260,7 @@ export class Entry {
       }
     }
 
-    function setNextAndPreviousCategories(saveframe) {
+    function setNextAndPreviousCategories(saveframe: Saveframe): void {
       const index = categoryOrder.indexOf(saveframe.category);
 
       /* In the case that the saveframe is no longer displayed (i.e. index < 0)
@@ -288,7 +296,7 @@ export class Entry {
     return result;
   }
 
-  getTagValue(fqtn: string, skip: Saveframe = null): string {
+  getTagValue(fqtn: string, skip: Saveframe | null = null): string | null {
 
     for (const saveframe of this.saveframes) {
       // Skip checking the saveframe that called us, if one did
@@ -306,7 +314,7 @@ export class Entry {
     return null;
   }
 
-  getSaveframeByName(saveframeName: string): Saveframe {
+  getSaveframeByName(saveframeName: string): Saveframe | null {
     for (const sf of this.saveframes) {
       if (sf.name === saveframeName) {
         return sf;
@@ -343,12 +351,12 @@ export class Entry {
     // First reset all the tag display values to the default
     for (const saveframe of this.saveframes) {
       for (const tag of saveframe.tags) {
-        tag.display = tag.schemaValues['User full view'];
+        tag.display = tag.schemaValues['User full view'] ?? 'H';
       }
       for (const loop of saveframe.loops) {
         for (const row of loop.data) {
           for (const tag of row) {
-            tag.display = tag.schemaValues['User full view'];
+            tag.display = tag.schemaValues['User full view'] ?? 'H';
           }
         }
       }
@@ -373,14 +381,14 @@ export class Entry {
                 console.warn('Dictionary override rule specifies non-existent tag:', rule['Tag'], rule);
               } else {
                 if (rule['Override view value'] === 'O') {
-                  tag.display = saveframe.tagDict[rule['Tag']].schemaValues['User full view'];
+                  tag.display = saveframe.tagDict[rule['Tag']].schemaValues['User full view'] ?? 'H';
                 } else {
                   tag.display = rule['Override view value'];
                 }
               }
               // See if the rule applies to a child loop
             } else {
-              const loopsByPrefix = {};
+              const loopsByPrefix: Record<string, Loop> = {};
               for (const loop of saveframe.loops) {
                 loopsByPrefix[loop.category] = loop;
               }
@@ -391,7 +399,7 @@ export class Entry {
               } else {
                 // If the rule applies to a different saveframe category, apply the rule to all of the saveframes in the category
                 if (rule['Sf category'] !== saveframe.category) {
-                  for (const frame of this.getSaveframesByCategory(rule['Sf category'])) {
+                  for (const frame of this.getSaveframesByCategory(rule['Sf category'] ?? '')) {
                     frame.setVisibility(rule);
                   }
                 } else {
@@ -410,6 +418,9 @@ export class Entry {
                 // We need to check each row
                 const tagCol = loop.getTagIndex(rule['Conditional tag']);
                 const applyCol = loop.getTagIndex(rule['Tag']);
+                if (tagCol === null || applyCol === null) {
+                  continue;
+                }
                 for (const row of loop.data) {
                   if (row[tagCol] && rule['Regex'].test(row[tagCol].value)) {
                     if (rule['Tag category'] === loop.category) {
@@ -491,7 +502,7 @@ export class Entry {
     }
   }
 
-  getLoopsByCategory(category): Loop[] {
+  getLoopsByCategory(category: string): Loop[] {
     const results: Loop[] = [];
     for (const saveframe of this.saveframes) {
       for (const loop of saveframe.loops) {
@@ -511,23 +522,23 @@ export class Entry {
      */
     const dfLoop = this.getLoopsByCategory('_Upload_data')[0];
     dfLoop.data = [];
-    for (let i = 0; i < this.dataStore.dataFiles.length; i++) {
-      for (let n = -1; n < this.dataStore.dataFiles[i].control.value.length; n++) {
+    for (const dataFile of this.dataStore.dataFiles) {
+      for (let n = -1; n < dataFile.control.value.length; n++) {
         let contentDescription = null;
         let sfCategory = null;
 
         // Make sure there is at least an empty record for each file
         if (n === -1) {
-          if (this.dataStore.dataFiles[i].control.value.length !== 0) {
+          if (dataFile.control.value.length !== 0) {
             continue;
           }
         } else {
-          contentDescription = this.dataStore.dataFiles[i].control.value[n][0];
-          sfCategory = this.dataStore.dataFiles[i].control.value[n][1];
+          contentDescription = dataFile.control.value[n][0];
+          sfCategory = dataFile.control.value[n][1];
         }
         const newRow = dfLoop.addRow();
         newRow[dfLoop.tags.indexOf('Data_file_ID')] = new LoopTag('Data_file_ID', String(dfLoop.data.length), dfLoop);
-        newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', this.dataStore.dataFiles[i].fileName, dfLoop);
+        newRow[dfLoop.tags.indexOf('Data_file_name')] = new LoopTag('Data_file_name', dataFile.fileName, dfLoop);
         newRow[dfLoop.tags.indexOf('Data_file_content_type')] = new LoopTag('Data_file_content_type', contentDescription, dfLoop);
         if (sfCategory === null) {
           newRow[dfLoop.tags.indexOf('Data_file_Sf_category')] = new LoopTag('Data_file_Sf_category', null, dfLoop);
@@ -586,8 +597,8 @@ export class Entry {
       }
     }
 
-    const dataBuilder = {};
-    const nameList = [];
+    const dataBuilder: Record<string, FileUploadType[]> = {};
+    const nameList: string[] = [];
     const dataDescriptionRow = dataLoop.tags.indexOf('Data_file_content_type');
     const dataFileNameRow = dataLoop.tags.indexOf('Data_file_name');
     for (const dataRow of dataLoop.data) {
@@ -628,9 +639,11 @@ export class Entry {
     if (!referenceCitation) {
       for (const citationFrame of this.getSaveframesByCategory('citations')) {
         const classTag = citationFrame.getTag('_Citation.Class');
-        classTag.valid = false;
-        classTag.validationMessage = 'Each deposition must have at least one saveframe of type "entry citation". ' +
-          'Please either create a new citation of type "entry citation" or update one of the existing ones.';
+        if (classTag) {
+          classTag.valid = false;
+          classTag.validationMessage = 'Each deposition must have at least one saveframe of type "entry citation". ' +
+            'Please either create a new citation of type "entry citation" or update one of the existing ones.';
+        }
         citationFrame.valid = false;
       }
     }

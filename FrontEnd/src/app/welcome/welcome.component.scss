@@ -15,22 +15,6 @@
   margin-bottom: .5em;
 }
 
-.resume-box {
-  div {
-    display: flex;
-
-    div {
-      flex: 1 1 0;
-      a, button {
-        width: 100%;
-      }
-    }
-    div:first-child, div:nth-child(2) {
-      padding-right: 1em;
-    }
-  }
-}
-
 h1 {
   margin-left: .5em;
 }

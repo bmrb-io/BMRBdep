@@ -1,5 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ApiService} from '../api.service';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {Router} from '@angular/router';
 import {Entry} from '../nmrstar/entry';
 import {Subscription, timer} from 'rxjs';
@@ -14,27 +15,26 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatButton]
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {
+  private persistence = inject(DepositionPersistenceService);
+  private lifecycle = inject(DepositionLifecycleService);
+  private router = inject(Router);
 
-  entry: Entry;
-  subscription$: Subscription;
 
-  constructor(private api: ApiService,
-              private router: Router) {
-  }
+  entry: Entry | null = null;
+  subscription$!: Subscription;
 
   ngOnInit() {
-    const parent: PendingValidationComponent = this;
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => {
-        parent.entry = entry;
+        this.entry = entry;
         // Route straight to the entry if validated
         if (entry && entry.emailValidated) {
           if (entry.deposited) {
-            parent.router.navigate(['/entry']).then();
+            this.router.navigate(['/entry']).then();
           } else if (entry.firstIncompleteCategory) {
-            parent.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
+            this.router.navigate(['/entry/', 'saveframe', entry.firstIncompleteCategory]).then();
           } else {
-            parent.router.navigate(['/entry/', 'review']).then();
+            this.router.navigate(['/entry/', 'review']).then();
           }
         }
       }
@@ -43,16 +43,16 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
     // Check the validation status every 2.5 seconds
     this.subscription$.add(timer(0, 2500).subscribe({
       next: () => {
-        parent.api.checkValidatedEmail().then(status => {
-          if (status) {
-            parent.entry.emailValidated = true;
-            parent.api.storeEntry(false);
-            if (parent.entry.deposited) {
-              parent.router.navigate(['/entry']).then();
-            } else if (parent.entry.firstIncompleteCategory) {
-              parent.router.navigate(['/entry/', 'saveframe', parent.entry.firstIncompleteCategory]).then();
+        this.persistence.checkValidatedEmail().then(status => {
+          if (status && this.entry) {
+            this.entry.emailValidated = true;
+            this.persistence.storeEntry(false);
+            if (this.entry.deposited) {
+              this.router.navigate(['/entry']).then();
+            } else if (this.entry.firstIncompleteCategory) {
+              this.router.navigate(['/entry/', 'saveframe', this.entry.firstIncompleteCategory]).then();
             } else {
-              parent.router.navigate(['/entry/', 'review']).then();
+              this.router.navigate(['/entry/', 'review']).then();
             }
           }
         });
@@ -67,6 +67,6 @@ export class PendingValidationComponent implements OnInit, OnDestroy {
   }
 
   resendValidationEmail(): void {
-    this.api.resendValidationEmail().subscribe();
+    this.lifecycle.resendValidationEmail().subscribe();
   }
 }

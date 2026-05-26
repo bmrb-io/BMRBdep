@@ -1,39 +1,40 @@
-import {UntypedFormControl} from '@angular/forms';
+import {FormControl} from '@angular/forms';
+import {FileUploadType} from './schemaTypes';
 
 export class DataFile {
-  dropDownList;
-  selectedItems;
-  fileName;
-  percent;
-  control: UntypedFormControl;
+  dropDownList: FileUploadType[];
+  selectedItems: FileUploadType[];
+  fileName: string;
+  percent: number;
+  control: FormControl<FileUploadType[]>;
 
-  constructor(fileName: string, dropDownList: {}, selectedItems: {} = []) {
+  constructor(fileName: string, dropDownList: FileUploadType[], selectedItems: FileUploadType[] = []) {
     this.fileName = fileName;
     this.dropDownList = dropDownList;
     this.selectedItems = selectedItems;
     this.percent = 0;
-    this.control = new UntypedFormControl(selectedItems);
+    this.control = new FormControl<FileUploadType[]>(selectedItems, {nonNullable: true});
   }
 }
 
 export class DataFileStore {
   dataFiles: DataFile[];
-  dataFileMap: {};
-  dropDownList;
+  dataFileMap: Record<string, DataFile>;
+  dropDownList: FileUploadType[];
 
-  constructor(fileNames: string[], dropDownList) {
+  constructor(fileNames: string[], dropDownList: FileUploadType[]) {
     // Create the dataFiles objects
     this.dataFiles = [];
     this.dataFileMap = {};
     this.dropDownList = dropDownList;
-    for (let i = 0; i < fileNames.length; i++) {
-      this.addFile(fileNames[i]).percent = 100;
+    for (const fileName of fileNames) {
+      this.addFile(fileName).percent = 100;
     }
   }
 
-  addFile(filename: string = null, selected: {} = []): DataFile {
+  addFile(filename: string, selected: FileUploadType[] = []): DataFile {
 
-    let dataFile;
+    let dataFile: DataFile;
 
     // File already exists
     if (this.dataFileMap[filename]) {
@@ -94,12 +95,12 @@ export class DataFileStore {
   }
 
   getDataFileNamesByCategory(category: string): Set<[string, string]> {
-    const results: Set<[string, string]> = new Set();
-    for (let i = 0; i < this.dataFiles.length; i++) {
-      for (let n = 0; n < this.dataFiles[i].control.value.length; n++) {
-        for (const specificCategory of this.dataFiles[i].control.value[n][1]) {
+    const results = new Set<[string, string]>();
+    for (const dataFile of this.dataFiles) {
+      for (const value of dataFile.control.value) {
+        for (const specificCategory of value[1]) {
           if (specificCategory === category) {
-            results.add([this.dataFiles[i].fileName, this.dataFiles[i].fileName]);
+            results.add([dataFile.fileName, dataFile.fileName]);
           }
         }
       }
@@ -107,12 +108,11 @@ export class DataFileStore {
     return results;
   }
 
-  toJSON(): {} {
+  toJSON(): string[] {
     const filenames: string[] = [];
-    for (let i = 0; i < this.dataFiles.length; i++) {
-      filenames.push(this.dataFiles[i].fileName);
+    for (const dataFile of this.dataFiles) {
+      filenames.push(dataFile.fileName);
     }
     return filenames;
   }
 }
-

@@ -25,7 +25,7 @@ from bmrbdep.database import init_db
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers import tokens
-from bmrbdep.helpers.star_tools import merge_entries
+from bmrbdep.helpers.star_tools import assign_unique_ids, merge_entries
 
 application = Flask(__name__)
 
@@ -250,7 +250,7 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
-Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to 
+Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to
 proceed. You can also use this link to return to your deposition later if you close the page before
 it is complete.
 <br><br>
@@ -304,6 +304,9 @@ def duplicate_deposition(uuid) -> Response:
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
         merge_entries(entry_template, repo.entry, schema, preserve_entry_information=True)
+        # Clones get their own fresh per-saveframe IDs so edits to the clone
+        # are never matched against the source deposition.
+        assign_unique_ids(entry_template, overwrite=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -522,6 +525,8 @@ def new_deposition() -> Response:
 
         # Add a "deleted" tag to use to track deletion status
         saveframe.add_tag('_Deleted', 'no', update=True)
+        # Add a stable per-saveframe ID used by the incremental save endpoint
+        saveframe.add_tag('_Unique_ID', str(uuid4()), update=True)
 
         for loop in saveframe:
             if not loop.data:
@@ -756,6 +761,14 @@ def fetch_or_store_deposition(uuid):
             entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
             bmrbnum: Optional[int] = repo.metadata.get('bmrbnum')
+
+            # Lazy backfill: pre-existing depositions created before incremental save
+            # have no `_Unique_ID` tags. Assign them on first GET so subsequent
+            # per-saveframe PUTs can match by ID. Deposited entries are sealed.
+            if not entry_deposited and assign_unique_ids(entry, overwrite=False) > 0:
+                repo.entry = entry
+                repo.commit("Backfilled per-saveframe unique IDs.")
+
             commit: str = repo.last_commit
         try:
             schema: dict = get_schema(schema_version)
@@ -772,3 +785,92 @@ def fetch_or_store_deposition(uuid):
         entry['commit'] = [commit]
 
         return jsonify(entry)
+
+
+@application.route('/deposition/<uuid:uuid>/saveframes', methods=('PUT',))
+def store_saveframes(uuid) -> Response:
+    """ Incremental save: replace only the saveframes the client marks as dirty.
+
+    Body: {"commit": [<known commit hashes>], "force"?: true,
+           "saveframes": [<pynmrstar saveframe-JSON>, ...]}
+
+    Each incoming saveframe is matched against the existing entry by its
+    `_Unique_ID` tag and replaced in place. Saveframes whose IDs are not found
+    are appended (this is how the client creates new saveframes — it generates
+    a uuid client-side and sends it).
+    """
+    payload: dict = request.get_json()
+    if not payload or 'saveframes' not in payload:
+        raise RequestError("Missing 'saveframes' in request body.")
+    if 'commit' not in payload:
+        raise RequestError("Missing 'commit' in request body.")
+
+    incoming: List[dict] = payload['saveframes']
+
+    try:
+        parsed_saveframes: List[pynmrstar.Saveframe] = [
+            pynmrstar.Saveframe.from_json(sf_json) for sf_json in incoming
+        ]
+    except ValueError as err:
+        raise RequestError("Invalid saveframe JSON: %s" % repr(err))
+
+    # Every incoming saveframe must carry a _Unique_ID
+    incoming_ids: List[str] = []
+    for sf_json, sf in zip(incoming, parsed_saveframes):
+        try:
+            sf_id = sf.get_tag('_Unique_ID')[0]
+        except IndexError:
+            raise RequestError("Saveframe '%s' is missing a %s tag." % (sf.name, '_Unique_ID'))
+        incoming_ids.append(sf_id)
+
+    with depositions.DepositionRepo(uuid) as repo:
+        existing_entry: pynmrstar.Entry = repo.entry
+
+        if repo.last_commit not in payload['commit']:
+            if not payload.get('force'):
+                logging.warning('Stale incremental save for deposition %s.', uuid)
+                return jsonify({'error': 'reload'})
+
+        # Index existing saveframes by their _Unique_ID for O(1) lookup, and also
+        # by name for the migration-skew fallback below.
+        existing_by_id: Dict[str, pynmrstar.Saveframe] = {}
+        existing_by_name: Dict[str, pynmrstar.Saveframe] = {}
+        for sf in existing_entry:
+            existing_by_name[sf.name] = sf
+            existing_id = sf.get_tag('_Unique_ID')
+            if existing_id and existing_id[0]:
+                existing_by_id[existing_id[0]] = sf
+
+        changed = False
+        for sf_id, sf in zip(incoming_ids, parsed_saveframes):
+            target = existing_by_id.get(sf_id)
+            # Fallback: if the client minted a UUID that the server doesn't know
+            # about, try matching by saveframe name. This handles a client whose
+            # IndexedDB cache predates the migration — the cached entry has no
+            # `_Unique_ID` tags, the client's `uniqueId` getter generated fresh
+            # ones, and the server happens to hold the same saveframe under the
+            # same name. We adopt the client's UUID so future saves match cleanly.
+            if target is None:
+                target = existing_by_name.get(sf.name)
+            if target is None:
+                # Genuinely new saveframe — append. Client allocated the uuid.
+                existing_entry.add_saveframe(sf)
+                changed = True
+            else:
+                # Replace in place. Skip the rewrite if nothing actually changed
+                # so we don't churn commits on no-op saves.
+                try:
+                    if target == sf:
+                        continue
+                except ValueError:
+                    pass
+                existing_entry[target.name] = sf
+                changed = True
+
+        if not changed:
+            return jsonify({'commit': repo.last_commit})
+
+        repo.entry = existing_entry
+        repo.commit("Entry updated (incremental).")
+
+        return jsonify({'commit': repo.last_commit})

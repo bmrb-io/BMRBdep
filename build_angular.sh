@@ -11,32 +11,47 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #  exit 1
 #fi
 
-user_id=`id -u`
-if [[ $user_id != '17473' ]]; then
- echo "Must run this as bmrbsvc user (or apache on production)..."
- exit 1
+if [[ ! -f "${SCRIPT_DIR}/.env" ]]; then
+  echo "No .env file found at ${SCRIPT_DIR}/.env; cannot determine build mode."
+  exit 1
 fi
-host=`hostname`
+
+read_env_var() {
+  grep -E "^[[:space:]]*$1[[:space:]]*=" "${SCRIPT_DIR}/.env" | tail -n 1 | cut -d= -f2- | tr -d '[:space:]"'"'"
+}
+
+ENVIRONMENT=$(read_env_var ENVIRONMENT)
+if [[ "${ENVIRONMENT}" != "production" && "${ENVIRONMENT}" != "development" ]]; then
+  echo "ENVIRONMENT in .env must be 'production' or 'development' (got: '${ENVIRONMENT}')."
+  exit 1
+fi
+
+required_uid=$(read_env_var UID)
+if [[ -n "${required_uid}" && "$(id -u)" != "${required_uid}" ]]; then
+  echo "Must run this as UID ${required_uid} (as specified in .env)."
+  exit 1
+fi
 
 echo "Getting newest schema."
-(
-source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-if ! "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py; then
+if ! (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && ./.venv/bin/python "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py); then
   echo "Schema loader failed, quitting."
   exit 2
 fi
-)
 
-echo "Compiling angular."
+echo "Compiling angular (${ENVIRONMENT})."
 source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
 cd "${SCRIPT_DIR}"/FrontEnd || exit 2
-if [[ $1 == "production" || $host == "bmrb-prod.nmrbox.org" ]]; then
+if ! npm install --no-save; then
+  echo "npm install failed, quitting."
+  exit 3
+fi
+if [[ "${ENVIRONMENT}" == "production" ]]; then
   if ! npm run build.prod; then
     echo "Angular build failed, quitting."
     exit 3
   fi
 else
-  if ! ./node_modules/@angular/cli/bin/ng.js build --configuration devprod; then
+  if ! npm run build.devprod; then
     echo "Angular build failed, quitting."
     exit 3
   fi

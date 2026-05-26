@@ -1,112 +1,103 @@
-@if (tag.interfaceType == 'country') {
-  <label>
-    <select
-      [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true, 'crs-country': true}"
-      (change)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      [attr.data-region-id]="'state'+getRow()"
-      [attr.data-default-value]="tag.value"
-      [disabled]="tag.disabled"
-      data-preferred="US,GB,CN,JP,AU,MX">
-    </select>
-  </label>
+@if (tag.interfaceType === 'country') {
+  <select
+    [(ngModel)]="tag.value"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true, 'crs-country': true}"
+    (change)="validateTag()"
+    [matTooltip]="tag.validationMessage"
+    [attr.data-region-id]="'state'+getRow()"
+    [attr.data-default-value]="tag.value"
+    [disabled]="tag.disabled"
+    data-preferred="US,GB,CN,JP,AU,MX">
+  </select>
 }
 
-@if (tag.interfaceType == 'state') {
-  <label>
-    <select
-      [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      (change)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      [id]="'state'+getRow()"
-      [attr.data-default-value]="tag.value"
-      [disabled]="tag.disabled"
-      data-default-option="Select State or Province">
-    </select>
-  </label>
+@if (tag.interfaceType === 'state') {
+  <select
+    [(ngModel)]="tag.value"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+    (change)="validateTag()"
+    [matTooltip]="tag.validationMessage"
+    [id]="'state'+getRow()"
+    [attr.data-default-value]="tag.value"
+    [disabled]="tag.disabled"
+    data-default-option="Select State or Province">
+  </select>
 }
 
 
-@if (tag.interfaceType == 'standard') {
-  <label>
-    <input
-      [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      [placeholder]="tag.schemaValues['default value']"
-      (change)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      [disabled]="tag.disabled">
-    <!--
-    Those don't play nicely with our validation
-    [type]="tag.dataType"
-    [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
-    -->
-  </label>
+@if (tag.interfaceType === 'standard') {
+  <input
+    [(ngModel)]="tag.value"
+    [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+    [placeholder]="tag.schemaValues['default value']"
+    (change)="validateTag()"
+    [matTooltip]="tag.validationMessage"
+    [disabled]="tag.disabled">
+  <!--
+  Those don't play nicely with our validation
+  [type]="tag.dataType"
+  [attr.step]="tag.schemaValues['BMRB data type'] == 'float' ? 'any' : null"
+  -->
 }
 
-@if (tag.interfaceType == 'closed_enum') {
-  <label>
-    <mat-select [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      (ngModelChange)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      [disabled]="tag.disabled">
-      @if (tag.value && tag.validationMessage) {
-        <mat-option disabled [value]="tag.value" class="type-error">{{tag.value}} -
-        Error: {{tag.validationMessage}}</mat-option>
+@if (tag.interfaceType === 'closed_enum') {
+  <mat-select [(ngModel)]="tag.value"
+              [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+              (ngModelChange)="validateTag()"
+              [matTooltip]="tag.validationMessage"
+              [disabled]="tag.disabled">
+    @if (tag.value && tag.validationMessage) {
+      <mat-option disabled [value]="tag.value" class="type-error">{{ tag.value }} -
+        Error: {{ tag.validationMessage }}
+      </mat-option>
+    }
+    @for (val of tag.enums; track val) {
+      @if (tag.value !== val[0]) {
+        <mat-option [value]="val[0]" [matTooltip]="val[1]">{{ val[0] }}</mat-option>
       }
-      @for (val of tag.enums; track val) {
-        @if (tag.value != val[0]) {
-          <mat-option [value]="val[0]" [matTooltip]="val[1]">{{val[0]}}</mat-option>
-        }
-        @if (tag.value == val[0] && !tag.validationMessage) {
-          <mat-option [value]="tag.value" [matTooltip]="val[1]">{{tag.value}}</mat-option>
-        }
+      @if (tag.value === val[0] && !tag.validationMessage) {
+        <mat-option [value]="tag.value" [matTooltip]="val[1]">{{ tag.value }}</mat-option>
       }
-    </mat-select>
-  </label>
+    }
+  </mat-select>
 }
 
-@if (tag.interfaceType == 'sf_pointer' || tag.interfaceType == 'experiment_pointer') {
-  <label>
-    <mat-select [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      (ngModelChange)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      [disabled]="tag.disabled" panelClass="closed_enum_option">
-      @for (frameLink of tag.frameLink; track frameLink) {
-        <mat-option [value]="frameLink[0]"
-        [ngClass]="{'type-error': !tag.valid}">{{frameLink[1]}}</mat-option>
-      }
-    </mat-select>
-  </label>
+@if (tag.interfaceType === 'sf_pointer' || tag.interfaceType === 'experiment_pointer') {
+  <mat-select [(ngModel)]="tag.value"
+              [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+              (ngModelChange)="validateTag()"
+              [matTooltip]="tag.validationMessage"
+              [disabled]="tag.disabled" panelClass="closed_enum_option">
+    @for (frameLink of tag.frameLink; track frameLink) {
+      <mat-option [value]="frameLink[0]"
+                  [ngClass]="{'type-error': !tag.valid}">{{ frameLink[1] }}
+      </mat-option>
+    }
+  </mat-select>
 }
 
-@if (tag.interfaceType == 'open_enum') {
-  <label>
-    <input matInput
-      [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      (change)="validateTag()"
-      (ngModelChange)="filter()"
-      (focus)="filter()"
-      [matTooltip]="tag.validationMessage"
-      [disabled]="tag.disabled"
-      [matAutocomplete]="auto">
-  </label>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto" class="closed_enum_option">
+@if (tag.interfaceType === 'open_enum') {
+  <input matInput
+         [(ngModel)]="tag.value"
+         [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+         (change)="validateTag()"
+         (ngModelChange)="filter()"
+         (focus)="filter()"
+         [matTooltip]="tag.validationMessage"
+         [disabled]="tag.disabled"
+         [matAutocomplete]="auto">
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="validateTag()" panelWidth="auto"
+                    class="closed_enum_option">
     @for (option of filteredOptions; track option) {
-      <mat-option [value]="option[0]" [matTooltip]="option[1]">{{option[0]}}</mat-option>
+      <mat-option [value]="option[0]" [matTooltip]="option[1]">{{ option[0] }}</mat-option>
     }
   </mat-autocomplete>
 }
 
 
-@if (tag.interfaceType == 'yes_no') {
+@if (tag.interfaceType === 'yes_no') {
   <div [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-    [matTooltip]="tag.validationMessage">
+       [matTooltip]="tag.validationMessage">
     <mat-radio-group [(ngModel)]="tag.value" [disabled]="tag.disabled" (change)="validateTag()">
       <mat-radio-button class="first-button" value="yes">Yes</mat-radio-button>
       <mat-radio-button value="no">No</mat-radio-button>
@@ -114,16 +105,13 @@
   </div>
 }
 
-@if (tag.interfaceType == 'text') {
-  <label>
-    <textarea [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      [placeholder]="tag.schemaValues['default value']"
-      (change)="validateTag()"
-      [matTooltip]="tag.validationMessage"
-      (ngModelChange)="recalculateHeight()"
-      [style.height.em]="height"
-    [disabled]="tag.disabled"></textarea>
-  </label>
+@if (tag.interfaceType === 'text') {
+  <textarea [(ngModel)]="tag.value"
+            [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+            [placeholder]="tag.schemaValues['default value']"
+            (change)="validateTag()"
+            [matTooltip]="tag.validationMessage"
+            (ngModelChange)="recalculateHeight()"
+            [style.height.em]="height"
+            [disabled]="tag.disabled"></textarea>
 }
-

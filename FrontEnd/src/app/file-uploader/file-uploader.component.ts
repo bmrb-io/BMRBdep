@@ -1,5 +1,5 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ApiService} from '../api.service';
+import {Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
@@ -22,20 +22,22 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
   imports: [MatButton, RouterLink, MatProgressBar, NgClass, MatFormField, MatSelect, FormsModule, ReactiveFormsModule, MatOption]
 })
 export class FileUploaderComponent implements OnInit, OnDestroy {
+  private persistence = inject(DepositionPersistenceService);
+  private messagesService = inject(MessagesService);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
 
-  @Input() entry: Entry;
-  @ViewChild('inputFile') fileUploadElement: ElementRef;
-  serverURL: String = null;
+
+  @Input() entry!: Entry;
+  @ViewChild('inputFile') fileUploadElement!: ElementRef;
+  serverURL: string | null = null;
   showCategoryLink: boolean;
-  uploadSubscriptionDict$: {};
-  subscription$: Subscription;
-  public activeUploads;
-  private dialogRef: MatDialogRef<ConfirmationDialogComponent>;
+  uploadSubscriptionDict$: Record<string, Subscription>;
+  subscription$!: Subscription;
+  public activeUploads: number;
+  private dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
 
-  constructor(private api: ApiService,
-              private messagesService: MessagesService,
-              private route: ActivatedRoute,
-              private dialog: MatDialog) {
+  constructor() {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
     this.activeUploads = 0;
@@ -51,7 +53,7 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.subscription$.add(this.api.entrySubject.subscribe({
+    this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => {
         if (entry) {
           for (const file of entry.dataStore.dataFiles) {
@@ -79,12 +81,12 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   updateAndSaveDataFiles() {
     this.entry.updateUploadedData();
     this.entry.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   // At the drag drop area
   // (dragover)="onDragOverFile($event)"
-  onDragOverFile(event) {
+  onDragOverFile(event: DragEvent) {
     event.stopPropagation();
     event.preventDefault();
   }
@@ -100,8 +102,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
 
   // At the file input element
   // (change)="selectFile($event)"
-  selectFile(event) {
-    this.uploadFiles(event.target.files);
+  selectFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.uploadFiles(input.files);
+    }
     this.fileUploadElement.nativeElement.value = '';
   }
 
@@ -110,21 +115,33 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
   processUploadEventAndUpload(event: DragEvent) {
-    if (typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function' &&
-      typeof event.dataTransfer.items[0].webkitGetAsEntry !== 'function') {
+    const dataTransfer = event.dataTransfer;
+    if (!dataTransfer) {
+      return;
+    }
+    const firstItem = dataTransfer.items[0] as (DataTransferItem & { getAsEntry?(): FileSystemEntry }) | undefined;
+    if (!firstItem ||
+      (typeof firstItem.webkitGetAsEntry !== 'function' &&
+        typeof firstItem.getAsEntry !== 'function')) {
       // Fall back to just uploading the top level files
-      this.uploadFiles(event.dataTransfer.files);
+      this.uploadFiles(dataTransfer.files);
       return;
     }
 
-    for (let i = 0; i < event.dataTransfer.items.length; i++) {
+    for (const dtItem of Array.from(dataTransfer.items)) {
       try {
-        this.traverseFileTree(event.dataTransfer.items[i].webkitGetAsEntry(), undefined);
+        const entry = dtItem.webkitGetAsEntry();
+        if (entry) {
+          this.traverseFileTree(entry, '');
+        }
       } catch {
         try {
-          this.traverseFileTree((event.dataTransfer.items[i] as any).getAsEntry(), undefined);
+          const legacy = dtItem as DataTransferItem & { getAsEntry?(): FileSystemEntry };
+          const entry = legacy.getAsEntry?.();
+          if (entry) {
+            this.traverseFileTree(entry, '');
+          }
         } catch {
-          // Help the compiler not get upset about the current lack of getAsEntry()
           console.error('In theory, this error state is impossible.');
         }
       }
@@ -132,39 +149,37 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   }
 
 
-  traverseFileTree(item, path: string) {
-    // This takes a list of File or Directory items, and recursively explores the directories, adding all files
-    //  within them for upload.
+  traverseFileTree(item: FileSystemEntry, path: string): void {
+    // Recursively walk a dropped File/Directory tree, uploading each file we encounter.
+    // Returns nothing — the FileSystemEntry APIs are async-callback based, so accumulating
+    // and returning the file list isn't possible; uploads are kicked off in-place instead.
 
-    let files = [];
-    const parent = this;
     path = path || '';
 
     if (item.isFile) {
       // Get file
-      item.file(function (file) {
+      (item as FileSystemFileEntry).file((file: File) => {
         console.log('File:', path + file.name, item);
 
         // Don't upload hidden files, this will just confuse the user
         if (!file.name.startsWith('.')) {
-          parent.uploadFile(file);
+          this.uploadFile(file);
         }
       });
     } else if (item.isDirectory) {
       // Get folder contents
-      const dirReader = item.createReader();
-      dirReader.readEntries(function (entries) {
-        for (let i = 0; i < entries.length; i++) {
-          files = files.concat(parent.traverseFileTree(entries[i], path + item.name + '/'));
+      const dirReader = (item as FileSystemDirectoryEntry).createReader();
+      dirReader.readEntries((entries: FileSystemEntry[]) => {
+        for (const entry of entries) {
+          this.traverseFileTree(entry, path + item.name + '/');
         }
       });
     }
-    return files;
   }
 
   uploadFiles(files: FileList) {
-    for (let i = 0; i < files.length; i++) {
-      if (!files[i].size) {
+    for (const file of Array.from(files)) {
+      if (!file.size) {
         this.messagesService.sendMessage(new Message(`It appears that you attempted to upload one or more folders or zero byte
         files. At the current time, uploading folders is only supported on modern browsers, and only via "drag and drop". Please either use
         a newer browser and drag and drop your folder(s), or tar or zip up your directory and then upload it. Uploading multiple files is
@@ -172,26 +187,28 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
           MessageType.NotificationMessage));
         continue;
       }
-      this.uploadFile(files[i]);
+      this.uploadFile(file);
     }
   }
 
-  uploadFile(file) {
+  uploadFile(file: File) {
 
     const dataFile = this.entry.dataStore.addFile(file.name);
 
     this.activeUploads += 1;
-    this.uploadSubscriptionDict$[file.name] = this.api.uploadFile(file)
+    this.uploadSubscriptionDict$[file.name] = this.persistence.uploadFile(file)
       .subscribe({
         next: event => {
           if (event.type === HttpEventType.UploadProgress) {
-            dataFile.percent = Math.round(100 * event.loaded / event.total);
-          } else if (event instanceof HttpResponse) {
-            this.entry.addCommit(event.body['commit'] as string);
+            if (event.total) {
+              dataFile.percent = Math.round(100 * event.loaded / event.total);
+            }
+          } else if (event instanceof HttpResponse && event.body) {
+            this.entry.addCommit(event.body.commit);
             dataFile.percent = 100;
-            this.entry.dataStore.updateName(dataFile, event.body['filename'] as string);
-            if (!event.body['changed']) {
-              this.messagesService.sendMessage(new Message(`The file '${event.body['filename']}' was already present on
+            this.entry.dataStore.updateName(dataFile, event.body.filename);
+            if (!event.body.changed) {
+              this.messagesService.sendMessage(new Message(`The file '${event.body.filename}' was already present on
                 the server with the same contents.`, MessageType.NotificationMessage));
             }
           }
@@ -224,9 +241,9 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
         if (result) {
           if (fileName in this.uploadSubscriptionDict$) {
             this.uploadSubscriptionDict$[fileName].unsubscribe();
-            this.api.deleteFile(fileName, true);
+            this.persistence.deleteFile(fileName, true);
           } else {
-            this.api.deleteFile(fileName);
+            this.persistence.deleteFile(fileName);
           }
         }
         this.dialogRef = null;

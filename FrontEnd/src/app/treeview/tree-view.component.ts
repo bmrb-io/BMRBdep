@@ -1,5 +1,6 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
-import {ApiService} from '../api.service';
+import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
@@ -22,23 +23,25 @@ import {FormsModule} from '@angular/forms';
   imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatLine, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
-  active: string;
+  private persistence = inject(DepositionPersistenceService);
+  protected lifecycle = inject(DepositionLifecycleService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  active: string = '';
   developerMode: boolean;
-  entry: Entry;
+  entry: Entry | null = null;
   page: string;
   @Output() sessionEnd = new EventEmitter<boolean>();
-  subscription$: Subscription;
+  subscription$!: Subscription;
 
-  constructor(private api: ApiService,
-              private router: Router,
-              private route: ActivatedRoute) {
+  constructor() {
     this.developerMode = false;
     this.page = '?';
   }
 
   ngOnInit() {
 
-    const parent = this;
     this.subscription$ = combineLatest([this.router.events, this.route.queryParams]).pipe(
       map(() => {
         let r = this.route;
@@ -49,18 +52,18 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         const urlSegments = this.router.url.split('/');
 
         if (urlSegments[2] === 'saveframe') {
-          parent.active = urlSegments[3];
-          parent.page = 'category';
+          this.active = urlSegments[3];
+          this.page = 'category';
         } else {
-          parent.page = urlSegments[urlSegments.length - 1];
-          if (parent.page === '') {
-            parent.page = 'new';
+          this.page = urlSegments[urlSegments.length - 1];
+          if (this.page === '') {
+            this.page = 'new';
           }
         }
       })
     ).subscribe();
 
-    this.subscription$.add(this.api.entrySubject.subscribe({
+    this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     }));
   }
@@ -71,13 +74,32 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  download(name: string, printable_object): void {
+  download(name: string, printable_object: Entry): void {
     download(name, printable_object);
   }
 
   endSession(): void {
-    this.api.clearDeposition();
-    this.sessionEnd.emit(true);
+    const entry = this.entry;
+    if (!entry) return;
+    this.persistence.confirmDiscardUnsaved('close this deposition').then(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+      this.persistence.closeDeposition(entry.entryID).then(() => {
+        this.sessionEnd.emit(true);
+        if (this.persistence.getOpenDepositionRecords().length === 0) {
+          this.router.navigate(['/']).then();
+          return;
+        }
+        // endSession always closes the active deposition; route the promoted
+        // sibling through /entry/load so it lands on the right saveframe rather
+        // than the closed entry's stale URL.
+        const newActive = this.persistence.getEntryID();
+        if (newActive) {
+          this.router.navigate(['/entry', 'load', newActive]).then();
+        }
+      });
+    });
   }
 
   logEntry(): void {
@@ -85,33 +107,38 @@ export class TreeViewComponent implements OnInit, OnDestroy {
   }
 
   timeRefresh(): void {
+    if (!this.entry) {
+      return;
+    }
     const iterations = 50;
-    // tslint:disable-next-line:no-console
     console.time('Refresh');
     for (let i = 0; i < iterations; i++) {
       this.entry.refresh();
     }
-    // tslint:disable-next-line:no-console
     console.timeEnd('Refresh');
   }
 
   refresh(): void {
-    this.api.loadEntry(this.entry.entryID, true);
-    this.entry.refresh();
-    this.api.storeEntry(false);
-    localStorage.setItem('entry', JSON.stringify(this.entry));
-    localStorage.setItem('entryID', this.entry.entryID);
-    localStorage.setItem('schema', JSON.stringify(this.entry.schema));
+    if (!this.entry) {
+      return;
+    }
+    const entry = this.entry;
+    this.persistence.confirmDiscardUnsaved('reload this entry from the server').then(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+      this.persistence.refetchEntry(entry.entryID, true);
+    });
   }
 
   scrollSideNav(): void {
-    let element: HTMLElement;
+    let element: HTMLElement | null;
     if (this.page === 'category') {
       element = document.getElementById(this.active);
     } else {
       element = document.getElementById(this.page);
     }
-    if (element) {
+    if (element && element.parentElement) {
       element.parentElement.scrollIntoView({behavior: 'smooth'});
     }
   }

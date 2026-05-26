@@ -3,37 +3,32 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 if [[ "$#" -gt 1 ]]; then
-    echo "Illegal number of parameters. Usage: install.sh [--upgrade]"
+    echo "Illegal number of parameters. Usage: install.sh [--update]"
 fi
 if [[ "$#" -eq 1 ]]; then
     if [[ "$1" != "--update" ]]; then
-        echo "Illegal parameter. Usage: install.sh [--upgrade]"
+        echo "Illegal parameter. Usage: install.sh [--update]"
     fi
 fi
 
-if [[ ! -d "${SCRIPT_DIR}/BackEnd/venv" ]]; then
-    echo "python environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    python3.13 -m venv "${SCRIPT_DIR}"/BackEnd/venv
-    source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    pip3 install --upgrade pip nodeenv | tee -a "${SCRIPT_DIR}"/installation.log
-    cd "${SCRIPT_DIR}"/BackEnd/bmrbdep
-    pip3 install -e . | tee -a "${SCRIPT_DIR}"/installation.log
-    deactivate
+if ! command -v uv >/dev/null 2>&1; then
+    echo "uv is required but not installed. See https://docs.astral.sh/uv/getting-started/installation/" | tee -a "${SCRIPT_DIR}"/installation.log
+    exit 1
+fi
+
+if [[ ! -d "${SCRIPT_DIR}/BackEnd/bmrbdep/.venv" ]]; then
+    echo "Python environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
+    (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && uv sync) | tee -a "${SCRIPT_DIR}"/installation.log
 fi
 
 if [[ "$1" == "--update" ]]; then
-    echo "Updating requirements in virtualenv..." | tee -a "${SCRIPT_DIR}"/installation.log
-    source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    cd "${SCRIPT_DIR}"/BackEnd/bmrbdep
-    pip3 install -e . | tee -a "${SCRIPT_DIR}"/installation.log
-    deactivate
+    echo "Updating Python dependencies..." | tee -a "${SCRIPT_DIR}"/installation.log
+    (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && uv sync) | tee -a "${SCRIPT_DIR}"/installation.log
 fi
 
 if [[ ! -d "${SCRIPT_DIR}/FrontEnd/node_env" ]]; then
-    echo "node environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
-    source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
-    python3 -m nodeenv -n lts "${SCRIPT_DIR}"/FrontEnd/node_env | tee -a "${SCRIPT_DIR}"/installation.log
-    deactivate
+    echo "Node environment was not yet set up. Setting up now... (This only needs to happen once.)" | tee -a "${SCRIPT_DIR}"/installation.log
+    uv run "${SCRIPT_DIR}"/scripts/bootstrap_node.py -n lts "${SCRIPT_DIR}"/FrontEnd/node_env | tee -a "${SCRIPT_DIR}"/installation.log
     source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
     cd "${SCRIPT_DIR}"/FrontEnd || exit 1
     npm install -g @angular/cli --silent | tee -a "${SCRIPT_DIR}"/installation.log
@@ -50,7 +45,7 @@ if [[ "$1" == "--update" ]]; then
     cd -
 fi
 
-if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/venvironments/versions.ts" ]] || [[ "$1" == "--update" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/FrontEnd/src/environments/versions.ts" ]] || [[ "$1" == "--update" ]]; then
   echo "Creating angular git version file for front end..." | tee -a "${SCRIPT_DIR}"/installation.log
   source "${SCRIPT_DIR}"/FrontEnd/node_env/bin/activate
   cd "${SCRIPT_DIR}"/FrontEnd/ || exit 3
@@ -82,8 +77,6 @@ if [[ ! -f "${SCRIPT_DIR}/BackEnd/bmrbdep/configuration.json" ]]; then
 fi
 
 if [[ ! -f "${SCRIPT_DIR}/BackEnd/schema/schema_data/last_commit" ]] || [[ "$1" == "--update" ]]; then
-  source "${SCRIPT_DIR}"/BackEnd/venv/bin/activate
   echo "Generating/updating schemas..." | tee -a "${SCRIPT_DIR}"/installation.log
-  "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py --force 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
-  deactivate
+  (cd "${SCRIPT_DIR}"/BackEnd/bmrbdep && uv run "${SCRIPT_DIR}"/BackEnd/schema/schema_loader.py --force) 2>&1 | tee -a "${SCRIPT_DIR}"/installation.log
 fi

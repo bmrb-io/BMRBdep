@@ -2,15 +2,15 @@
   <div>
     <table>
       <colgroup>
-      <col span="1" class="button-column">
-    </colgroup>
-    <thead>
+        <col span="1" class="button-column">
+      </colgroup>
+      <thead>
       <tr (contextmenu)="log()">
         <th colspan=999 [matTooltip]="loop.schemaValues['group_view_help']">
-          {{loop.data[0][0].schemaValues['ADIT category view name']}}
-          @if (loop.category == '_Citation_author' && loop.empty) {
+          {{ loop.data[0][0].schemaValues['ADIT category view name'] }}
+          @if (loop.category === '_Citation_author' && loop.empty) {
             <button mat-raised-button
-              (click)="copyAuthors()" color="accent">Copy authors from 'Entry information'
+                    (click)="copyAuthors()" color="accent">Copy authors from 'Entry information'
             </button>
           }
         </th>
@@ -18,71 +18,72 @@
       <tr>
         <th></th>
         @for (sampleTag of loop.data[0]; track sampleTag; let col = $index) {
-          @if (loop.displayTags[col] == 'Y' || (loop.displayTags[col] == 'N' && loop.parent.parent.showAll)) {
+          @if (loop.displayTags[col] === 'Y' || (loop.displayTags[col] === 'N' && loop.parent.parent.showAll)) {
             <th
               class="tag-header" (click)="helpClick(sampleTag, tag_info_box)"
-              [matTooltip]="sampleTag.schemaValues['Interface'] + ' Click for more information.'">{{sampleTag.schemaValues['Prompt']}}
-              @if (loop.displayTags[col] == 'Y') {
+              [matTooltip]="sampleTag.schemaValues['Interface'] + ' Click for more information.'">{{ sampleTag.schemaValues['Prompt'] }}
+              @if (loop.displayTags[col] === 'Y') {
                 <span class="mandatory">*</span>
               }
             </th>
           }
         }
       </tr>
-    </thead>
-    <tbody>
-      @for (row of loop.data; track row; let r = $index) {
-        <tr>
-          <td>
-            @if ((loop.category != '_Contact_person' && loop.data.length > 1) || (loop.category == '_Contact_person' && r > 0 && loop.data.length > 2)) {
-              <button mat-raised-button
-                (click)='deleteRow(r)' color="accent" class="square-button" matTooltip="Remove this row of data."
-                [disabled]="loop.parent.parent.deposited">-
-              </button>
+      </thead>
+      <tbody>
+        @for (row of loop.data; track row; let r = $index) {
+          <tr>
+            <td>
+              @if ((loop.category !== '_Contact_person' && loop.data.length > 1) || (loop.category === '_Contact_person' && r > 0 && loop.data.length > 2)) {
+                <button mat-raised-button
+                        (click)='deleteRow(r)' color="accent" class="square-button"
+                        matTooltip="Remove this row of data."
+                        [disabled]="loop.parent.parent.deposited">-
+                </button>
+              }
+            </td>
+            @for (col of row; track col; let c = $index) {
+              @if (loop.displayTags[c] === 'Y' || (loop.displayTags[c] === 'N' && loop.parent.parent.showAll)) {
+                <td
+                  [ngClass]="{'invisible': true,
+	      		              'invalid': !col.valid && (col.display === 'Y' || (col.display === 'N' && loop.parent.parent.showAll)),
+	      		              'greyed-out': (!(col.display === 'Y' || (col.display === 'N' && loop.parent.parent.showAll)))}">
+                  @if (col.display === 'Y' || (col.display === 'N' && loop.parent.parent.showAll)) {
+                    <app-tag
+                      [tag]='col' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
+                      (contextmenu)="col.log()"></app-tag>
+                  }
+                </td>
+              }
             }
-          </td>
-          @for (col of row; track col; let c = $index) {
-            @if (loop.displayTags[c] == 'Y' || (loop.displayTags[c] == 'N' && loop.parent.parent.showAll)) {
-              <td
-                        [ngClass]="{'invisible': true,
-	      		              'invalid': !col.valid && (col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)),
-	      		              'greyed-out': (!(col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)))}">
-                @if (col.display == 'Y' || (col.display == 'N' && loop.parent.parent.showAll)) {
-                  <app-tag
-                    [tag]='col' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
-                  (contextmenu)="col.log()"></app-tag>
-                }
-              </td>
-            }
-          }
-        </tr>
-      }
+          </tr>
+        }
       <tr>
         <td colspan=1>
           <button mat-raised-button (click)='addRow()' color="accent" class="square-button"
-            matTooltip="Add another row of data." [disabled]="loop.parent.parent.deposited">+
+                  matTooltip="Add another row of data." [disabled]="loop.parent.parent.deposited">+
           </button>
         </td>
         <td colspan=999></td>
       </tr>
 
-    </tbody>
-  </table>
-</div>
+      </tbody>
+    </table>
+  </div>
 
-<div #tag_info_box>
-  @if (activeTag) {
-    <div class='tag-info-box'>
-      <b>{{activeTag.schemaValues['Prompt']}}</b>
-      <p>{{activeTag.schemaValues['Interface']}}</p>
-      @if (activeTag.schemaValues['Example'] != '?') {
-        <p><b>Example:</b> {{activeTag.schemaValues['Example']}}</p>
-      }
-      <p><i>{{activeTag.fullyQualifiedTagName}}</i></p>
-      @if (activeTag.validationMessage) {
-        <p class="mandatory">{{activeTag.validationMessage}}</p>
-      }
-    </div>
-  }
-</div>
+  <div #tag_info_box>
+    @if (activeTag) {
+      <div class='tag-info-box'>
+        <b>{{ activeTag.schemaValues['Prompt'] }}</b>
+        <p>{{ activeTag.schemaValues['Interface'] }}</p>
+        @if (activeTag.schemaValues['Example'] !== '?') {
+          <p><b>Example:</b> {{ activeTag.schemaValues['Example'] }}</p>
+        }
+        <p><i>{{ activeTag.fullyQualifiedTagName }}</i></p>
+        @if (activeTag.validationMessage) {
+          <p class="mandatory">{{ activeTag.validationMessage }}</p>
+        }
+      </div>
+    }
+  </div>
 </div>

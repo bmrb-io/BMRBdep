@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatFormField, MatLabel} from '@angular/material/select';
 import {MatInput} from '@angular/material/input';
@@ -13,13 +13,15 @@ import {MatButton} from '@angular/material/button';
   imports: [MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton]
 })
 export class ConfirmationDialogComponent {
-  public confirmMessage: string;
+  dialogRef = inject<MatDialogRef<ConfirmationDialogComponent>>(MatDialogRef);
+
+  public confirmMessage = '';
   public proceedMessage: string;
   public cancelMessage: string;
-  public inputBoxText: string;
-  public name: string;
+  public inputBoxText: string | null;
+  public name = '';
 
-  constructor(public dialogRef: MatDialogRef<ConfirmationDialogComponent>) {
+  constructor() {
     this.proceedMessage = 'Proceed';
     this.cancelMessage = 'Cancel';
     this.inputBoxText = null;

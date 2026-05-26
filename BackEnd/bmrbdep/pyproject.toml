@@ -9,19 +9,19 @@ description = "Powers the BMRB deposition system."
 requires-python = ">=3.13"
 
 dependencies = [
-    "flask==3.1.1",
-    "flask-cors==6.0.1",
-    "simplejson==3.20.1",
+    "flask==3.1.3",
+    "flask-cors==6.0.2",
+    "simplejson==4.1.1",
     "Flask-Mail==0.10.0", #test
-    "requests==2.32.4", # For querying ORCID and PubMed
+    "requests==2.34.0", # For querying ORCID and PubMed
     "pynmrstar==3.5.1", # For working with BMRB entries
     "validate_email @ git+https://github.com/bmrb-io/validate_email.git@2b38de4374b1e6188a280b0c86e11e45d6308bd0", # For email validation
-    "gitpython==3.1.45", # For managing depositions
-    "filelock==3.12.0", # For managing depositions
+    "gitpython==3.1.50", # For managing depositions
+    "filelock==3.29.0", # For managing depositions
     "python-dateutil==2.9.0", # For managing depositions
-    "psycopg2-binary==2.9.10", # For putting entries in ETS
+    "psycopg2-binary==2.9.12", # For putting entries in ETS
     "Unidecode==1.4.0", # For stripping unicode
-    "sqlalchemy==2.0.44", # For keeping a DB of the entries
+    "sqlalchemy==2.0.49", # For keeping a DB of the entries
 ]
 
 [dependency-groups]

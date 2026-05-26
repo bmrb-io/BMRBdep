@@ -1,11 +1,13 @@
 import {nullTags} from './definitions';
 import {Entry} from './entry';
 
-export function cleanValue(value): string {
+export function cleanValue(rawValue: string | null | undefined): string {
 
-  if (checkValueIsNull(value)) {
+  if (checkValueIsNull(rawValue)) {
     return '.';
   }
+
+  const value: string = rawValue as string;
 
   // Values that go on their own line don't need to be touched
   if (value.indexOf('\n') !== -1) {
@@ -45,16 +47,16 @@ export function cleanValue(value): string {
   return value;
 }
 
-export function checkValueIsNull(value) {
-  return nullTags.indexOf(value) >= 0;
+export function checkValueIsNull(value: unknown): boolean {
+  return nullTags.indexOf(value as null | string | undefined) >= 0;
 }
 
-export function checkTagIsRequired(tag) {
+export function checkTagIsRequired(tag: { name: string }): boolean {
   const alwaysDisplay = ['sf_framecode', 'entry_id', 'id', 'sf_category', 'name'];
   return alwaysDisplay.indexOf(tag.name.toLowerCase()) >= 0;
 }
 
-export function download(filename, printableObject: Entry): void {
+export function download(filename: string, printableObject: Entry): void {
   const element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(printableObject.print()));
   element.setAttribute('download', filename);
@@ -64,6 +66,6 @@ export function download(filename, printableObject: Entry): void {
   document.body.removeChild(element);
 }
 
-export function isMixedCase(str) {
+export function isMixedCase(str: string): boolean {
   return str.toUpperCase() !== str && str.toLowerCase() !== str;
 }

@@ -5,32 +5,6 @@
     </span>
   </h1>
   <form (ngSubmit)="new(createDepositionForm)" name="createDepositionForm" [formGroup]="createDepositionForm">
-    @if (entry) {
-      <div class="content-box resume-box">
-        <h2>You have an in progress deposition: {{entry.depositionNickname}}</h2>
-        <div>
-          <div>
-            <a mat-raised-button color="primary"
-              [routerLink]="['/entry', 'pending-verification']"
-              matTooltip="Return to the first uncompleted section of the current deposition.">
-            Return to your deposition</a>
-          </div>
-          <div>
-            <a mat-raised-button color="primary"
-                     matTooltip="Create a new deposition with the same contents as the currently
-active deposition." (click)="api.cloneDeposition()">
-            Clone deposition</a>
-          </div>
-          <div>
-            <button mat-raised-button color="primary" (click)="api.clearDeposition()"
-                            matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">
-              End your session for this deposition
-            </button>
-          </div>
-        </div>
-      </div>
-    }
     <div class="content-box">
       <h2>Start a new deposition
         <!--<mat-icon routerLink="/support" class="pointer" title="Click to view deposition resources">help_outline</mat-icon>-->
@@ -40,7 +14,9 @@ your email when you created the deposition.">
         <mat-select [formControl]="sessionType" placeholder="Click to select a deposition type" required>
           <mat-option [value]="'new'">Begin a new deposition (with NMR data upload)</mat-option>
           <mat-option [value]="'bmrb_id'">Begin a new deposition from an existing and released BMRB entry</mat-option>
-          <mat-option [value]="'file'">Pre-populate an entire deposition's metadata by uploading an NMR-STAR file (version 3.x)</mat-option>
+          <mat-option [value]="'file'">Pre-populate an entire deposition's metadata by uploading an NMR-STAR file
+            (version 3.x)
+          </mat-option>
         </mat-select>
         @if (sessionType.invalid) {
           <mat-error>Please select a deposition type.</mat-error>
@@ -59,9 +35,9 @@ your email when you created the deposition.">
       <mat-form-field>
         <label>
           <input matInput
-            [formControl]="authorEmail"
-            placeholder="Please enter your e-mail."
-            required>
+                 [formControl]="authorEmail"
+                 placeholder="Please enter your e-mail."
+                 required>
         </label>
         @if (authorEmail.invalid) {
           <mat-error [innerHTML]="getEmailErrorMessage(authorEmail)"></mat-error>
@@ -71,16 +47,17 @@ your email when you created the deposition.">
       @if (emailValidationError) {
         <div class="fake-form-field">
           <mat-checkbox color="primary" [(ngModel)]="skipEmailValidation"
-          [ngModelOptions]="{standalone: true}">My e-mail is correct</mat-checkbox>
+                        [ngModelOptions]="{standalone: true}">My e-mail is correct
+          </mat-checkbox>
         </div>
       }
 
       <mat-form-field>
         <label>
           <input matInput
-            [formControl]="depositionNickname"
-            placeholder="Please enter a brief nickname for this deposition."
-            required>
+                 [formControl]="depositionNickname"
+                 placeholder="Please enter a brief nickname for this deposition."
+                 required>
         </label>
         @if (depositionNickname.invalid) {
           <mat-error>You must enter a nickname for the deposition.</mat-error>
@@ -90,8 +67,8 @@ your email when you created the deposition.">
       <mat-form-field>
         <label>
           <input matInput
-            [formControl]="authorORCID"
-            placeholder="Please enter your ORCID if you have one.">
+                 [formControl]="authorORCID"
+                 placeholder="Please enter your ORCID if you have one.">
         </label>
         @if (authorORCID.invalid) {
           <mat-error>Invalid ORCID value. Valid ORCID IDs look like:
@@ -101,13 +78,13 @@ your email when you created the deposition.">
       </mat-form-field>
 
 
-      @if (sessionType.value == 'bmrb_id') {
+      @if (sessionType.value === 'bmrb_id') {
         <mat-form-field>
           <label>
             <input matInput
-              [formControl]="bootstrapID"
-              placeholder="Enter the BMRB ID from which to start a new deposition."
-              required>
+                   [formControl]="bootstrapID"
+                   placeholder="Enter the BMRB ID from which to start a new deposition."
+                   required>
           </label>
           @if (bootstrapID.invalid) {
             <mat-error [innerHTML]="getBootstrapErrorMessage(bootstrapID)"></mat-error>
@@ -115,30 +92,30 @@ your email when you created the deposition.">
         </mat-form-field>
       }
 
-      @if (sessionType.value == 'file') {
+      @if (sessionType.value === 'file') {
         <div>
           @if (inputFile.files[0]) {
-            <span>{{inputFile.files[0].name}}</span>
+            <span>{{ inputFile.files[0].name }}</span>
           }
           @if (!inputFile.files[0]) {
             <span>No file selected</span>
           }
-          <input type="file" hidden #inputFile (change)="fileChangeEvent(inputFile)"/>
+          <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
           @if (!inputFile.files[0]) {
             <button mat-raised-button color="accent" type="button" (click)="openInput()"
-              [id]="'fileUploadButton'">
+                    [id]="'fileUploadButton'">
               Click to select a file to upload.
             </button>
           } @else {
             <button mat-raised-button color="accent" type="button" (click)="openInput()"
-              [id]="'fileUploadButton'">
+                    [id]="'fileUploadButton'">
               Click to select a different file to upload.
             </button>
           }
           <p></p>
-          @if (sessionType.value == 'file' && inputFile.files[0]) {
+          @if (sessionType.value === 'file' && inputFile.files[0]) {
             <button mat-raised-button color="primary">
-              Click here to start a new deposition from {{inputFile.files[0]?.name}}.
+              Click here to start a new deposition from {{ inputFile.files[0]?.name }}.
             </button>
           }
         </div>
@@ -146,66 +123,66 @@ your email when you created the deposition.">
 
       <br>
 
-        @if (sessionType.value == 'bmrb_id') {
-          <button mat-raised-button color="primary">
-            Click here to start a new deposition from an existing entry.
-          </button>
-        }
+      @if (sessionType.value === 'bmrb_id') {
+        <button mat-raised-button color="primary">
+          Click here to start a new deposition from an existing entry.
+        </button>
+      }
 
-        @if (sessionType.value == 'new') {
-          <button mat-raised-button color="primary">
-            Click here to start a new deposition from scratch.
-          </button>
-        }
+      @if (sessionType.value === 'new') {
+        <button mat-raised-button color="primary">
+          Click here to start a new deposition from scratch.
+        </button>
+      }
 
-        @if (!sessionType.value) {
-          <button mat-raised-button color="primary">
-            Click here to start a new deposition.
-          </button>
-        }
-
-      </div>
-    </form>
-
-    <div class="content-box">
-      <h3>Resume deposition</h3>
-
-      <div class="resume-options">
-        <div class="resume-option">
-          <h4>Get access by email</h4>
-          <p>Enter your email address to receive a link that will give you access to all your depositions.</p>
-          <mat-form-field>
-            <label>
-              <input matInput
-                [formControl]="resumeEmail"
-                placeholder="Enter your email address"
-                type="email">
-            </label>
-            @if (resumeEmail.invalid) {
-              <mat-error>Please enter a valid email address.</mat-error>
-            }
-          </mat-form-field>
-          <div>
-            <button mat-raised-button color="primary" (click)="requestEmailAccess()" [disabled]="resumeEmail.invalid">
-              Request access
-            </button>
-          </div>
-        </div>
-
-<!--        <div class="resume-option">-->
-<!--          <h4>Sign in with ORCID</h4>-->
-<!--          <p>Access all your depositions by signing in with your ORCID account.</p>-->
-<!--          <div>-->
-<!--            <button mat-raised-button color="primary">-->
-<!--              Sign in with ORCID-->
-<!--            </button>-->
-<!--          </div>-->
-<!--        </div>-->
-      </div>
-
+      @if (!sessionType.value) {
+        <button mat-raised-button color="primary">
+          Click here to start a new deposition.
+        </button>
+      }
 
     </div>
+  </form>
+
+  <div class="content-box">
+    <h3>Resume deposition</h3>
+
+    <div class="resume-options">
+      <div class="resume-option">
+        <h4>Get access by email</h4>
+        <p>Enter your email address to receive a link that will give you access to all your depositions.</p>
+        <mat-form-field>
+          <label>
+            <input matInput
+                   [formControl]="resumeEmail"
+                   placeholder="Enter your email address"
+                   type="email">
+          </label>
+          @if (resumeEmail.invalid) {
+            <mat-error>Please enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+        <div>
+          <button mat-raised-button color="primary" (click)="requestEmailAccess()" [disabled]="resumeEmail.invalid">
+            Request access
+          </button>
+        </div>
+      </div>
+
+      <!--        <div class="resume-option">-->
+      <!--          <h4>Sign in with ORCID</h4>-->
+      <!--          <p>Access all your depositions by signing in with your ORCID account.</p>-->
+      <!--          <div>-->
+      <!--            <button mat-raised-button color="primary">-->
+      <!--              Sign in with ORCID-->
+      <!--            </button>-->
+      <!--          </div>-->
+      <!--        </div>-->
+    </div>
+
+
   </div>
+</div>
 
 <div class="content-box">
   <p>If you need additional help, please

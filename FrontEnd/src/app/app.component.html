@@ -1,30 +1,30 @@
 <mat-toolbar>
   <mat-toolbar-row [ngClass]="{'auto-height': !entry}">
     @if (entry) {
-      <div
+      <button type="button"
         (click)="sidenav.toggle(); treeView.scrollSideNav()"
         class="valign-center" matTooltip="Toggle the navigation menu.">
         <mat-icon>menu</mat-icon>
         <span style="vertical-align: bottom">Menu</span>
-      </div>
+      </button>
     }
     @if (entry) {
       @if (entry && !entry.deposited) {
         <span class="title-center">
-          BMRBdep - Deposition '{{entry.depositionNickname}}' in progress
+          BMRBdep - Deposition '{{ entry.depositionNickname }}' in progress
         </span>
       }
       @if (entry && entry.deposited) {
         <span class="title-center">
-          BMRBdep - Deposition '{{entry.depositionNickname}}' completed and deposited
+          BMRBdep - Deposition '{{ entry.depositionNickname }}' completed and deposited
         </span>
       }
       @if (!entry) {
         <span class="title-center">BMRBdep</span>
       }
-      <span class="title-right pointer" routerLink="/" (click)="clearEntry()"
-                  matTooltip="Log out from this deposition. You can resume it later by following the link sent to
-your email when you created the deposition.">End session</span>
+      <button type="button" class="title-right pointer" (click)="clearEntry()"
+              matTooltip="Close all open depositions in this tab. You can resume any of them later by following the link sent to
+your email when you created the deposition, or from My Depositions.">Sign out</button>
     }
 
     @if (!entry) {
@@ -32,6 +32,33 @@ your email when you created the deposition.">End session</span>
     }
 
   </mat-toolbar-row>
+  @if (openDepositions.length >= 1) {
+    <mat-toolbar-row class="deposition-tabs"
+                     cdkDropList
+                     cdkDropListOrientation="horizontal"
+                     (cdkDropListDropped)="onChipDrop($event)">
+      <span class="deposition-tabs-label">Open depositions:</span>
+      @for (dep of openDepositions; track trackChip($index, dep)) {
+        <span class="dep-chip" cdkDrag
+              [ngClass]="{'active': dep.entryID === entry?.entryID}">
+          <button class="dep-chip-body" cdkDragHandle
+                  type="button"
+                  (click)="activateDeposition(dep.entryID)"
+                  [matTooltip]="(dep.entryID === entry?.entryID ? 'Currently viewing' : 'Click to switch · drag to reorder') + (dep.unsaved ? ' · unsaved changes' : '')">
+            @if (dep.unsaved) {
+              <span class="dep-chip-dirty" aria-label="Unsaved changes">●</span>
+            }
+            <span class="dep-chip-label">{{ dep.nickname || dep.entryID }}</span>
+          </button>
+          <button class="dep-chip-close"
+                  type="button"
+                  (click)="closeChip($event, dep.entryID)"
+                  matTooltip="Close this deposition in this tab."
+                  aria-label="Close deposition">×</button>
+        </span>
+      }
+    </mat-toolbar-row>
+  }
   @if ((loader.value$ | async)) {
     <mat-toolbar-row class="loading-bar-holder">
       <mat-progress-bar mode="indeterminate" [value]="loader.value$ | async"></mat-progress-bar>
@@ -39,7 +66,8 @@ your email when you created the deposition.">End session</span>
   }
 </mat-toolbar>
 
-<mat-sidenav-container> <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
+<mat-sidenav-container>
+  <!-- fullscreen  https://stackoverflow.com/questions/46666381/unable-to-set-the-height-of-a-angular-material-sidenav-to-100 -->
   <mat-sidenav [(opened)]="sidenav_open" mode="push" #sidenav [autoFocus]="false" [fixedInViewport]="true">
     <app-tree-view #treeView (sessionEnd)="sidenav.close()"></app-tree-view>
   </mat-sidenav>

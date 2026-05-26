@@ -1,6 +1,7 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormsModule, ReactiveFormsModule, UntypedFormControl, Validators} from '@angular/forms';
-import {ApiService} from '../api.service';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {SupportService} from '../support.service';
 import {Location} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {Entry} from '../nmrstar/entry';
@@ -17,17 +18,20 @@ import {MatButton} from '@angular/material/button';
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {
+  private persistence = inject(DepositionPersistenceService);
+  private support = inject(SupportService);
+  private location = inject(Location);
 
-  messageControl = new UntypedFormControl('', [Validators.required]);
-  emailControl = new UntypedFormControl('', [Validators.required]);
+
+  messageControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
+  emailControl = new FormControl<string>('', {nonNullable: true, validators: [Validators.required]});
   submitted: boolean;
-  entry: Entry;
-  notificationMessage: string;
-  subscription$: Subscription;
-  caughtException: {};
+  entry: Entry | null;
+  notificationMessage: string | null;
+  subscription$!: Subscription;
+  caughtException: { url?: string; message?: string } | null;
 
-  constructor(private api: ApiService,
-              private location: Location) {
+  constructor() {
     this.submitted = false;
     this.notificationMessage = null;
     this.entry = null;
@@ -35,13 +39,13 @@ export class SupportComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
     });
 
     if (history.state.data) {
       this.caughtException = history.state.data;
-      this.messageControl = new UntypedFormControl('');
+      this.messageControl = new FormControl<string>('', {nonNullable: true});
     }
   }
 
@@ -54,12 +58,12 @@ export class SupportComponent implements OnInit, OnDestroy {
   sendRequest() {
     let supportMessage = this.messageControl.value;
     if (this.caughtException) {
-      supportMessage = `User reporting an exception.\nException URL: ${this.caughtException['url']}\nException message: ${this.caughtException['message']}\n`;
+      supportMessage = `User reporting an exception.\nException URL: ${this.caughtException.url}\nException message: ${this.caughtException.message}\n`;
       if (this.messageControl.value) {
         supportMessage += 'User message: ' + this.messageControl.value;
       }
     }
-    this.api.newSupportRequest(supportMessage, undefined, this.emailControl.value).then(() => {
+    this.support.newSupportRequest(supportMessage, undefined, this.emailControl.value).then(() => {
       this.messageControl.disable();
       this.notificationMessage = 'Your message has been sent to BMRB support.';
     }, () => {

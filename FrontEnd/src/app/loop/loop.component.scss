@@ -66,6 +66,12 @@ td {
 .loop-wrapper-div {
   margin-bottom: 1em;
   margin-left: 1em;
+  // Let the browser skip layout/paint for loops scrolled out of view.
+  // `auto` in contain-intrinsic-size remembers the real size after first paint;
+  // the 400px fallback is just a placeholder before that.
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+
   div {
     overflow-x: auto;
   }

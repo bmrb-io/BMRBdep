@@ -1,19 +1,20 @@
 import {checkValueIsNull, cleanValue} from './nmrstar';
 import {Saveframe} from './saveframe';
 import {LoopTag} from './tag';
+import {OverrideRule, SaveframeSchemaEntry} from './schemaTypes';
 
 export class Loop {
   category: string;
   tags: string[];
   data: LoopTag[][];
   parent: Saveframe;
-  schemaValues: {};
+  schemaValues: SaveframeSchemaEntry;
   display: string;
   displayTags: string[];
   valid: boolean;
   empty: boolean;
 
-  toJSON(): {} {
+  toJSON(): object {
 
     // Turn the loop tags into a simple array of values
     const reducedData = [];
@@ -32,7 +33,7 @@ export class Loop {
     return {category: this.category, tags: this.tags, data: reducedData};
   }
 
-  constructor(category: string, tags: string[], data: string[][], parent: Saveframe) {
+  constructor(category: string, tags: string[], data: (string | null)[][], parent: Saveframe) {
     this.category = category;
     this.tags = tags;
     this.parent = parent;
@@ -43,10 +44,10 @@ export class Loop {
     this.empty = false;
 
     // Turn text nulls into logical nulls
-    for (let m = 0; m < data.length; m++) {
-      for (let n = 0; n < data[m].length; n++) {
-        if (checkValueIsNull(data[m][n])) {
-          data[m][n] = null;
+    for (const row of data) {
+      for (let n = 0; n < row.length; n++) {
+        if (checkValueIsNull(row[n])) {
+          row[n] = null;
         }
       }
     }
@@ -78,8 +79,8 @@ export class Loop {
     }
   }
 
-  getNextAvailableOrdinal(): number {
-    const seenIDs = [];
+  getNextAvailableOrdinal(): number | null {
+    const seenIDs: number[] = [];
     const IDCol = this.getTagIndex('ID');
     if (IDCol === null) {
       return null;
@@ -99,16 +100,19 @@ export class Loop {
     return found;
   }
 
-  addRow(): Array<LoopTag> {
+  addRow(): LoopTag[] {
     const newRow = [];
     for (const tag of this.tags) {
       const newTag = new LoopTag(tag, null, this);
       // Add the default value if the tag has one
-      if (!checkValueIsNull(newTag.schemaValues['default value'])) {
-        newTag.value = newTag.schemaValues['default value'];
+      if (!checkValueIsNull(newTag.schemaValues['default value'] as string)) {
+        newTag.value = newTag.schemaValues['default value'] as string;
       }
       if (tag === 'ID') {
-        newTag.value = this.getNextAvailableOrdinal().toString();
+        const ordinal = this.getNextAvailableOrdinal();
+        if (ordinal !== null) {
+          newTag.value = ordinal.toString();
+        }
       }
       newRow.push(newTag);
     }
@@ -126,12 +130,12 @@ export class Loop {
     this.addRow();
   }
 
-  deleteRow(rowID): void {
+  deleteRow(rowID: number): void {
     this.data.splice(rowID, 1);
   }
 
   // Creates a duplicate of this loop, or an empty loop of the same type
-  duplicate(clearValues: boolean = false): Loop {
+  duplicate(clearValues = false): Loop {
     const newLoop = new Loop(this.category, this.tags.slice(), [], this.parent);
 
     if (!clearValues) {
@@ -148,9 +152,9 @@ export class Loop {
 
     // BusinessRule
     if (this.category === '_Sample_condition_variable' && clearValues) {
-      const type_col = this.getTagIndex('Type');
-      const units_col = this.getTagIndex('Val_units');
-      const val_col = this.getTagIndex('Val');
+      const type_col = this.getTagIndex('Type')!;
+      const units_col = this.getTagIndex('Val_units')!;
+      const val_col = this.getTagIndex('Val')!;
       newLoop.data[0][type_col].value = 'temperature';
       newLoop.data[0][units_col].value = 'K';
       newLoop.addRow();
@@ -174,7 +178,7 @@ export class Loop {
   }
 
   // Sets the visibility of all tags in the loop
-  setVisibility(rule): void {
+  setVisibility(rule: OverrideRule): void {
 
     if (rule['Tag category'] !== '*' && rule['Tag category'] !== this.category) {
       console.error('Invalid rule applied to loop:', rule, this);
@@ -200,7 +204,7 @@ export class Loop {
       // Apply the rule
       for (const row of this.data) {
         if (rule['Override view value'] === 'O') {
-          row[tagCol].display = row[tagCol].schemaValues['User full view'];
+          row[tagCol].display = row[tagCol].schemaValues['User full view'] ?? 'H';
         } else {
           row[tagCol].display = rule['Override view value'];
         }
@@ -210,7 +214,7 @@ export class Loop {
       for (const row of this.data) {
         for (const tag of row) {
           if (rule['Override view value'] === 'O') {
-            tag.display = tag.schemaValues['User full view'];
+            tag.display = tag.schemaValues['User full view'] ?? 'H';
           } else {
             tag.display = rule['Override view value'];
           }
@@ -281,7 +285,7 @@ export class Loop {
     this.specialRules();
   }
 
-  getTagIndex(tagName: string): number {
+  getTagIndex(tagName: string): number | null {
     if (tagName.includes('.')) {
       tagName = tagName.slice(tagName.indexOf('.') + 1);
     }
@@ -293,8 +297,6 @@ export class Loop {
   }
 
   print(): string {
-
-    const parent = this;
 
     // Check for totally empty loops
     if (this.checkEmpty()) {
@@ -308,14 +310,14 @@ export class Loop {
 
     // Can't print data without columns
     if (this.tags.length === 0) {
-      throw new Error(`Impossible to print data if there are no associated tags. Loop: '${parent.category}'.`);
+      throw new Error(`Impossible to print data if there are no associated tags. Loop: '${this.category}'.`);
     }
 
     // Make sure that if there is data, it is the same width as the column tags
     if (this.data.length > 0) {
       for (let n = 0; n < this.data.length; n++) {
         if (this.tags.length !== this.data[n].length) {
-          throw new Error(`The number of column tags must match width of the data. Row: ${n} Loop: '${parent.category}'.`);
+          throw new Error(`The number of column tags must match width of the data. Row: ${n} Loop: '${this.category}'.`);
         }
       }
     }
@@ -473,7 +475,7 @@ export class Loop {
 
     // Copy the data
     for (const row in this.data) {
-      if (this.data.hasOwnProperty(row)) {
+      if (Object.hasOwn(this.data, row)) {
         this.data[row][citationGivenNameCol].value = entryAuthors.data[row][entryGivenNameCol].value;
         this.data[row][citationFamilyNameCol].value = entryAuthors.data[row][entryFamilyNameCol].value;
         this.data[row][citationMiddleInitialsCol].value = entryAuthors.data[row][entryMiddleInitialsCol].value;

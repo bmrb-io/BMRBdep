@@ -2,53 +2,53 @@
   <div>
     @if (saveframes.length > 0) {
       <div class="main-content">
-        <h2>{{entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name']}}</h2>
+        <h2>{{ entry.schema.saveframeSchema[saveframes[0].category]['category_group_view_name'] }}</h2>
         <p [innerHTML]="saveframes[0].schemaValues['group_view_help']"></p>
         @if (saveframes[0].previousCategory) {
           <a mat-raised-button class="saveframe-button"
-            [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
-           matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
+             [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
+             matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
 jump between sections by clicking on the 'Menu' button on the top left.">Previous section</a>
         }
-        @if (saveframes[0].nextCategory ) {
+        @if (saveframes[0].nextCategory) {
           <a mat-raised-button class="saveframe-button"
-            [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
-           matTooltip="Navigate to the next section. Note you may also open the navigation menu to
+             [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
+             matTooltip="Navigate to the next section. Note you may also open the navigation menu to
 jump between sections by clicking on the 'Menu' button on the top left.">Next section</a>
         } @else {
           @if (!entry.deposited) {
             <a mat-raised-button class="saveframe-button" routerLink="/entry/review"
-            color="accent"> Review deposition</a>
+               color="accent"> Review deposition</a>
           }
         }
         @for (saveframe of saveframes; track saveframe) {
           <app-saveframe [saveframe]='saveframe'
-          (sfReload)="reloadSaveframes($event)"></app-saveframe>
+                         (sfReload)="reloadSaveframes($event)"></app-saveframe>
         }
-        @if (saveframes[0].display == 'N' && !entry.showAll) {
+        @if (saveframes[0].display === 'N' && !entry.showAll) {
           <p>All tags in this category are optional, and you have
             chosen to hide non-mandatory tags. To view these tags, please
-          click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
+            click the 'Display non-mandatory tags' toggle in the navigation menu.</p>
         }
         @if (this.saveframes.length) {
           <div>
             @if (saveframes[0].previousCategory) {
               <a mat-raised-button class="saveframe-button"
-                [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
-               matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
+                 [routerLink]="['/entry', 'saveframe', saveframes[0].previousCategory]" color="accent"
+                 matTooltip="Navigate to the previous section. Note you may also open the navigation menu to
 jump between sections by clicking on the 'Menu' button on the top left.">
-              Previous section</a>
+                Previous section</a>
             }
             @if (saveframes[0].nextCategory) {
               <a mat-raised-button class="saveframe-button"
-                [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
-               matTooltip="Navigate to the next section. Note you may also open the navigation menu to
+                 [routerLink]="['/entry', 'saveframe', saveframes[0].nextCategory]" color="accent"
+                 matTooltip="Navigate to the next section. Note you may also open the navigation menu to
 jump between sections by clicking on the 'Menu' button on the top left.">
-              Next section</a>
+                Next section</a>
             } @else {
               @if (!entry.deposited) {
                 <a mat-raised-button class="saveframe-button" routerLink="/entry/review"
-                color="accent"> Review deposition</a>
+                   color="accent"> Review deposition</a>
               }
             }
           </div>
@@ -64,13 +64,13 @@ jump between sections by clicking on the 'Menu' button on the top left.">
           <mat-card-actions>
             @if (entry.getSaveframesByCategory(saveframeCategory).length > 0) {
               <button mat-raised-button
-                class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
+                      class="saveframe-button" (click)="restoreCategory(saveframeCategory)" color="accent">
                 Restore all sections of this type
               </button>
             }
             <a mat-raised-button class="saveframe-button" color="accent"
-              [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next
-            incomplete section</a>
+               [routerLink]="['/entry', 'saveframe', entry.firstIncompleteCategory]">Return to the next
+              incomplete section</a>
           </mat-card-actions>
         </mat-card>
       </div>

@@ -7,9 +7,9 @@
     "start": "ng serve --hmr",
     "prebuild.prod": "ts-node -O '{\"module\": \"commonjs\"}' git.version.ts",
     "build.prod": "ng build --configuration production",
+    "build.devprod": "ng build --configuration devprod",
     "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -26,8 +26,9 @@
     "@ngx-loading-bar/core": "^6.0.2",
     "@ngx-loading-bar/http-client": "^6.0.2",
     "core-js": "^3.46.0",
+    "country-region-selector": "^1.0.0",
     "material-design-icons": "^3.0.1",
-    "rxjs": "^6.6.7",
+    "rxjs": "^7.8.2",
     "tslib": "^2.8.1",
     "uuid": "^13.0.0",
     "zone.js": "^0.15.1"
@@ -37,11 +38,12 @@
     "@angular/cli": "^20.3.8",
     "@angular/compiler-cli": "^20.3.9",
     "@angular/language-service": "^20.3.9",
-    "@types/jasmine": "~3.8.0",
-    "codelyzer": "^6.0.2",
-    "@types/node": "^12.20.55",
-    "ts-node": "^8.10.2",
-    "tslint": "~6.1.0",
-    "typescript": "^5.9.3"
+    "@types/jasmine": "^5.1.4",
+    "@types/node": "^24.0.0",
+    "angular-eslint": "21.0.1",
+    "eslint": "^9.39.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "8.46.4"
   }
 }

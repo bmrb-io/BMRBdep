@@ -107,6 +107,22 @@ def get_authorized_depositions():
         return result
 
 
+@application.get('/deposition/session-info')
+def get_session_info():
+    """ Return identifying credentials present in the current session, if any.
+
+    Used by the frontend to disambiguate "no depositions match your credentials"
+    from "no credentials are present" — both look like an empty list to
+    /authorized-depositions. """
+
+    result = {}
+    if email := session.get('active_email'):
+        result['email'] = email
+    if orcid := session.get('orcid_id'):
+        result['orcid'] = orcid
+    return result
+
+
 @application.post('/deposition/end-session')
 def end_session():
     """ Clear all session state. """

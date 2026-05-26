@@ -1,6 +1,6 @@
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Entry} from '../nmrstar/entry';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
@@ -17,20 +17,22 @@ import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/ma
   imports: [MatButton, MatTooltip, RouterLink, SaveframeComponent, MatCard, MatCardTitle, MatCardContent, MatCardActions]
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {
-  saveframes: Saveframe[];
-  entry: Entry;
-  saveframeCategory: string;
-  subscription$: Subscription;
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private persistence = inject(DepositionPersistenceService);
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private api: ApiService) {
+  saveframes: Saveframe[];
+  entry: Entry | null = null;
+  saveframeCategory: string = '';
+  subscription$!: Subscription;
+
+  constructor() {
     this.saveframes = [];
   }
 
   ngOnInit() {
 
-    this.subscription$ = this.api.entrySubject.subscribe({
+    this.subscription$ = this.persistence.entrySubject.subscribe({
       next: entry => {
         this.entry = entry;
         this.reloadSaveframes();
@@ -38,11 +40,10 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
     });
 
     // Listen for the changing of the params string
-    const parent = this;
     this.subscription$.add(this.route.params.subscribe({
-      next: function (params) {
-        parent.saveframeCategory = params['saveframe_category'];
-        parent.reloadSaveframes();
+      next: (params) => {
+        this.saveframeCategory = params['saveframe_category'];
+        this.reloadSaveframes();
       }
     }));
   }
@@ -53,7 +54,7 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  reloadSaveframes(nextCategory: string = null): void {
+  reloadSaveframes(nextCategory: string | null = null): void {
 
     if (this.entry === null || !this.saveframeCategory) {
       this.saveframes = [];
@@ -77,9 +78,12 @@ export class SaveframeEditorComponent implements OnInit, OnDestroy {
   }
 
   restoreCategory(category: string): void {
+    if (!this.entry) {
+      return;
+    }
     this.entry.restoreByCategory(category);
     this.entry.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
     this.reloadSaveframes();
   }
 }
