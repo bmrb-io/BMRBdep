@@ -19,6 +19,11 @@
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
-    "typeCheckHostBindings": false
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "strictPropertyInitialization": false,
+    "typeCheckHostBindings": true
   }
 }
