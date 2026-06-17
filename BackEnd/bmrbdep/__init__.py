@@ -319,7 +319,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'schema_version': schema.version,
                                        'entry_deposited': False,
                                        'server_version_at_creation': get_release(),
-                                       'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                                       'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                                        'deposition_nickname': request_info['deposition_nickname'],
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
@@ -570,7 +570,7 @@ def new_deposition() -> Response:
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
-                        'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                        'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
 
