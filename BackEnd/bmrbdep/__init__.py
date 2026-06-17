@@ -663,7 +663,7 @@ title: %s
 
 contact persons: %s
 ''' % (uuid, bmrb_num, final_entry['entry_information_1']['Title'][0], contact_full)
-        mail.send(message)
+            mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
 
