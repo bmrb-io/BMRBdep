@@ -38,7 +38,7 @@
                           [disabled]="saveframe.parent.deposited">Create new
                   </button>
                 }
-                @if (saveframe.saveframesInCategory > saveframe.schemaValues['mandatory_number'] && !saveframe.deleted) {
+                @if (saveframe.saveframesInCategory > (saveframe.schemaValues['mandatory_number'] ?? 0) && !saveframe.deleted) {
                   <button mat-raised-button class="saveframe-button"
                           (click)='deleteSaveframe()' color="accent"
                           matTooltip="Delete this entire section."

@@ -15,6 +15,7 @@
               "base": "dist",
               "browser": ""
             },
+            "deleteOutputPath": false,
             "index": "src/index.html",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": [
