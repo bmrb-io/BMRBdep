@@ -107,7 +107,6 @@ class DepositionRepo:
             try:
                 self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
                 self._repo.close()
-                self._repo.__del__()
             # Catches all git-related errors
             except CacheError as err:
                 raise ServerError("An exception happened while closing the entry repository: %s" % err)
