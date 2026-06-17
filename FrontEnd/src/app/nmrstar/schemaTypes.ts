@@ -73,7 +73,8 @@ export interface TagSchemaEntry {
 }
 
 export interface SaveframeSchemaEntry {
-  'ADIT replicable'?: boolean;
+  // The schema delivers 'Y'/'N' strings; the local fallback in Saveframe uses a boolean false.
+  'ADIT replicable'?: string | boolean;
   category_group_view_name?: string;
   group_view_help?: string;
   mandatory_number?: number;

@@ -94,14 +94,14 @@
 
       @if (sessionType.value === 'file') {
         <div>
-          @if (inputFile.files[0]) {
-            <span>{{ inputFile.files[0].name }}</span>
+          @if (inputFile.files?.[0]) {
+            <span>{{ inputFile.files?.[0]?.name }}</span>
           }
-          @if (!inputFile.files[0]) {
+          @if (!inputFile.files?.[0]) {
             <span>No file selected</span>
           }
           <input type="file" hidden #inputFile (change)="fileChangeEvent()"/>
-          @if (!inputFile.files[0]) {
+          @if (!inputFile.files?.[0]) {
             <button mat-raised-button color="accent" type="button" (click)="openInput()"
                     [id]="'fileUploadButton'">
               Click to select a file to upload.
@@ -113,9 +113,9 @@
             </button>
           }
           <p></p>
-          @if (sessionType.value === 'file' && inputFile.files[0]) {
+          @if (sessionType.value === 'file' && inputFile.files?.[0]) {
             <button mat-raised-button color="primary">
-              Click here to start a new deposition from {{ inputFile.files[0]?.name }}.
+              Click here to start a new deposition from {{ inputFile.files?.[0]?.name }}.
             </button>
           }
         </div>
