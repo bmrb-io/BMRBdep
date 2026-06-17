@@ -410,7 +410,9 @@ class DepositionRepo:
                     bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
                     cur.execute(bmrb_sql, [id_range[0], id_range[1]])
 
-                    # Calculate the list of valid IDs
+                    # Calculate the list of valid IDs. The configured ranges are
+                    # intentionally half-open: the upper bound is exclusive and is
+                    # never assignable.
                     existing_ids: set = set([_[0] for _ in cur.fetchall()])
                     ids_in_range: set = set(range(id_range[0], id_range[1]))
                     assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
