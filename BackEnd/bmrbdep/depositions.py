@@ -269,10 +269,10 @@ class DepositionRepo:
                 middle_initial_index = loop.tag_index('Middle_initials')
                 first_initial_index = loop.tag_index('First_initial')
                 for row in loop.data:
-                    if middle_initial_index and row[middle_initial_index]:
+                    if middle_initial_index is not None and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
-                    if first_initial_index and row[middle_initial_index]:
-                        row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
+                    if first_initial_index is not None and row[first_initial_index]:
+                        row[first_initial_index] = ".".join(row[first_initial_index].replace(".", "")) + '.'
 
         # Delete the chemcomps if there is no ligand
         try:
