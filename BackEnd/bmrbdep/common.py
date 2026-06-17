@@ -3,7 +3,7 @@
 import os
 import pathlib
 import zlib
-from typing import Union, TextIO, Tuple, Iterable
+from typing import Union, TextIO, Tuple, Iterable, List, Optional
 
 import simplejson as json
 import werkzeug.utils
@@ -27,6 +27,12 @@ residue_mappings = {'polypeptide(L)': {'P': 'PRO', 'G': 'GLY', 'A': 'ALA', 'R': 
                                        'U': 'SEC'},
                     'polyribonucleotide': {'A': 'A', 'C': 'C', 'G': 'G', 'T': 'T', 'U': 'U'},
                     'polydeoxyribonucleotide': {'A': 'DA', 'C': 'DC', 'G': 'DG', 'T': 'DT', 'U': 'DU'}}
+
+
+def filter_null_values(values: Iterable[Optional[str]]) -> List[str]:
+    """ Filters NMR-STAR null placeholders ("." and "?") and None out of a list of tag values. """
+
+    return [_ for _ in values if _ != "." and _ != "?" and _ is not None]
 
 
 def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]:

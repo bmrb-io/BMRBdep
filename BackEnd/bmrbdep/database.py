@@ -7,7 +7,7 @@ from typing import Optional, List
 from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
-from bmrbdep.common import configuration, list_all_depositions, ServerError
+from bmrbdep.common import configuration, list_all_depositions, ServerError, filter_null_values
 from bmrbdep.depositions import DepositionRepo
 
 
@@ -108,8 +108,8 @@ def rescan():
 
                     # Handle author emails and orcids as arrays
                     contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
-                    author_emails = contact_loop.get_tag('Email_address')
-                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
+                    author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
+                    author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
 
                     # Check if the deposition already exists
                     stmt = select(Deposition).where(Deposition.deposition_id == deposition_id)

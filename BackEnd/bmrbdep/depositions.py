@@ -16,7 +16,8 @@ from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
 from sqlalchemy import select
 
-from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
+from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path, \
+    filter_null_values
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
@@ -145,8 +146,8 @@ class DepositionRepo:
                 # Get current entry data
                 try:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
-                    author_emails = [_ for _ in contact_loop.get_tag('Email_address') if _ != "." and _ != "?" and _ is not None]
-                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
+                    author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
+                    author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
                 except Exception:
                     # If we can't get entry data, just use empty lists
                     author_emails = []
