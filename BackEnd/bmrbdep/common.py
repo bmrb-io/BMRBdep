@@ -3,6 +3,7 @@
 import os
 import pathlib
 import zlib
+from io import StringIO
 from typing import Union, TextIO, Tuple, Iterable, List, Optional
 
 import simplejson as json
@@ -11,11 +12,14 @@ import werkzeug.utils
 from bmrbdep.exceptions import ServerError, RequestError
 
 root_dir: str = os.path.dirname(os.path.realpath(__file__))
-configuration: dict = json.loads(open(os.path.join(root_dir, 'configuration.json'), "r").read())
+with open(os.path.join(root_dir, 'configuration.json'), "r") as _config_file:
+    configuration: dict = json.loads(_config_file.read())
 
 # If we are running in docker, ignore the 'repo_path' and use the standard location
 try:
-    if '/docker' in open('/proc/self/cgroup', 'r').read() or os.path.exists('/.dockerenv'):
+    with open('/proc/self/cgroup', 'r') as _cgroup_file:
+        in_docker = '/docker' in _cgroup_file.read()
+    if in_docker or os.path.exists('/.dockerenv'):
         configuration['repo_path'] = '/opt/wsgi/depositions'
 except IOError:
     pass
@@ -50,7 +54,10 @@ def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]
             with open(os.path.join(schema_dir, version + '.json.zlib'), 'rb') as schema_file:
                 schema = json.loads(zlib.decompress(schema_file.read()).decode())
         elif schema_format == "xml":
-            return open(os.path.join(schema_dir, version + '.xml'), 'r')
+            # pynmrstar (the consumer) reads but never closes a passed file object, so read the
+            # content here within a context manager and hand it a StringIO to avoid leaking the handle.
+            with open(os.path.join(schema_dir, version + '.xml'), 'r') as xml_file:
+                return StringIO(xml_file.read())
         else:
             raise ServerError('Attempted to load invalid schema type.')
     except IOError:
@@ -62,7 +69,8 @@ def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]
 def get_release():
     """ Returns the git branch and last commit that were present during the last release. """
 
-    return open(os.path.join(root_dir, 'version.txt'), 'r').read().strip()
+    with open(os.path.join(root_dir, 'version.txt'), 'r') as version_file:
+        return version_file.read().strip()
 
 
 def secure_filename(filename: str) -> str:
