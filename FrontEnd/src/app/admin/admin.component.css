@@ -1,0 +1,79 @@
+.main-content {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+.search-form {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.search-field {
+  flex: 1 1 auto;
+  min-width: 260px;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.no-results {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.result-count {
+  font-weight: 500;
+}
+
+table.admin-results {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+table.admin-results th,
+table.admin-results td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  vertical-align: top;
+}
+
+table.admin-results th {
+  font-weight: 600;
+}
+
+td.uuid {
+  font-family: monospace;
+  font-size: 0.85em;
+  word-break: break-all;
+}
+
+td.actions {
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  border-radius: 10px;
+  font-size: 0.75em;
+  white-space: nowrap;
+}
+
+.badge-yes {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.badge-no {
+  background-color: #fdecea;
+  color: #b71c1c;
+}

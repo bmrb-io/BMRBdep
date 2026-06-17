@@ -97,8 +97,10 @@ init_db()
 # We need the context in order to load the modules
 with application.app_context():
     from bmrbdep.user_endpoints import user_endpoints
+    from bmrbdep.admin_endpoints import admin_endpoints
 
 application.register_blueprint(user_endpoints)
+application.register_blueprint(admin_endpoints)
 
 # Set up error handling
 @application.errorhandler(ServerError)

@@ -6,6 +6,7 @@ from flask_mail import Message
 from sqlalchemy import select, or_
 
 from bmrbdep import application, RequestError, configuration, mail, ServerError
+from bmrbdep.common import is_admin_email
 from bmrbdep.database import Deposition, get_db_session
 from bmrbdep.helpers.tokens import get_email_token, verify_email_token
 
@@ -118,6 +119,8 @@ def get_session_info():
     result = {}
     if email := session.get('active_email'):
         result['email'] = email
+        if is_admin_email(email):
+            result['admin'] = True
     if orcid := session.get('orcid_id'):
         result['orcid'] = orcid
     return result

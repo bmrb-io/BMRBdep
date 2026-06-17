@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {Deposition} from './my-depositions/my-depositions.component';
@@ -14,6 +14,7 @@ export interface EmailAccessTokenResponse {
 export interface SessionInfo {
   email?: string;
   orcid?: string;
+  admin?: boolean;
 }
 
 @Injectable({providedIn: 'root'})
@@ -63,5 +64,9 @@ export class AuthService {
       .pipe(
         catchError(() => of({} as SessionInfo))
       );
+  }
+
+  isAdmin(): Observable<boolean> {
+    return this.getSessionInfo().pipe(map(info => !!info.admin));
   }
 }

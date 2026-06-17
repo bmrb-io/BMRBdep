@@ -1,6 +1,7 @@
 import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
+import {AuthService} from '../auth.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {download} from '../nmrstar/nmrstar';
 import {Entry} from '../nmrstar/entry';
@@ -25,12 +26,14 @@ import {FormsModule} from '@angular/forms';
 export class TreeViewComponent implements OnInit, OnDestroy {
   private persistence = inject(DepositionPersistenceService);
   protected lifecycle = inject(DepositionLifecycleService);
+  private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   active: string = '';
   developerMode: boolean;
   entry: Entry | null = null;
+  isAdmin = false;
   page: string;
   @Output() sessionEnd = new EventEmitter<boolean>();
   subscription$!: Subscription;
@@ -65,6 +68,10 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
     this.subscription$.add(this.persistence.entrySubject.subscribe({
       next: entry => this.entry = entry
+    }));
+
+    this.subscription$.add(this.auth.isAdmin().subscribe({
+      next: isAdmin => this.isAdmin = isAdmin
     }));
   }
 

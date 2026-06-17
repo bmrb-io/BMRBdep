@@ -4,6 +4,14 @@
       <mat-card-title>My Depositions</mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      @if (sessionInfo.admin) {
+        <p class="admin-tools-link">
+          <a mat-raised-button color="primary" routerLink="/admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin tools
+          </a>
+        </p>
+      }
       @if (loading) {
         <div class="loading-container">
           <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>

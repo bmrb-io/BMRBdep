@@ -111,6 +111,13 @@ your email when you created the deposition, or from My Depositions.">
                          routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
             Support
           </mat-list-item>
+          @if (isAdmin) {
+            <mat-list-item [ngClass]="{'active': page==='admin'}"
+                           routerLink="/admin" id="admin"
+                           matTooltip="Search all depositions and perform administrative actions.">
+              Admin
+            </mat-list-item>
+          }
         </div>
         @if (developerMode) {
           <mat-divider></mat-divider>

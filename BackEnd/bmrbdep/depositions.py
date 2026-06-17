@@ -17,7 +17,7 @@ from git import Repo, CacheError
 from sqlalchemy import select
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path, \
-    filter_null_values
+    filter_null_values, format_contact_names
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
@@ -147,10 +147,12 @@ class DepositionRepo:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
                     author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
                     author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
+                    author_names = format_contact_names(contact_loop.get_tag(['Given_name', 'Family_name']))
                 except Exception:
                     # If we can't get entry data, just use empty lists
                     author_emails = []
                     author_orcids = []
+                    author_names = []
 
                 # Parse creation_date
                 creation_date = None
@@ -169,6 +171,7 @@ class DepositionRepo:
                     # Update existing record
                     existing.author_emails = author_emails
                     existing.author_orcids = author_orcids
+                    existing.author_names = author_names
                     existing.bmrbnum = self._live_metadata.get('bmrbnum')
                     existing.creation_date = creation_date
                     existing.nickname = self._live_metadata.get('deposition_nickname')
@@ -181,6 +184,7 @@ class DepositionRepo:
                         deposition_id=str(self._uuid),
                         author_emails=author_emails,
                         author_orcids=author_orcids,
+                        author_names=author_names,
                         bmrbnum=self._live_metadata.get('bmrbnum'),
                         creation_date=creation_date,
                         nickname=self._live_metadata.get('deposition_nickname'),
