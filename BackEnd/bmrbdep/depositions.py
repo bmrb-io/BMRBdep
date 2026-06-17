@@ -427,7 +427,7 @@ class DepositionRepo:
                                         (id_range[0], id_range[1]))
 
                 if not bmrbnum:
-                    logging.exception('No valid IDs remaining in any of the ranges!')
+                    logging.error('No valid IDs remaining in any of the ranges!')
                     raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
 
                 params['bmrbnum'] = bmrbnum

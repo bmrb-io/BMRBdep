@@ -741,7 +741,7 @@ def fetch_or_store_deposition(uuid):
 
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
-                    logging.exception('An entry changed on the server!')
+                    logging.warning('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
