@@ -16,7 +16,8 @@ from filelock import Timeout, FileLock, BaseFileLock
 from git import Repo, CacheError
 from sqlalchemy import select
 
-from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path
+from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path, \
+    filter_null_values
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
@@ -106,7 +107,6 @@ class DepositionRepo:
             try:
                 self.commit("Repo closed with changes but without a manual commit... Potential software bug.")
                 self._repo.close()
-                self._repo.__del__()
             # Catches all git-related errors
             except CacheError as err:
                 raise ServerError("An exception happened while closing the entry repository: %s" % err)
@@ -145,8 +145,8 @@ class DepositionRepo:
                 # Get current entry data
                 try:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
-                    author_emails = [_ for _ in contact_loop.get_tag('Email_address') if _ != "." and _ != "?" and _ is not None]
-                    author_orcids = [_ for _ in contact_loop.get_tag('ORCID') if _ != "." and _ != "?" and _ is not None]
+                    author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
+                    author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
                 except Exception:
                     # If we can't get entry data, just use empty lists
                     author_emails = []
@@ -269,10 +269,10 @@ class DepositionRepo:
                 middle_initial_index = loop.tag_index('Middle_initials')
                 first_initial_index = loop.tag_index('First_initial')
                 for row in loop.data:
-                    if middle_initial_index and row[middle_initial_index]:
+                    if middle_initial_index is not None and row[middle_initial_index]:
                         row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
-                    if first_initial_index and row[middle_initial_index]:
-                        row[middle_initial_index] = ".".join(row[middle_initial_index].replace(".", "")) + '.'
+                    if first_initial_index is not None and row[first_initial_index]:
+                        row[first_initial_index] = ".".join(row[first_initial_index].replace(".", "")) + '.'
 
         # Delete the chemcomps if there is no ligand
         try:
@@ -410,7 +410,9 @@ class DepositionRepo:
                     bmrb_sql: str = 'SELECT bmrbnum FROM entrylog WHERE bmrbnum >= %s AND bmrbnum <= %s;'
                     cur.execute(bmrb_sql, [id_range[0], id_range[1]])
 
-                    # Calculate the list of valid IDs
+                    # Calculate the list of valid IDs. The configured ranges are
+                    # intentionally half-open: the upper bound is exclusive and is
+                    # never assignable.
                     existing_ids: set = set([_[0] for _ in cur.fetchall()])
                     ids_in_range: set = set(range(id_range[0], id_range[1]))
                     assignable_ids = sorted(list(ids_in_range.difference(existing_ids)))
@@ -424,7 +426,7 @@ class DepositionRepo:
                                         (id_range[0], id_range[1]))
 
                 if not bmrbnum:
-                    logging.exception('No valid IDs remaining in any of the ranges!')
+                    logging.error('No valid IDs remaining in any of the ranges!')
                     raise ServerError('Could not find a valid BMRB ID to assign. Please contact us.')
 
                 params['bmrbnum'] = bmrbnum

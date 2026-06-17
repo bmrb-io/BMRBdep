@@ -319,7 +319,7 @@ def duplicate_deposition(uuid) -> Response:
                                        'schema_version': schema.version,
                                        'entry_deposited': False,
                                        'server_version_at_creation': get_release(),
-                                       'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                                       'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                                        'deposition_nickname': request_info['deposition_nickname'],
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
@@ -570,7 +570,7 @@ def new_deposition() -> Response:
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
-                        'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                        'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
 
@@ -663,7 +663,7 @@ title: %s
 
 contact persons: %s
 ''' % (uuid, bmrb_num, final_entry['entry_information_1']['Title'][0], contact_full)
-        mail.send(message)
+            mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
 
@@ -741,7 +741,7 @@ def fetch_or_store_deposition(uuid):
 
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
-                    logging.exception('An entry changed on the server!')
+                    logging.warning('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data

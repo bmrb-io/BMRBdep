@@ -177,7 +177,7 @@ export class Tag {
         } else {
           sampleName = sampleFrame.tagDict['_Sample.Name'].value;
           if (checkValueIsNull(sampleName)) {
-            sampleName = sampleFrame.getTag('Sf_framecode')!.value + +' (Unnamed)';
+            sampleName = sampleFrame.getTag('Sf_framecode')!.value + ' (Unnamed)';
           }
         }
 

@@ -81,7 +81,7 @@ If you add a new mutation, the pattern is: mutate the active `Entry`, call `entr
 
 ## Code conventions
 
-- **ESLint + angular-eslint.** Config in `FrontEnd/eslint.config.js` (flat config, ESLint 9). Stock `tseslint.configs.recommended` + `stylistic` + `angular.configs.tsRecommended`. `npm run lint` currently surfaces ~220 pre-existing issues (largely `eqeqeq` in templates, `prefer-inject`, and `no-explicit-any`) — see `FrontEnd/CLEANUP_TODO.md`.
+- **ESLint + angular-eslint.** Config in `FrontEnd/eslint.config.js` (flat config, ESLint 9). Stock `tseslint.configs.recommended` + `stylistic` + `angular.configs.tsRecommended`. `npm run lint` currently surfaces ~220 pre-existing issues (largely `eqeqeq` in templates, `prefer-inject`, and `no-explicit-any`).
 - **Component prefix is `app-`** (set in `FrontEnd/angular.json` schematics and enforced by `@angular-eslint/component-selector`).
 - Component default style is `css` (not scss) per `FrontEnd/angular.json`, even though the global theme is `styles.scss`.
 - `target: ES2022`, `module: es2020`, `moduleResolution: bundler`. `experimentalDecorators: true` (Angular still needs it).

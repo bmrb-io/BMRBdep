@@ -1,4 +1,4 @@
-import {enableProdMode, importProvidersFrom} from '@angular/core';
+import {enableProdMode, importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
 
 
 import {environment} from './environments/environment';
@@ -43,6 +43,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideZoneChangeDetection(),
     importProvidersFrom(BrowserModule, FormsModule, AppRoutingModule, ReactiveFormsModule, MatProgressBarModule, MatSelectModule, MatSlideToggleModule, MatSidenavModule, MatInputModule, MatListModule, MatToolbarModule, MatIconModule, MatMenuModule, MatCardModule, MatButtonModule, MatSnackBarModule, LoadingBarHttpClientModule, MatDialogModule, MatRadioModule, MatCheckboxModule, MatAutocompleteModule, MatTooltipModule, MatLineModule),
     SidenavService, {
       provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
