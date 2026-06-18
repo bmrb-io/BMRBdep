@@ -34,6 +34,7 @@
 
       @if (!searching && results.length > 0) {
         <p class="result-count">{{ results.length }} deposition(s) found.</p>
+        <div class="table-scroll">
         <table class="admin-results">
           <thead>
           <tr>
@@ -65,33 +66,37 @@
                   </span>
                 </td>
                 <td class="actions">
-                  <button mat-icon-button color="primary"
-                          matTooltip="Open this deposition"
+                  <button mat-stroked-button color="primary"
+                          matTooltip="Open this deposition (load it as the active session)"
                           [disabled]="pendingId === deposition.deposition_id"
                           (click)="openDeposition(deposition)">
                     <mat-icon>folder_open</mat-icon>
+                    Open
                   </button>
                   @if (deposition.entry_deposited) {
-                    <button mat-icon-button color="warn"
-                            matTooltip="Unlock (set back to not deposited)"
+                    <button mat-stroked-button color="warn"
+                            matTooltip="Set this deposited entry back to in-progress so it can be edited"
                             [disabled]="pendingId === deposition.deposition_id"
                             (click)="unlockDeposition(deposition)">
                       <mat-icon>lock_open</mat-icon>
+                      Unlock
                     </button>
                   }
-                  @if (!deposition.email_validated) {
-                    <button mat-icon-button color="accent"
-                            matTooltip="Mark e-mail as validated"
-                            [disabled]="pendingId === deposition.deposition_id"
-                            (click)="validateEmail(deposition)">
-                      <mat-icon>mark_email_read</mat-icon>
-                    </button>
-                  }
+                  <button mat-stroked-button color="accent"
+                          [matTooltip]="deposition.email_validated
+                            ? 'E-mail is already validated'
+                            : 'Manually mark this e-mail address as validated'"
+                          [disabled]="deposition.email_validated || pendingId === deposition.deposition_id"
+                          (click)="validateEmail(deposition)">
+                    <mat-icon>{{ deposition.email_validated ? 'mark_email_read' : 'mark_email_unread' }}</mat-icon>
+                    {{ deposition.email_validated ? 'Validated' : 'Mark validated' }}
+                  </button>
                 </td>
               </tr>
             }
           </tbody>
         </table>
+        </div>
       }
     </mat-card-content>
   </mat-card>

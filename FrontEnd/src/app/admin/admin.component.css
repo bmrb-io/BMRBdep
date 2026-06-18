@@ -31,10 +31,18 @@
   font-weight: 500;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
 table.admin-results {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
+}
+
+td.actions button {
+  margin: 2px 6px 2px 0;
 }
 
 table.admin-results th,

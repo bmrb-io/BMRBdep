@@ -4,7 +4,7 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatFormField} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTooltip} from '@angular/material/tooltip';
@@ -19,7 +19,7 @@ import {Message, MessagesService} from '../messages.service';
   styleUrls: ['./admin.component.css'],
   standalone: true,
   imports: [ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField,
-    MatInput, MatButton, MatIconButton, MatIcon, MatProgressSpinner, MatTooltip]
+    MatInput, MatButton, MatIcon, MatProgressSpinner, MatTooltip]
 })
 export class AdminComponent {
   private adminService = inject(AdminService);
