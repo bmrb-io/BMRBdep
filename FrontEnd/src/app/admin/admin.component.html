@@ -67,11 +67,13 @@
                 </td>
                 <td class="actions">
                   <button mat-raised-button color="primary"
-                          matTooltip="Open this deposition (load it as the active session)"
-                          [disabled]="pendingId === deposition.deposition_id"
+                          [matTooltip]="openIds.has(deposition.deposition_id)
+                            ? 'Already open — switch to it from the Open depositions bar at the top'
+                            : 'Open this deposition in the background (does not leave this page)'"
+                          [disabled]="openIds.has(deposition.deposition_id) || pendingId === deposition.deposition_id"
                           (click)="openDeposition(deposition)">
-                    <mat-icon>folder_open</mat-icon>
-                    Open
+                    <mat-icon>{{ openIds.has(deposition.deposition_id) ? 'folder_open' : 'folder' }}</mat-icon>
+                    {{ openIds.has(deposition.deposition_id) ? 'Opened' : 'Open' }}
                   </button>
                   @if (deposition.entry_deposited) {
                     <button mat-raised-button color="accent"

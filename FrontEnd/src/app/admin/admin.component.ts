@@ -40,6 +40,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   pendingId: string | null = null;
 
   private subscription$ = new Subscription();
+  // Deposition IDs already open in this tab, so the "Open" button can reflect that state.
+  openIds = new Set<string>();
 
   ngOnInit(): void {
     // The URL's `q` param is the single source of truth: searching just updates the param, and this
@@ -55,6 +57,10 @@ export class AdminComponent implements OnInit, OnDestroy {
           this.hasSearched = false;
         }
       }
+    }));
+
+    this.subscription$.add(this.persistence.openDepositionsSubject.subscribe({
+      next: views => this.openIds = new Set(views.map(v => v.entryID))
     }));
   }
 
@@ -86,9 +92,23 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   openDeposition(deposition: AdminDeposition): void {
-    // Loading by ID is not auth-gated on the backend, so the admin can open any deposition the
-    // same way a depositor would — landing on its first incomplete section.
-    this.router.navigate(['/entry', 'load', deposition.deposition_id]).then();
+    // Open in the background: add the deposition to this tab's open set (it appears in the
+    // "Open depositions" toolbar strip) without switching the current view away from the admin
+    // search results. Loading by ID is not auth-gated on the backend, so an admin can open any
+    // deposition the same way a depositor would.
+    if (this.openIds.has(deposition.deposition_id)) {
+      return;
+    }
+    this.pendingId = deposition.deposition_id;
+    this.persistence.loadEntry(deposition.deposition_id, true, false).then(
+      () => {
+        this.pendingId = null;
+        this.messages.sendMessage(new Message(
+          'Deposition opened in the background. Switch to it from the "Open depositions" bar at the top.'));
+      },
+      // The error message was already surfaced by the load path.
+      () => this.pendingId = null
+    );
   }
 
   unlockDeposition(deposition: AdminDeposition): void {
