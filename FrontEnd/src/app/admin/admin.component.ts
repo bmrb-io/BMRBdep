@@ -1,5 +1,6 @@
-import {Component, inject} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatFormField} from '@angular/material/form-field';
@@ -22,9 +23,10 @@ import {DepositionPersistenceService} from '../deposition-persistence.service';
   imports: [ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField,
     MatInput, MatButton, MatIcon, MatProgressSpinner, MatTooltip]
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit, OnDestroy {
   private adminService = inject(AdminService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
   private messages = inject(MessagesService);
   private persistence = inject(DepositionPersistenceService);
@@ -37,11 +39,39 @@ export class AdminComponent {
   // The deposition currently having an action applied, so we can disable its row buttons.
   pendingId: string | null = null;
 
+  private subscription$ = new Subscription();
+
+  ngOnInit(): void {
+    // The URL's `q` param is the single source of truth: searching just updates the param, and this
+    // subscription performs the actual lookup — so a page refresh re-runs the same search.
+    this.subscription$.add(this.route.queryParamMap.subscribe({
+      next: params => {
+        const query = (params.get('q') ?? '').trim();
+        this.searchControl.setValue(query);
+        if (query) {
+          this.runSearch(query);
+        } else {
+          this.results = [];
+          this.hasSearched = false;
+        }
+      }
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.subscription$.unsubscribe();
+  }
+
   search(): void {
     const query = this.searchControl.value.trim();
     if (!query) {
       return;
     }
+    // Push the term into the URL; the queryParamMap subscription runs the actual search.
+    this.router.navigate([], {relativeTo: this.route, queryParams: {q: query}}).then();
+  }
+
+  private runSearch(query: string): void {
     this.searching = true;
     this.adminService.search(query).subscribe({
       next: results => {
