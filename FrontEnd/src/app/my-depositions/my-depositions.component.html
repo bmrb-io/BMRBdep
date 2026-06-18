@@ -56,6 +56,28 @@
           }
         </mat-nav-list>
       }
+      @if (needsEmailAccess) {
+        <div class="email-access">
+          <h3>Get access by email</h3>
+          <p>Enter your email address to receive a link that will give you access to all depositions associated with that address.</p>
+          <mat-form-field>
+            <label>
+              <input matInput
+                     [formControl]="resumeEmail"
+                     placeholder="Enter your email address"
+                     type="email">
+            </label>
+            @if (resumeEmail.invalid) {
+              <mat-error>Please enter a valid email address.</mat-error>
+            }
+          </mat-form-field>
+          <div>
+            <button mat-raised-button color="primary" (click)="requestEmailAccess()" [disabled]="resumeEmail.invalid">
+              Request access
+            </button>
+          </div>
+        </div>
+      }
     </mat-card-content>
   </mat-card>
 </div>
