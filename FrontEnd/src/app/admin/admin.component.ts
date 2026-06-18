@@ -12,6 +12,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {AdminDeposition, AdminService} from '../admin.service';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {Message, MessagesService} from '../messages.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 
 @Component({
   selector: 'app-admin',
@@ -26,6 +27,7 @@ export class AdminComponent {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private messages = inject(MessagesService);
+  private persistence = inject(DepositionPersistenceService);
 
   searchControl = new FormControl('', {nonNullable: true});
   results: AdminDeposition[] = [];
@@ -74,6 +76,7 @@ export class AdminComponent {
         next: response => {
           deposition.entry_deposited = response.entry_deposited;
           this.pendingId = null;
+          this.refreshIfOpen(deposition.deposition_id);
           this.messages.sendMessage(new Message('Deposition unlocked.'));
         },
         error: () => {
@@ -97,6 +100,7 @@ export class AdminComponent {
         next: response => {
           deposition.email_validated = response.email_validated;
           this.pendingId = null;
+          this.refreshIfOpen(deposition.deposition_id);
           this.messages.sendMessage(new Message('E-mail marked as validated.'));
         },
         error: () => {
@@ -104,6 +108,17 @@ export class AdminComponent {
         }
       });
     });
+  }
+
+  /**
+   * If the just-mutated deposition is currently open in this tab, refetch it from the server so the
+   * in-memory copy reflects the change (e.g. an unlocked entry becomes editable again, or a now-
+   * validated e-mail clears the pending-verification state) instead of showing stale locked state.
+   */
+  private refreshIfOpen(depositionId: string): void {
+    if (this.persistence.isOpen(depositionId)) {
+      this.persistence.refetchEntry(depositionId, true);
+    }
   }
 
   private confirm(message: string, proceedMessage: string): Promise<boolean> {
