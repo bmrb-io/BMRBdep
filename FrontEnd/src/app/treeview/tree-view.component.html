@@ -1,10 +1,14 @@
-@if (entry) {
-  <mat-card appearance="outlined" class="nav-card">
+<mat-card appearance="outlined" class="nav-card">
+  @if (entry) {
     <mat-card-title (dblclick)="developerMode=true;logEntry()">
       Deposition "{{ entry.depositionNickname }}" Navigation
     </mat-card-title>
-    <mat-card-content>
-      <mat-nav-list>
+  } @else {
+    <mat-card-title>BMRBdep</mat-card-title>
+  }
+  <mat-card-content>
+    <mat-nav-list>
+      @if (entry) {
         <div>
           @for (superGroupCat of entry.superGroups; track superGroupCat) {
             @if ((superGroupCat.display === 'Y' || (entry.showAll && superGroupCat.display !== 'H'))) {
@@ -55,17 +59,6 @@ validation step.">
               Verify your email
             </mat-list-item>
           }
-          <mat-list-item [ngClass]="{'active': page==='my-depositions'}"
-                         routerLink="/my-depositions" id="my-depositions"
-                         matTooltip="View and switch between your accessible depositions.">
-            My depositions
-          </mat-list-item>
-          <mat-list-item [ngClass]="{'active': page==='new'}"
-                         routerLink="/" id="new"
-                         matTooltip="End this deposition session and create a new deposition. Optionally 'clone' this
-deposition to a new deposition if your other deposition is very similar.">
-            Create new deposition
-          </mat-list-item>
           @if (entry.hasDeleted && !entry.deposited) {
             <mat-list-item [ngClass]="{'active': page==='restore'}"
                            routerLink="/entry/restore" id="restore"
@@ -107,38 +100,52 @@ except any uploaded data files.">
 your email when you created the deposition, or from My Depositions.">
             Close this deposition
           </mat-list-item>
-          <mat-list-item [ngClass]="{'active': page==='support'}"
-                         routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
-            Support
-          </mat-list-item>
-          @if (isAdmin) {
-            <mat-list-item [ngClass]="{'active': page==='admin'}"
-                           routerLink="/admin" id="admin"
-                           matTooltip="Search all depositions and perform administrative actions.">
-              Admin
-            </mat-list-item>
-          }
         </div>
-        @if (developerMode) {
-          <mat-divider></mat-divider>
+        <mat-divider></mat-divider>
+      }
+      <div>
+        @if (entry) {
+          <h3 matLine>General</h3>
         }
-        @if (developerMode) {
+        <mat-list-item [ngClass]="{'active': page==='my-depositions'}"
+                       routerLink="/my-depositions" id="my-depositions"
+                       matTooltip="View and switch between your accessible depositions.">
+          My depositions
+        </mat-list-item>
+        <mat-list-item [ngClass]="{'active': page==='new'}"
+                       routerLink="/" id="new"
+                       matTooltip="Create a new deposition.">
+          Create new deposition
+        </mat-list-item>
+        <mat-list-item [ngClass]="{'active': page==='support'}"
+                       routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
+          Support
+        </mat-list-item>
+        @if (isAdmin) {
+          <mat-list-item [ngClass]="{'active': page==='admin'}"
+                         routerLink="/admin" id="admin"
+                         matTooltip="Search all depositions and perform administrative actions.">
+            Admin
+          </mat-list-item>
+        }
+      </div>
+      @if (developerMode && entry) {
+        <mat-divider></mat-divider>
+        <div>
           <div>
-            <div>
-              <h3 matLine>Developer options</h3>
-              <mat-list-item (click)='download(entry.entryID + ".str", entry)'>Download entry
-              </mat-list-item>
-              <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
-              <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
-              <mat-list-item>
-                <mat-slide-toggle [(ngModel)]="entry.showAll"
-                                  (ngModelChange)="entry.updateCategories()">Display non-mandatory tags
-                </mat-slide-toggle>
-              </mat-list-item>
-            </div>
+            <h3 matLine>Developer options</h3>
+            <mat-list-item (click)='download(entry.entryID + ".str", entry)'>Download entry
+            </mat-list-item>
+            <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
+            <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
+            <mat-list-item>
+              <mat-slide-toggle [(ngModel)]="entry.showAll"
+                                (ngModelChange)="entry.updateCategories()">Display non-mandatory tags
+              </mat-slide-toggle>
+            </mat-list-item>
           </div>
-        }
-      </mat-nav-list>
-    </mat-card-content>
-  </mat-card>
-}
+        </div>
+      }
+    </mat-nav-list>
+  </mat-card-content>
+</mat-card>
