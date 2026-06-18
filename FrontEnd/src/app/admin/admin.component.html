@@ -43,7 +43,29 @@
             <th>E-mail(s)</th>
             <th>UUID</th>
             <th>BMRB ID</th>
-            <th>Status</th>
+            <th>
+              Status
+              <div class="sort-controls">
+                <button type="button" class="sort-header"
+                        [class.active]="sortField === 'email_validated'"
+                        matTooltip="Sort by e-mail validation status"
+                        (click)="sortBy('email_validated')">
+                  E-mail
+                  <mat-icon class="sort-arrow">{{
+                    sortField === 'email_validated' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+                  }}</mat-icon>
+                </button>
+                <button type="button" class="sort-header"
+                        [class.active]="sortField === 'entry_deposited'"
+                        matTooltip="Sort by deposition status"
+                        (click)="sortBy('entry_deposited')">
+                  Deposited
+                  <mat-icon class="sort-arrow">{{
+                    sortField === 'entry_deposited' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+                  }}</mat-icon>
+                </button>
+              </div>
+            </th>
             <th>Actions</th>
           </tr>
           </thead>

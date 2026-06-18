@@ -66,6 +66,43 @@ table.admin-results th {
   font-weight: 600;
 }
 
+.sort-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.85em;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.sort-header.active {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sort-header .sort-arrow {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  // Idle (unfold_more) arrows are faint until the column is the active sort.
+  opacity: 0.55;
+}
+
+.sort-header.active .sort-arrow {
+  opacity: 1;
+}
+
 td.uuid {
   font-family: monospace;
   font-size: 0.85em;

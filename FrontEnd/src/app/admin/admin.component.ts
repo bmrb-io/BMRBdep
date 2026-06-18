@@ -43,6 +43,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Deposition IDs already open in this tab, so the "Open" button can reflect that state.
   openIds = new Set<string>();
 
+  // Client-side sort state for the two boolean status fields. null = natural (server) order.
+  sortField: 'email_validated' | 'entry_deposited' | null = null;
+  sortAsc = true;
+
   ngOnInit(): void {
     // The URL's `q` param is the single source of truth: searching just updates the param, and this
     // subscription performs the actual lookup — so a page refresh re-runs the same search.
@@ -82,6 +86,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.adminService.search(query).subscribe({
       next: results => {
         this.results = results;
+        this.applySort();
         this.hasSearched = true;
         this.searching = false;
       },
@@ -89,6 +94,26 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.searching = false;
       }
     });
+  }
+
+  /** Toggle/apply a client-side sort on one of the boolean status fields. */
+  sortBy(field: 'email_validated' | 'entry_deposited'): void {
+    if (this.sortField === field) {
+      this.sortAsc = !this.sortAsc;
+    } else {
+      this.sortField = field;
+      this.sortAsc = true;
+    }
+    this.applySort();
+  }
+
+  private applySort(): void {
+    if (!this.sortField) {
+      return;
+    }
+    const field = this.sortField;
+    const dir = this.sortAsc ? 1 : -1;
+    this.results = [...this.results].sort((a, b) => (Number(a[field]) - Number(b[field])) * dir);
   }
 
   openDeposition(deposition: AdminDeposition): void {
