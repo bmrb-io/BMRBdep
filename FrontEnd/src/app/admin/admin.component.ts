@@ -191,35 +191,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteDeposition(deposition: AdminDeposition): void {
-    this.confirm(
-      `Permanently delete deposition "${deposition.nickname || deposition.deposition_id}"? ` +
-      'This removes the deposition directory and all of its data files from the server. ' +
-      'This cannot be undone.',
-      'Yes, delete permanently'
-    ).then(confirmed => {
-      if (!confirmed) {
-        return;
-      }
-      this.pendingId = deposition.deposition_id;
-      this.adminService.deleteDeposition(deposition.deposition_id).subscribe({
-        next: () => {
-          this.pendingId = null;
-          // Drop any locally-open copy so auto-save doesn't keep PUTting to a now-deleted entry.
-          if (this.persistence.isOpen(deposition.deposition_id)) {
-            this.persistence.closeDeposition(deposition.deposition_id);
-          }
-          // Remove it from the visible results immediately.
-          this.results = this.results.filter(d => d.deposition_id !== deposition.deposition_id);
-          this.messages.sendMessage(new Message('Deposition deleted.'));
-        },
-        error: () => {
-          this.pendingId = null;
-        }
-      });
-    });
-  }
-
   /**
    * If the just-mutated deposition is currently open in this tab, refetch it from the server so the
    * in-memory copy reflects the change (e.g. an unlocked entry becomes editable again, or a now-

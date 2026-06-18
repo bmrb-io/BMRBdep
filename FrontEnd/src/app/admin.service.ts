@@ -66,15 +66,4 @@ export class AdminService {
         })
       );
   }
-
-  deleteDeposition(depositionId: string): Observable<{status: string}> {
-    const apiEndPoint = `${environment.serverURL}/admin/deposition/${depositionId}`;
-    return this.http.delete<{status: string}>(apiEndPoint, {withCredentials: true})
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          this.errorHandler.handle(error);
-          return throwError(() => error);
-        })
-      );
-  }
 }
