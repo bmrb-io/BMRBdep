@@ -47,6 +47,23 @@ export class AuthService {
     }));
   }
 
+  /**
+   * Terminate the current session server-side (clears the e-mail / ORCID session cookie). Resolves
+   * even on error so the client-side sign-out cleanup can still proceed; the error is surfaced.
+   */
+  endSession(): Promise<void> {
+    const apiEndPoint = `${environment.serverURL}/end-session`;
+    return new Promise<void>(resolve => {
+      this.http.post(apiEndPoint, {}, {withCredentials: true}).subscribe({
+        next: () => resolve(),
+        error: error => {
+          this.errorHandler.handle(error);
+          resolve();
+        }
+      });
+    });
+  }
+
   getAuthorizedDepositions(): Observable<Deposition[]> {
     const apiEndPoint = `${environment.serverURL}/authorized-depositions`;
     return this.http.get<Deposition[]>(apiEndPoint, {withCredentials: true})
