@@ -99,12 +99,18 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (this.openIds.has(deposition.deposition_id)) {
       return;
     }
+    // "Background" means "don't navigate away from this page" — not "never activate". If nothing is
+    // currently active there's no view to protect, so make this one active (which populates the
+    // toolbar + side menu) while staying on the admin page. If another deposition is already active,
+    // open this one truly in the background so it doesn't steal the current view.
+    const activate = !this.persistence.currentEntry;
     this.pendingId = deposition.deposition_id;
-    this.persistence.loadEntry(deposition.deposition_id, true, false).then(
+    this.persistence.loadEntry(deposition.deposition_id, true, activate).then(
       () => {
         this.pendingId = null;
-        this.messages.sendMessage(new Message(
-          'Deposition opened in the background. Switch to it from the "Open depositions" bar at the top.'));
+        this.messages.sendMessage(new Message(activate
+          ? 'Deposition opened. Use the Menu button (top left) to navigate it.'
+          : 'Deposition opened in the background. Switch to it from the "Open depositions" bar at the top.'));
       },
       // The error message was already surfaced by the load path.
       () => this.pendingId = null
