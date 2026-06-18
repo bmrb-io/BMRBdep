@@ -92,6 +92,16 @@ def admin_unlock_deposition(uuid):
                         'entry_deposited': repo.metadata.get('entry_deposited', False)})
 
 
+@admin_endpoints.delete('/deposition/admin/deposition/<uuid:uuid>')
+@require_admin
+def admin_delete_deposition(uuid):
+    """ Permanently delete a deposition: its on-disk git repo directory and its database row.
+    This is irrecoverable. """
+
+    depositions.DepositionRepo(uuid).delete()
+    return jsonify({'status': 'success'})
+
+
 @admin_endpoints.post('/deposition/admin/deposition/<uuid:uuid>/validate-email')
 @require_admin
 def admin_validate_email(uuid):

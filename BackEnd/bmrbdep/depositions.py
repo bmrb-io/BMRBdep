@@ -531,6 +531,44 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         self._modified_files = True
         return True
 
+    def delete(self) -> None:
+        """ Permanently and irrecoverably delete this deposition: its on-disk git repo directory
+        and its row in the depositions database. Intended for administrator use only.
+
+        Unlike other mutations this is used WITHOUT the `with` statement, since there is nothing
+        to commit once the directory is gone. """
+
+        # Import here to avoid circular imports (mirrors _update_database_metadata).
+        from bmrbdep.database import Deposition, get_db_session
+
+        # Take the repo's lock so we don't delete out from under an in-progress request. The lock
+        # file lives inside the directory we're about to remove, which is fine: on Linux an open
+        # file can be unlinked, and release() below just drops our handle.
+        try:
+            self._lock_object.acquire()
+        except Timeout:
+            raise ServerError('Could not get a lock on the deposition directory. This is usually because another'
+                              ' request is already in progress.')
+        try:
+            shutil.rmtree(self._entry_dir)
+        finally:
+            # The lock file is gone with the directory; releasing just closes our descriptor.
+            try:
+                self._lock_object.release()
+            except OSError:
+                pass
+
+        # Drop the database row. The on-disk repo is the source of truth, so a failure here is
+        # logged but not fatal — the deposition is already gone from disk.
+        try:
+            with get_db_session() as session:
+                existing = session.execute(
+                    select(Deposition).where(Deposition.deposition_id == str(self._uuid))).scalar_one_or_none()
+                if existing:
+                    session.delete(existing)
+        except Exception as e:
+            logging.warning(f"Deleted deposition directory {self._uuid} but could not delete its database row: {e}")
+
     def raise_write_errors(self):
         """ Raises an error if the entry may not be edited. This could happen if it is already deposited, or the email
         has not been validated."""

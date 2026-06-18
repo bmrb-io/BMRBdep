@@ -115,6 +115,13 @@
                     <mat-icon>{{ deposition.email_validated ? 'mark_email_read' : 'mark_email_unread' }}</mat-icon>
                     {{ deposition.email_validated ? 'Validated' : 'Mark validated' }}
                   </button>
+                  <button mat-raised-button color="warn"
+                          matTooltip="Permanently delete this deposition and all of its data files"
+                          [disabled]="pendingId === deposition.deposition_id"
+                          (click)="deleteDeposition(deposition)">
+                    <mat-icon>delete_forever</mat-icon>
+                    Delete
+                  </button>
                 </td>
               </tr>
             }
