@@ -1,3 +1,10 @@
+@use '@angular/material' as mat;
+@use '../../custom-theme.scss' as theme;
+
+// The theme palette has no green, so source the positive badge from Material's stock green palette;
+// the negative badge reuses the app's existing warn (red) palette for consistency with other errors.
+$badge-positive: mat.m2-define-palette(mat.$m2-green-palette);
+
 .main-content {
   max-width: 1100px;
   margin: 20px auto;
@@ -77,11 +84,11 @@ td.actions {
 }
 
 .badge-yes {
-  background-color: #e6f4ea;
-  color: #1e7e34;
+  background-color: mat.m2-get-color-from-palette($badge-positive, 50);
+  color: mat.m2-get-color-from-palette($badge-positive, 800);
 }
 
 .badge-no {
-  background-color: #fdecea;
-  color: #b71c1c;
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, 50);
+  color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, 800);
 }

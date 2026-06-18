@@ -17,7 +17,7 @@ import {DepositionPersistenceService} from '../deposition-persistence.service';
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css'],
+  styleUrls: ['./admin.component.scss'],
   standalone: true,
   imports: [ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField,
     MatInput, MatButton, MatIcon, MatProgressSpinner, MatTooltip]
