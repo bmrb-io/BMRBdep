@@ -86,6 +86,16 @@ def admin_unlock_deposition(uuid):
 
     with depositions.DepositionRepo(uuid) as repo:
         if repo.metadata.get('entry_deposited'):
+            # Only allow unlock while annotation has not yet begun, i.e. the ETS status is still
+            # 'nd'. A None status means there is nothing to check against (no BMRB ID, or ETS is
+            # mocked locally), so we don't block in that case.
+            ets_status = repo.get_ets_status()
+            if ets_status is not None and ets_status.lower() != 'nd':
+                raise RequestError("This deposition cannot be unlocked because its entry tracking status is "
+                                   f"'{ets_status}', not 'nd'. Annotation has already begun; please contact "
+                                   "an annotator.")
+            # Flip the ETS status to 'unlk' (recording a logtable entry) before re-opening the entry.
+            repo.set_ets_status('unlk', 'Deposition unlocked for editing')
             repo.metadata['entry_deposited'] = False
             repo.commit('Manual deposition unlock by administrator')
         return jsonify({'commit': repo.last_commit,

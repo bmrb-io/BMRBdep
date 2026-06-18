@@ -30,6 +30,26 @@ if not os.path.exists(configuration['repo_path']):
         pass
 
 
+def ets_mocked() -> bool:
+    """ Whether the entry tracking system is effectively disabled (local/dev). In that case the
+    deposit flow assigns a placeholder BMRB ID rather than talking to ETS, so status reads/writes
+    are no-ops too. """
+
+    return configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME'
+
+
+def get_ets_connection():
+    """ Open a connection to the ETS (entry tracking system) database, raising a user-facing
+    ServerError if it is unreachable. """
+
+    try:
+        return psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
+                                database=configuration['ets']['database'])
+    except psycopg2.OperationalError:
+        logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
+        raise ServerError('Could not connect to entry tracking system. Please contact us.')
+
+
 class DepositionRepo:
     """ A class to interface with git repos for depositions.
 
@@ -391,20 +411,20 @@ class DepositionRepo:
         if len(ranges) == 0:
             raise ServerError('Server configuration error.')
 
-        # If they have already deposited, just keep the same BMRB ID
+        # If they have already deposited, just keep the same BMRB ID. A pre-existing BMRB ID also
+        # means this is a re-deposit (the entry was unlocked after a prior deposition), so we move
+        # the ETS status back to 'nd' rather than creating a brand-new ETS record.
         bmrbnum = self.metadata.get('bmrbnum', None)
+        is_redeposit = bool(bmrbnum)
         if configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME' and not bmrbnum:
             bmrbnum = 999999
         if bmrbnum:
             params['bmrbnum'] = bmrbnum
+            if is_redeposit:
+                self.set_ets_status('nd', 'Deposition re-submitted by depositor')
         else:
-            try:
-                conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
-                                        database=configuration['ets']['database'])
-                cur = conn.cursor()
-            except psycopg2.OperationalError:
-                logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
-                raise ServerError('Could not connect to entry tracking system. Please contact us.')
+            conn = get_ets_connection()
+            cur = conn.cursor()
 
             try:
                 # Determine which bmrbnum to use - one range at a time
@@ -468,6 +488,57 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
 
         # Return the assigned BMRB ID
         return bmrbnum
+
+    def get_ets_status(self) -> Optional[str]:
+        """ Return the current ETS status code for this deposition's assigned BMRB ID.
+
+        Returns None when there is nothing to check against: the deposition has no BMRB ID yet,
+        ETS is mocked (local/dev), or no entry tracking record exists for the BMRB ID. """
+
+        if ets_mocked():
+            return None
+        bmrbnum = self.metadata.get('bmrbnum')
+        if not bmrbnum:
+            return None
+        conn = get_ets_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT status FROM entrylog WHERE bmrbnum = %s;', [bmrbnum])
+            row = cur.fetchone()
+            return row[0].strip() if row and row[0] else None
+        finally:
+            conn.close()
+
+    def set_ets_status(self, new_status: str, action_description: str) -> None:
+        """ Set the ETS status for this deposition's BMRB ID and record a logtable entry describing
+        the change. No-op when ETS is mocked (local/dev). """
+
+        if ets_mocked():
+            return
+        bmrbnum = self.metadata.get('bmrbnum')
+        if not bmrbnum:
+            raise ServerError('Cannot update entry tracking status: this deposition has no assigned BMRB ID.')
+        conn = get_ets_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT depnum FROM entrylog WHERE bmrbnum = %s;', [bmrbnum])
+            row = cur.fetchone()
+            if not row:
+                raise ServerError('Cannot update entry tracking status: no record for BMRB ID %s.' % bmrbnum)
+            depnum = row[0]
+            cur.execute('UPDATE entrylog SET status = %s, last_updated = %s WHERE bmrbnum = %s;',
+                        [new_status, date.today().isoformat(), bmrbnum])
+            log_sql = """
+INSERT INTO logtable (logid, depnum, actdesc, newstatus, statuslevel, logdate, login)
+  VALUES (nextval('logid_seq'), %s, %s, %s, 1, now(), '')"""
+            cur.execute(log_sql, [depnum, action_description, new_status])
+            conn.commit()
+        except psycopg2.Error:
+            conn.rollback()
+            logging.exception('Failed to update ETS status to %s for BMRB ID %s', new_status, bmrbnum)
+            raise ServerError('Could not update the entry tracking status. Please try again.')
+        finally:
+            conn.close()
 
     @property
     def entry(self) -> pynmrstar.Entry:
