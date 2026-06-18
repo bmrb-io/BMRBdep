@@ -76,6 +76,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
       if (!confirmed) return;
       this.persistence.closeDeposition(entryID).then(() => {
+        // Only move the user if they are actually viewing a deposition (a /entry* page). On other
+        // pages (admin, my-depositions, support, help) closing in the tab strip shouldn't yank them
+        // away — the close just updates the active entry and the tab strip in place.
+        if (!this.router.url.startsWith('/entry')) {
+          return;
+        }
         if (this.persistence.getOpenDepositionRecords().length === 0) {
           this.router.navigate(['/']).then();
           return;

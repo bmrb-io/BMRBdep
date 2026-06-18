@@ -94,6 +94,12 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       }
       this.persistence.closeDeposition(entry.entryID).then(() => {
         this.sessionEnd.emit(true);
+        // Only move the user if they are actually viewing a deposition (a /entry* page). The side
+        // menu is reachable from other pages (e.g. admin) once a deposition is active, and closing
+        // from there shouldn't yank them away — the close just updates the active entry in place.
+        if (!this.router.url.startsWith('/entry')) {
+          return;
+        }
         if (this.persistence.getOpenDepositionRecords().length === 0) {
           this.router.navigate(['/']).then();
           return;
