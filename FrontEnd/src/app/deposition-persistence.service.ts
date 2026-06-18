@@ -791,7 +791,7 @@ export class DepositionPersistenceService implements OnDestroy {
         next: event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && this.router.url.indexOf('/my-depositions') < 0 && !this.currentEntry) {
+              && this.router.url.indexOf('/my-depositions') < 0 && this.router.url.indexOf('/admin') < 0 && !this.currentEntry) {
               this.subscription$.unsubscribe();
               this.router.navigate(['/']).then();
             }

@@ -6,18 +6,20 @@
     <mat-card-content>
       <p>Search all depositions by depositor e-mail, deposition (session) UUID, or depositor name.</p>
 
-      <form class="search-form" (ngSubmit)="search()">
+      <div class="search-form">
         <mat-form-field class="search-field">
           <input matInput
                  [formControl]="searchControl"
                  placeholder="E-mail, UUID, or name"
-                 autocomplete="off">
+                 autocomplete="off"
+                 (keyup.enter)="search()">
         </mat-form-field>
-        <button mat-raised-button color="primary" type="submit"
+        <button mat-raised-button color="primary" type="button"
+                (click)="search()"
                 [disabled]="searching || !searchControl.value.trim()">
           Search
         </button>
-      </form>
+      </div>
 
       @if (searching) {
         <div class="loading-container">
