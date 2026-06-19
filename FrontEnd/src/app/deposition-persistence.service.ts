@@ -409,9 +409,9 @@ export class DepositionPersistenceService implements OnDestroy {
    * `loadEntry` short-circuits when the entry is already open, so it can't
    * stand in for a forced refetch.
    */
-  refetchEntry(entryID: string, skipMessage = false): void {
+  refetchEntry(entryID: string, skipMessage = false): Promise<Entry> {
     this.openDepositions.delete(entryID);
-    this.loadEntry(entryID, skipMessage);
+    return this.loadEntry(entryID, skipMessage);
   }
 
   /**
