@@ -1,12 +1,12 @@
 import logging
 import socket
 
-from flask import Blueprint, request, url_for, session, redirect
+from flask import Blueprint, request, url_for, session, redirect, jsonify
 from flask_mail import Message
 from sqlalchemy import select, or_
 
-from bmrbdep import application, RequestError, configuration, mail, ServerError
-from bmrbdep.common import is_admin_email
+from bmrbdep import application, RequestError, configuration, mail, ServerError, depositions
+from bmrbdep.common import is_admin_email, filter_null_values
 from bmrbdep.database import Deposition, get_db_session
 from bmrbdep.helpers.tokens import get_email_token, verify_email_token
 
@@ -132,4 +132,69 @@ def end_session():
 
     session.clear()
     return {'status': 'success'}
+
+
+def _deposition_contact_emails(repo) -> list:
+    """ Return the list of contact-person e-mail addresses for a deposition, with NMR-STAR null
+    placeholders removed. Used to authorize a depositor against their own deposition. """
+
+    try:
+        contact_loop = repo.entry.get_loops_by_category("_Contact_Person")[0]
+        return filter_null_values(contact_loop.get_tag('Email_address'))
+    except Exception:
+        return []
+
+
+@application.get('/deposition/<uuid:uuid>/unlock-status')
+def deposition_unlock_status(uuid):
+    """ Report whether a deposited entry can still be unlocked by the depositor.
+
+    A deposition is only unlockable while annotation has not yet begun, i.e. while the ETS status is
+    still 'nd'. A None status (no BMRB ID assigned yet, or ETS mocked locally) is treated as
+    unlockable so the flow works in development. """
+
+    with depositions.DepositionRepo(uuid, read_only=True) as repo:
+        deposited = bool(repo.metadata.get('entry_deposited'))
+        ets_status = repo.get_ets_status() if deposited else None
+        unlockable = deposited and (ets_status is None or ets_status.lower() == 'nd')
+
+    return jsonify({'entry_deposited': deposited,
+                    'ets_status': ets_status,
+                    'unlockable': unlockable})
+
+
+@application.post('/deposition/<uuid:uuid>/unlock')
+def unlock_own_deposition(uuid):
+    """ Allow a depositor authenticated by e-mail to re-open their own deposited entry for editing.
+
+    This mirrors the administrator unlock, but is gated on the signed session e-mail being one of the
+    deposition's contact persons rather than on administrator privilege. Unlocking is only permitted
+    while the ETS status is still 'nd' (annotation has not yet begun). As with the admin path, only the
+    metadata is mutated (entry.str is left untouched) and the assigned BMRB ID is retained so a
+    subsequent re-deposit reuses the same number. """
+
+    active_email = session.get('active_email')
+    if not active_email:
+        raise RequestError('You must be signed in via an e-mail access link to unlock a deposition. Use the '
+                           '"Access my depositions" e-mail link, then try again.', status_code=403)
+
+    with depositions.DepositionRepo(uuid) as repo:
+        contact_emails = _deposition_contact_emails(repo)
+        if active_email.strip().lower() not in {_.strip().lower() for _ in contact_emails}:
+            logging.warning('Denied unlock of %s to %s (not a contact person)', uuid, active_email)
+            raise RequestError('You can only unlock depositions that list your e-mail address as a contact person.',
+                               status_code=403)
+
+        if repo.metadata.get('entry_deposited'):
+            ets_status = repo.get_ets_status()
+            if ets_status is not None and ets_status.lower() != 'nd':
+                raise RequestError('This deposition can no longer be unlocked because it has begun being processed '
+                                   'by BMRB annotators. Please e-mail any further changes to help@bmrb.io.')
+            # Flip the ETS status to 'unlk' (recording a logtable entry) before re-opening the entry.
+            repo.set_ets_status('unlk', 'Deposition unlocked for editing by depositor')
+            repo.metadata['entry_deposited'] = False
+            repo.commit('Deposition unlocked by depositor %s' % active_email)
+
+        return jsonify({'commit': repo.last_commit,
+                        'entry_deposited': repo.metadata.get('entry_deposited', False)})
 
