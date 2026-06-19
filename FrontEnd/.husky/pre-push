@@ -1,0 +1,3 @@
+cd FrontEnd
+echo "Running production build before push..."
+npm run build.prod
