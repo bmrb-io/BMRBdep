@@ -39,6 +39,12 @@ if application.debug or configuration['debug']:
 application.secret_key = configuration['secret_key']
 assert application.secret_key != "CHANGE_ME"
 
+# Staging directory for in-progress uploads. It lives on the same filesystem as
+# the deposition repos so that moving a finished upload into a deposition is a
+# fast atomic rename rather than a cross-filesystem copy held under the lock.
+_UPLOAD_STAGING_ROOT = os.path.join(configuration['repo_path'], '.staging')
+os.makedirs(_UPLOAD_STAGING_ROOT, exist_ok=True)
+
 # Configure session timeout for email sessions (2 weeks)
 application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(weeks=2)
 
@@ -688,30 +694,43 @@ def file_operations(uuid, path: str) -> Response:
 def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
-    # Store a data file
-    with depositions.DepositionRepo(uuid) as repo:
+    # Build the repo object (this validates that the UUID exists) but do NOT take
+    # the lock yet: we want to receive the upload - the slow, network-bound part -
+    # without blocking every other request to this deposition.
+    repo = depositions.DepositionRepo(uuid)
 
-        temp_dir = configuration.get('temporary_directory', None)
-        with tempfile.TemporaryDirectory(dir=temp_dir) as upload_dir:
-            # noinspection PyUnusedLocal,PyShadowingNames
-            def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
-                return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir)
+    # Stream the upload into a staging directory on the same filesystem as the
+    # deposition repos. Using delete=False means closing the FileStorage won't
+    # unlink the staged file out from under us; the TemporaryDirectory still
+    # removes anything left behind (e.g. on error or a partial upload).
+    with tempfile.TemporaryDirectory(dir=_UPLOAD_STAGING_ROOT) as upload_dir:
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
+            return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir, delete=False)
 
-            # noinspection PyUnresolvedReferences
-            stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
-                                                                      stream_factory=custom_stream_factory)
+        # noinspection PyUnresolvedReferences
+        stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
+                                                                  stream_factory=custom_stream_factory)
 
-            # A single POST may carry many files (e.g. an uploaded folder). Write
-            # them all and commit once, so a folder upload is a single git
-            # operation rather than one lock-protected commit per file.
-            uploaded = files.getlist('file')
-            if not uploaded:
-                raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
+        # A single POST may carry many files (e.g. an uploaded folder).
+        uploaded = files.getlist('file')
+        if not uploaded:
+            raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
 
+        # Capture (staged path, destination name) before taking the lock. Closing
+        # the FileStorage flushes and closes the file without deleting it.
+        staged: List[tuple] = []
+        for file_ in uploaded:
+            source_path = file_.stream.name
+            file_.close()
+            staged.append((source_path, file_.filename))
+
+        # Now take the lock only to move the staged files into place and commit -
+        # a fast, atomic rename per file rather than the whole upload duration.
+        with repo:
             filenames: List[str] = []
-            for file_ in uploaded:
-                filenames.append(repo.write_file(file_.filename, source_path=file_.stream.name))
-                file_.close()
+            for source_path, destination in staged:
+                filenames.append(repo.write_file(destination, source_path=source_path, move=True))
 
             changed: bool = repo.commit("User uploaded %d file(s)." % len(filenames))
             return jsonify({'filenames': filenames, 'changed': changed, 'commit': repo.last_commit})
