@@ -35,8 +35,15 @@ const ACTIVE_ENTRY_SESSION_KEY = 'bmrbdep.activeEntryID';
 
 export interface FileUploadResponse {
   commit: string;
-  filename: string;
+  filenames: string[];
   changed: boolean;
+}
+
+export interface UploadItem {
+  file: File;
+  // Folder-relative path to store the file under (e.g. 'myfolder/sub/data.txt').
+  // For a plain file selection this is just the file name.
+  path: string;
 }
 
 export interface CommitResponse {
@@ -310,11 +317,15 @@ export class DepositionPersistenceService implements OnDestroy {
     });
   }
 
-  uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
+  uploadFile(items: UploadItem[]): Observable<HttpEvent<FileUploadResponse>> {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
     const formData = new FormData();
-    formData.append('file', file);
+    for (const item of items) {
+      // The third argument sets the filename transmitted to the server, which is
+      // how we preserve a folder-relative path for files uploaded inside a folder.
+      formData.append('file', item.file, item.path);
+    }
 
     const options = {
       params: new HttpParams(),

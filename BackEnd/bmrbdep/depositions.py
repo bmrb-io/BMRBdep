@@ -503,9 +503,21 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
             raise RequestError('No file with that name saved for this entry.')
 
     def get_data_file_list(self) -> List[str]:
-        """ Returns the list of data files associated with this deposition. """
+        """ Returns the list of data files associated with this deposition.
 
-        return os.listdir(os.path.join(self._entry_dir, 'data_files'))
+        Paths are returned relative to the data_files directory using forward
+        slashes, so files uploaded inside a folder keep their relative location. """
+
+        data_root = os.path.join(self._entry_dir, 'data_files')
+        results: List[str] = []
+        for dirpath, _, filenames in os.walk(data_root):
+            rel_dir = os.path.relpath(dirpath, data_root)
+            for filename in filenames:
+                if rel_dir == '.':
+                    results.append(filename)
+                else:
+                    results.append(os.path.join(rel_dir, filename).replace(os.sep, '/'))
+        return results
 
     def delete_data_file(self, path: str) -> bool:
         """ Delete a data file by name."""

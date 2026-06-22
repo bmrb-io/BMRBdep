@@ -700,18 +700,21 @@ def store_file(uuid) -> Response:
             # noinspection PyUnresolvedReferences
             stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
                                                                       stream_factory=custom_stream_factory)
-            for file_ in files.values():
-                if file_.name == 'file':
-                    filename = repo.write_file(file_.filename, source_path=file_.stream.name)
-                    file_.close()
 
-                    # Update the entry data
-                    if repo.commit("User uploaded file: %s" % file_.filename):
-                        return jsonify({'filename': filename, 'changed': True, 'commit': repo.last_commit})
-                    else:
-                        return jsonify({'filename': filename, 'changed': False, 'commit': repo.last_commit})
+            # A single POST may carry many files (e.g. an uploaded folder). Write
+            # them all and commit once, so a folder upload is a single git
+            # operation rather than one lock-protected commit per file.
+            uploaded = files.getlist('file')
+            if not uploaded:
+                raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
 
-            raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
+            filenames: List[str] = []
+            for file_ in uploaded:
+                filenames.append(repo.write_file(file_.filename, source_path=file_.stream.name))
+                file_.close()
+
+            changed: bool = repo.commit("User uploaded %d file(s)." % len(filenames))
+            return jsonify({'filenames': filenames, 'changed': changed, 'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>', methods=('GET', 'PUT'))
