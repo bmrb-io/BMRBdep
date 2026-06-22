@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {environment} from '../environments/environment';
 import {Message, MessagesService, MessageType} from './messages.service';
 import {Deposition} from './my-depositions/my-depositions.component';
@@ -14,6 +14,7 @@ export interface EmailAccessTokenResponse {
 export interface SessionInfo {
   email?: string;
   orcid?: string;
+  admin?: boolean;
 }
 
 @Injectable({providedIn: 'root'})
@@ -46,6 +47,23 @@ export class AuthService {
     }));
   }
 
+  /**
+   * Terminate the current session server-side (clears the e-mail / ORCID session cookie). Resolves
+   * even on error so the client-side sign-out cleanup can still proceed; the error is surfaced.
+   */
+  endSession(): Promise<void> {
+    const apiEndPoint = `${environment.serverURL}/end-session`;
+    return new Promise<void>(resolve => {
+      this.http.post(apiEndPoint, {}, {withCredentials: true}).subscribe({
+        next: () => resolve(),
+        error: error => {
+          this.errorHandler.handle(error);
+          resolve();
+        }
+      });
+    });
+  }
+
   getAuthorizedDepositions(): Observable<Deposition[]> {
     const apiEndPoint = `${environment.serverURL}/authorized-depositions`;
     return this.http.get<Deposition[]>(apiEndPoint, {withCredentials: true})
@@ -63,5 +81,9 @@ export class AuthService {
       .pipe(
         catchError(() => of({} as SessionInfo))
       );
+  }
+
+  isAdmin(): Observable<boolean> {
+    return this.getSessionInfo().pipe(map(info => !!info.admin));
   }
 }

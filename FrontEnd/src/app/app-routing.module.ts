@@ -11,6 +11,8 @@ import {PendingValidationComponent} from './pending-validation/pending-validatio
 import {LoadEntryComponent} from './load-entry/load-entry.component';
 import {SupportComponent} from './support/support-component';
 import {MyDepositionsComponent} from './my-depositions/my-depositions.component';
+import {AdminComponent} from './admin/admin.component';
+import {adminGuard} from './admin.guard';
 
 const routes: Routes = [
   {path: '', component: WelcomeComponent},
@@ -23,6 +25,7 @@ const routes: Routes = [
   {path: 'help/molecular-assembly', component: MolecularSystemComponent},
   {path: 'support', component: SupportComponent},
   {path: 'my-depositions', component: MyDepositionsComponent},
+  {path: 'admin', component: AdminComponent, canActivate: [adminGuard]},
 ];
 
 @NgModule({
