@@ -198,7 +198,7 @@ export class AdminComponent implements OnInit, OnDestroy {
    */
   private refreshIfOpen(depositionId: string): void {
     if (this.persistence.isOpen(depositionId)) {
-      this.persistence.refetchEntry(depositionId, true);
+      this.persistence.refetchEntry(depositionId, true).catch(() => { /* load failure already surfaced by the load path */ });
     }
   }
 

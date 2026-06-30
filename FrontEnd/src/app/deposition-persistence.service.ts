@@ -233,8 +233,9 @@ export class DepositionPersistenceService implements OnDestroy {
         state.needsCommitCheck = false;
         this.checkLastCommit(entryID).then(foundCommit => {
           if (!foundCommit) {
-            this.refetchEntry(entryID, true);
+            return this.refetchEntry(entryID, true);
           }
+          return undefined;
         }).catch(() => { /* retry timer / next activation will pick it up */ });
       }
     } else {
@@ -693,7 +694,7 @@ export class DepositionPersistenceService implements OnDestroy {
           dialogRef.afterClosed().subscribe(result => {
             this.conflictDialogOpen.delete(entryID);
             if (result) {
-              this.refetchEntry(entryID, true);
+              this.refetchEntry(entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
             } else if (result === false) {
               // User chose to overwrite the server. Fall back to the full-entry PUT
               // so every saveframe (including ones the server has and we don't) is
@@ -846,7 +847,7 @@ export class DepositionPersistenceService implements OnDestroy {
           // IDB invariant broken — refetch this entry from the server (it will land in
           // the open set with the right schema on response).
           console.warn(`Missing IDB record for entry ${record.entryID} or schema ${record.schemaVersion}; refetching.`);
-          this.loadEntry(record.entryID, true);
+          this.loadEntry(record.entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
           continue;
         }
         const schemaJson = JSON.parse(rawSchema) as SchemaJSON;
@@ -1007,7 +1008,7 @@ export class DepositionPersistenceService implements OnDestroy {
       this.conflictDialogOpen.delete(entryID);
       if (!this.openDepositions.has(entryID)) return;
       if (result) {
-        this.refetchEntry(entryID, true);
+        this.refetchEntry(entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
       } else if (result === false) {
         this.saveEntry(true, entryID);
       }

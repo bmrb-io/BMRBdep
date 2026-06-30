@@ -140,7 +140,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
       if (!confirmed) {
         return;
       }
-      this.persistence.refetchEntry(entry.entryID, true);
+      this.persistence.refetchEntry(entry.entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
     });
   }
 
