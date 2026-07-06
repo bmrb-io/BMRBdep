@@ -3,12 +3,15 @@ import {DepositionPersistenceService, OpenDepositionView} from '../deposition-pe
 import {AuthService, SessionInfo} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatNavList} from '@angular/material/list';
 import {MatIcon} from '@angular/material/icon';
 import {NgClass} from '@angular/common';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatButton} from '@angular/material/button';
+import {MatError, MatFormField} from '@angular/material/form-field';
+import {MatInput} from '@angular/material/input';
 
 export interface Deposition {
   deposition_id: string;
@@ -23,7 +26,7 @@ export interface Deposition {
   templateUrl: './my-depositions.component.html',
   styleUrls: ['./my-depositions.component.scss'],
   standalone: true,
-  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink]
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink, ReactiveFormsModule, MatFormField, MatError, MatInput]
 })
 export class MyDepositionsComponent implements OnInit, OnDestroy {
   private persistence = inject(DepositionPersistenceService);
@@ -34,6 +37,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
   activeDepositionId: string | null = null;
   openDepositionIds = new Set<string>();
   sessionInfo: SessionInfo = {};
+  resumeEmail = new FormControl<string>('', {nonNullable: true, validators: [Validators.required, Validators.email]});
 
   // The empty-state needs both signals before it can be trusted: the server's
   // authorized list AND the in-tab hydration of locally-opened depositions.
@@ -99,7 +103,7 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
     if (this.sessionInfo.orcid) {
       return `No depositions are associated with ORCID iD ${this.sessionInfo.orcid}.`;
     }
-    return 'You are not signed in. To see depositions associated with your e-mail address, request an access link from the home page.';
+    return 'You are not signed in. To see depositions associated with your e-mail address, request an access link below.';
   }
 
   /**
@@ -147,6 +151,19 @@ export class MyDepositionsComponent implements OnInit, OnDestroy {
       }
     });
     return auths.join(', ');
+  }
+
+  // Shown when the visitor has not authenticated via an e-mail link (they may still be ORCID-
+  // authenticated, or not signed in at all). Lets them request an access link without having to
+  // go back to the home page.
+  get needsEmailAccess(): boolean {
+    return !this.loading && !this.sessionInfo.email;
+  }
+
+  requestEmailAccess(): void {
+    if (this.resumeEmail.valid) {
+      this.auth.sendEmailAccessToken(this.resumeEmail.value).then();
+    }
   }
 
   loadDeposition(deposition: Deposition): void {

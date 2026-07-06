@@ -35,8 +35,15 @@ const ACTIVE_ENTRY_SESSION_KEY = 'bmrbdep.activeEntryID';
 
 export interface FileUploadResponse {
   commit: string;
-  filename: string;
+  filenames: string[];
   changed: boolean;
+}
+
+export interface UploadItem {
+  file: File;
+  // Folder-relative path to store the file under (e.g. 'myfolder/sub/data.txt').
+  // For a plain file selection this is just the file name.
+  path: string;
 }
 
 export interface CommitResponse {
@@ -226,8 +233,9 @@ export class DepositionPersistenceService implements OnDestroy {
         state.needsCommitCheck = false;
         this.checkLastCommit(entryID).then(foundCommit => {
           if (!foundCommit) {
-            this.refetchEntry(entryID, true);
+            return this.refetchEntry(entryID, true);
           }
+          return undefined;
         }).catch(() => { /* retry timer / next activation will pick it up */ });
       }
     } else {
@@ -310,11 +318,15 @@ export class DepositionPersistenceService implements OnDestroy {
     });
   }
 
-  uploadFile(file: File): Observable<HttpEvent<FileUploadResponse>> {
+  uploadFile(items: UploadItem[]): Observable<HttpEvent<FileUploadResponse>> {
     const apiEndPoint = `${environment.serverURL}/${this.getEntryID()}/file`;
 
     const formData = new FormData();
-    formData.append('file', file);
+    for (const item of items) {
+      // The third argument sets the filename transmitted to the server, which is
+      // how we preserve a folder-relative path for files uploaded inside a folder.
+      formData.append('file', item.file, item.path);
+    }
 
     const options = {
       params: new HttpParams(),
@@ -409,98 +421,121 @@ export class DepositionPersistenceService implements OnDestroy {
    * `loadEntry` short-circuits when the entry is already open, so it can't
    * stand in for a forced refetch.
    */
-  refetchEntry(entryID: string, skipMessage = false): void {
+  refetchEntry(entryID: string, skipMessage = false): Promise<Entry> {
     this.openDepositions.delete(entryID);
-    this.loadEntry(entryID, skipMessage);
+    return this.loadEntry(entryID, skipMessage);
   }
 
   /**
-   * Load a deposition. If it is already open in this tab, just make it
-   * active. Otherwise fetch from the server, dedup the schema, add to the
-   * open set, persist, and make active. Broadcasts to peer tabs so any
-   * tab that already has this entry open can refresh in place.
+   * Load a deposition and resolve with the resulting Entry once it is fully open
+   * (fetched, schema-deduped, persisted to IDB, and added to the open set). If it
+   * is already open in this tab, resolve immediately. Rejects if the fetch or the
+   * IDB write fails — the user-facing message is shown either way, so callers only
+   * need to react to the rejection (e.g. navigate off a now-dead load route).
+   *
+   * `activate` (default true) makes the loaded deposition the active one and emits
+   * it on `entrySubject`; pass false to open it in the background — it joins the
+   * open-depositions tab strip without stealing the current view. Broadcasts to
+   * peer tabs so any tab that already has this entry open can refresh in place.
    */
-  loadEntry(entryID: string, skipMessage = false): void {
-    if (this.openDepositions.has(entryID)) {
-      this.setActive(entryID);
-      return;
+  loadEntry(entryID: string, skipMessage = false, activate = true): Promise<Entry> {
+    const alreadyOpen = this.openDepositions.get(entryID);
+    if (alreadyOpen) {
+      if (activate) {
+        this.setActive(entryID);
+      }
+      return Promise.resolve(alreadyOpen.entry);
     }
 
     const entryURL = `${environment.serverURL}/${entryID}`;
     if (!skipMessage) {
       this.messagesService.sendMessage(new Message(`Loading deposition ${entryID}...`));
     }
-    this.http.get<EntryJSON>(entryURL).subscribe({
-      next: async jsonData => {
-        if (!skipMessage) {
-          this.messagesService.clearMessage();
-        }
-        const schemaJson = jsonData.schema;
-        const schema = this.resolveSchema(schemaJson.version, schemaJson);
-        // entryFromJSON expects schema bundled; reuse the cached instance.
-        const loadedEntry: Entry = entryFromJSON(jsonData);
-        loadedEntry.schema = schema;
-
-        // Verify that the NMR-STAR matches the uploaded files
-        let filesOutOfSync = false;
-        if (jsonData.data_files) {
-          const files: string[] = jsonData.data_files;
-          for (const dataFile of files) {
-            if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
-              loadedEntry.dataStore.addFile(dataFile).percent = 100;
-              filesOutOfSync = true;
+    return new Promise<Entry>((resolve, reject) => {
+      this.http.get<EntryJSON>(entryURL).subscribe({
+        next: async jsonData => {
+          try {
+            if (!skipMessage) {
+              this.messagesService.clearMessage();
             }
+            const schemaJson = jsonData.schema;
+            const schema = this.resolveSchema(schemaJson.version, schemaJson);
+            // entryFromJSON expects schema bundled; reuse the cached instance.
+            const loadedEntry: Entry = entryFromJSON(jsonData);
+            loadedEntry.schema = schema;
+
+            // Verify that the NMR-STAR matches the uploaded files
+            let filesOutOfSync = false;
+            if (jsonData.data_files) {
+              const files: string[] = jsonData.data_files;
+              for (const dataFile of files) {
+                if (!(dataFile in loadedEntry.dataStore.dataFileMap)) {
+                  loadedEntry.dataStore.addFile(dataFile).percent = 100;
+                  filesOutOfSync = true;
+                }
+              }
+            }
+
+            const state: DepositionState = {
+              entry: loadedEntry,
+              savedSaveframeSnapshots: new Map(),
+              lastChangeTime: null,
+              saveInProgress: false,
+              needsCommitCheck: false,
+            };
+            this.seedSnapshots(state);
+            this.openDepositions.set(entryID, state);
+
+            // Block the load on the IDB write. If it fails (most commonly quota
+            // exceeded) we'd rather refuse the load than leave an in-memory entry
+            // that silently won't survive a refresh.
+            try {
+              await this.persistEntry(state, schemaJson);
+            } catch (err) {
+              this.openDepositions.delete(entryID);
+              // Best-effort cleanup: the entry blob and/or the index may have
+              // landed before the failure. If these also fail (still quota) the
+              // catches swallow it — in-memory state is the part that matters.
+              this.storage.deleteEntry(entryID).catch(() => { /* ignore */ });
+              this.persistIndex().catch(() => { /* ignore */ });
+              this.emitOpenDepositions();
+              this.handleStorageFailure(err, 'load this deposition');
+              reject(err);
+              return;
+            }
+            this.postBroadcast({type: 'loaded', entryID});
+
+            this.emitOpenDepositions();
+            if (activate) {
+              this.setActive(entryID);
+            }
+
+            // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
+            if (filesOutOfSync) {
+              console.warn('Files detected as uploaded which are not present in NMR-STAR. Triggering re-save.');
+              loadedEntry.updateUploadedData();
+              loadedEntry.refresh();
+              this.saveEntry(true, entryID);
+            }
+            resolve(loadedEntry);
+          } catch (err) {
+            reject(err);
           }
+        },
+        error: error => {
+          this.errorHandler.handle(error);
+          reject(error);
         }
-
-        const state: DepositionState = {
-          entry: loadedEntry,
-          savedSaveframeSnapshots: new Map(),
-          lastChangeTime: null,
-          saveInProgress: false,
-          needsCommitCheck: false,
-        };
-        this.seedSnapshots(state);
-        this.openDepositions.set(entryID, state);
-
-        // Block the load on the IDB write. If it fails (most commonly quota
-        // exceeded) we'd rather refuse the load than leave an in-memory entry
-        // that silently won't survive a refresh.
-        try {
-          await this.persistEntry(state, schemaJson);
-        } catch (err) {
-          this.openDepositions.delete(entryID);
-          // Best-effort cleanup: the entry blob and/or the index may have
-          // landed before the failure. If these also fail (still quota) the
-          // catches swallow it — in-memory state is the part that matters.
-          this.storage.deleteEntry(entryID).catch(() => { /* ignore */ });
-          this.persistIndex().catch(() => { /* ignore */ });
-          this.emitOpenDepositions();
-          this.handleStorageFailure(err, 'load this deposition');
-          return;
-        }
-        this.postBroadcast({type: 'loaded', entryID});
-
-        this.emitOpenDepositions();
-        this.setActive(entryID);
-
-        // Somehow the NMR-STAR data got out of sync with the uploaded files. Trigger a regeneration of the NMR-STAR, and a save.
-        if (filesOutOfSync) {
-          console.warn('Files detected as uploaded which are not present in NMR-STAR. Triggering re-save.');
-          loadedEntry.updateUploadedData();
-          loadedEntry.refresh();
-          this.saveEntry(true, entryID);
-        }
-      },
-      error: error => this.errorHandler.handle(error)
+      });
     });
   }
 
   /**
-   * Surface an IDB write failure on the load path to the user and get them
-   * off the now-dead /entry/load/:id route. Quota-exceeded gets a tailored
-   * message since the user can act on it (close other depositions, free up
-   * browser storage); anything else gets a generic message.
+   * Surface an IDB write failure on the load path to the user. Quota-exceeded gets
+   * a tailored message since the user can act on it (close other depositions, free
+   * up browser storage); anything else gets a generic message. Navigating away from
+   * a now-dead load route is the caller's responsibility (via the rejected loadEntry
+   * promise), so this only shows the message.
    */
   private handleStorageFailure(err: unknown, action: string): void {
     if (isStorageQuotaError(err)) {
@@ -515,13 +550,6 @@ export class DepositionPersistenceService implements OnDestroy {
         `Your browser blocked the local save needed to ${action}, so the deposition was not opened. ` +
         'Please try again, and contact support if the problem persists.',
         MessageType.ErrorMessage, 30000));
-    }
-    // The user is sitting on /entry/load/:id waiting on an entrySubject emission
-    // that will never come. Send them somewhere sensible.
-    if (this.activeEntryID) {
-      this.router.navigate(['/entry']).then();
-    } else {
-      this.router.navigate(['/']).then();
     }
   }
 
@@ -666,7 +694,7 @@ export class DepositionPersistenceService implements OnDestroy {
           dialogRef.afterClosed().subscribe(result => {
             this.conflictDialogOpen.delete(entryID);
             if (result) {
-              this.refetchEntry(entryID, true);
+              this.refetchEntry(entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
             } else if (result === false) {
               // User chose to overwrite the server. Fall back to the full-entry PUT
               // so every saveframe (including ones the server has and we don't) is
@@ -791,7 +819,7 @@ export class DepositionPersistenceService implements OnDestroy {
         next: event => {
           if (event instanceof NavigationEnd) {
             if (this.router.url.indexOf('/load/') < 0 && this.router.url.indexOf('/help') < 0 && this.router.url.indexOf('/support') < 0
-              && this.router.url.indexOf('/my-depositions') < 0 && !this.currentEntry) {
+              && this.router.url.indexOf('/my-depositions') < 0 && this.router.url.indexOf('/admin') < 0 && !this.currentEntry) {
               this.subscription$.unsubscribe();
               this.router.navigate(['/']).then();
             }
@@ -819,7 +847,7 @@ export class DepositionPersistenceService implements OnDestroy {
           // IDB invariant broken — refetch this entry from the server (it will land in
           // the open set with the right schema on response).
           console.warn(`Missing IDB record for entry ${record.entryID} or schema ${record.schemaVersion}; refetching.`);
-          this.loadEntry(record.entryID, true);
+          this.loadEntry(record.entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
           continue;
         }
         const schemaJson = JSON.parse(rawSchema) as SchemaJSON;
@@ -980,7 +1008,7 @@ export class DepositionPersistenceService implements OnDestroy {
       this.conflictDialogOpen.delete(entryID);
       if (!this.openDepositions.has(entryID)) return;
       if (result) {
-        this.refetchEntry(entryID, true);
+        this.refetchEntry(entryID, true).catch(() => { /* load failure already surfaced by the load path */ });
       } else if (result === false) {
         this.saveEntry(true, entryID);
       }

@@ -4,6 +4,7 @@ import logging
 import os
 import pathlib
 import shutil
+import tempfile
 from datetime import date, datetime, timezone
 from typing import List, BinaryIO, Optional
 
@@ -17,7 +18,7 @@ from git import Repo, CacheError
 from sqlalchemy import select
 
 from bmrbdep.common import configuration, residue_mappings, get_release, get_schema, secure_full_path, \
-    filter_null_values
+    filter_null_values, format_contact_names
 from bmrbdep.exceptions import ServerError, RequestError
 from bmrbdep.helpers.pubmed import update_citation_with_pubmed
 from bmrbdep.helpers.star_tools import upgrade_chemcomps_and_create_entities_where_needed
@@ -28,6 +29,48 @@ if not os.path.exists(configuration['repo_path']):
         logging.warning('The deposition root directory did not exist... creating it.')
     except FileExistsError:
         pass
+
+
+def _determine_lock_directory() -> str:
+    """ Pick a directory to hold the per-deposition advisory locks.
+
+    This MUST be on a local filesystem with reliable file locking. The deposition
+    repos themselves live on NFS, where filelock-based mutual exclusion is not
+    dependable, so locking there let concurrent git operations collide on
+    .git/index.lock. /dev/shm (tmpfs) is local, fast, and cleared on reboot - so
+    stale locks never survive a crash. We fall back to the system temp directory
+    on platforms without /dev/shm. """
+
+    if os.path.isdir('/dev/shm'):
+        base = '/dev/shm'
+    else:
+        base = tempfile.gettempdir()
+    lock_directory = os.path.join(base, 'bmrbdep-locks')
+    os.makedirs(lock_directory, exist_ok=True)
+    return lock_directory
+
+
+_LOCK_DIRECTORY = _determine_lock_directory()
+
+
+def ets_mocked() -> bool:
+    """ Whether the entry tracking system is effectively disabled (local/dev). In that case the
+    deposit flow assigns a placeholder BMRB ID rather than talking to ETS, so status reads/writes
+    are no-ops too. """
+
+    return configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME'
+
+
+def get_ets_connection():
+    """ Open a connection to the ETS (entry tracking system) database, raising a user-facing
+    ServerError if it is unreachable. """
+
+    try:
+        return psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
+                                database=configuration['ets']['database'])
+    except psycopg2.OperationalError:
+        logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
+        raise ServerError('Could not connect to entry tracking system. Please contact us.')
 
 
 class DepositionRepo:
@@ -57,7 +100,9 @@ class DepositionRepo:
         self._live_metadata: dict = {}
         self._original_metadata: dict = {}
         uuids = str(uuid)
-        self._lock_path: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids, '.git', 'api.lock')
+        # The lock lives on a local filesystem (see _determine_lock_directory), NOT
+        # inside the deposition's NFS repo, because NFS file locking is unreliable.
+        self._lock_path: str = os.path.join(_LOCK_DIRECTORY, '%s.lock' % uuids)
         self._entry_dir: str = os.path.join(configuration['repo_path'], uuids[0], uuids[1], uuids)
 
         # Make sure the entry ID is valid, or throw an exception
@@ -147,10 +192,12 @@ class DepositionRepo:
                     contact_loop = self.entry.get_loops_by_category("_Contact_Person")[0]
                     author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
                     author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
+                    author_names = format_contact_names(contact_loop.get_tag(['Given_name', 'Family_name']))
                 except Exception:
                     # If we can't get entry data, just use empty lists
                     author_emails = []
                     author_orcids = []
+                    author_names = []
 
                 # Parse creation_date
                 creation_date = None
@@ -169,6 +216,7 @@ class DepositionRepo:
                     # Update existing record
                     existing.author_emails = author_emails
                     existing.author_orcids = author_orcids
+                    existing.author_names = author_names
                     existing.bmrbnum = self._live_metadata.get('bmrbnum')
                     existing.creation_date = creation_date
                     existing.nickname = self._live_metadata.get('deposition_nickname')
@@ -181,6 +229,7 @@ class DepositionRepo:
                         deposition_id=str(self._uuid),
                         author_emails=author_emails,
                         author_orcids=author_orcids,
+                        author_names=author_names,
                         bmrbnum=self._live_metadata.get('bmrbnum'),
                         creation_date=creation_date,
                         nickname=self._live_metadata.get('deposition_nickname'),
@@ -387,20 +436,20 @@ class DepositionRepo:
         if len(ranges) == 0:
             raise ServerError('Server configuration error.')
 
-        # If they have already deposited, just keep the same BMRB ID
+        # If they have already deposited, just keep the same BMRB ID. A pre-existing BMRB ID also
+        # means this is a re-deposit (the entry was unlocked after a prior deposition), so we move
+        # the ETS status back to 'nd' rather than creating a brand-new ETS record.
         bmrbnum = self.metadata.get('bmrbnum', None)
+        is_redeposit = bool(bmrbnum)
         if configuration['debug'] and configuration['ets']['host'] == 'CHANGE_ME' and not bmrbnum:
             bmrbnum = 999999
         if bmrbnum:
             params['bmrbnum'] = bmrbnum
+            if is_redeposit:
+                self.set_ets_status('nd', 'Deposition re-submitted by depositor')
         else:
-            try:
-                conn = psycopg2.connect(user=configuration['ets']['user'], host=configuration['ets']['host'],
-                                        database=configuration['ets']['database'])
-                cur = conn.cursor()
-            except psycopg2.OperationalError:
-                logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
-                raise ServerError('Could not connect to entry tracking system. Please contact us.')
+            conn = get_ets_connection()
+            cur = conn.cursor()
 
             try:
                 # Determine which bmrbnum to use - one range at a time
@@ -465,6 +514,57 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
         # Return the assigned BMRB ID
         return bmrbnum
 
+    def get_ets_status(self) -> Optional[str]:
+        """ Return the current ETS status code for this deposition's assigned BMRB ID.
+
+        Returns None when there is nothing to check against: the deposition has no BMRB ID yet,
+        ETS is mocked (local/dev), or no entry tracking record exists for the BMRB ID. """
+
+        if ets_mocked():
+            return None
+        bmrbnum = self.metadata.get('bmrbnum')
+        if not bmrbnum:
+            return None
+        conn = get_ets_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT status FROM entrylog WHERE bmrbnum = %s;', [bmrbnum])
+            row = cur.fetchone()
+            return row[0].strip() if row and row[0] else None
+        finally:
+            conn.close()
+
+    def set_ets_status(self, new_status: str, action_description: str) -> None:
+        """ Set the ETS status for this deposition's BMRB ID and record a logtable entry describing
+        the change. No-op when ETS is mocked (local/dev). """
+
+        if ets_mocked():
+            return
+        bmrbnum = self.metadata.get('bmrbnum')
+        if not bmrbnum:
+            raise ServerError('Cannot update entry tracking status: this deposition has no assigned BMRB ID.')
+        conn = get_ets_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT depnum FROM entrylog WHERE bmrbnum = %s;', [bmrbnum])
+            row = cur.fetchone()
+            if not row:
+                raise ServerError('Cannot update entry tracking status: no record for BMRB ID %s.' % bmrbnum)
+            depnum = row[0]
+            cur.execute('UPDATE entrylog SET status = %s, last_updated = %s WHERE bmrbnum = %s;',
+                        [new_status, date.today().isoformat(), bmrbnum])
+            log_sql = """
+INSERT INTO logtable (logid, depnum, actdesc, newstatus, statuslevel, logdate, login)
+  VALUES (nextval('logid_seq'), %s, %s, %s, 1, now(), '')"""
+            cur.execute(log_sql, [depnum, action_description, new_status])
+            conn.commit()
+        except psycopg2.Error:
+            conn.rollback()
+            logging.exception('Failed to update ETS status to %s for BMRB ID %s', new_status, bmrbnum)
+            raise ServerError('Could not update the entry tracking status. Please try again.')
+        finally:
+            conn.close()
+
     @property
     def entry(self) -> pynmrstar.Entry:
         """ Return the NMR-STAR entry for this entry. """
@@ -503,9 +603,21 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
             raise RequestError('No file with that name saved for this entry.')
 
     def get_data_file_list(self) -> List[str]:
-        """ Returns the list of data files associated with this deposition. """
+        """ Returns the list of data files associated with this deposition.
 
-        return os.listdir(os.path.join(self._entry_dir, 'data_files'))
+        Paths are returned relative to the data_files directory using forward
+        slashes, so files uploaded inside a folder keep their relative location. """
+
+        data_root = os.path.join(self._entry_dir, 'data_files')
+        results: List[str] = []
+        for dirpath, _, filenames in os.walk(data_root):
+            rel_dir = os.path.relpath(dirpath, data_root)
+            for filename in filenames:
+                if rel_dir == '.':
+                    results.append(filename)
+                else:
+                    results.append(os.path.join(rel_dir, filename).replace(os.sep, '/'))
+        return results
 
     def delete_data_file(self, path: str) -> bool:
         """ Delete a data file by name."""
@@ -540,9 +652,13 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
     def write_file(self, filename: str,
                    data: Optional[bytes] = None,
                    source_path: Optional[str] = None,
-                   root: bool = False) \
+                   root: bool = False,
+                   move: bool = False) \
             -> str:
-        """ Adds (or overwrites) a file to the repo. Returns the name of the written file. """
+        """ Adds (or overwrites) a file to the repo. Returns the name of the written file.
+
+        When a source_path is given, set move=True to move it into place via an atomic
+        rename instead of copying. The source must be on the same filesystem as the repo. """
 
         # The submission info file should always be writeable
         if filename != 'submission_info.json':
@@ -569,7 +685,10 @@ INSERT INTO logtable (logid,depnum,actdesc,newstatus,statuslevel,logdate,login)
             with open(full_path, "wb") as fo:
                 fo.write(data)
         elif source_path and not data:
-            shutil.copy(source_path, full_path)
+            if move:
+                os.replace(source_path, full_path)
+            else:
+                shutil.copy(source_path, full_path)
         else:
             raise ValueError('Cannot provide both data and source_path, please only provide one.')
         # Make sure the permissions of the written file are correct

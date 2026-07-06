@@ -1,5 +1,5 @@
 import {Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DepositionPersistenceService} from '../deposition-persistence.service';
+import {DepositionPersistenceService, UploadItem} from '../deposition-persistence.service';
 import {HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message, MessagesService, MessageType} from '../messages.service';
 import {Entry} from '../nmrstar/entry';
@@ -34,13 +34,11 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
   showCategoryLink: boolean;
   uploadSubscriptionDict$: Record<string, Subscription>;
   subscription$!: Subscription;
-  public activeUploads: number;
   private dialogRef: MatDialogRef<ConfirmationDialogComponent> | null = null;
 
   constructor() {
     this.showCategoryLink = true;
     this.uploadSubscriptionDict$ = {};
-    this.activeUploads = 0;
   }
 
   ngOnInit() {
@@ -128,56 +126,78 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Grab the FileSystemEntry roots synchronously — the DataTransferItemList is
+    // only valid for the duration of the drop event handler.
+    const roots: FileSystemEntry[] = [];
     for (const dtItem of Array.from(dataTransfer.items)) {
+      let entry: FileSystemEntry | null = null;
       try {
-        const entry = dtItem.webkitGetAsEntry();
-        if (entry) {
-          this.traverseFileTree(entry, '');
-        }
+        entry = dtItem.webkitGetAsEntry();
       } catch {
         try {
           const legacy = dtItem as DataTransferItem & { getAsEntry?(): FileSystemEntry };
-          const entry = legacy.getAsEntry?.();
-          if (entry) {
-            this.traverseFileTree(entry, '');
-          }
+          entry = legacy.getAsEntry?.() ?? null;
         } catch {
           console.error('In theory, this error state is impossible.');
         }
       }
+      if (entry) {
+        roots.push(entry);
+      }
     }
+
+    // Walk the whole tree, then upload everything in a single request.
+    Promise.all(roots.map(entry => this.collectFileTree(entry, '')))
+      .then(nested => this.uploadBatch(nested.flat()));
   }
 
-
-  traverseFileTree(item: FileSystemEntry, path: string): void {
-    // Recursively walk a dropped File/Directory tree, uploading each file we encounter.
-    // Returns nothing — the FileSystemEntry APIs are async-callback based, so accumulating
-    // and returning the file list isn't possible; uploads are kicked off in-place instead.
-
-    path = path || '';
+  private collectFileTree(item: FileSystemEntry, path: string): Promise<UploadItem[]> {
+    // Recursively walk a dropped File/Directory tree, resolving to the full list of
+    // files found (each with its folder-relative path). The FileSystemEntry APIs are
+    // async-callback based, so we promisify them and accumulate rather than uploading
+    // in place — that lets the caller send the entire folder as one request.
 
     if (item.isFile) {
-      // Get file
-      (item as FileSystemFileEntry).file((file: File) => {
-        console.log('File:', path + file.name, item);
-
-        // Don't upload hidden files, this will just confuse the user
-        if (!file.name.startsWith('.')) {
-          this.uploadFile(file);
-        }
+      return new Promise<UploadItem[]>(resolve => {
+        (item as FileSystemFileEntry).file(
+          (file: File) => {
+            // Don't upload hidden files, this will just confuse the user
+            resolve(file.name.startsWith('.') ? [] : [{file, path: path + file.name}]);
+          },
+          () => resolve([]));
       });
     } else if (item.isDirectory) {
-      // Get folder contents
       const dirReader = (item as FileSystemDirectoryEntry).createReader();
-      dirReader.readEntries((entries: FileSystemEntry[]) => {
-        for (const entry of entries) {
-          this.traverseFileTree(entry, path + item.name + '/');
-        }
+      const dirPath = path + item.name + '/';
+
+      // readEntries() returns the directory in batches (~100 entries), so it must be
+      // called repeatedly until it yields an empty array or large folders lose files.
+      const readAllEntries = (): Promise<FileSystemEntry[]> => new Promise(resolve => {
+        const all: FileSystemEntry[] = [];
+        const readBatch = () => {
+          dirReader.readEntries(
+            (entries: FileSystemEntry[]) => {
+              if (entries.length === 0) {
+                resolve(all);
+              } else {
+                all.push(...entries);
+                readBatch();
+              }
+            },
+            () => resolve(all));
+        };
+        readBatch();
       });
+
+      return readAllEntries()
+        .then(entries => Promise.all(entries.map(entry => this.collectFileTree(entry, dirPath))))
+        .then(nested => nested.flat());
     }
+    return Promise.resolve([]);
   }
 
   uploadFiles(files: FileList) {
+    const items: UploadItem[] = [];
     for (const file of Array.from(files)) {
       if (!file.size) {
         this.messagesService.sendMessage(new Message(`It appears that you attempted to upload one or more folders or zero byte
@@ -187,46 +207,65 @@ export class FileUploaderComponent implements OnInit, OnDestroy {
           MessageType.NotificationMessage));
         continue;
       }
-      this.uploadFile(file);
+      items.push({file, path: file.webkitRelativePath || file.name});
     }
+    this.uploadBatch(items);
   }
 
-  uploadFile(file: File) {
+  private uploadBatch(items: UploadItem[]) {
+    // Upload an entire set of files (e.g. a dropped folder) as one request so the
+    // backend performs a single git commit rather than one per file.
+    if (items.length === 0) {
+      return;
+    }
 
-    const dataFile = this.entry.dataStore.addFile(file.name);
+    // Register every file in the data store up front so the UI shows a row per file.
+    const dataFiles = items.map(item => this.entry.dataStore.addFile(item.path));
 
-    this.activeUploads += 1;
-    this.uploadSubscriptionDict$[file.name] = this.persistence.uploadFile(file)
-      .subscribe({
-        next: event => {
-          if (event.type === HttpEventType.UploadProgress) {
-            if (event.total) {
-              dataFile.percent = Math.round(100 * event.loaded / event.total);
-            }
-          } else if (event instanceof HttpResponse && event.body) {
-            this.entry.addCommit(event.body.commit);
-            dataFile.percent = 100;
-            this.entry.dataStore.updateName(dataFile, event.body.filename);
-            if (!event.body.changed) {
-              this.messagesService.sendMessage(new Message(`The file '${event.body.filename}' was already present on
-                the server with the same contents.`, MessageType.NotificationMessage));
+    const subscription = this.persistence.uploadFile(items).subscribe({
+      next: event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          if (event.total) {
+            // A single request reports aggregate progress; show it on every row.
+            const percent = Math.round(100 * event.loaded / event.total);
+            for (const dataFile of dataFiles) {
+              dataFile.percent = percent;
             }
           }
-        },
-        error: () => {
-          this.entry.dataStore.deleteFile(dataFile.fileName);
-          this.messagesService.sendMessage(new Message(`Failed to upload file ${dataFile.fileName}, please retry.`,
-            MessageType.ErrorMessage, 15000));
-          this.activeUploads -= 1;
-        },
-        complete: () => {
-          this.activeUploads -= 1;
-          if (this.activeUploads === 0) {
-            this.updateAndSaveDataFiles();
+        } else if (event instanceof HttpResponse && event.body) {
+          this.entry.addCommit(event.body.commit);
+          for (let i = 0; i < dataFiles.length; i++) {
+            dataFiles[i].percent = 100;
+            // The server may have sanitized the name; adopt whatever it stored.
+            if (event.body.filenames[i]) {
+              this.entry.dataStore.updateName(dataFiles[i], event.body.filenames[i]);
+            }
+          }
+          if (!event.body.changed) {
+            this.messagesService.sendMessage(new Message(
+              `The ${items.length === 1 ? 'file was' : 'files were'} already present on the server with the same contents.`,
+              MessageType.NotificationMessage));
           }
         }
-      });
+      },
+      error: () => {
+        for (const dataFile of dataFiles) {
+          this.entry.dataStore.deleteFile(dataFile.fileName);
+        }
+        this.messagesService.sendMessage(new Message(
+          `Failed to upload ${items.length === 1 ? 'the file' : 'the files'}, please retry.`,
+          MessageType.ErrorMessage, 15000));
+      },
+      complete: () => {
+        this.updateAndSaveDataFiles();
+      }
+    });
 
+    // Share the subscription under each file's name so a delete can cancel the
+    // in-flight upload (cancelling aborts the whole batch, since it is one request).
+    for (const item of items) {
+      this.uploadSubscriptionDict$[item.path] = subscription;
+    }
   }
 
   deleteFile(fileName: string): void {

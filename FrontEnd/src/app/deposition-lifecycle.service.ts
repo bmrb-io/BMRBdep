@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpParams} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -18,6 +18,17 @@ export interface DepositionIdResponse {
 
 export interface ResendValidationEmailResponse {
   status: 'validated' | 'unvalidated';
+}
+
+export interface UnlockStatusResponse {
+  entry_deposited: boolean;
+  ets_status: string | null;
+  unlockable: boolean;
+}
+
+export interface UnlockResponse {
+  commit: string;
+  entry_deposited: boolean;
 }
 
 @Injectable({providedIn: 'root'})
@@ -147,6 +158,67 @@ export class DepositionLifecycleService {
         }
       });
     }));
+  }
+
+  /**
+   * Ask the server whether a deposited entry can still be unlocked by the depositor. An entry is
+   * unlockable only while its ETS status is still 'nd' (annotation has not begun). Returns null on
+   * error so callers can fail closed (show neither the unlock option nor a misleading message).
+   */
+  getUnlockStatus(entryID: string): Observable<UnlockStatusResponse | null> {
+    const apiEndPoint = `${environment.serverURL}/${entryID}/unlock-status`;
+    return this.http.get<UnlockStatusResponse>(apiEndPoint, {withCredentials: true})
+      .pipe(catchError(() => of(null)));
+  }
+
+  /**
+   * Re-open the depositor's own deposited entry for editing, gated server-side on the e-mail session.
+   * On success the entry is refetched (it comes back as not-deposited and therefore editable) and the
+   * depositor is reminded that they must complete the deposition again.
+   */
+  unlockDeposition(): void {
+    const entry = this.persistence.currentEntry;
+    if (!entry) {
+      return;
+    }
+    const entryID = entry.entryID;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {disableClose: false});
+    dialogRef.componentInstance.confirmMessage =
+      'This will unlock your deposition so you can make further changes. After unlocking you must ' +
+      'complete the deposition process again (press "Submit deposition to BMRB") or your changes will ' +
+      'not be processed by BMRB annotators. Are you sure you want to proceed?';
+    dialogRef.componentInstance.proceedMessage = 'Yes, unlock deposition';
+    dialogRef.componentInstance.cancelMessage = 'No, cancel';
+
+    dialogRef.afterClosed().subscribe({
+      next: confirmed => {
+        if (!confirmed) {
+          return;
+        }
+        const apiEndPoint = `${environment.serverURL}/${entryID}/unlock`;
+        this.messagesService.sendMessage(new Message('Unlocking deposition...',
+          MessageType.NotificationMessage, 0));
+        this.http.post<UnlockResponse>(apiEndPoint, {}, {withCredentials: true}).subscribe({
+          next: () => {
+            this.messagesService.sendMessage(new Message(
+              'Deposition unlocked. Make your changes, then submit the deposition again so it is processed.',
+              MessageType.NotificationMessage, 15000));
+            // Refetch so the in-memory copy reflects the now not-deposited (editable) state, then send
+            // the depositor to the section that still needs attention — or straight to the review/deposit
+            // page (where the "Submit deposition to BMRB" button lives) if the entry is already complete.
+            this.persistence.refetchEntry(entryID, true).then(entry => {
+              if (entry.firstIncompleteCategory) {
+                this.router.navigate(['/entry', 'saveframe', entry.firstIncompleteCategory]).then();
+              } else {
+                this.router.navigate(['/entry', 'review']).then();
+              }
+            }).catch(() => { /* load failure is already surfaced by the load path */ });
+          },
+          error: error => this.errorHandler.handle(error)
+        });
+      }
+    });
   }
 
   resendValidationEmail(): Observable<ResendValidationEmailResponse | null> {

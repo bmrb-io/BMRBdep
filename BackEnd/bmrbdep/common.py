@@ -39,6 +39,32 @@ def filter_null_values(values: Iterable[Optional[str]]) -> List[str]:
     return [_ for _ in values if _ != "." and _ != "?" and _ is not None]
 
 
+def format_contact_names(given_family_pairs: Iterable[Iterable[Optional[str]]]) -> List[str]:
+    """ Turns a list of (Given_name, Family_name) pairs (as returned by
+    `loop.get_tag(['Given_name', 'Family_name'])`) into a list of "Given Family" strings,
+    dropping NMR-STAR null placeholders and entries that come out empty. """
+
+    names: List[str] = []
+    for pair in given_family_pairs:
+        parts = [p.strip() for p in filter_null_values(list(pair)) if p and p.strip()]
+        if parts:
+            names.append(" ".join(parts))
+    return names
+
+
+def is_admin_email(email: Optional[str]) -> bool:
+    """ Returns whether the given e-mail address belongs to a configured administrator.
+
+    The comparison is case-insensitive and whitespace-insensitive on both sides so that the
+    session e-mail and the configured admin list don't have to match byte-for-byte. """
+
+    if not email:
+        return False
+    normalized = email.strip().lower()
+    admins = configuration.get('admin_emails') or []
+    return normalized in {str(_).strip().lower() for _ in admins}
+
+
 def get_schema(version: str, schema_format: str = "json") -> Union[dict, TextIO]:
     """ Return the schema from disk. """
 

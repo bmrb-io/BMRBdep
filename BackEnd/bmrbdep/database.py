@@ -4,10 +4,11 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select
+from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
-from bmrbdep.common import configuration, list_all_depositions, ServerError, filter_null_values
+from bmrbdep.common import configuration, list_all_depositions, ServerError, filter_null_values, \
+    format_contact_names
 from bmrbdep.depositions import DepositionRepo
 
 
@@ -20,6 +21,7 @@ class Deposition(Base):
     deposition_id: Mapped[str] = mapped_column(String, primary_key=True)
     author_emails: Mapped[Optional[List]] = mapped_column(JSON)
     author_orcids: Mapped[Optional[List]] = mapped_column(JSON)
+    author_names: Mapped[Optional[List]] = mapped_column(JSON)
     bmrbnum: Mapped[Optional[int]] = mapped_column(Integer)
     creation_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
     nickname: Mapped[Optional[str]] = mapped_column(String)
@@ -72,6 +74,14 @@ def init_db():
     """Create the database if it doesn't exist and populate it with the table"""
     engine = get_engine()
     Base.metadata.create_all(engine)
+
+    # create_all() never alters an existing table, so columns added after a database was first
+    # created have to be migrated in by hand. This is idempotent: it only adds the column if absent.
+    with engine.begin() as connection:
+        existing_columns = {row[1] for row in connection.execute(text("PRAGMA table_info(depositions)"))}
+        if 'author_names' not in existing_columns:
+            connection.execute(text("ALTER TABLE depositions ADD COLUMN author_names JSON"))
+
     return engine
 
 def rescan():
@@ -110,6 +120,7 @@ def rescan():
                     contact_loop = entry.get_loops_by_category("_Contact_Person")[0]
                     author_emails = filter_null_values(contact_loop.get_tag('Email_address'))
                     author_orcids = filter_null_values(contact_loop.get_tag('ORCID'))
+                    author_names = format_contact_names(contact_loop.get_tag(['Given_name', 'Family_name']))
 
                     # Check if the deposition already exists
                     stmt = select(Deposition).where(Deposition.deposition_id == deposition_id)
@@ -119,6 +130,7 @@ def rescan():
                         # Update existing record
                         existing.author_emails = author_emails
                         existing.author_orcids = author_orcids
+                        existing.author_names = author_names
                         existing.bmrbnum = json_data.get('bmrbnum')
                         existing.creation_date = creation_date
                         existing.nickname = json_data.get('deposition_nickname')
@@ -130,6 +142,7 @@ def rescan():
                             deposition_id=deposition_id,
                             author_emails=author_emails,
                             author_orcids=author_orcids,
+                            author_names=author_names,
                             bmrbnum=json_data.get('bmrbnum'),
                             creation_date=creation_date,
                             nickname=json_data.get('deposition_nickname'),

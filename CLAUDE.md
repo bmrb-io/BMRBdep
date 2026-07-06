@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository hosts **BMRBdep**, the BMRB NMR-STAR deposition server that replaced ADIT-NMR. It has two halves plus shared orchestration:
 
-- `FrontEnd/` — Angular 20 SPA. Most app code lives here.
+- `FrontEnd/` — Angular 21 SPA. Most app code lives here.
 - `BackEnd/bmrbdep/` — Python Flask + uWSGI API the frontend talks to (mounted at `/deposition`).
 - `BackEnd/schema/` — NMR-STAR schema loader; produces the schema JSON the frontend consumes.
 - `Dockerfile`, `docker-compose.yml`, `build_angular.sh`, `install.sh`, `run_locally.sh`, `upgrade.sh` — deployment/dev orchestration scripts at the repo root that operate on both halves.

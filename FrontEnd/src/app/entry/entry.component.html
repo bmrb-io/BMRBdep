@@ -6,6 +6,26 @@
         <div class="bmrb-id-label">Assigned BMRB Entry ID</div>
         <div class="bmrb-id-value">{{ entry.bmrbnum }}</div>
       </div>
+      @if (unlockable === true) {
+        <div class="unlock-section">
+          <p>
+            If you need to make further changes to this deposition, you may unlock this deposition and make
+            further changes. <strong>Please note</strong>: after unlocking a deposition, you
+            <strong>must</strong> complete the deposition process again (i.e. press the
+            "Submit deposition to BMRB" button) or else your deposition <strong>will not</strong> be processed
+            by BMRB annotators.
+          </p>
+          <button mat-raised-button color="accent" (click)="unlockDeposition()">Unlock deposition</button>
+        </div>
+      }
+      @if (unlockable === false) {
+        <div class="unlock-section">
+          <p>
+            Your deposition has already begun being processed by BMRB annotators. If you would like to make
+            further changes, please e-mail them to <a href="mailto:help@bmrb.io">help&#64;bmrb.io</a>.
+          </p>
+        </div>
+      }
     }
     @for (sf of entry.saveframes; track sf) {
       @if (!sf.deleted) {

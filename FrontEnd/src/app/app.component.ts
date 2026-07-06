@@ -1,5 +1,6 @@
 import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DepositionPersistenceService, OpenDepositionView} from './deposition-persistence.service';
+import {AuthService, SessionInfo} from './auth.service';
 import {versions} from 'environments/versions';
 import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
@@ -23,6 +24,7 @@ import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from 
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private persistence = inject(DepositionPersistenceService);
+  private auth = inject(AuthService);
   private sidenavService = inject(SidenavService);
   private router = inject(Router);
   loader = inject(LoadingBarService);
@@ -31,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   sidenav_open: boolean;
   entry: Entry | null = null;
   openDepositions: OpenDepositionView[] = [];
+  sessionInfo: SessionInfo = {};
   subscription$ = new Subscription();
   @ViewChild('sidenav') public sidenav!: MatSidenav;
 
@@ -48,6 +51,16 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription$.add(this.persistence.openDepositionsSubject.subscribe({
       next: views => this.openDepositions = views
     }));
+    // Fetched once on load; the session only changes via full-page flows (e-mail link activation,
+    // sign-out below), so a one-shot read is sufficient to decide whether to offer sign-out.
+    this.subscription$.add(this.auth.getSessionInfo().subscribe({
+      next: info => this.sessionInfo = info
+    }));
+  }
+
+  /** Sign-out is offered whenever there is user state to clear: a loaded entry or an active session. */
+  get canSignOut(): boolean {
+    return !!(this.entry || this.sessionInfo.email || this.sessionInfo.orcid);
   }
 
   ngAfterViewInit(): void {
@@ -59,10 +72,17 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   clearEntry(): void {
+    // Close any open depositions first (prompts on unsaved changes); if the user cancels, abort.
     this.persistence.signOut().then(done => {
-      if (done) {
-        this.router.navigate(['/']).then();
+      if (!done) {
+        return;
       }
+      // Then terminate the server-side session so no user state remains, and clear the local copy
+      // so the sign-out button hides immediately.
+      this.auth.endSession().then(() => {
+        this.sessionInfo = {};
+        this.router.navigate(['/']).then();
+      });
     });
   }
 
@@ -76,6 +96,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.persistence.confirmDiscardUnsaved('close this deposition', entryID).then(confirmed => {
       if (!confirmed) return;
       this.persistence.closeDeposition(entryID).then(() => {
+        // Only move the user if they are actually viewing a deposition (a /entry* page). On other
+        // pages (admin, my-depositions, support, help) closing in the tab strip shouldn't yank them
+        // away — the close just updates the active entry and the tab strip in place.
+        if (!this.router.url.startsWith('/entry')) {
+          return;
+        }
         if (this.persistence.getOpenDepositionRecords().length === 0) {
           this.router.navigate(['/']).then();
           return;
