@@ -11,6 +11,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
  && rm -rf /var/lib/apt/lists/*
 
+# Force a UTF-8 environment. The slim image ships no locale, so the default
+# C/POSIX locale makes sys.getfilesystemencoding() 'ascii'. That breaks
+# subprocess calls (e.g. git commit) whose arguments contain non-ASCII
+# characters, such as an uploaded filename with a curly quote. PYTHONUTF8=1
+# puts the interpreter in UTF-8 mode; LANG/LC_ALL cover git and other
+# child processes.
+ENV PYTHONUTF8=1 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
 # Set timezone
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
