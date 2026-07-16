@@ -99,8 +99,10 @@
                   </button>
                   @if (deposition.entry_deposited) {
                     <button mat-raised-button color="accent"
-                            matTooltip="Set this deposited entry back to in-progress so it can be edited"
-                            [disabled]="pendingId === deposition.deposition_id"
+                            [matTooltip]="deposition.unlockable
+                              ? 'Set this deposited entry back to in-progress so it can be edited'
+                              : 'Cannot unlock: annotation has already begun (entry tracking status is no longer \'nd\')'"
+                            [disabled]="!deposition.unlockable || pendingId === deposition.deposition_id"
                             (click)="unlockDeposition(deposition)">
                       <mat-icon>lock_open</mat-icon>
                       Unlock

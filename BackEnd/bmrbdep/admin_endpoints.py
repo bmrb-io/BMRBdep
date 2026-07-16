@@ -62,6 +62,19 @@ def admin_search():
                 .limit(SEARCH_RESULT_LIMIT))
         results = db_session.execute(stmt).scalars().all()
 
+        # A deposited entry can only be unlocked while annotation has not yet begun, i.e. its ETS
+        # status is still 'nd' (or None: no BMRB ID / ETS mocked). We resolve this up front so the
+        # UI can gate the Unlock button the same way the depositor UI does, rather than offering an
+        # action the backend would only reject. The actual unlock endpoint re-checks authoritatively.
+        ets_statuses = depositions.get_ets_statuses(
+            [dep.bmrbnum for dep in results if dep.entry_deposited and dep.bmrbnum])
+
+        def _unlockable(dep) -> bool:
+            if not dep.entry_deposited:
+                return False
+            status = ets_statuses.get(dep.bmrbnum)
+            return status is None or status.lower() == 'nd'
+
         return jsonify([{
             'deposition_id': dep.deposition_id,
             'nickname': dep.nickname,
@@ -72,6 +85,7 @@ def admin_search():
             'creation_date': dep.creation_date.isoformat() if dep.creation_date else None,
             'email_validated': bool(dep.email_validated),
             'entry_deposited': bool(dep.entry_deposited),
+            'unlockable': _unlockable(dep),
         } for dep in results])
 
 

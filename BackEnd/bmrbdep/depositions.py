@@ -6,7 +6,7 @@ import pathlib
 import shutil
 import tempfile
 from datetime import date, datetime, timezone
-from typing import List, BinaryIO, Optional
+from typing import Dict, List, BinaryIO, Optional
 
 import flask
 import psycopg2
@@ -71,6 +71,33 @@ def get_ets_connection():
     except psycopg2.OperationalError:
         logging.exception('Could not connect to ETS database. Is the server down, or the configuration wrong?')
         raise ServerError('Could not connect to entry tracking system. Please contact us.')
+
+
+def get_ets_statuses(bmrbnums: List[int]) -> Dict[int, Optional[str]]:
+    """ Batch-fetch ETS status codes for a collection of BMRB IDs.
+
+    Returns a mapping of bmrbnum -> status code (stripped) for those IDs that have an entry
+    tracking record. IDs without a record (or all IDs, when ETS is mocked) are simply absent from
+    the returned mapping. Unlike `DepositionRepo.get_ets_status`, this never raises on an ETS
+    problem: it logs and returns whatever it has (possibly empty), so callers such as the admin
+    search can degrade gracefully rather than failing the whole request when ETS is unreachable. """
+
+    unique_ids = sorted({_ for _ in bmrbnums if _})
+    if ets_mocked() or not unique_ids:
+        return {}
+    try:
+        conn = get_ets_connection()
+    except ServerError:
+        return {}
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT bmrbnum, status FROM entrylog WHERE bmrbnum = ANY(%s);', [unique_ids])
+        return {row[0]: (row[1].strip() if row[1] else None) for row in cur.fetchall()}
+    except psycopg2.Error:
+        logging.exception('Failed to batch-fetch ETS statuses for %s', unique_ids)
+        return {}
+    finally:
+        conn.close()
 
 
 class DepositionRepo:

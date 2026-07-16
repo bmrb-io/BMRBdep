@@ -15,6 +15,9 @@ export interface AdminDeposition {
   creation_date: string | null;
   email_validated: boolean;
   entry_deposited: boolean;
+  // Whether a deposited entry can still be unlocked (ETS status still 'nd', i.e. annotation has
+  // not begun). Mirrors the depositor-facing unlock-status gate.
+  unlockable: boolean;
 }
 
 export interface UnlockResponse {
