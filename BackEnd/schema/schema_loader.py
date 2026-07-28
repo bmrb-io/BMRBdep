@@ -96,6 +96,13 @@ def get_file(file_name, commit):
 
 
 def get_main_schema(commit, small_molecule=False):
+    # NB the .replace("$", ",") calls below and elsewhere in this module: the
+    # dictionary distribution used to be written unquoted, with a comma inside
+    # a value encoded as '$'. The 2026-07 build emits standard CSV with real,
+    # quoted commas instead. The substitutions stay because schema_emitter walks
+    # the entire commit history and most revisions are still encoded; on a
+    # current revision there is no '$' left, so they are no-ops. csv.reader
+    # already handles the quoting either way.
     file_obj = get_file("xlschem_ann.csv", commit)
     if file_obj is None:
         return None, None
@@ -286,6 +293,11 @@ def load_schemas(rev, small_molecule=False):
             # Skip the initial saveframe
             if '_Item_enumeration' not in saveframe:
                 continue
+            # '$'-for-comma is a retired convention: enumerations.txt (and the
+            # distribution CSVs) store real commas as of the 2026-07 dictionary
+            # build. Keep substituting anyway -- schema_emitter walks the whole
+            # commit history, so most revisions this sees are still encoded.
+            # On a current revision there is no '$' left and this is a no-op.
             enums = [(x.replace("$", ","), y.replace("$", ",")) for x, y in
                      saveframe['_Item_enumeration'].get_tag(['Value', 'Description'])]
             try:
