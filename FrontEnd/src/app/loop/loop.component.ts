@@ -1,28 +1,33 @@
-import {ApiService} from '../api.service';
+import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {AfterViewChecked, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
 
 /* Import country updater code */
-import * as crs from '../javascript/crs.min';
+import * as crs from 'country-region-selector';
+import {MatTooltip} from '@angular/material/tooltip';
+import {MatButton} from '@angular/material/button';
+import {NgClass} from '@angular/common';
+import {TagComponent} from '../tag/tag.component';
 
 @Component({
   selector: 'app-loop',
   templateUrl: './loop.component.html',
-  styleUrls: ['./loop.component.scss']
+  styleUrls: ['./loop.component.scss'],
+  standalone: true,
+  imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
-export class LoopComponent implements OnInit, AfterViewChecked {
-  @Input() loop: Loop;
-  activeTag: LoopTag;
+export class LoopComponent implements AfterViewChecked {
+  private persistence = inject(DepositionPersistenceService);
+  private changeDetector = inject(ChangeDetectorRef);
+
+  @Input() loop!: Loop;
+  activeTag: LoopTag | null;
   crsInit: boolean;
 
-  constructor(private api: ApiService,
-              private changeDetector: ChangeDetectorRef) {
+  constructor() {
     this.activeTag = null;
     this.crsInit = false;
-  }
-
-  ngOnInit() {
   }
 
   // Load the country autofill code
@@ -39,7 +44,7 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   addRow() {
     this.loop.addRow();
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
     // Reload the country-autofill code
     if (this.loop.category === '_Contact_person') {
       this.changeDetector.detectChanges();
@@ -48,16 +53,18 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   }
 
   // Delete a row of data
-  deleteRow(row_id) {
+  deleteRow(row_id: number) {
     this.loop.deleteRow(row_id);
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 
   helpClick(activeTag: LoopTag, el: HTMLElement) {
     if (this.activeTag !== activeTag) {
       this.activeTag = activeTag;
-      setTimeout(() => {el.scrollIntoView(false); }, 5);
+      setTimeout(() => {
+        el.scrollIntoView(false);
+      }, 5);
     } else {
       this.activeTag = null;
     }
@@ -70,6 +77,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
   copyAuthors(): void {
     this.loop.copyAuthors();
     this.loop.parent.parent.refresh();
-    this.api.storeEntry(true);
+    this.persistence.storeEntry(true);
   }
 }

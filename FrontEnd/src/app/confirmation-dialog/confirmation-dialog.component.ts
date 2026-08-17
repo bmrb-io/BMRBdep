@@ -1,19 +1,27 @@
-import {Component} from '@angular/core';
-import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {Component, inject} from '@angular/core';
+import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
+import {MatFormField, MatLabel} from '@angular/material/select';
+import {MatInput} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-confirmation-dialog',
   templateUrl: 'confirmation-dialog.component.html',
-  styleUrls: ['./confirmation-dialog.component.scss']
+  styleUrls: ['./confirmation-dialog.component.scss'],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton]
 })
 export class ConfirmationDialogComponent {
-  public confirmMessage: string;
+  dialogRef = inject<MatDialogRef<ConfirmationDialogComponent>>(MatDialogRef);
+
+  public confirmMessage = '';
   public proceedMessage: string;
   public cancelMessage: string;
-  public inputBoxText: string;
-  public name: string;
+  public inputBoxText: string | null;
+  public name = '';
 
-  constructor(public dialogRef: MatDialogRef<ConfirmationDialogComponent>) {
+  constructor() {
     this.proceedMessage = 'Proceed';
     this.cancelMessage = 'Cancel';
     this.inputBoxText = null;

@@ -1,5 +1,25 @@
 import re
+from uuid import uuid4
+
 import pynmrstar
+
+def assign_unique_ids(entry: pynmrstar.Entry, overwrite: bool = False) -> int:
+    """ Ensure every saveframe in `entry` has a `_Unique_ID` tag.
+
+    If `overwrite` is True, every saveframe gets a fresh uuid even if it already
+    has one (used when cloning a deposition so the copy has its own IDs).
+    Otherwise only saveframes missing the tag are assigned (used for lazy
+    backfill of pre-existing depositions).
+
+    Returns the number of saveframes that were assigned a new ID.
+    """
+    assigned = 0
+    for saveframe in entry:
+        existing = saveframe.get_tag('_Unique_ID')
+        if overwrite or not existing or not existing[0]:
+            saveframe.add_tag('_Unique_ID', str(uuid4()), update=True)
+            assigned += 1
+    return assigned
 
 
 def _sort_saveframes(sort_list: list) -> list:

@@ -7,7 +7,6 @@ import os
 import socket
 import tempfile
 import traceback
-from logging.handlers import SMTPHandler
 from typing import Dict, Union, Any, Optional, List
 from uuid import uuid4
 
@@ -19,15 +18,15 @@ from dns.exception import Timeout
 from dns.resolver import NXDOMAIN
 from flask import Flask, request, jsonify, url_for, redirect, send_file, send_from_directory, Response
 from flask_mail import Mail, Message
-from itsdangerous import URLSafeSerializer
-from itsdangerous.exc import BadData
 from validate_email import validate_email
 
 from bmrbdep import depositions
 from bmrbdep.common import configuration, get_schema, root_dir, secure_filename, get_release
+from bmrbdep.database import init_db
 from bmrbdep.depositions import DepositionRepo
 from bmrbdep.exceptions import ServerError, RequestError
-from bmrbdep.helpers.star_tools import merge_entries
+from bmrbdep.helpers import tokens
+from bmrbdep.helpers.star_tools import assign_unique_ids, merge_entries
 
 application = Flask(__name__)
 
@@ -41,22 +40,34 @@ if application.debug or configuration['debug']:
 application.secret_key = configuration['secret_key']
 assert application.secret_key != "CHANGE_ME"
 
+# Staging directory for in-progress uploads. It lives on the same filesystem as
+# the deposition repos so that moving a finished upload into a deposition is a
+# fast atomic rename rather than a cross-filesystem copy held under the lock.
+_UPLOAD_STAGING_ROOT = os.path.join(configuration['repo_path'], '.staging')
+os.makedirs(_UPLOAD_STAGING_ROOT, exist_ok=True)
+
+# Configure session timeout for email sessions (2 weeks)
+application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(weeks=2)
+
 # Set up the mail interface
 application.config.update(
     MAIL_SERVER=configuration['smtp']['server'],
-    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address']
+    MAIL_DEFAULT_SENDER=configuration['smtp']['from_address'],
+    MAIL_PORT=configuration['smtp'].get('MAIL_PORT', 587),
+    MAIL_USE_TLS=configuration['smtp'].get('MAIL_USE_TLS', True),
+    MAIL_USE_SSL=configuration['smtp'].get('MAIL_USE_SSL', False),
+    MAIL_USERNAME=configuration['smtp']['MAIL_USERNAME'],
+    MAIL_PASSWORD=configuration['smtp']['MAIL_PASSWORD'],
 )
 mail = Mail(application)
 
 # Set up the SMTP error handler
 if configuration['smtp'].get('server') != 'CHANGE_ME':
 
-    # Don't send error e-mails in debugging mode
+    # Don't send error e-mails in debugging mode, but otherwise e-mail them
+    #  Using the same e-mail settings as for mailing deposition information
     if not configuration['debug']:
-        mail_handler = SMTPHandler(mailhost=configuration['smtp']['server'],
-                                   fromaddr=configuration['smtp']['from_address'],
-                                   toaddrs=configuration['smtp']['admins'],
-                                   subject='BMRB API Error occurred')
+        mail_handler = logging.StreamHandler()
         mail_handler.setLevel(logging.WARNING)
         application.logger.addHandler(mail_handler)
 
@@ -80,6 +91,23 @@ if configuration['debug']:
 else:
     logging.getLogger().setLevel('WARNING')
 
+# Only log pynmrstar errors of level ERROR or above.
+#  Otherwise, the docker logs get super congested
+logging.getLogger('pynmrstar').setLevel(logging.ERROR)
+
+# If they upload NMR-STAR with empty strings, just map them to null rather than throw an exception
+pynmrstar.definitions.STR_CONVERSION_DICT[''] = None
+
+# Ensure that the database is set up
+init_db()
+
+# We need the context in order to load the modules
+with application.app_context():
+    from bmrbdep.user_endpoints import user_endpoints
+    from bmrbdep.admin_endpoints import admin_endpoints
+
+application.register_blueprint(user_endpoints)
+application.register_blueprint(admin_endpoints)
 
 # Set up error handling
 @application.errorhandler(ServerError)
@@ -204,8 +232,9 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
             confirm_message = Message("Entry reference for BMRBDep deposition '%s'." %
                                       repo.metadata['deposition_nickname'],
                                       recipients=[repo.metadata['author_email']],
+                                      bcc=configuration['smtp'].get('logging_emails', []),
                                       reply_to=configuration['smtp']['reply_to_address'])
-            token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+            token = tokens.get_deposition_token(uuid)
 
             confirm_message.html = """
             Thank you for your deposition '%s' created %s (UTC).
@@ -238,13 +267,14 @@ def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) ->
         confirm_message = Message("Please validate your e-mail address for BMRBdep deposition '%s'." %
                                   repo.metadata['deposition_nickname'],
                                   recipients=[repo.metadata['author_email']],
+                                  bcc=configuration['smtp'].get('logging_emails', []),
                                   reply_to=configuration['smtp']['reply_to_address'])
-        token = URLSafeSerializer(configuration['secret_key']).dumps({'deposition_id': uuid})
+        token = tokens.get_deposition_token(uuid)
 
         confirm_message.html = """
 Thank you for your deposition '%s' created %s (UTC).
 <br><br>
-Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to 
+Please click <a href="%s" target="BMRBDep">here</a> to validate your e-mail for this session. This is required to
 proceed. You can also use this link to return to your deposition later if you close the page before
 it is complete.
 <br><br>
@@ -271,12 +301,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
-    serializer = URLSafeSerializer(application.config['SECRET_KEY'])
-    try:
-        deposition_data = serializer.loads(token)
-        deposition_id = deposition_data['deposition_id']
-    except (BadData, KeyError, TypeError):
-        raise RequestError('Invalid e-mail validation token. Please request a new e-mail validation message.')
+    deposition_id = tokens.verify_deposition_token(token)
 
     with depositions.DepositionRepo(deposition_id) as repo:
         if not repo.metadata['email_validated']:
@@ -303,14 +328,10 @@ def duplicate_deposition(uuid) -> Response:
                                                                     default_values=True, schema=schema)
 
     with depositions.DepositionRepo(uuid, read_only=True) as repo:
-        merge_entries(entry_template, repo.get_entry(), schema, preserve_entry_information=True)
-
-        # This shouldn't be necessary for modern entries, since they will already have the '_Deleted' tag
-        #  But keep it in place for a while (until 2022?) in case people clone any old entries which are missing
-        #   the tag. Alternatively, search for and fix all old entries with saveframes missing the '_Deleted' tag
-        for saveframe in entry_template:
-            if '_Deleted' not in saveframe or saveframe['_Deleted'] in pynmrstar.utils.definitions.NULL_VALUES:
-                saveframe.add_tag('_Deleted', 'no', update=True)
+        merge_entries(entry_template, repo.entry, schema, preserve_entry_information=True)
+        # Clones get their own fresh per-saveframe IDs so edits to the clone
+        # are never matched against the source deposition.
+        assign_unique_ids(entry_template, overwrite=True)
 
         with depositions.DepositionRepo(deposition_id, initialize=True) as new_repo:
             new_repo._live_metadata = {'deposition_id': deposition_id,
@@ -323,12 +344,12 @@ def duplicate_deposition(uuid) -> Response:
                                        'schema_version': schema.version,
                                        'entry_deposited': False,
                                        'server_version_at_creation': get_release(),
-                                       'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                                       'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                                        'deposition_nickname': request_info['deposition_nickname'],
                                        'deposition_from_file': False,
                                        'deposition_cloned_from': str(uuid)
                                        }
-            new_repo.write_entry(entry_template)
+            new_repo.entry = entry_template
             new_repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
             # Delete data files when cloning
             for file_ in new_repo.get_data_file_list():
@@ -472,9 +493,10 @@ def new_deposition() -> Response:
         sample_conditions['Val'] = [None, None, '1', None]
         sample_conditions['Val_units'] = ['K', 'pH', 'atm', 'M']
 
-    # Just add a single row to the entry author loop
+    # Just add a single row to the entry author loop if this is a new deposition and it isn't from a validated system like NAN
     author_loop: pynmrstar.Loop = entry_saveframe['_Entry_author']
-    author_loop.data.insert(0, ['.'] * len(author_loop.tags))
+    if not (request.environ['REMOTE_ADDR'] in configuration['local-ips'] and request_info.get('email_validated') == 'true'):
+        author_loop.data.insert(0, ['.'] * len(author_loop.tags))
 
     # Modify the contact_loop as needed
     contact_loop: pynmrstar.Loop = entry_saveframe['_Contact_person']
@@ -528,6 +550,8 @@ def new_deposition() -> Response:
 
         # Add a "deleted" tag to use to track deletion status
         saveframe.add_tag('_Deleted', 'no', update=True)
+        # Add a stable per-saveframe ID used by the incremental save endpoint
+        saveframe.add_tag('_Unique_ID', str(uuid4()), update=True)
 
         for loop in saveframe:
             if not loop.data:
@@ -565,11 +589,13 @@ def new_deposition() -> Response:
                         'last_ip': request.environ['REMOTE_ADDR'],
                         'deposition_origination': {'request': dict(request.headers),
                                                    'ip': request.environ['REMOTE_ADDR']},
-                        'email_validated': configuration['debug'],
+                        # Skip the e-mail validation if coming from a system where the email is already validated
+                        'email_validated': configuration['debug'] or \
+                                           (request.environ['REMOTE_ADDR'] in configuration['local-ips'] and request_info.get('email_validated') == 'true'),
                         'schema_version': schema.version,
                         'entry_deposited': False,
                         'server_version_at_creation': get_release(),
-                        'creation_date': datetime.datetime.utcnow().strftime("%I:%M %p on %B %d, %Y"),
+                        'creation_date': datetime.datetime.now(datetime.timezone.utc).strftime("%I:%M %p on %B %d, %Y"),
                         'deposition_nickname': request_info['deposition_nickname'],
                         'deposition_from_file': True if uploaded_entry else False}
 
@@ -577,8 +603,27 @@ def new_deposition() -> Response:
     with depositions.DepositionRepo(deposition_id, initialize=True) as repo:
         # Manually set the metadata during object creation - never should be done this way elsewhere
         repo._live_metadata = entry_meta
-        repo.write_entry(entry_template)
+
+        # If they uploaded files, add them to the repo
+        upload_data = entry_template.get_saveframes_by_category('deposited_data_files')[0]['_Upload_data']
+        pos = len(upload_data.data) + 1
+        for file_name, file in request.files.to_dict().items():
+            if file_name == 'nmrstar_file':
+                continue
+            else:
+                filename = repo.write_file(filename=file_name, data=file.read())
+                upload_data.add_data([{'Data_file_ID': pos,
+                                       'Deposited_data_files_ID': 1,
+                                       'Data_file_name': filename,
+                                       'Data_file_content_type': 'Time-domain data (raw spectral data)',
+                                       'Data_file_Sf_category': "*"}])
+                pos += 1
+
+        # Write out the NMR-STAR file, plus the schema being used
+        repo.entry = entry_template
         repo.write_file('schema.json', data=json.dumps(json_schema).encode(), root=True)
+
+        # Create the rest of the metadata
         if uploaded_entry:
             if entry_bootstrap:
                 entry_meta['bootstrap_entry'] = request_info['bootstrapID']
@@ -614,7 +659,9 @@ def deposit_entry(uuid) -> Response:
         contact_full = ["%s %s <%s>" % tuple(x) for x in
                         final_entry.get_loops_by_category("_Contact_Person")[0].get_tag(
                             ['Given_name', 'Family_name', 'Email_address'])]
-        message = Message("Your entry has been deposited!", recipients=contact_emails,
+        message = Message("Your entry has been deposited!",
+                          recipients=contact_emails,
+                          bcc=configuration['smtp'].get('logging_emails', []),
                           reply_to=configuration['smtp']['reply_to_address'])
         message.html = 'Thank you for your deposition! Your assigned BMRB ID is %s. We have attached a copy of the ' \
                        'deposition contents for reference. You may also use this file to start a new deposition. ' \
@@ -641,7 +688,7 @@ title: %s
 
 contact persons: %s
 ''' % (uuid, bmrb_num, final_entry['entry_information_1']['Title'][0], contact_full)
-        mail.send(message)
+            mail.send(message)
 
     return jsonify({'commit': repo.last_commit})
 
@@ -653,7 +700,7 @@ def file_operations(uuid, path: str) -> Response:
     # Werkzeug implicitly allows HEAD wherever GET is allowed, and dispatches it to this view
     if request.method in ("GET", "HEAD"):
         with depositions.DepositionRepo(uuid, read_only=True) as repo:
-            return send_file(repo.get_file(path, root=False), download_name=path)
+            return send_file(path_or_file=repo.get_file(path, root=False), download_name=path)
     elif request.method == "DELETE":
         with depositions.DepositionRepo(uuid) as repo:
             if repo.delete_data_file(path):
@@ -667,30 +714,46 @@ def file_operations(uuid, path: str) -> Response:
 def store_file(uuid) -> Response:
     """ Stores a data file based on uuid. """
 
-    # Store a data file
-    with depositions.DepositionRepo(uuid) as repo:
+    # Build the repo object (this validates that the UUID exists) but do NOT take
+    # the lock yet: we want to receive the upload - the slow, network-bound part -
+    # without blocking every other request to this deposition.
+    repo = depositions.DepositionRepo(uuid)
 
-        temp_dir = configuration.get('temporary_directory', None)
-        with tempfile.TemporaryDirectory(dir=temp_dir) as upload_dir:
-            # noinspection PyUnusedLocal,PyShadowingNames
-            def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
-                return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir)
+    # Stream the upload into a staging directory on the same filesystem as the
+    # deposition repos. Using delete=False means closing the FileStorage won't
+    # unlink the staged file out from under us; the TemporaryDirectory still
+    # removes anything left behind (e.g. on error or a partial upload).
+    with tempfile.TemporaryDirectory(dir=_UPLOAD_STAGING_ROOT) as upload_dir:
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def custom_stream_factory(total_content_length, filename, content_type, content_length=None):
+            return tempfile.NamedTemporaryFile('wb+', prefix='flaskapp', dir=upload_dir, delete=False)
 
-            # noinspection PyUnresolvedReferences
-            stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
-                                                                      stream_factory=custom_stream_factory)
-            for file_ in files.values():
-                if file_.name == 'file':
-                    filename = repo.write_file(file_.filename, source_path=file_.stream.name)
-                    file_.close()
+        # noinspection PyUnresolvedReferences
+        stream, form, files = werkzeug.formparser.parse_form_data(request.environ,
+                                                                  stream_factory=custom_stream_factory)
 
-                    # Update the entry data
-                    if repo.commit("User uploaded file: %s" % file_.filename):
-                        return jsonify({'filename': filename, 'changed': True, 'commit': repo.last_commit})
-                    else:
-                        return jsonify({'filename': filename, 'changed': False, 'commit': repo.last_commit})
-
+        # A single POST may carry many files (e.g. an uploaded folder).
+        uploaded = files.getlist('file')
+        if not uploaded:
             raise RequestError('No file uploaded, or file uploaded with the wrong parameter name!')
+
+        # Capture (staged path, destination name) before taking the lock. Closing
+        # the FileStorage flushes and closes the file without deleting it.
+        staged: List[tuple] = []
+        for file_ in uploaded:
+            source_path = file_.stream.name
+            file_.close()
+            staged.append((source_path, file_.filename))
+
+        # Now take the lock only to move the staged files into place and commit -
+        # a fast, atomic rename per file rather than the whole upload duration.
+        with repo:
+            filenames: List[str] = []
+            for source_path, destination in staged:
+                filenames.append(repo.write_file(destination, source_path=source_path, move=True))
+
+            changed: bool = repo.commit("User uploaded %d file(s)." % len(filenames))
+            return jsonify({'filenames': filenames, 'changed': changed, 'commit': repo.last_commit})
 
 
 @application.route('/deposition/<uuid:uuid>', methods=('GET', 'PUT'))
@@ -706,7 +769,7 @@ def fetch_or_store_deposition(uuid):
             raise RequestError("Invalid JSON uploaded. The JSON was not a valid NMR-STAR entry.")
 
         with depositions.DepositionRepo(uuid) as repo:
-            existing_entry: pynmrstar.Entry = repo.get_entry()
+            existing_entry: pynmrstar.Entry = repo.entry
 
             # If they aren't making any changes
             try:
@@ -718,17 +781,13 @@ def fetch_or_store_deposition(uuid):
             if existing_entry.entry_id != entry.entry_id:
                 raise RequestError("Refusing to overwrite entry with entry of different ID.")
 
-            # Next two lines can be removed after clients upgrade (06/01/2020)
-            if isinstance(entry_json['commit'], str):
-                entry_json['commit'] = [entry_json['commit']]
-
             if repo.last_commit not in entry_json['commit']:
                 if 'force' not in entry_json:
-                    logging.exception('An entry changed on the server!')
+                    logging.warning('An entry changed on the server!')
                     return jsonify({'error': 'reload'})
 
             # Update the entry data
-            repo.write_entry(entry)
+            repo.entry = entry
             repo.commit("Entry updated.")
 
             return jsonify({'commit': repo.last_commit})
@@ -737,12 +796,21 @@ def fetch_or_store_deposition(uuid):
     else:
 
         with depositions.DepositionRepo(uuid) as repo:
-            entry: pynmrstar.Entry = repo.get_entry()
+            entry: pynmrstar.Entry = repo.entry
             schema_version: str = repo.metadata['schema_version']
             data_files: List[str] = repo.get_data_file_list()
             email_validated: bool = repo.metadata['email_validated']
             entry_deposited: bool = repo.metadata['entry_deposited']
             deposition_nickname: str = repo.metadata['deposition_nickname']
+            bmrbnum: Optional[int] = repo.metadata.get('bmrbnum')
+
+            # Lazy backfill: pre-existing depositions created before incremental save
+            # have no `_Unique_ID` tags. Assign them on first GET so subsequent
+            # per-saveframe PUTs can match by ID. Deposited entries are sealed.
+            if not entry_deposited and assign_unique_ids(entry, overwrite=False) > 0:
+                repo.entry = entry
+                repo.commit("Backfilled per-saveframe unique IDs.")
+
             commit: str = repo.last_commit
         try:
             schema: dict = get_schema(schema_version)
@@ -755,6 +823,96 @@ def fetch_or_store_deposition(uuid):
         entry['email_validated'] = email_validated
         entry['entry_deposited'] = entry_deposited
         entry['deposition_nickname'] = deposition_nickname
+        entry['bmrbnum'] = bmrbnum
         entry['commit'] = [commit]
 
         return jsonify(entry)
+
+
+@application.route('/deposition/<uuid:uuid>/saveframes', methods=('PUT',))
+def store_saveframes(uuid) -> Response:
+    """ Incremental save: replace only the saveframes the client marks as dirty.
+
+    Body: {"commit": [<known commit hashes>], "force"?: true,
+           "saveframes": [<pynmrstar saveframe-JSON>, ...]}
+
+    Each incoming saveframe is matched against the existing entry by its
+    `_Unique_ID` tag and replaced in place. Saveframes whose IDs are not found
+    are appended (this is how the client creates new saveframes — it generates
+    a uuid client-side and sends it).
+    """
+    payload: dict = request.get_json()
+    if not payload or 'saveframes' not in payload:
+        raise RequestError("Missing 'saveframes' in request body.")
+    if 'commit' not in payload:
+        raise RequestError("Missing 'commit' in request body.")
+
+    incoming: List[dict] = payload['saveframes']
+
+    try:
+        parsed_saveframes: List[pynmrstar.Saveframe] = [
+            pynmrstar.Saveframe.from_json(sf_json) for sf_json in incoming
+        ]
+    except ValueError as err:
+        raise RequestError("Invalid saveframe JSON: %s" % repr(err))
+
+    # Every incoming saveframe must carry a _Unique_ID
+    incoming_ids: List[str] = []
+    for sf_json, sf in zip(incoming, parsed_saveframes):
+        try:
+            sf_id = sf.get_tag('_Unique_ID')[0]
+        except IndexError:
+            raise RequestError("Saveframe '%s' is missing a %s tag." % (sf.name, '_Unique_ID'))
+        incoming_ids.append(sf_id)
+
+    with depositions.DepositionRepo(uuid) as repo:
+        existing_entry: pynmrstar.Entry = repo.entry
+
+        if repo.last_commit not in payload['commit']:
+            if not payload.get('force'):
+                logging.warning('Stale incremental save for deposition %s.', uuid)
+                return jsonify({'error': 'reload'})
+
+        # Index existing saveframes by their _Unique_ID for O(1) lookup, and also
+        # by name for the migration-skew fallback below.
+        existing_by_id: Dict[str, pynmrstar.Saveframe] = {}
+        existing_by_name: Dict[str, pynmrstar.Saveframe] = {}
+        for sf in existing_entry:
+            existing_by_name[sf.name] = sf
+            existing_id = sf.get_tag('_Unique_ID')
+            if existing_id and existing_id[0]:
+                existing_by_id[existing_id[0]] = sf
+
+        changed = False
+        for sf_id, sf in zip(incoming_ids, parsed_saveframes):
+            target = existing_by_id.get(sf_id)
+            # Fallback: if the client minted a UUID that the server doesn't know
+            # about, try matching by saveframe name. This handles a client whose
+            # IndexedDB cache predates the migration — the cached entry has no
+            # `_Unique_ID` tags, the client's `uniqueId` getter generated fresh
+            # ones, and the server happens to hold the same saveframe under the
+            # same name. We adopt the client's UUID so future saves match cleanly.
+            if target is None:
+                target = existing_by_name.get(sf.name)
+            if target is None:
+                # Genuinely new saveframe — append. Client allocated the uuid.
+                existing_entry.add_saveframe(sf)
+                changed = True
+            else:
+                # Replace in place. Skip the rewrite if nothing actually changed
+                # so we don't churn commits on no-op saves.
+                try:
+                    if target == sf:
+                        continue
+                except ValueError:
+                    pass
+                existing_entry[target.name] = sf
+                changed = True
+
+        if not changed:
+            return jsonify({'commit': repo.last_commit})
+
+        repo.entry = existing_entry
+        repo.commit("Entry updated (incremental).")
+
+        return jsonify({'commit': repo.last_commit})

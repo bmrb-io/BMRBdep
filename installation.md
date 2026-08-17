@@ -28,8 +28,10 @@ A basic installation of the BMRBdep server is very straightforward. These are th
      * `local-ips` - This will cause the server to return a full stack trace rather than a basic error
       if your IP address is in the `local-ips` list. Only enter IPs for development machines,
       or end users may see stack traces. 
-5. Build and launch a development environment docker container by running `./build_docker.sh`
-6. If everything has went well, you should be able to connect to the server running the BMRBdep docker
+5. Build the front end by running `./build_angular.sh`. This is required on first deploy and any time the
+front end source changes.
+6. Launch the BMRBdep docker container by running `docker compose up -d --build`.
+7. If everything has went well, you should be able to connect to the server running the BMRBdep docker
 container on port 9001. If you don't see the server running there, and there were not any command line
 errors, check the docker error log using `sudo docker logs bmrbdep`.
 
@@ -40,8 +42,9 @@ experimental "small molecule" deposition type is hidden.
 
 1. Follow all the steps above.
 2. Change the `debug` value in the configuration file to `false`. This turns on e-mail validation.
-3. Deploy docker by running `./build_docker.sh production` rather than `./build_docker.sh`.
-(This will replace the previous docker instance from step 5 above.)
+3. Set `ENVIRONMENT=production` in the `.env` file at the repository root (the development default is `ENVIRONMENT=development`).
+4. Rebuild the front end with `./build_angular.sh` and redeploy the container with `docker compose up -d --build`.
+(This will replace the previous docker instance.)
 
 
 ### Upgrading to a new release
@@ -54,18 +57,15 @@ To upgrade to a new release of BMRBdep, first cd to the root BMRBdep directory a
 
 This will update the node environment and pip environment if necessary.
 
-If you are running in production more (or in the development Docker mode) you must then run
+If the front end source has changed, rebuild it from the root BMRBdep directory:
 
-```python
-./build_docker.sh
+```bash
+./build_angular.sh
 ```
 
-for a development mode container or
+The build mode (production vs. development) is determined by the `ENVIRONMENT` value in the `.env` file at
+the repository root. Then redeploy the container:
 
-```python
-./build_docker.sh production
+```bash
+docker compose up -d --build
 ```
-
-for a production mode container
-
-in the root BMRBdep directory.

@@ -82,7 +82,7 @@ def get_file(file_name, commit):
     try:
         file_contents = StringIO('\n'.join(repo.git.show('{}:{}'.format(commit.hexsha, file_name)).splitlines()))
     except GitCommandError as err:
-        if ("Path '" + file_name + "' does not exist") in str(err):
+        if ("path '" + file_name + "' does not exist") in str(err).lower():
             file_name = 'NMR-STAR/internal_106_distribution/%s' % file_name
             try:
                 file_contents = StringIO(
@@ -96,12 +96,10 @@ def get_file(file_name, commit):
 
 
 def get_main_schema(commit, small_molecule=False):
-    try:
-        xmlschem_ann = csv.reader(get_file("xlschem_ann.csv", commit))
-    except GitCommandError:
+    file_obj = get_file("xlschem_ann.csv", commit)
+    if file_obj is None:
         return None, None
-    if xmlschem_ann is None:
-        return None, None
+    xmlschem_ann = csv.reader(file_obj)
     whole_schema = [next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann), next(xmlschem_ann)]
     version = whole_schema[3][3]
 

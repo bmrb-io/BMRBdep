@@ -1,0 +1,127 @@
+<div class="main-content">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Administrator &mdash; Deposition Search</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Search all depositions by depositor e-mail, deposition (session) UUID, or depositor name.</p>
+
+      <div class="search-form">
+        <mat-form-field class="search-field">
+          <input matInput
+                 [formControl]="searchControl"
+                 placeholder="E-mail, UUID, or name"
+                 autocomplete="off"
+                 (keyup.enter)="search()">
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="button"
+                (click)="search()"
+                [disabled]="searching || !searchControl.value.trim()">
+          Search
+        </button>
+      </div>
+
+      @if (searching) {
+        <div class="loading-container">
+          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+          <p>Searching...</p>
+        </div>
+      }
+
+      @if (!searching && hasSearched && results.length === 0) {
+        <p class="no-results">No depositions matched that search.</p>
+      }
+
+      @if (!searching && results.length > 0) {
+        <p class="result-count">{{ results.length }} deposition(s) found.</p>
+        <div class="table-scroll">
+        <table class="admin-results">
+          <thead>
+          <tr>
+            <th>Nickname</th>
+            <th>Depositor(s)</th>
+            <th>E-mail(s)</th>
+            <th>UUID</th>
+            <th>BMRB ID</th>
+            <th>
+              Status
+              <div class="sort-controls">
+                <button type="button" class="sort-header"
+                        [class.active]="sortField === 'email_validated'"
+                        matTooltip="Sort by e-mail validation status"
+                        (click)="sortBy('email_validated')">
+                  E-mail
+                  <mat-icon class="sort-arrow">{{
+                    sortField === 'email_validated' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+                  }}</mat-icon>
+                </button>
+                <button type="button" class="sort-header"
+                        [class.active]="sortField === 'entry_deposited'"
+                        matTooltip="Sort by deposition status"
+                        (click)="sortBy('entry_deposited')">
+                  Deposited
+                  <mat-icon class="sort-arrow">{{
+                    sortField === 'entry_deposited' ? (sortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'
+                  }}</mat-icon>
+                </button>
+              </div>
+            </th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (deposition of results; track deposition.deposition_id) {
+              <tr>
+                <td>{{ deposition.nickname || '(none)' }}</td>
+                <td>{{ deposition.author_names.length ? deposition.author_names.join(', ') : '—' }}</td>
+                <td>{{ deposition.author_emails.length ? deposition.author_emails.join(', ') : '—' }}</td>
+                <td class="uuid">{{ deposition.deposition_id }}</td>
+                <td>{{ deposition.bmrbnum ?? '—' }}</td>
+                <td>
+                  <span class="badge" [class.badge-yes]="deposition.email_validated"
+                        [class.badge-no]="!deposition.email_validated">
+                    {{ deposition.email_validated ? 'Email validated' : 'Email unvalidated' }}
+                  </span>
+                  <span class="badge" [class.badge-yes]="deposition.entry_deposited"
+                        [class.badge-no]="!deposition.entry_deposited">
+                    {{ deposition.entry_deposited ? 'Deposited' : 'In progress' }}
+                  </span>
+                </td>
+                <td class="actions">
+                  <button mat-raised-button color="primary"
+                          [matTooltip]="openIds.has(deposition.deposition_id)
+                            ? 'Already open — switch to it from the Open depositions bar at the top'
+                            : 'Open this deposition in the background (does not leave this page)'"
+                          [disabled]="openIds.has(deposition.deposition_id) || pendingId === deposition.deposition_id"
+                          (click)="openDeposition(deposition)">
+                    <mat-icon>{{ openIds.has(deposition.deposition_id) ? 'folder_open' : 'folder' }}</mat-icon>
+                    {{ openIds.has(deposition.deposition_id) ? 'Opened' : 'Open' }}
+                  </button>
+                  @if (deposition.entry_deposited) {
+                    <button mat-raised-button color="accent"
+                            matTooltip="Set this deposited entry back to in-progress so it can be edited"
+                            [disabled]="pendingId === deposition.deposition_id"
+                            (click)="unlockDeposition(deposition)">
+                      <mat-icon>lock_open</mat-icon>
+                      Unlock
+                    </button>
+                  }
+                  <button mat-raised-button color="accent"
+                          [matTooltip]="deposition.email_validated
+                            ? 'E-mail is already validated'
+                            : 'Manually mark this e-mail address as validated'"
+                          [disabled]="deposition.email_validated || pendingId === deposition.deposition_id"
+                          (click)="validateEmail(deposition)">
+                    <mat-icon>{{ deposition.email_validated ? 'mark_email_read' : 'mark_email_unread' }}</mat-icon>
+                    {{ deposition.email_validated ? 'Validated' : 'Mark validated' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

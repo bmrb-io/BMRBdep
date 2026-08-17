@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {MatLegacySnackBar as MatSnackBar, MatLegacySnackBarRef as MatSnackBarRef, LegacySimpleSnackBar as SimpleSnackBar} from '@angular/material/legacy-snack-bar';
+import {inject, Injectable} from '@angular/core';
+import {MatSnackBar, MatSnackBarRef, SimpleSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 
 export enum MessageType {
@@ -20,7 +20,7 @@ export class Message {
 
   constructor(messageBody: string,
               messageType: MessageType = MessageType.NotificationMessage,
-              messageTimeout: number = 15000) {
+              messageTimeout = 15000) {
     this.messageBody = messageBody;
     this.messageType = messageType;
     this.messageTimeout = messageTimeout;
@@ -31,15 +31,14 @@ export class Message {
   providedIn: 'root'
 })
 export class MessagesService {
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
-  snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private snackBar: MatSnackBar,
-              private router: Router) {
-  }
+  snackBarRef!: MatSnackBarRef<SimpleSnackBar>;
 
-  sendMessage(message: Message, actualException = null) {
-    let action = null;
+  sendMessage(message: Message, actualException: string | null = null) {
+    let action: string | undefined;
     if (message.messageType === MessageType.ErrorMessage) {
       action = 'Notify Us';
     }
@@ -48,12 +47,14 @@ export class MessagesService {
       panelClass: MessageTypeLabel.get(message.messageType)
     });
 
-    this.snackBarRef.onAction().subscribe(() => {
-      let errorMessage = message.messageBody;
-      if (actualException) {
-        errorMessage = actualException;
+    this.snackBarRef.onAction().subscribe({
+      next: () => {
+        let errorMessage = message.messageBody;
+        if (actualException) {
+          errorMessage = actualException;
+        }
+        this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
       }
-      this.router.navigate(['support'], {state: {data: {message: errorMessage, url: this.router.url}}}).then();
     });
 
     // Log messages to the console if in development mode

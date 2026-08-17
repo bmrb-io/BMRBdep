@@ -1,0 +1,133 @@
+@use '@angular/material' as mat;
+@use '../../custom-theme.scss' as theme;
+
+// The theme palette has no green, so source the positive badge from Material's stock green palette;
+// the negative badge reuses the app's existing warn (red) palette for consistency with other errors.
+$badge-positive: mat.m2-define-palette(mat.$m2-green-palette);
+
+.main-content {
+  // No width cap: search results can have long nicknames and a full row of action
+  // buttons, so let the card use the full page width rather than overflowing into a
+  // horizontal scrollbar.
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+.search-form {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.search-field {
+  flex: 1 1 auto;
+  min-width: 260px;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.no-results {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.result-count {
+  font-weight: 500;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+table.admin-results {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td.actions button {
+  margin: 2px 6px 2px 0;
+}
+
+table.admin-results th,
+table.admin-results td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  vertical-align: top;
+}
+
+table.admin-results th {
+  font-weight: 600;
+}
+
+.sort-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.85em;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.sort-header.active {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.sort-header .sort-arrow {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  // Idle (unfold_more) arrows are faint until the column is the active sort.
+  opacity: 0.55;
+}
+
+.sort-header.active .sort-arrow {
+  opacity: 1;
+}
+
+td.uuid {
+  font-family: monospace;
+  font-size: 0.85em;
+  word-break: break-all;
+}
+
+td.actions {
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  border-radius: 10px;
+  font-size: 0.75em;
+  white-space: nowrap;
+}
+
+.badge-yes {
+  background-color: mat.m2-get-color-from-palette($badge-positive, 50);
+  color: mat.m2-get-color-from-palette($badge-positive, 800);
+}
+
+.badge-no {
+  background-color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, 50);
+  color: mat.m2-get-color-from-palette(theme.$custom-theme-warn, 800);
+}
