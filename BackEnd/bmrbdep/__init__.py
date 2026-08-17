@@ -138,6 +138,19 @@ def handle_scanner(exception: werkzeug.exceptions.MethodNotAllowed):
     return Response('🤨', status=404)
 
 
+@application.errorhandler(werkzeug.exceptions.HTTPException)
+def handle_http_exceptions(exception: werkzeug.exceptions.HTTPException):
+    """ Client-caused HTTP errors - an unsatisfiable Range header, an oversized upload, a
+    malformed request - aren't server bugs, so return the real status code rather than
+    letting the catch-all handler turn them into a 500 and e-mail the admins. """
+
+    logging.warning(f'HTTP {exception.code} returned for {request.method}:{request.url} - {exception.description}')
+
+    response = jsonify({'error': exception.description})
+    response.status_code = exception.code
+    return response
+
+
 @application.errorhandler(Exception)
 def handle_other_errors(exception: Exception):
     """ Catches any other exceptions and formats them. Only
