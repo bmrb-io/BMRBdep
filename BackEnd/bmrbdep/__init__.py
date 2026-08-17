@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import functools
 import logging
 import os
 import socket
@@ -137,6 +138,19 @@ def handle_scanner(exception: werkzeug.exceptions.MethodNotAllowed):
     return Response('🤨', status=404)
 
 
+@application.errorhandler(werkzeug.exceptions.HTTPException)
+def handle_http_exceptions(exception: werkzeug.exceptions.HTTPException):
+    """ Client-caused HTTP errors - an unsatisfiable Range header, an oversized upload, a
+    malformed request - aren't server bugs, so return the real status code rather than
+    letting the catch-all handler turn them into a 500 and e-mail the admins. """
+
+    logging.warning(f'HTTP {exception.code} returned for {request.method}:{request.url} - {exception.description}')
+
+    response = jsonify({'error': exception.description})
+    response.status_code = exception.code
+    return response
+
+
 @application.errorhandler(Exception)
 def handle_other_errors(exception: Exception):
     """ Catches any other exceptions and formats them. Only
@@ -173,6 +187,20 @@ def handle_other_errors(exception: Exception):
         return response
 
 
+def no_side_effects_on_head(func):
+    """ Werkzeug implicitly allows HEAD on every rule that allows GET, and dispatches it to the same view
+    function. Decorate views which have side effects so that a HEAD probe - e-mail link scanners and web
+    crawlers issue them freely - can't trigger those side effects. """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if request.method == 'HEAD':
+            return Response(status=200)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @application.route('/')
 @application.route('/<path:filename>', methods=['GET'])
 def send_local_file(filename: str = None) -> Response:
@@ -201,6 +229,7 @@ def send_validation_status(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
+@no_side_effects_on_head
 def send_validation_email(uuid, repo_object: Optional[DepositionRepo] = None) -> Response:
     """ Sends the validation e-mail. """
 
@@ -281,6 +310,7 @@ BMRBDep System""" % (repo.metadata['deposition_nickname'], repo.metadata['creati
 
 
 @application.route('/deposition/validate_email/<token>')
+@no_side_effects_on_head
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
@@ -680,7 +710,8 @@ contact persons: %s
 def file_operations(uuid, path: str) -> Response:
     """ Either retrieve or delete a file. """
 
-    if request.method == "GET":
+    # Werkzeug implicitly allows HEAD wherever GET is allowed, and dispatches it to this view
+    if request.method in ("GET", "HEAD"):
         with depositions.DepositionRepo(uuid, read_only=True) as repo:
             return send_file(path_or_file=repo.get_file(path, root=False), download_name=path)
     elif request.method == "DELETE":
@@ -775,7 +806,7 @@ def fetch_or_store_deposition(uuid):
             return jsonify({'commit': repo.last_commit})
 
     # Load an entry
-    elif request.method == "GET":
+    else:
 
         with depositions.DepositionRepo(uuid) as repo:
             entry: pynmrstar.Entry = repo.entry

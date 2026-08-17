@@ -408,6 +408,20 @@ export class LoopTag extends Tag {
     return this.parent.parent;
   }
 
+  /* Returns the tag with the given name from the same row of the loop, or null if there is none. */
+  getTagInSameRow(tagName: string): LoopTag | null {
+    const column = this.parent.getTagIndex(tagName);
+    if (column === null) {
+      return null;
+    }
+    for (const row of this.parent.data) {
+      if (row.indexOf(this) >= 0) {
+        return row[column];
+      }
+    }
+    return null;
+  }
+
 }
 
 
