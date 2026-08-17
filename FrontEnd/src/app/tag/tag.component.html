@@ -2,13 +2,17 @@
   <label>
     <select
       [(ngModel)]="tag.value"
-      [ngClass]="{'type-error': !tag.valid, 'tag-input': true, 'crs-country': true}"
-      (change)="validateTag()"
+      [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
+      (ngModelChange)="countryChanged($event)"
       [matTooltip]="tag.validationMessage"
-      [attr.data-region-id]="'state'+getRow()"
-      [attr.data-default-value]="tag.value"
-      [disabled]="tag.disabled"
-      data-preferred="US,GB,CN,JP,AU,MX">
+      [disabled]="tag.disabled">
+      <option value="">Select country</option>
+      @if (valueIsUnlisted(countryNames)) {
+        <option [value]="tag.value">{{tag.value}}</option>
+      }
+      @for (country of countryNames; track country) {
+        <option [value]="country">{{country}}</option>
+      }
     </select>
   </label>
 }
@@ -18,12 +22,16 @@
     <select
       [(ngModel)]="tag.value"
       [ngClass]="{'type-error': !tag.valid, 'tag-input': true}"
-      (change)="validateTag()"
+      (ngModelChange)="validateTag()"
       [matTooltip]="tag.validationMessage"
-      [id]="'state'+getRow()"
-      [attr.data-default-value]="tag.value"
-      [disabled]="tag.disabled"
-      data-default-option="Select State or Province">
+      [disabled]="tag.disabled">
+      <option value="">Select State or Province</option>
+      @if (valueIsUnlisted(regions)) {
+        <option [value]="tag.value">{{tag.value}}</option>
+      }
+      @for (region of regions; track region) {
+        <option [value]="region">{{region}}</option>
+      }
     </select>
   </label>
 }

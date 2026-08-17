@@ -1,10 +1,8 @@
 import {ApiService} from '../api.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
-/* Import country updater code */
-import * as crs from 'country-region-selector';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatButton} from '@angular/material/button';
 import {NgClass} from '@angular/common';
@@ -16,28 +14,15 @@ import {TagComponent} from '../tag/tag.component';
     styleUrls: ['./loop.component.scss'],
     imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
-export class LoopComponent implements OnInit, AfterViewChecked {
+export class LoopComponent implements OnInit {
     @Input() loop: Loop;
     activeTag: LoopTag;
-    crsInit: boolean;
 
-    constructor(private api: ApiService,
-                private changeDetector: ChangeDetectorRef) {
+    constructor(private api: ApiService) {
         this.activeTag = null;
-        this.crsInit = false;
     }
 
     ngOnInit() {
-    }
-
-    // Load the country autofill code
-    ngAfterViewChecked() {
-        // Note that we use ngAfterViewChecked with a custom run-once check rather than AfterViewInit due to the issues discussed here:
-        // https://stackoverflow.com/questions/31171084/how-to-call-function-after-dom-renders-in-angular2
-        if (!this.crsInit && this.loop.category === '_Contact_person') {
-            crs.init();
-            this.crsInit = true;
-        }
     }
 
     // Add another row of data
@@ -45,11 +30,6 @@ export class LoopComponent implements OnInit, AfterViewChecked {
         this.loop.addRow();
         this.loop.parent.parent.refresh();
         this.api.storeEntry(true);
-        // Reload the country-autofill code
-        if (this.loop.category === '_Contact_person') {
-            this.changeDetector.detectChanges();
-            crs.init();
-        }
     }
 
     // Delete a row of data

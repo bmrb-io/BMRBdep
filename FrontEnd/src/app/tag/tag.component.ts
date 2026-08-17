@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
-import {Tag} from '../nmrstar/tag';
+import {LoopTag, Tag} from '../nmrstar/tag';
+import {countryNames, getRegions} from '../nmrstar/countries';
 import {FormsModule} from '@angular/forms';
 import {NgClass} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
@@ -17,8 +18,11 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 })
 export class TagComponent implements OnInit {
     @Input() tag: Tag;
-    @Input() unique_identifier: string;
     filteredOptions: [string, string][];
+    countryNames = countryNames;
+
+    /* For a country tag, the state/province tag of the same row, and vice versa. */
+    private linkedTag: LoopTag;
 
     public height: number;
 
@@ -35,6 +39,34 @@ export class TagComponent implements OnInit {
                 this.filteredOptions.push(singleEnum);
             }
         }
+        // The country and state/province tags of a contact person drive each other
+        if (this.tag instanceof LoopTag) {
+            if (this.tag.interfaceType === 'country') {
+                this.linkedTag = this.tag.getTagInSameRow('State_province');
+            } else if (this.tag.interfaceType === 'state') {
+                this.linkedTag = this.tag.getTagInSameRow('Country');
+            }
+        }
+    }
+
+    /* The states/provinces to offer for a state tag, based on the country selected in the same row. */
+    get regions(): string[] {
+        return getRegions(this.linkedTag ? this.linkedTag.value : '');
+    }
+
+    /* True if the tag holds a country or region that isn't in the list, which happens when a
+     * deposition was started before a country renamed or reorganized its subdivisions. Such a value
+     * is offered as an extra option rather than silently dropped. */
+    valueIsUnlisted(options: string[]): boolean {
+        return !!this.tag.value && options.indexOf(this.tag.value) < 0;
+    }
+
+    /* A state/province is only meaningful for the country it belongs to. */
+    countryChanged(country: string): void {
+        if (this.linkedTag && getRegions(country).indexOf(this.linkedTag.value) < 0) {
+            this.linkedTag.value = '';
+        }
+        this.validateTag();
     }
 
     private filter() {
@@ -44,11 +76,6 @@ export class TagComponent implements OnInit {
                 this.filteredOptions.push(singleEnum);
             }
         }
-    }
-
-    getRow() {
-        const split = this.unique_identifier.split('_');
-        return split[split.length - 2];
     }
 
     recalculateHeight() {
