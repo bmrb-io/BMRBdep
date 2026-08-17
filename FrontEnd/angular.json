@@ -103,9 +103,11 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts",
+              "zone.js/testing"
+            ],
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "styles": [
@@ -114,7 +116,7 @@
                 "inject": true
               },
               "./node_modules/material-design-icons/iconfont/material-icons.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "assets": [
               "src/assets",
