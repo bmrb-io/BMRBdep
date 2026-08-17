@@ -50,7 +50,7 @@
 	      		              'greyed-out': (!(col.display === 'Y' || (col.display === 'N' && loop.parent.parent.showAll)))}">
                   @if (col.display === 'Y' || (col.display === 'N' && loop.parent.parent.showAll)) {
                     <app-tag
-                      [tag]='col' [unique_identifier]="'_' + loop.parent.name + '_' + r + '_' + c"
+                      [tag]='col'
                       (contextmenu)="col.log()"></app-tag>
                   }
                 </td>
