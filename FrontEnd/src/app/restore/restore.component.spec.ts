@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {RestoreComponent} from './restore.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
 
 describe('RestoreComponent', () => {
     let component: RestoreComponent;
@@ -8,7 +11,8 @@ describe('RestoreComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [RestoreComponent]
+            imports: [RestoreComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         })
             .compileComponents();
     }));

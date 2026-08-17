@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {TagComponent} from './tag.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
 
 describe('TagComponent', () => {
     let component: TagComponent;
@@ -8,7 +11,8 @@ describe('TagComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [TagComponent]
+            imports: [TagComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         })
             .compileComponents();
     }));

@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {SaveframeComponent} from './saveframe.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
 
 describe('SaveframeComponent', () => {
     let component: SaveframeComponent;
@@ -8,7 +11,8 @@ describe('SaveframeComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [SaveframeComponent]
+            imports: [SaveframeComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         })
             .compileComponents();
     }));

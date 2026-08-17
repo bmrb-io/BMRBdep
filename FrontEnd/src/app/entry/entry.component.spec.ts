@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {EntryComponent} from './entry.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
 
 describe('EntryComponent', () => {
     let component: EntryComponent;
@@ -8,7 +11,8 @@ describe('EntryComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [EntryComponent]
+            imports: [EntryComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         })
             .compileComponents();
     }));

@@ -6,7 +6,9 @@ describe('SidenavService', () => {
     let service: SidenavService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            providers: [SidenavService]
+        });
         service = TestBed.inject(SidenavService);
     });
 

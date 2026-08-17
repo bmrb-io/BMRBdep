@@ -1,6 +1,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {FileUploaderComponent} from './file-uploader.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
 
 describe('FileUploaderComponent', () => {
     let component: FileUploaderComponent;
@@ -8,7 +11,8 @@ describe('FileUploaderComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [FileUploaderComponent]
+            imports: [FileUploaderComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
         })
             .compileComponents();
     }));

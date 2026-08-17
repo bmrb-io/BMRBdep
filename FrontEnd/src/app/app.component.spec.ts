@@ -1,10 +1,15 @@
 import {TestBed, waitForAsync} from '@angular/core/testing';
 import {AppComponent} from './app.component';
+import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClientTesting} from '@angular/common/http/testing';
+import {provideRouter} from '@angular/router';
+import {SidenavService} from './sidenav.service';
 
 describe('AppComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             imports: [AppComponent],
+            providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([]), SidenavService]
         }).compileComponents();
     }));
     it('should create the app', waitForAsync(() => {
