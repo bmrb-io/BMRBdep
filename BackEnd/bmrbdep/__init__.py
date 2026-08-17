@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import functools
 import logging
 import os
 import tempfile
@@ -148,6 +149,20 @@ def handle_other_errors(exception: Exception):
         return response
 
 
+def no_side_effects_on_head(func):
+    """ Werkzeug implicitly allows HEAD on every rule that allows GET, and dispatches it to the same view
+    function. Decorate views which have side effects so that a HEAD probe - e-mail link scanners and web
+    crawlers issue them freely - can't trigger those side effects. """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if request.method == 'HEAD':
+            return Response(status=200)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @application.route('/deposition/released')
 def all_released():
 
@@ -231,6 +246,7 @@ def send_validation_status(uuid) -> Response:
 
 
 @application.route('/deposition/<uuid:uuid>/resend-validation-email')
+@no_side_effects_on_head
 def send_validation_email(uuid) -> Response:
     """ Sends the validation e-mail. """
 
@@ -302,6 +318,7 @@ BMRbig System""" % (repo.metadata['deposition_nickname'], repo.metadata['creatio
 
 
 @application.route('/deposition/validate_email/<token>')
+@no_side_effects_on_head
 def validate_user(token: str):
     """ Perform validation of user-email and then redirect to the entry loader URL. """
 
@@ -544,7 +561,8 @@ contact persons: %s
 def file_operations(uuid, path: str) -> Response:
     """ Either retrieve or delete a file. """
 
-    if request.method == "GET":
+    # Werkzeug implicitly allows HEAD wherever GET is allowed, and dispatches it to this view
+    if request.method in ("GET", "HEAD"):
         with depositions.DepositionRepo(uuid) as repo:
             return send_file(path_or_file=repo.get_file(path, root=False),
                              download_name=path)
@@ -622,7 +640,7 @@ def fetch_or_store_deposition(uuid):
             return jsonify({'commit': repo.last_commit})
 
     # Load an entry
-    elif request.method == "GET":
+    else:
 
         with depositions.DepositionRepo(uuid) as repo:
             entry: pynmrstar.Entry = repo.get_entry()
@@ -649,6 +667,7 @@ def fetch_or_store_deposition(uuid):
 
 
 @application.route('/refresh')
+@no_side_effects_on_head
 def re_release_entries():
     """ Re-releases all entries. """
 
