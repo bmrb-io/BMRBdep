@@ -67,7 +67,7 @@ def schema_emitter(small_molecule=False):
 
     last_schema_version = None
 
-    for commit in repo.iter_commits('nmr-star-development'):
+    for commit in repo.iter_commits('nmr-star-production'):
         next_schema = load_schemas(commit, small_molecule=small_molecule)
         if next_schema is None:
             continue
@@ -338,6 +338,10 @@ if __name__ == "__main__":
     if not os.path.exists(dictionary_dir):
         Git(root_dir).clone('https://github.com/bmrb-io/nmr-star-dictionary.git')
     repo = Repo(dictionary_dir)
+    # Check out the production branch before pulling, so that the pull updates
+    # it -- a checkout made before this read nmr-star-development, and its local
+    # nmr-star-production branch dates from when it was cloned.
+    repo.git.checkout('nmr-star-production')
     repo.remotes.origin.pull()
     most_recent_commit = repo.commit()
 
@@ -351,9 +355,6 @@ if __name__ == "__main__":
             not options.force and not options.full:
         print('Schemas already up to date according to git commit stored.')
         sys.exit(0)
-
-    # Check out the development branch
-    repo.git.checkout('nmr-star-development')
 
     # Load the data types
     data_types = {x[0]: x[1] for x in csv.reader(open(dt_path, "r"))}
