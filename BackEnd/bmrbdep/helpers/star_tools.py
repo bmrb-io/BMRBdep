@@ -81,10 +81,16 @@ def merge_entries(template_entry: pynmrstar.Entry, existing_entry: pynmrstar.Ent
             if saveframe.category != "entry_information" or preserve_entry_information:
                 for tag in saveframe.tags:
                     lower_tag = tag[0].lower()
-                    if lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
-                                         'original_nmr_star_version', 'atomic_coordinate_file_name',
-                                         'atomic_coordinate_file_syntax', 'constraint_file_name']:
-                        fqtn = frame_prefix_lower + '.' + lower_tag
+                    fqtn = frame_prefix_lower + '.' + lower_tag
+                    # An integer ID is a counter that normalize() renumbers, but a non-integer one is data that
+                    #  can't be recreated - _Chem_comp.ID is the ligand code - so keep it. (_Entry.ID is the one
+                    #  other, and it must stay the new deposition's.)
+                    if lower_tag == 'id' and fqtn != '_entry.id' and fqtn in new_schema.schema and \
+                            new_schema.schema[fqtn]['BMRB data type'] != 'int':
+                        new_saveframe.add_tag(tag[0], tag[1], update=True)
+                    elif lower_tag not in ['sf_category', 'sf_framecode', 'id', 'entry_id', 'nmr_star_version',
+                                           'original_nmr_star_version', 'atomic_coordinate_file_name',
+                                           'atomic_coordinate_file_syntax', 'constraint_file_name']:
                         if fqtn in new_schema.schema or lower_tag == '_deleted':
                             new_saveframe.add_tag(tag[0], tag[1], update=True)
 
