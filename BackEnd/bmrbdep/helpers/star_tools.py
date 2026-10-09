@@ -165,14 +165,18 @@ def upgrade_chemcomps_and_create_entities_where_needed(entry: pynmrstar.Entry, s
 
     # Create the entity for the chem_comps that need linking
     for saveframe in need_linking:
-        if 'PDB_code' in saveframe and saveframe['PDB_code'][0] not in pynmrstar.definitions.NULL_VALUES:
+        pdb_code = saveframe['PDB_code'][0] if 'PDB_code' in saveframe else None
+        if isinstance(pdb_code, str) and pdb_code.strip() not in pynmrstar.definitions.NULL_VALUES:
             try:
-                chemcomp_entry = pynmrstar.Entry.from_database('chemcomp_' + saveframe['PDB_code'][0].upper())
+                chemcomp_entry = pynmrstar.Entry.from_database('chemcomp_' + pdb_code.strip().upper())
             except IOError:
                 saveframe['Note_to_annotator'] = 'Attempted to automatically look up the chem_comp and entity' \
                                                  ' from the PDB_code, but it isn\'t valid. Please rectify.'
                 chem_comp_entity_map[saveframe.name] = create_entity_for_saveframe_and_attach(entry, saveframe, schema)
                 continue
+
+            # The chem_comp entry's Entry_ID tags carry the ligand code; they must carry the deposition's ID
+            chemcomp_entry.entry_id = entry.entry_id
 
             chemcomp_saveframe = chemcomp_entry.get_saveframes_by_category('chem_comp')[0]
             chemcomp_saveframe['Paramagnetic'] = saveframe['Paramagnetic'][0]
