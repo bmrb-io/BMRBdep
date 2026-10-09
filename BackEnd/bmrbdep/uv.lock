@@ -88,7 +88,7 @@ requires-dist = [
     { name = "flask-mail", specifier = "==0.10.0" },
     { name = "gitpython", specifier = "==3.1.50" },
     { name = "psycopg2-binary", specifier = "==2.9.12" },
-    { name = "pynmrstar", specifier = "==3.5.1" },
+    { name = "pynmrstar", specifier = "==3.6.2" },
     { name = "python-dateutil", specifier = "==2.9.0" },
     { name = "requests", specifier = "==2.34.0" },
     { name = "simplejson", specifier = "==4.1.1" },
@@ -538,19 +538,31 @@ wheels = [
 
 [[package]]
 name = "pynmrstar"
-version = "3.5.1"
+version = "3.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/55/193526241c9033f411f2d38673219c918a81f2c255d5594ae3853404d873/pynmrstar-3.5.1.tar.gz", hash = "sha256:6065d34b58d13e8c5dee63203125e66c141af42a3c04ee391dda366fdb99fed7", size = 424452, upload-time = "2026-04-27T20:41:42.479Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/b1/abd7f92277e3d3e3d4d3480af6e77d6c7320328109368c43de10783aec35/pynmrstar-3.6.2.tar.gz", hash = "sha256:21da446d61b161b0b429bbfb3248fba95ea08cd89a3903a0c7be7b1d5ab13fd4", size = 541887, upload-time = "2026-10-09T17:25:42.825Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e8/d1/d2fbea7a73669d16863921de06353f9e2c6d3aaad23d51da6e455565f613/pynmrstar-3.5.1-cp313-cp313-macosx_10_15_x86_64.whl", hash = "sha256:0b82fcf385209784d4f733b15bd13f31c65e3d9f883a80f8affbcfcd94aa43af", size = 657479, upload-time = "2026-04-27T20:40:59.275Z" },
-    { url = "https://files.pythonhosted.org/packages/e3/6d/b52816aaa5f10f42f4ba9b2b69fbf2b4ea8ec59add4e15b59633ba2e5979/pynmrstar-3.5.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:05f421428e681c223d262d3475c4bfb2ddd256ff1a94b27c94c35132a19ba10a", size = 651182, upload-time = "2026-04-27T20:41:00.855Z" },
-    { url = "https://files.pythonhosted.org/packages/af/06/9ff75933ff0ff38c10a0188fb1be9889d3f4f0b54fad8deae8e8a8b16da9/pynmrstar-3.5.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:07943fd27edb251db03544043eb82db90b96fe2f9f47e758897816c061ba5f3f", size = 688803, upload-time = "2026-04-27T20:41:02.34Z" },
-    { url = "https://files.pythonhosted.org/packages/8d/e3/6a8bb463738c093362976b521ae60073f4823660d9afa43fb47260703d40/pynmrstar-3.5.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:37008a28ccc76fca19913c9a05941f3a01798fc8197409959ea29a1736983da5", size = 759962, upload-time = "2026-04-27T20:41:03.882Z" },
-    { url = "https://files.pythonhosted.org/packages/4e/fe/f14bfe7bf457ff8e533998ef227059b9fed36832acff3381750640fdc1c7/pynmrstar-3.5.1-cp313-cp313-win32.whl", hash = "sha256:97c4859c3b245ac98d3c6d57c5c6330bc51c0139ac039de9cfa0284a2073c55b", size = 535944, upload-time = "2026-04-27T20:41:05.575Z" },
-    { url = "https://files.pythonhosted.org/packages/11/89/345fe1290acf334a4b6b2409557a0f1b0e1af56a29659f0880c78d8fa97b/pynmrstar-3.5.1-cp313-cp313-win_amd64.whl", hash = "sha256:0cafdc3c66071671204ec001648cad402686e554795f9dc46034393fad0f2e10", size = 546236, upload-time = "2026-04-27T20:41:07.227Z" },
+    { url = "https://files.pythonhosted.org/packages/45/0e/4ee9f52e27263e4698dcb042afc7f16bb22538988aa5fd51570c3045b290/pynmrstar-3.6.2-cp313-cp313-macosx_10_15_x86_64.whl", hash = "sha256:1fd8bbccbd30a67dab3b29810fb53a4196ffb0f6bdccbcd33533019b89254c8e", size = 785154, upload-time = "2026-10-09T17:24:49.77Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/b3/4f292fb5b0e1ac9ceeb2cc5390f83a7c7835ce3ec6f8f96eb921f9f92607/pynmrstar-3.6.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:5f771edae930d1759e3681df2ca03bf190b3f7b283995c3fcb8a03b178499499", size = 777802, upload-time = "2026-10-09T17:24:51.364Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/20/f135d95429f9926164ed5658b5a4cd42ee62ec1b23143a9f556b1ecbebb7/pynmrstar-3.6.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4c5755fc82066199074759c748280fe462b12815678940909d9c81fe4f6f87e4", size = 815709, upload-time = "2026-10-09T17:24:52.82Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/85/28516836bc8c3e4740e378524a3b466303063486d64a9cb0264720ddc374/pynmrstar-3.6.2-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:1fe5cdbfc54f0a95e6bf974cd6f6991247aa333ed6243b7777d74fdb633e9c8a", size = 886925, upload-time = "2026-10-09T17:24:54.47Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/0d/b51116c5e42527a72f63fb1cc42b17d38a8f7ba5b1a96aff5751a81e048b/pynmrstar-3.6.2-cp313-cp313-win32.whl", hash = "sha256:360ea2b6b7ade3ad2bcc141f736e7c0c86eef6e35be1ccd00e852b1cffe93ae5", size = 657827, upload-time = "2026-10-09T17:24:56.285Z" },
+    { url = "https://files.pythonhosted.org/packages/16/bd/e33b8d5a1b9ce15036574968f7c507a14baa064442bb1ddb2f5321013d98/pynmrstar-3.6.2-cp313-cp313-win_amd64.whl", hash = "sha256:f67a21c1750d7c30ecc32de34bb271a5ea2d2b9ede4a3bfe80a724518a1d46fd", size = 671206, upload-time = "2026-10-09T17:24:57.79Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/00/a63600869bdfd1256ca18d85f915510f6c2c6b1555d47d5867b63b58e0f7/pynmrstar-3.6.2-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:11c79e46d7f93fa30fbcd91a1e49f2cf8095228c2b0ed0197bf68a6912d730d8", size = 785878, upload-time = "2026-10-09T17:24:59.128Z" },
+    { url = "https://files.pythonhosted.org/packages/40/05/70a005291a8c2177f0e49f645efecff48d788082fb8811b2dab47dac3380/pynmrstar-3.6.2-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:4f07ac5d408b6f66387420f68e125630adcd08765ec5e2f3549e870f6a75288a", size = 778403, upload-time = "2026-10-09T17:25:00.615Z" },
+    { url = "https://files.pythonhosted.org/packages/04/00/73d95278fee42e21c612673ca29514fd138d3817f546f0d2addc425bb0ce/pynmrstar-3.6.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:a66054b3bb505dd292213333e678220527f5519fb1bf86968b63a917462ee4ad", size = 816214, upload-time = "2026-10-09T17:25:01.973Z" },
+    { url = "https://files.pythonhosted.org/packages/83/40/9a60e671a972df606cf18cc7e6c693adaef0e4ea46ed11bf36a0858188ac/pynmrstar-3.6.2-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:59d4d53e0b0b5b3d6a2de9cf45501cf82369656fd1aca99faa9d381cacb22ef5", size = 887600, upload-time = "2026-10-09T17:25:03.478Z" },
+    { url = "https://files.pythonhosted.org/packages/48/88/ebf25365afc2be2c3518b7828ef8f64c385003083e0ec4a5c92c2430a25e/pynmrstar-3.6.2-cp314-cp314-win32.whl", hash = "sha256:046baf4ed52808473db72fda21bd1e0c8ded5056d5df2e3aad7dee8e558752fb", size = 658243, upload-time = "2026-10-09T17:25:05.044Z" },
+    { url = "https://files.pythonhosted.org/packages/85/45/608d679a6ead1817c18bfe22a8ab9954acdd414447aa754c311e001b98c8/pynmrstar-3.6.2-cp314-cp314-win_amd64.whl", hash = "sha256:cfd405ab0b815be535644918c9cb32ee50d1e67475ac1d66292feaaf416eee4e", size = 672162, upload-time = "2026-10-09T17:25:06.443Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/a0/ee0ecb3e6b3032335345af5db971446205af9ac55b6097c36fc6d5921564/pynmrstar-3.6.2-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:d6ba5e2f21e087bf4870363730eb1a92e67b17daf38c06fe792c847d8c5355b3", size = 784755, upload-time = "2026-10-09T17:25:07.902Z" },
+    { url = "https://files.pythonhosted.org/packages/26/af/767c1b01b9a9d3d7b6338d03314949478739708e009aab85af3b4288a6a5/pynmrstar-3.6.2-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:e88acaeb8fd654ade39fa473089a679e6db8d0106eb843a4e4d846c1b65ca6ec", size = 776827, upload-time = "2026-10-09T17:25:09.321Z" },
+    { url = "https://files.pythonhosted.org/packages/35/2a/41559b3573c52af72d58fec5b30d5a2c16a5a29f89ece7b8b0d16c159b39/pynmrstar-3.6.2-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:5e0076de8036c86b24cb2215e80eec9e57453e274a3d53e4bec5a131341467db", size = 816315, upload-time = "2026-10-09T17:25:11.017Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/98/ff7ea5f398ca5dedd66d287ea92ccb75542d56eccd8e1826bc6d93a93d28/pynmrstar-3.6.2-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:844cc0f84143a4a4e2f42df8498faae06d84398e814d3dfeb59a178987529423", size = 886875, upload-time = "2026-10-09T17:25:12.552Z" },
+    { url = "https://files.pythonhosted.org/packages/55/f6/d05bb041dc628047496f27a8cdb6e2c80420e3843ea1ce910683962a7679/pynmrstar-3.6.2-cp314-cp314t-win32.whl", hash = "sha256:1094c119a6f5279546c3057434e927321249fd1959682e65cf361746b3b81b8f", size = 657805, upload-time = "2026-10-09T17:25:13.904Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/51/84664a0db71661ad439caf62c7963441016adfe4d750229a02abb36534ea/pynmrstar-3.6.2-cp314-cp314t-win_amd64.whl", hash = "sha256:243f769042c6eb845846afa80192a741a06d6b7a055e2b99ba17d414e033dca8", size = 672132, upload-time = "2026-10-09T17:25:15.424Z" },
 ]
 
 [[package]]
