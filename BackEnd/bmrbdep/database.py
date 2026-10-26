@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select, text
+from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select, text, exists, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from bmrbdep.common import configuration, list_all_depositions, ServerError, filter_null_values, \
@@ -28,6 +28,14 @@ class Deposition(Base):
     email_validated: Mapped[Optional[bool]] = mapped_column(Boolean)
     entry_deposited: Mapped[Optional[bool]] = mapped_column(Boolean)
     schema_version: Mapped[Optional[str]] = mapped_column(String)
+
+def json_list_has(column, value: str):
+    """ Builds a condition that is true when the JSON list in `column` has an element equal to `value`,
+    ignoring case and surrounding whitespace. This matches whole elements, so 'bob@x.org' does not
+    match 'jimbob@x.org' - use it for anything that grants access. """
+
+    elements = func.json_each(column).table_valued('value')
+    return exists().where(func.lower(func.trim(elements.c.value)) == value.strip().lower())
 
 # Global engine and session factory
 _engine = None

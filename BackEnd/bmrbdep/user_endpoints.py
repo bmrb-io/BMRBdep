@@ -3,11 +3,11 @@ import socket
 
 from flask import Blueprint, request, url_for, session, redirect, jsonify
 from flask_mail import Message
-from sqlalchemy import select, or_, type_coerce, String
+from sqlalchemy import select, or_
 
 from bmrbdep import application, RequestError, configuration, mail, ServerError, depositions
 from bmrbdep.common import is_admin_email, filter_null_values
-from bmrbdep.database import Deposition, get_db_session
+from bmrbdep.database import Deposition, get_db_session, json_list_has
 from bmrbdep.helpers.tokens import get_email_token, verify_email_token
 
 user_endpoints = Blueprint('user_endpoints', __name__)
@@ -62,6 +62,13 @@ def activate_email_session(token: str):
     return redirect('/my-depositions', code=302)
 
 
+def _list_has(values, value: str) -> bool:
+    """ Python-side counterpart of `json_list_has`: whether `values` has an element equal to `value`,
+    ignoring case and surrounding whitespace. """
+
+    return value.strip().lower() in {_.strip().lower() for _ in values or []}
+
+
 @application.get('/deposition/authorized-depositions')
 def get_authorized_depositions():
     """ Return the list of depositions the user can access based on their session. """
@@ -78,10 +85,10 @@ def get_authorized_depositions():
         conditions = []
 
         if active_email:
-            conditions.append(type_coerce(Deposition.author_emails, String).contains(active_email))
+            conditions.append(json_list_has(Deposition.author_emails, active_email))
 
         if orcid_id:
-            conditions.append(type_coerce(Deposition.author_orcids, String).contains(orcid_id))
+            conditions.append(json_list_has(Deposition.author_orcids, orcid_id))
 
         stmt = select(Deposition).where(or_(*conditions))
         depositions = db_session.execute(stmt).scalars().all()
@@ -91,10 +98,10 @@ def get_authorized_depositions():
         for dep in depositions:
             auth_reasons = []
 
-            if active_email and active_email in (dep.author_emails or []):
+            if active_email and _list_has(dep.author_emails, active_email):
                 auth_reasons.append('email')
 
-            if orcid_id and orcid_id in (dep.author_orcids or []):
+            if orcid_id and _list_has(dep.author_orcids, orcid_id):
                 auth_reasons.append('orcid')
 
             result.append({
