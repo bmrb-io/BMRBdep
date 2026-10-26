@@ -2,11 +2,11 @@ import functools
 import logging
 
 from flask import Blueprint, request, session, jsonify
-from sqlalchemy import select, or_, type_coerce, String
+from sqlalchemy import select, or_, func, String
 
 from bmrbdep import depositions
 from bmrbdep.common import is_admin_email
-from bmrbdep.database import Deposition, get_db_session
+from bmrbdep.database import Deposition, get_db_session, fold, json_list_search
 from bmrbdep.exceptions import RequestError
 
 admin_endpoints = Blueprint('admin_endpoints', __name__)
@@ -47,15 +47,15 @@ def admin_search():
         raise RequestError('Please provide a search term.')
 
     with get_db_session() as db_session:
-        # All conditions are parameterized by SQLAlchemy - the term is never interpolated into SQL.
-        # `.contains` matches a substring of the stored JSON text, which is what we want for the
-        # JSON list columns (coerced to String, as SQLAlchemy 2.1 deprecates `.contains` on JSON);
-        # `.ilike` is a case-insensitive substring match for the scalar columns.
+        # All conditions are parameterized by SQLAlchemy - the term is never interpolated into SQL,
+        # and autoescape makes '%' and '_' in it match literally. Names, e-mails and the nickname
+        # are compared case- and accent-insensitively (see `fold`), element by element for the
+        # JSON list columns.
         conditions = [
-            Deposition.deposition_id.ilike(f'%{term}%'),
-            type_coerce(Deposition.author_emails, String).contains(term),
-            type_coerce(Deposition.author_names, String).contains(term),
-            Deposition.nickname.ilike(f'%{term}%'),
+            Deposition.deposition_id.icontains(term, autoescape=True),
+            json_list_search(Deposition.author_emails, term),
+            json_list_search(Deposition.author_names, term),
+            func.bmrbdep_fold(Deposition.nickname, type_=String).contains(fold(term), autoescape=True),
         ]
         stmt = (select(Deposition)
                 .where(or_(*conditions))

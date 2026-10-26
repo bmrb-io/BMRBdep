@@ -4,8 +4,9 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import create_engine, String, Integer, Boolean, DateTime, JSON, select, text, exists, func
+from sqlalchemy import create_engine, event, String, Integer, Boolean, DateTime, JSON, select, text, exists, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from unidecode import unidecode
 
 from bmrbdep.common import configuration, list_all_depositions, ServerError, filter_null_values, \
     format_contact_names
@@ -37,6 +38,26 @@ def json_list_has(column, value: str):
     elements = func.json_each(column).table_valued('value')
     return exists().where(func.lower(func.trim(elements.c.value)) == value.strip().lower())
 
+def fold(value: Optional[str]) -> Optional[str]:
+    """ Reduces a string to a case- and accent-insensitive form for fuzzy searching, so that
+    'Zürich', 'ZURICH' and 'zurich' all match. Entries are transliterated with unidecode when
+    deposited, so this also lets an accented search term find a deposited entry. Registered with
+    SQLite as bmrbdep_fold() so queries can apply it to stored values. Not for access checks. """
+
+    if value is None:
+        return None
+    return unidecode(value).casefold()
+
+
+def json_list_search(column, term: str):
+    """ Builds a condition that is true when any element of the JSON list in `column` contains
+    `term`, compared after `fold`. It searches the decoded elements rather than the JSON text,
+    where non-ASCII characters are stored escaped ('Z\\u00fcrich'). """
+
+    elements = func.json_each(column).table_valued('value')
+    folded_element = func.bmrbdep_fold(elements.c.value, type_=String)
+    return exists().where(folded_element.contains(fold(term), autoescape=True))
+
 # Global engine and session factory
 _engine = None
 _SessionFactory = None
@@ -54,6 +75,10 @@ def get_engine():
 
         db_path = os.path.join(entry_dir, 'database.sqlite3')
         _engine = create_engine(f'sqlite:///{db_path}')
+
+        @event.listens_for(_engine, 'connect')
+        def _register_functions(dbapi_connection, _connection_record):
+            dbapi_connection.create_function('bmrbdep_fold', 1, fold, deterministic=True)
 
     return _engine
 
