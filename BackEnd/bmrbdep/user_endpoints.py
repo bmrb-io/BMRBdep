@@ -3,7 +3,7 @@ import socket
 
 from flask import Blueprint, request, url_for, session, redirect, jsonify
 from flask_mail import Message
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, type_coerce, String
 
 from bmrbdep import application, RequestError, configuration, mail, ServerError, depositions
 from bmrbdep.common import is_admin_email, filter_null_values
@@ -78,10 +78,10 @@ def get_authorized_depositions():
         conditions = []
 
         if active_email:
-            conditions.append(Deposition.author_emails.contains(active_email))
+            conditions.append(type_coerce(Deposition.author_emails, String).contains(active_email))
 
         if orcid_id:
-            conditions.append(Deposition.author_orcids.contains(orcid_id))
+            conditions.append(type_coerce(Deposition.author_orcids, String).contains(orcid_id))
 
         stmt = select(Deposition).where(or_(*conditions))
         depositions = db_session.execute(stmt).scalars().all()

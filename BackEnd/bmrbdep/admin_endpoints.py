@@ -2,7 +2,7 @@ import functools
 import logging
 
 from flask import Blueprint, request, session, jsonify
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, type_coerce, String
 
 from bmrbdep import depositions
 from bmrbdep.common import is_admin_email
@@ -49,11 +49,12 @@ def admin_search():
     with get_db_session() as db_session:
         # All conditions are parameterized by SQLAlchemy - the term is never interpolated into SQL.
         # `.contains` matches a substring of the stored JSON text, which is what we want for the
-        # JSON list columns; `.ilike` is a case-insensitive substring match for the scalar columns.
+        # JSON list columns (coerced to String, as SQLAlchemy 2.1 deprecates `.contains` on JSON);
+        # `.ilike` is a case-insensitive substring match for the scalar columns.
         conditions = [
             Deposition.deposition_id.ilike(f'%{term}%'),
-            Deposition.author_emails.contains(term),
-            Deposition.author_names.contains(term),
+            type_coerce(Deposition.author_emails, String).contains(term),
+            type_coerce(Deposition.author_names, String).contains(term),
             Deposition.nickname.ilike(f'%{term}%'),
         ]
         stmt = (select(Deposition)
