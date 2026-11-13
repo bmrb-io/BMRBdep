@@ -79,6 +79,13 @@
                   "with": "src/environments/environment.devprod.ts"
                 }
               ]
+            },
+            "testing": {
+              "aot": false,
+              "polyfills": [
+                "zone.js",
+                "zone.js/testing"
+              ]
             }
           },
           "defaultConfiguration": ""
@@ -101,28 +108,14 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "karmaConfig": "./karma.conf.js",
-            "polyfills": [
-              "src/polyfills.ts",
-              "zone.js/testing"
-            ],
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [],
-            "styles": [
-              {
-                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                "inject": true
-              },
-              "./node_modules/material-design-icons/iconfont/material-icons.css",
-              "src/styles.scss"
+            "reporters": [
+              "default"
             ],
-            "assets": [
-              "src/assets",
-              "src/favicon.ico",
-              "src/.htaccess"
-            ]
+            "buildTarget": ":build:testing",
+            "runner": "vitest"
           }
         },
         "lint": {

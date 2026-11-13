@@ -26,7 +26,7 @@ When making frontend-only changes you typically work inside `FrontEnd/`, but bui
 | Production build | `npm run build.prod` (`FrontEnd/`) — runs `git.version.ts` prebuild, then `ng build --configuration production` |
 | Devprod build (prod-like but with devprod env) | `ng build --configuration=devprod` (`FrontEnd/`) |
 | Lint | `npm run lint` (`FrontEnd/`) — ESLint via `FrontEnd/eslint.config.js` |
-| Unit tests | `npm test` (`FrontEnd/`) — Karma + Jasmine, see `FrontEnd/karma.conf.js` |
+| Unit tests | `npm test` (`FrontEnd/`) — Vitest via the `@angular/build:unit-test` builder, in a jsdom environment (no browser needed). Add `-- --watch=false` for a single run. |
 | Full deploy build | `./build_angular.sh` or `./build_angular.sh production` (repo root) |
 
 **To sanity-check a change compiles**, run `npm run build.prod` from `FrontEnd/` (after sourcing `node_env`). Only `production` and `devprod` are defined in `angular.json` — there is no `development` build configuration, and `tsc --noEmit` alone misses Angular template type errors that the compiler catches.
