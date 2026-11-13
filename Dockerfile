@@ -12,6 +12,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
  && rm -rf /var/lib/apt/lists/*
 
+# Use a UTF-8 locale. The python:3.13 images no longer set LANG, and uWSGI's
+# embedded interpreter doesn't do the C-locale coercion the python CLI does,
+# so without this the filesystem encoding is ASCII and any non-ASCII argument
+# passed to a subprocess (e.g. a git commit message containing an uploaded
+# file's name) raises UnicodeEncodeError.
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
 # Set timezone
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
