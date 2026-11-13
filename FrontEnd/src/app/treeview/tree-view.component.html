@@ -1,112 +1,124 @@
-<ng-container *ngIf="entry">
-
-    <mat-card class="nav-card">
-        <mat-card-title (dblclick)="developerMode=true;logEntry()">
-            Upload "{{entry.depositionNickname}}" Navigation
-        </mat-card-title>
-        <mat-card-content>
-
-            <mat-nav-list>
-                <div>
-                    <ng-container *ngFor="let superGroupCat of entry.superGroups">
-                        <div *ngIf="(superGroupCat.display == 'Y' || (entry.showAll && superGroupCat.display != 'H'))">
-                            <h3 matLine [matTooltip]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
-                                <mat-icon routerLink="/help/molecular-assembly"
-                                          *ngIf="superGroupCat.superCategory == 'assembly_supercategory'"
-                                          class="pointer"
-                                          matTooltip="Molecular assembly help">help_outline
-                                </mat-icon>
-                            </h3>
-
-                            <mat-divider></mat-divider>
-
-                            <ng-container *ngFor="let category of superGroupCat.children">
-                                <ng-container
-                                        *ngIf="(entry.showAll || category.display == 'Y') && category.display != 'H'">
-                                    <a mat-list-item
-                                       [ngClass]="{'active': active==category.category && page=='category'}"
-                                       [matTooltip]="entry.schema.saveframeSchema[category.category]['group_view_help']"
-                                       [routerLink]="['/entry', 'saveframe', category.category]"
-                                       [id]="category.category">
-                                        <mat-icon *ngIf="category.valid" matTooltip="Section incomplete">done</mat-icon>
-                                        <span *ngIf="!category.valid" class="cdk-visually-hidden">Incomplete</span>
-                                        <mat-icon *ngIf="!category.valid" matTooltip="Section complete">error_outline</mat-icon>
-                                        <span *ngIf="category.valid" class="cdk-visually-hidden">Completed</span>
-                                        <h2 matLine> {{category.displayName}} </h2>
-                                    </a>
-                                </ng-container>
-                            </ng-container>
-                        </div>
-                    </ng-container>
-                </div>
-
+@if (entry) {
+  <mat-card appearance="outlined" class="nav-card">
+    <mat-card-title (dblclick)="developerMode=true;logEntry()">
+      Upload "{{entry.depositionNickname}}" Navigation
+    </mat-card-title>
+    <mat-card-content>
+      <mat-nav-list>
+        <div>
+          @for (superGroupCat of entry.superGroups; track superGroupCat) {
+            @if ((superGroupCat.display == 'Y' || (entry.showAll && superGroupCat.display != 'H'))) {
+              <div>
+                <h3 matLine [matTooltip]="superGroupCat.displayHelp">{{superGroupCat.displayName}}
+                  @if (superGroupCat.superCategory == 'assembly_supercategory') {
+                    <mat-icon routerLink="/help/molecular-assembly"
+                      class="pointer"
+                      matTooltip="Molecular assembly help">help_outline
+                    </mat-icon>
+                  }
+                </h3>
                 <mat-divider></mat-divider>
-                <div>
-                    <h3 matLine>Upload options</h3>
-
-                    <a mat-list-item [ngClass]="{'active': page=='pending-verification'}" *ngIf="!entry.emailValidated"
+                @for (category of superGroupCat.children; track category) {
+                  @if ((entry.showAll || category.display == 'Y') && category.display != 'H') {
+                    <mat-list-item
+                      [ngClass]="{'active': active==category.category && page=='category'}"
+                      [matTooltip]="entry.schema.saveframeSchema[category.category]['group_view_help']"
+                      [routerLink]="['/entry', 'saveframe', category.category]"
+                      [id]="category.category">
+                      @if (category.valid) {
+                        <mat-icon matTooltip="Section complete">done</mat-icon>
+                      }
+                      @if (!category.valid) {
+                        <span class="cdk-visually-hidden">Incomplete</span>
+                      }
+                      @if (!category.valid) {
+                        <mat-icon matTooltip="Section incomplete">error_outline</mat-icon>
+                      }
+                      @if (category.valid) {
+                        <span class="cdk-visually-hidden">Completed</span>
+                      }
+                      {{category.displayName}}
+                    </mat-list-item>
+                  }
+                }
+              </div>
+            }
+          }
+        </div>
+        <mat-divider></mat-divider>
+        <div>
+          <h3>Upload options</h3>
+          <mat-divider></mat-divider>
+          @if (!entry.emailValidated) {
+            <mat-list-item [ngClass]="{'active': page=='pending-verification'}"
                        routerLink="/entry/pending-verification" id="pending-verification" matTooltip="Complete the e-mail
 validation step.">
-                        <h2 matLine>Verify your email</h2>
-                    </a>
-
-                    <a mat-list-item [ngClass]="{'active': page=='new'}"
-                       routerLink="/" id="new"
-                       matTooltip="End this upload session and create a new upload.">
-                        <h2 matLine>Create new upload</h2>
-                    </a>
-
-                    <a mat-list-item [ngClass]="{'active': page=='restore'}"
-                       *ngIf="entry.hasDeleted"
-                       routerLink="/entry/restore" id="restore"
-                       matTooltip="View and restore deleted sections">
-                        <h2 matLine>View and restore deleted sections</h2>
-                    </a>
-
-                    <a mat-list-item [ngClass]="{'active': page=='entry'}" *ngIf="entry.deposited"
-                       routerLink="/entry" id="entry" matTooltip="Review entire upload.">
-                        <h2 matLine>View full upload</h2>
-                    </a>
-
-                    <a mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to BMRbig." id="review"
-                       routerLink="/entry/review">
-                        <mat-icon *ngIf="entry.valid">done</mat-icon>
-                        <span *ngIf="!entry.valid" class="cdk-visually-hidden">Incomplete</span>
-                        <mat-icon *ngIf="!entry.valid">error_outline</mat-icon>
-                        <span *ngIf="entry.valid" class="cdk-visually-hidden">Completed</span>
-                        <h2 matLine>Upload current entry</h2>
-                    </a>
-
-                    <a mat-list-item routerLink="/" (click)="endSession()"
+              Verify your email
+            </mat-list-item>
+          }
+          <mat-list-item [ngClass]="{'active': page=='new'}"
+            routerLink="/" id="new"
+            matTooltip="End this upload session and create a new upload.">
+            Create new upload
+          </mat-list-item>
+          @if (entry.hasDeleted) {
+            <mat-list-item [ngClass]="{'active': page=='restore'}"
+              routerLink="/entry/restore" id="restore"
+              matTooltip="View and restore deleted sections">
+              View and restore deleted sections
+            </mat-list-item>
+          }
+          @if (entry.deposited) {
+            <mat-list-item [ngClass]="{'active': page=='entry'}"
+              routerLink="/entry" id="entry" matTooltip="Review entire upload.">
+              View full upload
+            </mat-list-item>
+          }
+          <mat-list-item [ngClass]="{'active': page=='review'}" matTooltip="Upload entry to BMRbig." id="review"
+            routerLink="/entry/review">
+            @if (entry.valid) {
+              <mat-icon>done</mat-icon>
+            }
+            @if (!entry.valid) {
+              <span class="cdk-visually-hidden">Incomplete</span>
+            }
+            @if (!entry.valid) {
+              <mat-icon>error_outline</mat-icon>
+            }
+            @if (entry.valid) {
+              <span class="cdk-visually-hidden">Completed</span>
+            }
+            Upload current entry
+          </mat-list-item>
+          <mat-list-item routerLink="/" (click)="endSession()"
                        matTooltip="Log out from this upload. You can resume it later by following the link sent to
 your email when you created the upload.">
-                        <h2 matLine>End session</h2>
-                    </a>
-
-                    <a mat-list-item [ngClass]="{'active': page=='support'}"
-                       routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
-                        <h2 matLine>Support</h2>
-                    </a>
-                </div>
-
-              <mat-divider *ngIf="developerMode"></mat-divider>
-              <div *ngIf="developerMode">
-                <div>
-                  <h3 matLine>Developer options</h3>
-
-                  <mat-list-item (click)='download(entry.entryID + ".str", entry)'>Download entry
-                  </mat-list-item>
-                  <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
-                  <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
-                  <mat-list-item>
-                    <mat-slide-toggle [(ngModel)]="entry.showAll"
-                                      (ngModelChange)="entry.updateCategories()"
-                                      color="#CBDBFF">Display non-mandatory tags
-                    </mat-slide-toggle>
-                  </mat-list-item>
-                </div>
-              </div>
-            </mat-nav-list>
-        </mat-card-content>
-    </mat-card>
-</ng-container>
+            End session
+          </mat-list-item>
+          <mat-list-item [ngClass]="{'active': page=='support'}"
+            routerLink="/support" id="contact-us" matTooltip="Contact BMRB for support for any issue.">
+            Support
+          </mat-list-item>
+        </div>
+        @if (developerMode) {
+          <div>
+            <div>
+              <h3>Developer options</h3>
+              <mat-divider></mat-divider>
+              <mat-list-item (click)='download(entry.entryID + ".str", entry)'>Download entry
+              </mat-list-item>
+              <mat-list-item (click)='refresh()'>Reload entry</mat-list-item>
+              <mat-list-item (click)='timeRefresh()'>Time refresh</mat-list-item>
+              <mat-list-item>
+                <mat-slide-toggle [(ngModel)]="entry.showAll"
+                  (ngModelChange)="entry.updateCategories()"
+                  color="#CBDBFF">Display non-mandatory tags
+                </mat-slide-toggle>
+              </mat-list-item>
+            </div>
+          </div>
+        }
+      </mat-nav-list>
+    </mat-card-content>
+  </mat-card>
+}

@@ -5,10 +5,14 @@ services:
     image: bmrbig
     container_name: bmrbig
     restart: always
-    network_mode: host
+    ports:
+      - 9001:9001
+      - 9111:9111
     env_file:
       - .env
     user: "17473:10144"
     volumes:
       - /projects/BMRB/depositions/bmrbig/${ENVIRONMENT}:/opt/wsgi/depositions
       - /projects/BMRB/public/bmrbig/BackEnd/bmrbdep/configuration_${ENVIRONMENT}.json:/opt/wsgi/bmrbdep/configuration.json
+      - ./BackEnd/schema/schema_data/:/opt/wsgi/schema_data/
+      - ./FrontEnd/dist/:/opt/wsgi/dist/
