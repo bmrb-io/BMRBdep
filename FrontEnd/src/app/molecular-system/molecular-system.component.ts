@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Location} from '@angular/common';
 import {MatButton} from '@angular/material/button';
@@ -8,6 +8,7 @@ import {MatButton} from '@angular/material/button';
   templateUrl: './molecular-system.component.html',
   styleUrls: ['./molecular-system.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton]
 })
 export class MolecularSystemComponent implements OnInit {

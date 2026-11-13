@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {AuthService} from '../auth.service';
@@ -15,6 +15,7 @@ import {MatCheckbox} from '@angular/material/checkbox';
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, RouterLink, FormsModule, ReactiveFormsModule, MatFormField, MatSelect, MatOption, MatError, MatInput, MatCheckbox]
 })
 export class WelcomeComponent {

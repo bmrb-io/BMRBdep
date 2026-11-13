@@ -4,7 +4,7 @@ import {enableProdMode, importProvidersFrom, provideZoneChangeDetection} from '@
 import {environment} from './environments/environment';
 import {SidenavService} from './app/sidenav.service';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipModule} from '@angular/material/tooltip';
-import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {AppRoutingModule} from './app/app-routing.module';
@@ -48,7 +48,7 @@ bootstrapApplication(AppComponent, {
     SidenavService, {
       provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
       useValue: {showDelay: 1750, position: 'right'}
-    }, provideHttpClient(withInterceptorsFromDi()),
+    }, provideHttpClient(withXhr(), withInterceptorsFromDi()),
     provideAnimations()
   ]
 })

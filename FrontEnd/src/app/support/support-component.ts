@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {SupportService} from '../support.service';
@@ -15,6 +15,7 @@ import {MatButton} from '@angular/material/button';
   templateUrl: './support.component.html',
   styleUrls: ['./support.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatButton]
 })
 export class SupportComponent implements OnInit, OnDestroy {

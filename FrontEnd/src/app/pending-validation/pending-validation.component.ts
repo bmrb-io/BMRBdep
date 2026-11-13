@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {Router} from '@angular/router';
@@ -12,6 +12,7 @@ import {MatButton} from '@angular/material/button';
   templateUrl: './pending-validation.component.html',
   styleUrls: ['./pending-validation.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatButton]
 })
 export class PendingValidationComponent implements OnInit, OnDestroy {

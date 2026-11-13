@@ -1,5 +1,5 @@
 import {DepositionPersistenceService} from '../deposition-persistence.service';
-import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, ViewEncapsulation, ChangeDetectionStrategy} from '@angular/core';
 import {Saveframe} from '../nmrstar/saveframe';
 import {SaveframeTag} from '../nmrstar/tag';
 import {ActivatedRoute, Params, RouterLink} from '@angular/router';
@@ -20,6 +20,7 @@ import {LoopComponent} from '../loop/loop.component';
   styleUrls: ['./saveframe.component.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FileUploaderComponent, MatTooltip, MatIcon, RouterLink, MatButton, NgClass, TagComponent, LoopComponent]
 })
 export class SaveframeComponent implements OnInit, OnDestroy {

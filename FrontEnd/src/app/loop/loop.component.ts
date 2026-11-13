@@ -1,7 +1,7 @@
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Loop} from '../nmrstar/loop';
 import {LoopTag} from '../nmrstar/tag';
-import {Component, inject, Input} from '@angular/core';
+import {Component, inject, Input, ChangeDetectionStrategy} from '@angular/core';
 
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatButton} from '@angular/material/button';
@@ -13,6 +13,7 @@ import {TagComponent} from '../tag/tag.component';
   templateUrl: './loop.component.html',
   styleUrls: ['./loop.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTooltip, MatButton, NgClass, TagComponent]
 })
 export class LoopComponent {

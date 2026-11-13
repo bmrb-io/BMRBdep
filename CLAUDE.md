@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository hosts **BMRBdep**, the BMRB NMR-STAR deposition server that replaced ADIT-NMR. It has two halves plus shared orchestration:
 
-- `FrontEnd/` — Angular 21 SPA. Most app code lives here.
+- `FrontEnd/` — Angular 22 SPA. Most app code lives here.
 - `BackEnd/bmrbdep/` — Python Flask + uWSGI API the frontend talks to (mounted at `/deposition`).
 - `BackEnd/schema/` — NMR-STAR schema loader; produces the schema JSON the frontend consumes.
 - `Dockerfile`, `docker-compose.yml`, `build_angular.sh`, `install.sh`, `run_locally.sh`, `upgrade.sh` — deployment/dev orchestration scripts at the repo root that operate on both halves.
@@ -81,7 +81,7 @@ If you add a new mutation, the pattern is: mutate the active `Entry`, call `entr
 
 ## Code conventions
 
-- **ESLint + angular-eslint.** Config in `FrontEnd/eslint.config.js` (flat config, ESLint 9). Stock `tseslint.configs.recommended` + `stylistic` + `angular.configs.tsRecommended`. `npm run lint` currently surfaces ~220 pre-existing issues (largely `eqeqeq` in templates, `prefer-inject`, and `no-explicit-any`).
+- **ESLint + angular-eslint.** Config in `FrontEnd/eslint.config.js` (flat config, ESLint 9). Stock `tseslint.configs.recommended` + `stylistic` + `angular.configs.tsRecommended`. `npm run lint` currently passes cleanly. `@angular-eslint/prefer-on-push-component-change-detection` is deliberately turned off (see the change-detection note below).
 - **Component prefix is `app-`** (set in `FrontEnd/angular.json` schematics and enforced by `@angular-eslint/component-selector`).
 - Component default style is `css` (not scss) per `FrontEnd/angular.json`, even though the global theme is `styles.scss`.
 - `target: ES2022`, `module: es2020`, `moduleResolution: bundler`. `experimentalDecorators: true` (Angular still needs it).
@@ -89,6 +89,7 @@ If you add a new mutation, the pattern is: mutate the active `Entry`, call `entr
 
 ## Things that will bite you
 
+- **Components must declare `changeDetection: ChangeDetectionStrategy.Eager`.** Angular 22 made `OnPush` the default, but the NMR-STAR model is mutated in place, which `OnPush` doesn't detect. Every existing component sets `Eager` explicitly; do the same for new components or their views won't update.
 - **Don't mutate an `Entry` without calling `refresh()`** — validation flags, the category tree, and `firstIncompleteCategory` will be stale and the sidebar/tree will show wrong state.
 - **IndexedDB is the source of truth across reloads** (via `StorageService`). If you change the shape of what `Entry.toJSON()` produces, you must either bump a version field or handle older cached entries (see the `commit`-as-string upgrade shim in `entryFromJSON` for the pattern).
 - **Schema is large.** `Schema.toJSON()` only emits the fields needed to reconstruct the parsed schema — derived fields (`schema`, `saveframeSchema`, etc.) are intentionally left out to keep the IDB payload small. If you need a new field to survive a round-trip, add it to `toJSON()` first.

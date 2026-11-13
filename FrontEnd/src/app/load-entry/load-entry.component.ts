@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
@@ -8,6 +8,7 @@ import {Entry} from '../nmrstar/entry';
   selector: 'app-load-entry',
   templateUrl: './load-entry.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./load-entry.component.css']
 })
 export class LoadEntryComponent implements OnInit, OnDestroy {

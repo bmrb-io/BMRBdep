@@ -1,7 +1,7 @@
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {Entry} from '../nmrstar/entry';
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {Subscription} from 'rxjs';
 import {SaveframeComponent} from '../saveframe/saveframe.component';
@@ -11,6 +11,7 @@ import {SaveframeComponent} from '../saveframe/saveframe.component';
   templateUrl: './entry.component.html',
   styleUrls: ['./entry.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SaveframeComponent, MatButtonModule]
 })
 export class EntryComponent implements OnInit, OnDestroy {

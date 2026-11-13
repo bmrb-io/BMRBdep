@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, inject, OnDestroy, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {AuthService} from '../auth.service';
@@ -21,6 +21,7 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './tree-view.component.html',
   styleUrls: ['./tree-view.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardTitle, MatCardContent, MatNavList, MatLine, MatTooltip, MatIcon, RouterLink, MatDivider, MatListItem, NgClass, MatSlideToggle, FormsModule]
 })
 export class TreeViewComponent implements OnInit, OnDestroy {

@@ -71,7 +71,7 @@ export class DepositionLifecycleService {
 
     const options = {
       params: new HttpParams(),
-      reportProgress: true,
+      reportUploadProgress: true,
     };
 
     return new Promise((resolve, reject) => {

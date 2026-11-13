@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService, OpenDepositionView} from '../deposition-persistence.service';
 import {AuthService, SessionInfo} from '../auth.service';
 import {Router, RouterLink} from '@angular/router';
@@ -26,6 +26,7 @@ export interface Deposition {
   templateUrl: './my-depositions.component.html',
   styleUrls: ['./my-depositions.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatIcon, NgClass, MatProgressSpinner, MatButton, RouterLink, ReactiveFormsModule, MatFormField, MatError, MatInput]
 })
 export class MyDepositionsComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, inject, Input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {LoopTag, Tag} from '../nmrstar/tag';
 import {countryNames, getRegions} from '../nmrstar/countries';
@@ -15,6 +15,7 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
   templateUrl: './tag.component.html',
   styleUrls: ['./tag.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgClass, MatTooltip, MatSelect, MatOption, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatRadioGroup, MatRadioButton]
 })
 export class TagComponent implements OnInit {

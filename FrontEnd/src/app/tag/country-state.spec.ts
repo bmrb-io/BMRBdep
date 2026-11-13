@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 
@@ -34,6 +34,7 @@ function buildContactLoop(country: string, state: string): Loop {
 @Component({
   standalone: true,
   imports: [TagComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @for (tag of loop.data[0]; track tag) {
       <app-tag [tag]="tag"></app-tag>

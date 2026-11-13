@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatFormField, MatLabel} from '@angular/material/select';
 import {MatInput} from '@angular/material/input';
@@ -10,6 +10,7 @@ import {MatButton} from '@angular/material/button';
   templateUrl: 'confirmation-dialog.component.html',
   styleUrls: ['./confirmation-dialog.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDialogTitle, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton]
 })
 export class ConfirmationDialogComponent {

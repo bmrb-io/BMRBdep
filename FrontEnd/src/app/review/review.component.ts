@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {DepositionLifecycleService} from '../deposition-lifecycle.service';
 import {MessagesService} from '../messages.service';
@@ -21,6 +21,7 @@ import {MatInput} from '@angular/material/input';
   templateUrl: './review.component.html',
   styleUrls: ['./review.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatNavList, MatButton, MatTooltip, RouterLink, MatFormField, MatInput, FormsModule, ReactiveFormsModule, MatCardActions]
 })
 export class ReviewComponent implements OnInit, OnDestroy {

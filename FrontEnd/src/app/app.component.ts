@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {DepositionPersistenceService, OpenDepositionView} from './deposition-persistence.service';
 import {AuthService, SessionInfo} from './auth.service';
-import {versions} from 'environments/versions';
+import {versions} from '../environments/versions';
 import {Entry} from './nmrstar/entry';
 import {Subscription} from 'rxjs';
 import {SidenavService} from './sidenav.service';
@@ -20,6 +20,7 @@ import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from 
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatToolbar, MatToolbarRow, NgClass, MatTooltip, MatIcon, RouterLink, MatProgressBar, MatSidenavContainer, MatSidenav, TreeViewComponent, MatSidenavContent, RouterOutlet, AsyncPipe, CdkDropList, CdkDrag, CdkDragHandle]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {

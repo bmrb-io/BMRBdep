@@ -1,6 +1,6 @@
 import {DepositionPersistenceService} from '../deposition-persistence.service';
 import {Entry} from '../nmrstar/entry';
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Saveframe} from '../nmrstar/saveframe';
 import {Subscription} from 'rxjs';
@@ -14,6 +14,7 @@ import {MatCard, MatCardActions, MatCardContent, MatCardTitle} from '@angular/ma
   templateUrl: './saveframe-editor.component.html',
   styleUrls: ['./saveframe-editor.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, RouterLink, SaveframeComponent, MatCard, MatCardTitle, MatCardContent, MatCardActions]
 })
 export class SaveframeEditorComponent implements OnInit, OnDestroy {

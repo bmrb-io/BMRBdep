@@ -330,7 +330,7 @@ export class DepositionPersistenceService implements OnDestroy {
 
     const options = {
       params: new HttpParams(),
-      reportProgress: true,
+      reportUploadProgress: true,
     };
 
     const req = new HttpRequest<FormData>('POST', apiEndPoint, formData, options);

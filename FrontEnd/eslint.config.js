@@ -34,6 +34,10 @@ module.exports = defineConfig([
       // Allow explicit primitive type annotations on initialized members; the explicit form
       // documents intent and stays useful when initializers later change shape.
       "@typescript-eslint/no-inferrable-types": "off",
+      // Angular 22 made OnPush the default, and the v22 migration pinned every component to
+      // ChangeDetectionStrategy.Eager. The NMR-STAR model (Entry/Saveframe/Loop/Tag) is mutated
+      // in place, which OnPush would not pick up, so components deliberately stay Eager.
+      "@angular-eslint/prefer-on-push-component-change-detection": "off",
     },
   },
   {
