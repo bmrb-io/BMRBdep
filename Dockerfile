@@ -3,6 +3,13 @@ FROM python:3.13-slim
 EXPOSE 9000
 WORKDIR /opt/wsgi
 
+# Use a UTF-8 locale. uWSGI's embedded Python interpreter doesn't do the
+# C-locale coercion the python CLI does, so without this the filesystem
+# encoding can end up ASCII and any non-ASCII argument passed to a subprocess
+# (e.g. a git commit message) raises UnicodeEncodeError.
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
 # Install system dependencies including uwsgi and git
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
