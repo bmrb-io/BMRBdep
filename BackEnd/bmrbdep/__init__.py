@@ -187,15 +187,20 @@ def all_released():
 @application.route('/deposition/released/<string:entry_id>/<file_name>')
 def released(entry_id: str, file_name=None):
 
-    # Fix the ID if necessary
-    if entry_id.startswith('bmrbig'):
-        entry_id = int(entry_id.replace('bmrbig', ''))
+    not_found = "No deposition with that ID exists or has been released!"
+
+    # Accept either 'bmrbig5' or '5'. Anything else (such as a link mangled by an e-mail
+    # URL rewriter, e.g. 'bmrbig1&gsessionid=...') is simply not a released entry.
+    try:
+        entry_id = int(entry_id.removeprefix('bmrbig'))
+    except ValueError:
+        raise RequestError(not_found, status_code=404)
 
     # Check if the entry is released
     with EntryDB() as entry_db:
         restart_id = entry_db.get_id_from_released_entry(entry_id)
         if not restart_id:
-            raise RequestError("No deposition with that ID exists or has been released!")
+            raise RequestError(not_found, status_code=404)
 
     with DepositionRepo(restart_id) as deposition_repo:
 
